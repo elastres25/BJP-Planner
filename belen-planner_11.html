@@ -21,6 +21,7 @@
   --ink-3:      #A8A29E;
   --rule:       #E7E5E0;
   --rule-dark:  #D0CEC8;
+  --crit:       #B23B2E;
   /* GRR phases */
   --ph-focused-bg: #FAEEDA; --ph-focused-tx: #633806; --ph-focused-br: #EF9F27;
   --ph-guided-bg:  #E1F5EE; --ph-guided-tx:  #085041; --ph-guided-br:  #1D9E75;
@@ -893,8 +894,136 @@ body.simple-mode .dp-adv { display: none !important; }
 
 <!-- ── VIEWS ──────────────────────────────────────────────────── -->
 
+<style>
+/* ── DASHBOARD ───────────────────────────────────────────────── */
+.d-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:18px;flex-wrap:wrap;}
+.d-eyebrow{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:5px;}
+.d-head h1{font-family:'Crimson Pro',Georgia,serif;font-size:28px;font-weight:600;color:var(--navy);line-height:1;}
+.d-head .d-sub{font-size:12.5px;color:var(--ink-2);margin-top:6px;}
+.d-today{text-align:right;font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;}
+.d-today b{display:block;font-family:'Crimson Pro',Georgia,serif;font-size:17px;color:var(--ink);font-weight:600;letter-spacing:0;text-transform:none;}
+.d-quicknav{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.d-quicknav button{display:inline-flex;align-items:center;gap:8px;font-family:inherit;font-size:13px;font-weight:600;border-radius:var(--radius-sm);padding:10px 16px;cursor:pointer;transition:all .12s;}
+.d-qn-primary{background:var(--navy);color:#fff;border:1px solid var(--navy);}
+.d-qn-primary:hover{background:var(--navy-dark);}
+.d-qn-btn{background:var(--white);color:var(--navy);border:1px solid var(--rule-dark);}
+.d-qn-btn:hover{border-color:var(--navy);}
+.d-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px;}
+.d-kpi{background:var(--white);border:1px solid var(--rule);border-radius:var(--radius);padding:14px 16px;}
+.d-kpi.d-accent{border-top:3px solid var(--navy);}
+.d-kpi .d-lbl{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px;}
+.d-kpi .d-big{font-family:'Crimson Pro',Georgia,serif;font-size:22px;font-weight:600;color:var(--navy);line-height:1.05;}
+.d-kpi .d-small{font-size:11.5px;color:var(--ink-2);margin-top:3px;line-height:1.4;}
+.d-status{display:flex;align-items:center;gap:6px;margin-top:9px;font-size:11.5px;font-weight:600;}
+.d-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.d-ring{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;}
+.d-ring::before{content:"";position:absolute;width:36px;height:36px;border-radius:50%;background:var(--white);}
+.d-ring b{position:relative;font-size:12.5px;font-weight:700;color:var(--ink);}
+.d-ringrow{display:flex;align-items:center;gap:13px;}
+.d-grid{display:grid;grid-template-columns:1.55fr 1fr;gap:16px;align-items:start;}
+.d-col{display:flex;flex-direction:column;gap:16px;min-width:0;}
+.d-card{background:var(--white);border:1px solid var(--rule);border-radius:var(--radius);padding:16px 17px;}
+.d-card-h{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:13px;}
+.d-card-h h2{font-family:'Crimson Pro',Georgia,serif;font-size:16px;font-weight:600;color:var(--navy);}
+.d-card-h .d-meta{font-size:11px;color:var(--ink-3);}
+/* horizon */
+.d-horizon{background:linear-gradient(180deg,var(--gold-bg),#FCFAF3);border:1px solid #EBD9A8;border-radius:var(--radius-sm);padding:13px 14px;margin-bottom:15px;}
+.d-horizon-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+.d-h-lead{font-size:12.5px;color:var(--ink);line-height:1.45;}
+.d-h-lead b{color:var(--navy);}
+.d-h-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;white-space:nowrap;}
+.d-track{display:flex;gap:3px;align-items:stretch;}
+.d-slot{flex:1;min-width:0;height:34px;border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;position:relative;overflow:hidden;}
+.d-slot .d-sd{font-size:8px;opacity:.8;font-weight:600;white-space:nowrap;}
+.d-slot.d-today{outline:2px solid var(--navy);outline-offset:1px;}
+.d-slot.d-empty{background:repeating-linear-gradient(135deg,#F3F1EC,#F3F1EC 4px,#ECEAE4 4px,#ECEAE4 8px);color:var(--ink-3);border:1px dashed var(--rule-dark);}
+.d-track-legend{display:flex;gap:14px;margin-top:9px;font-size:10.5px;color:var(--ink-2);flex-wrap:wrap;}
+.d-track-legend span{display:inline-flex;align-items:center;gap:5px;}
+.d-sw{width:11px;height:11px;border-radius:3px;display:inline-block;flex-shrink:0;}
+/* todo */
+.d-add-row{display:flex;gap:7px;margin-bottom:13px;}
+.d-add-row input{flex:1;border:1px solid var(--rule);border-radius:var(--radius-sm);padding:7px 11px;font-size:12.5px;outline:none;color:var(--ink);}
+.d-add-row input:focus{border-color:var(--navy);}
+.d-add-row button{background:var(--navy);color:#fff;border:none;border-radius:var(--radius-sm);padding:7px 14px;font-size:12.5px;font-weight:600;}
+.d-tg{margin-bottom:14px;}
+.d-tg:last-child{margin-bottom:0;}
+.d-tg-head{display:flex;align-items:center;gap:8px;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px;}
+.d-tg-head .d-count{font-size:10px;color:var(--ink-3);font-weight:600;letter-spacing:0;}
+.d-tg-line{flex:1;height:1px;background:var(--rule);}
+.d-todo{display:flex;align-items:flex-start;gap:10px;padding:9px 10px;border:1px solid var(--rule);border-radius:var(--radius-sm);margin-bottom:7px;position:relative;transition:border-color .12s,background .12s;}
+.d-todo:hover{border-color:var(--rule-dark);background:#FCFBF9;}
+.d-todo::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px;}
+.d-todo.p-crit::before{background:var(--crit,#B23B2E);}
+.d-todo.p-warn::before{background:var(--gold);}
+.d-todo.p-plan::before{background:var(--navy);}
+.d-cb{width:17px;height:17px;border:1.5px solid var(--rule-dark);border-radius:5px;flex-shrink:0;margin-top:1px;background:var(--white);display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.d-cb svg{opacity:0;stroke:#fff;}
+.d-todo.done .d-cb{background:#1D9E75;border-color:#1D9E75;}
+.d-todo.done .d-cb svg{opacity:1;}
+.d-todo.done .d-t-main{text-decoration:line-through;color:var(--ink-3);}
+.d-t-body{flex:1;min-width:0;}
+.d-t-main{font-size:13px;font-weight:600;color:var(--ink);line-height:1.35;}
+.d-t-main.link{cursor:pointer;}
+.d-t-main.link:hover{color:var(--navy);}
+.d-t-sub{display:flex;align-items:center;gap:7px;margin-top:5px;flex-wrap:wrap;}
+.d-t-tag{font-size:9.5px;font-weight:600;padding:1px 7px;border-radius:999px;background:var(--parchment);border:1px solid var(--rule);color:var(--ink-2);}
+.d-t-tag.auto{background:rgba(35,74,135,.08);border-color:rgba(35,74,135,.2);color:var(--navy-light);}
+.d-t-due{font-size:11px;font-weight:600;color:var(--ink-2);display:inline-flex;align-items:center;gap:4px;white-space:nowrap;}
+.d-t-due.crit{color:var(--crit,#B23B2E);}
+.d-t-due.warn{color:#8a6d1a;}
+.d-t-del{border:none;background:none;color:var(--ink-3);font-size:15px;line-height:1;padding:2px 4px;cursor:pointer;flex-shrink:0;}
+.d-t-del:hover{color:var(--crit,#B23B2E);}
+.d-empty-note{padding:18px;text-align:center;color:var(--ink-3);font-style:italic;font-size:12.5px;}
+/* mini calendar */
+.d-cal-nav{display:flex;align-items:center;gap:6px;}
+.d-cal-nav button{border:1px solid var(--rule);background:var(--white);border-radius:5px;width:24px;height:22px;font-size:13px;color:var(--ink-2);display:flex;align-items:center;justify-content:center;}
+.d-cal-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;}
+.d-dow{font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);text-align:center;padding-bottom:2px;}
+.d-cell{min-height:44px;border:1px solid var(--rule);border-radius:5px;padding:4px;display:flex;flex-direction:column;gap:2px;position:relative;}
+.d-cell .d-num{font-size:10px;font-weight:600;color:var(--ink-3);}
+.d-cell.off{background:#FAFAF8;opacity:.5;}
+.d-cell.lesson{cursor:pointer;}
+.d-cell.lesson:hover{border-color:var(--navy);}
+.d-cell.d-today{border-color:var(--navy);border-width:1.5px;box-shadow:0 0 0 2px rgba(27,58,107,.1);}
+.d-cal-tag{font-size:8.5px;font-weight:700;color:#fff;border-radius:3px;padding:1px 4px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.d-cal-tag.unplanned{background:var(--ink-3);}
+.d-cal-assess{position:absolute;top:4px;right:4px;width:6px;height:6px;border-radius:50%;background:var(--crit,#B23B2E);}
+/* assessments */
+.d-arow{display:flex;align-items:center;gap:11px;padding:8px 0;border-bottom:1px solid var(--rule);cursor:pointer;}
+.d-arow:last-child{border-bottom:none;}
+.d-adate{width:38px;text-align:center;flex-shrink:0;}
+.d-adate .d-am{font-size:9px;font-weight:700;text-transform:uppercase;color:var(--crit,#B23B2E);letter-spacing:.04em;}
+.d-adate .d-ad{font-family:'Crimson Pro',Georgia,serif;font-size:18px;font-weight:600;color:var(--ink);line-height:1;}
+.d-ainfo{flex:1;min-width:0;}
+.d-ainfo .d-an{font-size:12.5px;font-weight:600;color:var(--ink);}
+.d-ainfo .d-au{font-size:10.5px;color:var(--ink-3);margin-top:1px;}
+.d-abadge{font-size:9px;font-weight:700;padding:2px 8px;border-radius:999px;white-space:nowrap;}
+/* unit progress */
+.d-uprow{display:flex;align-items:center;gap:11px;padding:7px 0;cursor:pointer;}
+.d-uprow+.d-uprow{border-top:1px solid var(--rule);}
+.d-upname{flex:1;min-width:0;}
+.d-upname .d-un{font-size:12px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.d-upname .d-un small{color:var(--ink-3);font-weight:500;}
+.d-upbar{height:6px;background:var(--rule);border-radius:999px;margin-top:5px;overflow:hidden;}
+.d-upbar i{display:block;height:100%;border-radius:999px;}
+.d-uppct{font-size:11px;font-weight:700;color:var(--ink-2);width:34px;text-align:right;flex-shrink:0;font-variant-numeric:tabular-nums;}
+/* grr */
+.d-grrbar{display:flex;height:26px;border-radius:6px;overflow:hidden;border:1px solid var(--rule);}
+.d-grrseg{display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;min-width:0;}
+.d-grrlegend{display:grid;grid-template-columns:1fr 1fr;gap:5px 12px;margin-top:11px;}
+.d-grrlegend span{display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--ink-2);}
+.d-grrlegend b{margin-left:auto;color:var(--ink);font-variant-numeric:tabular-nums;}
+@media (max-width:940px){.d-kpis{grid-template-columns:repeat(2,1fr);}.d-grid{grid-template-columns:1fr;}}
+@media (max-width:560px){.d-kpis{grid-template-columns:1fr;}}
+</style>
+
+<!-- DASHBOARD (landing) -->
+<div class="view active" id="view-dashboard">
+  <div class="wrap" id="dashboard-wrap"></div>
+</div>
+
 <!-- COURSE OVERVIEW -->
-<div class="view active" id="view-course">
+<div class="view" id="view-course">
   <div class="wrap">
     <div class="course-hero">
       <div class="course-hero-title" id="course-hero-title">Introduction to Catholicism &amp; Ignatian Spirituality</div>
@@ -1578,10 +1707,19 @@ async function pullFromSheets() {
 // ── NAVIGATION ────────────────────────────────────────────────────
 function nav(target, unitId) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  if (target === 'course') {
+  if (target === 'dashboard') {
+    document.getElementById('view-dashboard').classList.add('active');
+    currentUnit = null; currentWeek = 0; openDayIdx = null; openWeekIdx = null;
+    setBreadcrumb([{label:'Dashboard', home:true, active:true}]);
+    renderDashboard();
+    window.scrollTo(0,0);
+  } else if (target === 'course') {
     document.getElementById('view-course').classList.add('active');
     currentUnit = null; currentWeek = 0; openDayIdx = null; openWeekIdx = null;
-    setBreadcrumb([{label:'Course',active:true}]);
+    setBreadcrumb([
+      {label:'Dashboard', home:true, onclick:"nav('dashboard')"},
+      {label:'Course', active:true},
+    ]);
     renderCourse();
   } else if (target === 'unit') {
     if (currentUnit !== unitId) currentUnitTab = 'plan'; // only reset tab when switching units
@@ -1591,6 +1729,7 @@ function nav(target, unitId) {
     document.getElementById('view-unit').classList.add('active');
     const u = UNIT_META.find(m=>m.id===unitId);
     setBreadcrumb([
+      {label:'Dashboard', home:true, onclick:"nav('dashboard')"},
       {label:'Course', onclick:"nav('course')"},
       {label:`Unit ${unitId}`, active:true},
     ]);
@@ -1601,9 +1740,370 @@ function nav(target, unitId) {
 function setBreadcrumb(items) {
   const homeIcon = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:3px;vertical-align:-1px"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`;
   document.getElementById('breadcrumb').innerHTML = items.map((it,i) => {
-    const icon = it.label === 'Course' ? homeIcon : '';
+    const icon = it.home ? homeIcon : '';
     return `${i>0?'<span class="crumb-sep">›</span>':''}<button class="crumb-btn ${it.active?'active':''}" ${it.onclick?`onclick="${it.onclick}"`:''} >${icon}${it.label}</button>`;
   }).join('');
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────────────
+// Landing view: next class, planning runway, auto+manual to-do list,
+// a "how far ahead am I planned" horizon (goal: 2 weeks), a month
+// calendar, upcoming assessments, unit progress and teaching balance.
+let dashCalMonth = null; // {y, m(0-based)} for the mini calendar; null = current month
+
+function dayIsPlanned(d){ return !!(d && (d.topic || d.eq || (d.activities||[]).length || (d.targets||[]).length)); }
+function isoToday(){ const t=new Date(); return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`; }
+function isoOf(dt){ return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`; }
+function isoParse(iso){ return new Date(iso+'T00:00:00'); }
+function isoAddDays(iso,n){ const d=isoParse(iso); d.setDate(d.getDate()+n); return isoOf(d); }
+function daysBetween(a,b){ return Math.round((isoParse(b)-isoParse(a))/86400000); }
+function fmtNice(iso){ if(!iso) return ''; return isoParse(iso).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}); }
+function fmtMD(iso){ if(!iso) return ''; return isoParse(iso).toLocaleDateString('en-US',{month:'short',day:'numeric'}); }
+
+// Every dated class session (each A/B block that has a date), sorted.
+function collectClasses(){
+  const out=[];
+  UNIT_META.forEach(u=>{
+    const c = COLOR_MAP[u.color] || {br:'#8a8a8a',bg:'#eee',tx:'#333'};
+    (state.units[u.id]||[]).forEach((w,wi)=>{
+      (w.days||[]).forEach((d,di)=>{
+        const planned = dayIsPlanned(d);
+        [['A',d.dateA],['B',d.dateB]].forEach(([block,date])=>{
+          if(date) out.push({date,block,uid:u.id,wi,di,d,u,c,planned});
+        });
+      });
+    });
+  });
+  out.sort((a,b)=> a.date.localeCompare(b.date) || a.block.localeCompare(b.block));
+  return out;
+}
+
+// ── Manual to-do CRUD (auto to-dos are derived each render) ──
+function addDashTodo(){
+  const ti = document.getElementById('d-todo-text');
+  const di = document.getElementById('d-todo-due');
+  const text = (ti.value||'').trim();
+  if(!text){ ti.focus(); return; }
+  if(!state.todos) state.todos = [];
+  state.todos.push({ id: uid(), text, due: di.value||'', done:false });
+  saveState();
+  renderDashboard();
+}
+function toggleDashTodo(id){
+  const t = (state.todos||[]).find(x=>x.id===id);
+  if(t){ t.done=!t.done; saveState(); renderDashboard(); }
+}
+function deleteDashTodo(id){
+  state.todos = (state.todos||[]).filter(x=>x.id!==id);
+  saveState(); renderDashboard();
+}
+function toggleAutoDone(key){
+  if(!state.autoDone) state.autoDone = {};
+  state.autoDone[key] = !state.autoDone[key];
+  saveState(); renderDashboard();
+}
+function dashCalStep(delta){
+  const t=new Date();
+  if(!dashCalMonth) dashCalMonth={y:t.getFullYear(), m:t.getMonth()};
+  let m=dashCalMonth.m+delta, y=dashCalMonth.y;
+  if(m<0){ m=11; y--; } if(m>11){ m=0; y++; }
+  dashCalMonth={y,m};
+  renderDashboard();
+}
+
+function renderDashboard(){
+  const el = document.getElementById('dashboard-wrap');
+  if(!el) return;
+  const co = getCourse();
+  const today = isoToday();
+  const target = isoAddDays(today, 14);          // 2-week planning goal
+  const classes = collectClasses();
+  const upcoming = classes.filter(c=>c.date>=today);
+
+  // ── planning runway: leading streak of planned upcoming classes ──
+  let runway=0, plannedThrough=null;
+  for(const c of upcoming){ if(c.planned){ runway++; plannedThrough=c.date; } else break; }
+  const onTrack = !!plannedThrough && plannedThrough>=target;
+  const nextClass = upcoming[0] || null;
+
+  // ── course-wide planned coverage ──
+  let total=0, built=0, plannedMin=0;
+  UNIT_META.forEach(u=>(state.units[u.id]||[]).forEach(w=>(w.days||[]).forEach(d=>{
+    total++; if(dayIsPlanned(d)){ built++; plannedMin+=(d.blockDuration||90); }
+  })));
+  const pct = total ? Math.round(built/total*100) : 0;
+  const pctColor = pct>=80 ? '#1D9E75' : pct>=40 ? 'var(--gold)' : 'var(--crit)';
+
+  // ── distinct upcoming class-dates (dedupe A/B on same day) for horizon ──
+  const seenDate=new Set(); const byDate=[];
+  upcoming.forEach(c=>{ if(!seenDate.has(c.date)){ seenDate.add(c.date); byDate.push(c); } });
+
+  // ============ KPI STRIP ============
+  const nextKpi = nextClass ? `
+    <div class="d-big">${fmtNice(nextClass.date)} · ${nextClass.block} Block</div>
+    <div class="d-small">${esc(nextClass.u.name)} · ${esc(nextClass.d.label)}${nextClass.d.topic?` — <b style="color:var(--maroon,#7B1A2E)">${esc(nextClass.d.topic)}</b>`:''}</div>
+    ${nextClass.d.eq?`<div class="d-small" style="font-style:italic;color:var(--ink-3)">EQ: ${esc(nextClass.d.eq)}</div>`:''}`
+    : `<div class="d-big">No class scheduled</div><div class="d-small">Add A/B block dates to your day plans</div>`;
+
+  const runwayKpi = plannedThrough ? `
+    <div class="d-big">${runway} class${runway===1?'':'es'}</div>
+    <div class="d-small">Planned through <b>${fmtNice(plannedThrough)}</b></div>
+    <div class="d-status" style="color:${onTrack?'#0f8a5f':'#8a6d1a'}"><span class="d-dot" style="background:${onTrack?'#1D9E75':'var(--gold)'}"></span>${onTrack?'On track — 2 weeks ahead':'Below your 2-week goal'}</div>`
+    : `<div class="d-big">—</div><div class="d-small">Next class isn't planned yet</div>`;
+
+  // Where "Continue planning" should go: next unplanned upcoming class,
+  // else the next class, else the course page.
+  const contClass = upcoming.find(c=>!c.planned) || nextClass;
+  const contOnclick = contClass ? `openGridDay(${contClass.uid},${contClass.wi},${contClass.di})` : `nav('course')`;
+  const contLabel = contClass ? (contClass.planned ? 'Open next class' : 'Continue planning') : 'Start planning';
+
+  const nextClick = nextClass ? ` style="cursor:pointer" onclick="openGridDay(${nextClass.uid},${nextClass.wi},${nextClass.di})" title="Open this lesson"` : '';
+
+  const kpis = `
+    <div class="d-kpis">
+      <div class="d-kpi d-accent"${nextClick}><div class="d-lbl">Next Class</div>${nextKpi}</div>
+      <div class="d-kpi"><div class="d-lbl">Planning Runway</div>${runwayKpi}</div>
+      <div class="d-kpi"><div class="d-lbl">Course Planned</div>
+        <div class="d-ringrow">
+          <div class="d-ring" style="background:conic-gradient(${pctColor} ${pct}%, var(--rule) 0)"><b>${pct}%</b></div>
+          <div><div class="d-big" style="font-size:19px">${built} / ${total}</div><div class="d-small">lesson days built</div></div>
+        </div>
+      </div>
+      <div class="d-kpi"><div class="d-lbl">Instruction</div>
+        <div class="d-big">${(plannedMin/60).toFixed(plannedMin%60?1:0)} hrs</div>
+        <div class="d-small">${built} block${built===1?'':'s'} planned · <b>${total-built} left</b> to build</div>
+      </div>
+    </div>`;
+
+  // ============ HORIZON ============
+  let horizon;
+  if(!byDate.length){
+    horizon = `<div class="d-horizon"><div class="d-h-lead">No upcoming dated classes yet. Add <b>A/B block dates</b> to your day plans and this will track how far ahead you're planned.</div></div>`;
+  } else {
+    const withinTarget = byDate.filter(c=>c.date<=target);
+    const gap = withinTarget.filter(c=>!c.planned).length;
+    const slots = byDate.slice(0,8);
+    let recPlaced=false;
+    const slotHTML = slots.map(c=>{
+      const isToday = c.date===today;
+      const rec = (!recPlaced && c.date>=target) ? (recPlaced=true, ' d-rec') : '';
+      if(c.planned){
+        return `<div class="d-slot${isToday?' d-today':''}${rec}" style="background:${c.c.br}" title="${esc(c.u.name)} — ${esc(c.d.label)}"><span class="d-sd">${fmtMD(c.date)}</span>✓</div>`;
+      }
+      return `<div class="d-slot d-empty${isToday?' d-today':''}${rec}" title="Not planned"><span class="d-sd">${fmtMD(c.date)}</span>—</div>`;
+    }).join('');
+    horizon = `
+    <div class="d-horizon">
+      <div class="d-horizon-top">
+        <div class="d-h-lead">You're planned <b>${runway} class${runway===1?'':'es'}</b> ahead${plannedThrough?` (through <b>${fmtNice(plannedThrough)}</b>)`:''}. Goal: stay <b>2 weeks</b> ahead → plan through <b>${fmtNice(target)}</b>.</div>
+        <span class="d-h-badge" style="background:${onTrack?'rgba(29,158,117,.15)':'rgba(201,153,26,.16)'};color:${onTrack?'#0f6e56':'#8a6d1a'}">${onTrack?'✓ On track':`${gap} class${gap===1?'':'es'} to plan`}</span>
+      </div>
+      <div class="d-track">${slotHTML}</div>
+      <div class="d-track-legend">
+        <span><i class="d-sw" style="background:var(--navy)"></i>Planned</span>
+        <span><i class="d-sw" style="background:repeating-linear-gradient(135deg,#F3F1EC,#F3F1EC 3px,#ECEAE4 3px,#ECEAE4 6px);border:1px dashed var(--rule-dark)"></i>Not planned</span>
+        <span><i class="d-sw" style="background:var(--crit)"></i>2-week horizon</span>
+      </div>
+    </div>`;
+  }
+
+  // ============ TO-DOS (auto + manual) ============
+  const autos=[];
+  const seenPlan=new Set();
+  classes.filter(c=>c.date>=today && c.date<=target && !c.planned).forEach(c=>{
+    const k=`${c.uid}-${c.wi}-${c.di}`; if(seenPlan.has(k))return; seenPlan.add(k);
+    autos.push({ key:`plan:${k}`, text:`Plan ${c.u.name} — ${c.d.label}`, due:c.date, unit:`Unit ${c.uid}`, tag:'unplanned day', open:[c.uid,c.wi,c.di] });
+  });
+  const seenAssess=new Set();
+  classes.filter(c=>c.date>=today && c.date<=isoAddDays(today,30) && c.d.assessType).forEach(c=>{
+    const k=`${c.uid}-${c.wi}-${c.di}`; if(seenAssess.has(k))return; seenAssess.add(k);
+    autos.push({ key:`assess:${k}`, text:`Prepare ${c.d.assessType}${c.d.topic?` — ${c.d.topic}`:''}`, due:isoAddDays(c.date,-3), unit:`Unit ${c.uid}`, tag:`${c.d.assessType} ${fmtMD(c.date)}`, open:[c.uid,c.wi,c.di] });
+  });
+  if(byDate.length && !onTrack){
+    autos.push({ key:'horizon', text:`Extend your plan through ${fmtNice(target)} to stay 2 weeks ahead`, due:plannedThrough||today, tag:'planning horizon' });
+  }
+
+  const items = [
+    ...autos.map(a=>({ id:a.key, auto:true, text:a.text, due:a.due, tag:a.tag, unit:a.unit, open:a.open, done:!!(state.autoDone&&state.autoDone[a.key]) })),
+    ...(state.todos||[]).map(t=>({ id:t.id, manual:true, text:t.text, due:t.due||'', done:!!t.done })),
+  ];
+
+  const bucketOf = it => (it.due && it.due<today) ? 'over' : (it.due && it.due<=isoAddDays(today,7)) ? 'week' : 'later';
+  const groups = {over:[], week:[], later:[]};
+  items.forEach(it=>groups[bucketOf(it)].push(it));
+  const sortFn = (a,b)=> (a.done-b.done) || (!a.due-!b.due) || (a.due||'').localeCompare(b.due||'');
+  Object.values(groups).forEach(g=>g.sort(sortFn));
+
+  const todoRow = it => {
+    let pri='p-plan', dueCls='', dueTxt='No date';
+    if(it.due){
+      if(it.due<today){ pri='p-crit'; dueCls=' crit'; const late=daysBetween(it.due,today); dueTxt=`Due ${fmtMD(it.due)} · ${late} day${late===1?'':'s'} late`; }
+      else if(it.due<=isoAddDays(today,2)){ pri='p-crit'; dueCls=' crit'; dueTxt=`Due ${fmtNice(it.due)}`; }
+      else if(it.due<=isoAddDays(today,7)){ pri='p-warn'; dueCls=' warn'; dueTxt=`Due ${fmtNice(it.due)}`; }
+      else { dueTxt=`Due ${fmtNice(it.due)}`; }
+    }
+    const toggle = it.auto ? `toggleAutoDone('${it.id}')` : `toggleDashTodo('${it.id}')`;
+    const mainClick = it.open ? ` onclick="openGridDay(${it.open[0]},${it.open[1]},${it.open[2]})"` : '';
+    const tags = [
+      it.unit ? `<span class="d-t-tag">${esc(it.unit)}</span>` : '',
+      it.auto ? `<span class="d-t-tag auto">auto · ${esc(it.tag||'')}</span>` : '',
+      `<span class="d-t-due${dueCls}">${dueTxt}</span>`,
+    ].join('');
+    return `<div class="d-todo ${pri}${it.done?' done':''}">
+      <div class="d-cb" onclick="${toggle}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div class="d-t-body">
+        <div class="d-t-main${it.open?' link':''}"${mainClick}>${esc(it.text)}</div>
+        <div class="d-t-sub">${tags}</div>
+      </div>
+      ${it.manual?`<button class="d-t-del" title="Delete" onclick="deleteDashTodo('${it.id}')">&times;</button>`:''}
+    </div>`;
+  };
+
+  const groupHTML = (title, color, list) => list.length ? `
+    <div class="d-tg">
+      <div class="d-tg-head" style="color:${color}">${title}<span class="d-tg-line"></span><span class="d-count">${list.length}</span></div>
+      ${list.map(todoRow).join('')}
+    </div>` : '';
+
+  const anyTodo = items.length>0;
+  const todoCard = `
+    <div class="d-card">
+      <div class="d-card-h"><h2>Teacher To-Do</h2><span class="d-meta">${items.filter(i=>!i.done).length} open</span></div>
+      ${horizon}
+      <div class="d-add-row">
+        <input id="d-todo-text" placeholder="Add your own task…" onkeydown="if(event.key==='Enter')addDashTodo()">
+        <input id="d-todo-due" type="date" title="Optional due date" style="flex:0 0 auto;width:140px">
+        <button onclick="addDashTodo()">Add</button>
+      </div>
+      ${anyTodo ? (groupHTML('Overdue','var(--crit)',groups.over)+groupHTML('This Week','#8a6d1a',groups.week)+groupHTML('Next Two Weeks','var(--navy)',groups.later))
+                : `<div class="d-empty-note">You're all caught up — no tasks due. Auto-tasks appear here as classes and assessments approach.</div>`}
+    </div>`;
+
+  // ============ MINI CALENDAR ============
+  const t=new Date();
+  if(!dashCalMonth) dashCalMonth={y:t.getFullYear(), m:t.getMonth()};
+  const {y:cy,m:cm}=dashCalMonth;
+  const monthLabel=new Date(cy,cm,1).toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  const dateMap={};
+  classes.forEach(c=>{ (dateMap[c.date]=dateMap[c.date]||[]).push(c); });
+  const monthEnd=new Date(cy,cm+1,0);
+  const baseMon=new Date(cy,cm,1); baseMon.setDate(baseMon.getDate()-((baseMon.getDay()+6)%7));
+  let calCells='';
+  for(let wk=0; wk<6; wk++){
+    const wkStart=new Date(baseMon); wkStart.setDate(baseMon.getDate()+wk*7);
+    if(wkStart>monthEnd) break;
+    const row=[];
+    for(let dd=0; dd<5; dd++){ const cur=new Date(wkStart); cur.setDate(wkStart.getDate()+dd); row.push(cur); }
+    if(!row.some(c=>c.getMonth()===cm)) continue;
+    calCells += row.map(cur=>{
+      const iso=isoOf(cur), inMonth=cur.getMonth()===cm, isToday=iso===today;
+      const cls=dateMap[iso]||[];
+      if(!inMonth) return `<div class="d-cell off"><span class="d-num">${cur.getDate()}</span></div>`;
+      if(!cls.length) return `<div class="d-cell${isToday?' d-today':''}"><span class="d-num">${cur.getDate()}</span></div>`;
+      const c0=cls[0];
+      const hasAssess=cls.some(x=>x.d.assessType);
+      const tag = c0.planned
+        ? `<span class="d-cal-tag" style="background:${c0.c.br}">U${c0.uid}·${esc(c0.d.label.replace(/^Day\s*/,'D'))}</span>`
+        : `<span class="d-cal-tag unplanned">unplanned</span>`;
+      return `<div class="d-cell lesson${isToday?' d-today':''}" onclick="openGridDay(${c0.uid},${c0.wi},${c0.di})">
+        ${hasAssess?'<span class="d-cal-assess" title="Assessment"></span>':''}
+        <span class="d-num">${cur.getDate()}</span>${tag}</div>`;
+    }).join('');
+  }
+  const calCard = `
+    <div class="d-card">
+      <div class="d-card-h"><h2>${monthLabel}</h2>
+        <div class="d-cal-nav"><button onclick="dashCalStep(-1)" title="Previous month">‹</button><button onclick="dashCalStep(1)" title="Next month">›</button></div>
+      </div>
+      <div class="d-cal-grid">
+        <div class="d-dow">Mon</div><div class="d-dow">Tue</div><div class="d-dow">Wed</div><div class="d-dow">Thu</div><div class="d-dow">Fri</div>
+        ${calCells}
+      </div>
+    </div>`;
+
+  // ============ UPCOMING ASSESSMENTS ============
+  const seenAss=new Set(); const assessList=[];
+  upcoming.filter(c=>c.d.assessType).forEach(c=>{
+    const k=`${c.uid}-${c.wi}-${c.di}`; if(seenAss.has(k))return; seenAss.add(k);
+    if(c.date<=isoAddDays(today,45)) assessList.push(c);
+  });
+  const assessCard = `
+    <div class="d-card">
+      <div class="d-card-h"><h2>Upcoming Assessments</h2><span class="d-meta">next 45 days</span></div>
+      ${assessList.length ? assessList.slice(0,6).map(c=>{
+        const ac=ASSESS_COLORS[c.d.assessType]||{bg:'var(--rule)',tx:'var(--ink-2)'};
+        return `<div class="d-arow" onclick="openGridDay(${c.uid},${c.wi},${c.di})">
+          <div class="d-adate"><div class="d-am">${isoParse(c.date).toLocaleDateString('en-US',{month:'short'})}</div><div class="d-ad">${isoParse(c.date).getDate()}</div></div>
+          <div class="d-ainfo"><div class="d-an">${esc(c.d.topic||c.d.assessType)}</div><div class="d-au">${esc(c.u.name)} · ${esc(c.d.label)}</div></div>
+          <span class="d-abadge" style="background:${ac.bg};color:${ac.tx}">${esc(c.d.assessType)}</span>
+        </div>`;
+      }).join('') : `<div class="d-empty-note">No assessments scheduled in the next 45 days.</div>`}
+    </div>`;
+
+  // ============ UNIT PROGRESS ============
+  const upRows = UNIT_META.filter(u=>u.sem===(nextClass?nextClass.u.sem:1) || true).map(u=>{
+    const ws=state.units[u.id]||[]; let tot=0,bl=0;
+    ws.forEach(w=>(w.days||[]).forEach(d=>{ tot++; if(dayIsPlanned(d))bl++; }));
+    const p = tot?Math.round(bl/tot*100):0;
+    const c=COLOR_MAP[u.color]||{br:'var(--navy)'};
+    const barColor = p===100?'#1D9E75':(p>0?c.br:'var(--rule-dark)');
+    return `<div class="d-uprow" onclick="nav('unit',${u.id})">
+      <div class="d-upname"><div class="d-un">U${u.id} · ${esc(u.name)} <small>${bl}/${tot}</small></div>
+        <div class="d-upbar"><i style="width:${Math.max(p,2)}%;background:${barColor}"></i></div></div>
+      <div class="d-uppct">${p}%</div>
+    </div>`;
+  }).join('');
+  const progressCard = `<div class="d-card"><div class="d-card-h"><h2>Unit Progress</h2><span class="d-meta">${co.name}</span></div>${upRows}</div>`;
+
+  // ============ TEACHING BALANCE (GRR) ============
+  let grrUid = nextClass ? nextClass.uid : null;
+  if(!grrUid){ for(const u of UNIT_META){ if((state.units[u.id]||[]).some(w=>(w.days||[]).some(d=>(d.activities||[]).some(a=>a.grr)))){ grrUid=u.id; break; } } }
+  const grrTotals={focused:0,guided:0,collaborative:0,independent:0,reflection:0}; let grrSum=0;
+  if(grrUid){
+    (state.units[grrUid]||[]).forEach(w=>(w.days||[]).forEach(d=>{
+      (d.activities||[]).forEach(a=>{ if(a.grr && grrTotals[a.grr]!=null){ grrTotals[a.grr]+=(a.dur||0); grrSum+=(a.dur||0); } });
+    }));
+  }
+  const grrMeta = {focused:['Focused · I do','--ph-focused-br'],guided:['Guided · We do','--ph-guided-br'],collaborative:['Collaborative','--ph-collab-br'],independent:['Independent','--ph-indep-br'],reflection:['Reflection','--ph-reflect-br']};
+  const grrUnit = grrUid ? UNIT_META.find(u=>u.id===grrUid) : null;
+  const grrCard = `
+    <div class="d-card">
+      <div class="d-card-h"><h2>Teaching Balance</h2><span class="d-meta">${grrUnit?esc(grrUnit.name)+' · GRR':'Gradual Release'}</span></div>
+      ${grrSum ? `
+        <div class="d-grrbar">
+          ${Object.keys(grrMeta).map(k=>{ const pctv=Math.round(grrTotals[k]/grrSum*100); return pctv? `<div class="d-grrseg" style="flex:${grrTotals[k]};background:var(${grrMeta[k][1]})">${pctv}%</div>`:''; }).join('')}
+        </div>
+        <div class="d-grrlegend">
+          ${Object.keys(grrMeta).map(k=>{ const pctv=grrSum?Math.round(grrTotals[k]/grrSum*100):0; return `<span><i class="d-sw" style="background:var(${grrMeta[k][1]})"></i>${grrMeta[k][0].split(' ·')[0]}<b>${pctv}%</b></span>`; }).join('')}
+        </div>`
+      : `<div class="d-empty-note">Tag activities with a teaching phase (I do / We do / You do) to see your balance.</div>`}
+    </div>`;
+
+  // ============ ASSEMBLE ============
+  el.innerHTML = `
+    <div class="d-head">
+      <div>
+        <div class="d-eyebrow">Ad Majorem Dei Gloriam</div>
+        <h1>Course Dashboard</h1>
+        <div class="d-sub">${esc(co.fullName)} · <span>${esc(state?.teacher||'Eric Lastres, SJ')}</span></div>
+      </div>
+      <div class="d-today">Today<b>${new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</b></div>
+    </div>
+    <div class="d-quicknav">
+      <button class="d-qn-primary" onclick="${contOnclick}">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4z"/></svg>
+        ${contLabel}${contClass?` · ${esc(contClass.u.name)} ${esc(contClass.d.label)}`:''}
+      </button>
+      <button class="d-qn-btn" onclick="nav('course')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Browse all units
+      </button>
+    </div>
+    ${kpis}
+    <div class="d-grid">
+      <div class="d-col">${todoCard}</div>
+      <div class="d-col">${calCard}${assessCard}${progressCard}${grrCard}</div>
+    </div>`;
 }
 
 // ── COURSE VIEW ───────────────────────────────────────────────────
@@ -5504,6 +6004,7 @@ async function init() {
     setSyncStatus('local');
   }
   renderCourse();
+  nav('dashboard');
 }
 init();
 </script>
