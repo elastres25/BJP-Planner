@@ -1206,7 +1206,12 @@ const GRR_COLORS = {
 const BAR_COLORS = ['#1B3A6B','#0F6E56','#993C1D','#534AB7','#854F0B','#185FA5','#3B6D11'];
 
 // State
-let state = loadState();
+// Declared before assignment so that anything loadState() touches during a
+// first-run fallback (e.g. the UNIT_META getter, which reads `state`) sees
+// `undefined` rather than a temporal-dead-zone ReferenceError. Without this,
+// a browser with no saved data yet would fail to load.
+let state;
+state = loadState();
 let currentUnit = null;
 let currentUnitTab = 'plan';   // persists across re-renders so chip edits don't bounce back to Weekly Plan
 let uovPanelOpen = {};         // per-unit open/closed state of the collapsible Unit Overview panel
