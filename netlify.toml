@@ -1,5 +1,11 @@
-# Serve the planner at the site root.
-# Netlify looks for index.html by default; our app file is named
+# No build step — the app is a single static HTML file served from the repo
+# root. "publish = ." tells Netlify to deploy the repo root as-is, overriding
+# any publish-directory value configured in the dashboard.
+[build]
+  publish = "."
+  command = ""
+
+# Netlify serves index.html at "/" by default; our app file is named
 # belen-planner_11.html, so this rewrite makes "/" serve it directly.
 [[redirects]]
   from = "/"
