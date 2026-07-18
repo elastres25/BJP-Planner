@@ -2772,99 +2772,7 @@ function unitOverviewPageHTML(u, weeks, showPacingGuide = true) {
       </tbody>
     </table>
 
-    ${showPacingGuide ? `
-    <!-- PACING GUIDE -->
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-      <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)">Pacing Guide</div>
-      <button onclick="exportPacingGuidePDF()"
-        style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:var(--navy);color:white;border:none;border-radius:var(--radius-sm);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:opacity .12s"
-        onmouseenter="this.style.opacity='.85'" onmouseleave="this.style.opacity='1'">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 18 15 15"/></svg>
-        Export PDF
-      </button>
-    </div>
-    <p style="font-size:12px;color:var(--ink-3);margin-bottom:10px;font-style:italic">Click any row to open that day's lesson plan. Edit the Description of Content directly in the table — changes sync to the lesson plan.</p>
-    <table class="pace-table">
-      <thead>
-        <tr>
-          <th style="width:120px">Topic / Day</th>
-          <th>Description of Content</th>
-          <th style="width:32%">Learning Targets</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${allDays.map(({d, wi, di, weekLabel}) => {
-          const assessBadge = d.assessType
-            ? `<span class="pace-assess-badge" style="background:${ASSESS_COLORS[d.assessType]?.bg};color:${ASSESS_COLORS[d.assessType]?.tx}">${esc(d.assessType)}</span>`
-            : '';
-          const targetsHTML = (d.targets||[]).map((t,ti) =>
-            `<div class="pace-target-chip" id="pace-tgt-${wi}-${di}-${ti}">
-              <span>SWBAT</span>${esc(t)}
-              <button onclick="event.stopPropagation();removePaceTarget(${wi},${di},${ti})"
-                style="border:none;background:none;cursor:pointer;color:rgba(255,255,255,.5);font-size:13px;line-height:1;padding:0;margin-left:2px">×</button>
-            </div>`
-          ).join('');
-          return `<tr draggable="true" id="pace-row-${wi}-${di}"
-            data-wi="${wi}" data-di="${di}"
-            style="border-bottom:1px solid var(--rule);transition:opacity .15s"
-            ondragstart="paceDragStart(event,${wi},${di})"
-            ondragend="paceDragEnd(event)"
-            ondragover="paceDragOver(event)"
-            ondrop="paceDrop(event,${wi},${di})"
-            ondragenter="this.style.background='#EEF2FF'"
-            ondragleave="this.style.background=''">
-            <td onclick="event.stopPropagation()" style="padding:0;vertical-align:top;position:relative">
-              <div style="padding:6px 12px 4px;border-bottom:1px solid var(--rule);background:#FDF5F0;display:flex;align-items:center;gap:6px">
-                <span title="Drag to reorder" style="cursor:grab;color:var(--ink-3);font-size:12px;flex-shrink:0;user-select:none;padding-right:2px">⠿</span>
-                <div style="flex:1">
-                  <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:3px">
-                    <button onclick="event.stopPropagation();openPacingDay(${wi},${di})"
-                      style="font-size:11px;font-weight:700;color:var(--navy);background:none;border:none;cursor:pointer;font-family:inherit;padding:0;letter-spacing:.03em;white-space:nowrap">
-                      ${esc(d.label)}
-                    </button>
-                    ${assessBadge}
-                  </div>
-                  <div class="pace-date">${d.dateA||d.dateB ? (d.dateA||'')+(d.dateB&&d.dateA?' / ':' ')+(d.dateB||'') : '—'}</div>
-                </div>
-              </div>
-              <div contenteditable="true"
-                data-wi="${wi}" data-di="${di}"
-                data-placeholder="Topic…"
-                onblur="savePaceTopic(this)"
-                onclick="event.stopPropagation()"
-                style="padding:6px 12px;min-height:36px;outline:none;font-size:12px;font-weight:600;color:#7B1A2E;line-height:1.35"
-              >${esc(d.topic||'')}</div>
-            </td>
-            <td onclick="event.stopPropagation()" style="padding:0;vertical-align:top;position:relative">
-              <div id="pace-tb-${wi}-${di}" style="display:none;background:var(--parchment);border-bottom:1px solid var(--rule);padding:3px 6px;gap:2px;align-items:center">
-                <button class="obj-tb-btn" onmousedown="event.preventDefault();rteCmd('bold','pace-td-${wi}-${di}')"><b>B</b></button>
-                <button class="obj-tb-btn" onmousedown="event.preventDefault();rteCmd('italic','pace-td-${wi}-${di}')"><i>I</i></button>
-                <button class="obj-tb-btn" onmousedown="event.preventDefault();rteCmd('insertUnorderedList','pace-td-${wi}-${di}')">•≡</button>
-                <button class="obj-tb-btn" onmousedown="event.preventDefault();rteCmd('insertOrderedList','pace-td-${wi}-${di}')">1≡</button>
-              </div>
-              <div id="pace-td-${wi}-${di}" class="pace-rte" contenteditable="true"
-                data-wi="${wi}" data-di="${di}"
-                data-placeholder="Describe what will be taught in this lesson…"
-                onblur="savePaceDesc(this);document.getElementById('pace-tb-${wi}-${di}').style.display='none'"
-                onfocus="document.getElementById('pace-tb-${wi}-${di}').style.display='flex'"
-                style="padding:8px 12px"
-              >${d.topicDesc||''}</div>
-            </td>
-            <td onclick="event.stopPropagation()" class="pace-cell" style="vertical-align:top">
-              <div id="pace-targets-${wi}-${di}" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px">
-                ${targetsHTML}
-              </div>
-              <input
-                style="border:1px dashed rgba(27,58,107,.3);border-radius:999px;padding:3px 10px;font-size:11px;font-family:inherit;color:var(--ink);outline:none;background:transparent;width:100%;box-sizing:border-box"
-                placeholder="SWBAT… (press Enter)"
-                onkeydown="addPaceTarget(event,${wi},${di})"
-                onfocus="this.style.borderStyle='solid';this.style.borderColor='var(--navy)'"
-                onblur="this.style.borderStyle='dashed';this.style.borderColor='rgba(27,58,107,.3)'">
-            </td>
-          </tr>`;
-        }).join('')}
-      </tbody>
-    </table>` : ''}
+    ${showPacingGuide ? pacingTableBlockHTML(u, weeks) : ''}
   `;
 }
 
@@ -2941,6 +2849,17 @@ function savePaceDesc(el) {
   saveState();
 }
 
+// Save the pacing guide Assessment / HW cell back to the day's assessment
+// field so it also shows in the day plan's "Assessment / closing" box.
+function savePaceAssess(el) {
+  const wi = +el.dataset.wi;
+  const di = +el.dataset.di;
+  currentWeek = wi;
+  const d = getDay(di);
+  d.assessment = el.innerHTML;
+  saveState();
+}
+
 function setUnitTab(tab, btn) {
   currentUnitTab = tab; // remember so re-renders (chip adds, etc.) stay on this tab
   ['overview','plan','pacing'].forEach(t => {
@@ -2955,9 +2874,16 @@ function setUnitTab(tab, btn) {
 }
 
 // ── PACING GUIDE ──────────────────────────────────────────────────
+// The standalone Pacing Guide tab reuses the same editable table as the
+// Unit Overview so the two always look identical.
 function pacingGuideHTML(u, weeks) {
-  const c = COLOR_MAP[u.color];
-  // Collect all days across all weeks
+  return pacingTableBlockHTML(u, weeks);
+}
+
+// Shared editable pacing table. Rendered in the Pacing Guide tab.
+// Rows are drag-reorderable; topic, description, learning targets and the
+// assessment / homework column all sync back to each day's lesson plan.
+function pacingTableBlockHTML(u, weeks) {
   const allDays = [];
   weeks.forEach((w, wi) => {
     (w.days||[]).forEach((d, di) => {
@@ -2965,53 +2891,115 @@ function pacingGuideHTML(u, weeks) {
     });
   });
 
-  const rows = allDays.map(({d, wi, di, weekLabel}) => {
-    const assessBadge = d.assessType
-      ? `<span style="font-size:9px;font-weight:600;padding:2px 7px;border-radius:999px;background:${ASSESS_COLORS[d.assessType]?.bg||'var(--rule)'};color:${ASSESS_COLORS[d.assessType]?.tx||'var(--ink-2)'}">${esc(d.assessType)}</span>`
-      : '';
-    const dateStr = d.dateA && d.dateB ? `A: ${d.dateA} / B: ${d.dateB}` : d.dateA || d.dateB || '—';
-    const actCount = (d.activities||[]).length;
-    return `<tr style="border-bottom:1px solid var(--rule)" onmouseenter="this.style.background='#FAFAF8'" onmouseleave="this.style.background=''">
-      <td style="padding:12px 14px;vertical-align:top;background:#FDF5F0;border-right:1px solid var(--rule)">
-        <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:4px">
-          <button onclick="openPacingDay(${wi},${di})" style="font-size:11px;font-weight:700;color:var(--navy);background:none;border:none;cursor:pointer;font-family:inherit;padding:0;letter-spacing:.03em">${esc(d.label)}</button>
-          ${assessBadge}
-        </div>
-        <div style="font-size:13px;font-weight:600;color:#7B1A2E;line-height:1.35">${d.topic ? esc(d.topic) : '<span style="color:var(--ink-3);font-style:italic;font-weight:400;font-size:12px">No topic yet</span>'}</div>
-        ${dateStr !== '—' ? `<div style="font-size:10px;color:var(--ink-3);margin-top:4px">${dateStr}</div>` : ''}
-      </td>
-      <td style="padding:8px 14px;font-size:12px;color:var(--ink);font-style:${d.eq?'normal':'italic'}">${esc(d.eq||'—')}</td>
-      <td style="padding:8px 14px">
-        ${(d.targets||[]).map(t => `<div style="font-size:10px;color:var(--ink-2);line-height:1.4;padding-left:10px;position:relative"><span style="position:absolute;left:2px;color:var(--navy)">·</span>${esc(t)}</div>`).join('')}
-        ${!(d.targets||[]).length ? '<span style="font-size:11px;color:var(--ink-3);font-style:italic">—</span>' : ''}
-      </td>
-      <td style="padding:8px 14px;text-align:center">
-        ${assessBadge || '<span style="font-size:11px;color:var(--ink-3)">—</span>'}
-      </td>
-      <td style="padding:8px 14px;text-align:center">
-        <span style="font-size:11px;color:${actCount?'var(--ink)':'var(--ink-3)'}">${actCount ? actCount+' activities' : '—'}</span>
-      </td>
-    </tr>`;
-  }).join('');
-
-  return `<div style="background:var(--white);border:1px solid var(--rule);border-radius:var(--radius);overflow:hidden">
-    <div style="background:${c.bg};padding:10px 16px;border-bottom:1px solid var(--rule)">
-      <div style="font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:${c.tx}">Pacing Guide — ${esc(u.name)}</div>
-      <div style="font-size:11px;color:${c.tx};opacity:.7;margin-top:2px">${allDays.length} total blocks · Click any row to open that day plan</div>
+  return `
+    <!-- PACING GUIDE -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)">Pacing Guide</div>
+      <button onclick="exportPacingGuidePDF()"
+        style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:var(--navy);color:white;border:none;border-radius:var(--radius-sm);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:opacity .12s"
+        onmouseenter="this.style.opacity='.85'" onmouseleave="this.style.opacity='1'">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 18 15 15"/></svg>
+        Export PDF
+      </button>
     </div>
-    <table style="width:100%;border-collapse:collapse">
+    <p style="font-size:12px;color:var(--ink-3);margin-bottom:10px;font-style:italic">Click any row to open that day's lesson plan. Edit the Description of Content and Assessment / HW directly in the table — changes sync to the lesson plan.</p>
+    <table class="pace-table">
       <thead>
-        <tr style="background:var(--navy)">
-          <th style="padding:8px 14px;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:white;text-align:left;border-right:1px solid rgba(255,255,255,.15)">Day / Topic</th>
-          <th style="padding:8px 14px;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:white;text-align:left;border-right:1px solid rgba(255,255,255,.15)">Essential Question</th>
-          <th style="padding:8px 14px;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:white;text-align:left;border-right:1px solid rgba(255,255,255,.15)">Learning Targets</th>
-          <th style="padding:8px 14px;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:white;text-align:center;border-right:1px solid rgba(255,255,255,.15)">Assessment</th>
-          <th style="padding:8px 14px;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:white;text-align:center">Activities</th>
+        <tr>
+          <th style="width:120px">Topic / Day</th>
+          <th>Description of Content</th>
+          <th style="width:26%">Learning Targets</th>
+          <th style="width:22%">Assessment / HW</th>
         </tr>
       </thead>
-      <tbody>${rows}</tbody>
-    </table>
-  </div>`;
+      <tbody>
+        ${allDays.map(({d, wi, di, weekLabel}) => {
+          const assessBadge = d.assessType
+            ? `<span class="pace-assess-badge" style="background:${ASSESS_COLORS[d.assessType]?.bg};color:${ASSESS_COLORS[d.assessType]?.tx}">${esc(d.assessType)}</span>`
+            : '';
+          const targetsHTML = (d.targets||[]).map((t,ti) =>
+            `<div class="pace-target-chip" id="pace-tgt-${wi}-${di}-${ti}">
+              <span>SWBAT</span>${esc(t)}
+              <button onclick="event.stopPropagation();removePaceTarget(${wi},${di},${ti})"
+                style="border:none;background:none;cursor:pointer;color:rgba(255,255,255,.5);font-size:13px;line-height:1;padding:0;margin-left:2px">×</button>
+            </div>`
+          ).join('');
+          return `<tr draggable="true" id="pace-row-${wi}-${di}"
+            data-wi="${wi}" data-di="${di}"
+            style="border-bottom:1px solid var(--rule);transition:opacity .15s"
+            ondragstart="paceDragStart(event,${wi},${di})"
+            ondragend="paceDragEnd(event)"
+            ondragover="paceDragOver(event)"
+            ondrop="paceDrop(event,${wi},${di})"
+            ondragenter="this.style.background='#EEF2FF'"
+            ondragleave="this.style.background=''">
+            <td onclick="event.stopPropagation()" style="padding:0;vertical-align:top;position:relative">
+              <div style="padding:6px 12px 4px;border-bottom:1px solid var(--rule);background:#FDF5F0;display:flex;align-items:center;gap:6px">
+                <span title="Drag to reorder" style="cursor:grab;color:var(--ink-3);font-size:12px;flex-shrink:0;user-select:none;padding-right:2px">⠿</span>
+                <div style="flex:1">
+                  <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:3px">
+                    <button onclick="event.stopPropagation();openPacingDay(${wi},${di})"
+                      style="font-size:11px;font-weight:700;color:var(--navy);background:none;border:none;cursor:pointer;font-family:inherit;padding:0;letter-spacing:.03em;white-space:nowrap">
+                      ${esc(d.label)}
+                    </button>
+                    ${assessBadge}
+                  </div>
+                  <div class="pace-date">${d.dateA||d.dateB ? (d.dateA||'')+(d.dateB&&d.dateA?' / ':' ')+(d.dateB||'') : '—'}</div>
+                </div>
+              </div>
+              <div contenteditable="true"
+                data-wi="${wi}" data-di="${di}"
+                data-placeholder="Topic…"
+                onblur="savePaceTopic(this)"
+                onclick="event.stopPropagation()"
+                style="padding:6px 12px;min-height:36px;outline:none;font-size:12px;font-weight:600;color:#7B1A2E;line-height:1.35"
+              >${esc(d.topic||'')}</div>
+            </td>
+            <td onclick="event.stopPropagation()" style="padding:0;vertical-align:top;position:relative">
+              <div id="pace-tb-${wi}-${di}" style="display:none;background:var(--parchment);border-bottom:1px solid var(--rule);padding:3px 6px;gap:2px;align-items:center">
+                <button class="obj-tb-btn" onmousedown="event.preventDefault();rteCmd('bold','pace-td-${wi}-${di}')"><b>B</b></button>
+                <button class="obj-tb-btn" onmousedown="event.preventDefault();rteCmd('italic','pace-td-${wi}-${di}')"><i>I</i></button>
+                <button class="obj-tb-btn" onmousedown="event.preventDefault();rteCmd('insertUnorderedList','pace-td-${wi}-${di}')">•≡</button>
+                <button class="obj-tb-btn" onmousedown="event.preventDefault();rteCmd('insertOrderedList','pace-td-${wi}-${di}')">1≡</button>
+              </div>
+              <div id="pace-td-${wi}-${di}" class="pace-rte" contenteditable="true"
+                data-wi="${wi}" data-di="${di}"
+                data-placeholder="Describe what will be taught in this lesson…"
+                onblur="savePaceDesc(this);document.getElementById('pace-tb-${wi}-${di}').style.display='none'"
+                onfocus="document.getElementById('pace-tb-${wi}-${di}').style.display='flex'"
+                style="padding:8px 12px"
+              >${d.topicDesc||''}</div>
+            </td>
+            <td onclick="event.stopPropagation()" class="pace-cell" style="vertical-align:top">
+              <div id="pace-targets-${wi}-${di}" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px">
+                ${targetsHTML}
+              </div>
+              <input
+                style="border:1px dashed rgba(27,58,107,.3);border-radius:999px;padding:3px 10px;font-size:11px;font-family:inherit;color:var(--ink);outline:none;background:transparent;width:100%;box-sizing:border-box"
+                placeholder="SWBAT… (press Enter)"
+                onkeydown="addPaceTarget(event,${wi},${di})"
+                onfocus="this.style.borderStyle='solid';this.style.borderColor='var(--navy)'"
+                onblur="this.style.borderStyle='dashed';this.style.borderColor='rgba(27,58,107,.3)'">
+            </td>
+            <td onclick="event.stopPropagation()" style="padding:0;vertical-align:top;position:relative">
+              <div id="pace-astb-${wi}-${di}" style="display:none;background:var(--parchment);border-bottom:1px solid var(--rule);padding:3px 6px;gap:2px;align-items:center">
+                <button class="obj-tb-btn" onmousedown="event.preventDefault();rteCmd('bold','pace-as-${wi}-${di}')"><b>B</b></button>
+                <button class="obj-tb-btn" onmousedown="event.preventDefault();rteCmd('italic','pace-as-${wi}-${di}')"><i>I</i></button>
+                <button class="obj-tb-btn" onmousedown="event.preventDefault();rteCmd('insertUnorderedList','pace-as-${wi}-${di}')">•≡</button>
+                <button class="obj-tb-btn" onmousedown="event.preventDefault();rteCmd('insertOrderedList','pace-as-${wi}-${di}')">1≡</button>
+              </div>
+              <div id="pace-as-${wi}-${di}" class="pace-rte" contenteditable="true"
+                data-wi="${wi}" data-di="${di}"
+                data-placeholder="Assessment / homework for this day…"
+                onblur="savePaceAssess(this);document.getElementById('pace-astb-${wi}-${di}').style.display='none'"
+                onfocus="document.getElementById('pace-astb-${wi}-${di}').style.display='flex'"
+                style="padding:8px 12px;min-height:48px"
+              >${d.assessment||''}</div>
+            </td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>`;
 }
 
 // ── PACING GUIDE DRAG & DROP ──────────────────────────────────────
@@ -3042,8 +3030,8 @@ function paceDrop(e, destWi, destDi) {
   if (!paceDragSrc) return;
   if (paceDragSrc.wi === destWi && paceDragSrc.di === destDi) return;
   moveDayTo(paceDragSrc.wi, paceDragSrc.di, destWi, destDi);
-  // Re-render overview tab to reflect new order
-  setTimeout(() => setUnitTab('overview', document.getElementById('utab-overview')), 50);
+  // moveDayTo() already re-renders the unit; currentUnitTab keeps us on the
+  // Pacing Guide tab so the reordered table stays in view.
 }
 
 function openPacingDay(wi, di) {
@@ -3234,7 +3222,7 @@ function renderUnit() {
 
     <!-- UNIT OVERVIEW TAB -->
     <div id="utab-content-overview" style="display:${currentUnitTab==='overview'?'block':'none'}">
-      ${unitOverviewPageHTML(u, weeks)}
+      ${unitOverviewPageHTML(u, weeks, false)}
     </div>
 
     <!-- WEEKLY PLAN TAB -->
