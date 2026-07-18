@@ -1,0 +1,7 @@
+# Serve the planner at the site root.
+# Netlify looks for index.html by default; our app file is named
+# belen-planner_11.html, so this rewrite makes "/" serve it directly.
+[[redirects]]
+  from = "/"
+  to = "/belen-planner_11.html"
+  status = 200
