@@ -858,6 +858,15 @@ body.simple-mode .dp-adv { display: none !important; }
   </div>
 
   <div class="topbar-right">
+    <div class="tb-search">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="global-search" type="text" placeholder="Search lessons, topics, scripture…" autocomplete="off"
+        oninput="runGlobalSearch(this.value)"
+        onkeydown="if(event.key==='Escape'){this.value='';runGlobalSearch('');this.blur();}"
+        onblur="setTimeout(()=>{const b=document.getElementById('search-results');if(b)b.style.display='none';},180)"
+        onfocus="if(this.value.trim().length>=2)runGlobalSearch(this.value)">
+      <div id="search-results" class="search-results" style="display:none"></div>
+    </div>
     <div id="sync-status" style="display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(255,255,255,.5);margin-right:4px">
       <span id="sync-dot" style="width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.3);flex-shrink:0"></span>
       <span id="sync-label">Not synced</span>
@@ -895,6 +904,23 @@ body.simple-mode .dp-adv { display: none !important; }
 <!-- ── VIEWS ──────────────────────────────────────────────────── -->
 
 <style>
+/* ── GLOBAL SEARCH ───────────────────────────────────────────── */
+.tb-search{position:relative;display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:6px 11px;min-width:210px;}
+.tb-search:focus-within{background:rgba(255,255,255,.16);border-color:var(--gold-light);}
+.tb-search > svg{stroke:rgba(255,255,255,.6);flex-shrink:0;}
+.tb-search input{border:none;background:none;outline:none;color:#fff;font-size:12.5px;width:100%;}
+.tb-search input::placeholder{color:rgba(255,255,255,.5);}
+.search-results{position:absolute;top:calc(100% + 6px);right:0;width:360px;max-width:80vw;max-height:60vh;overflow-y:auto;background:var(--white);border:1px solid var(--rule);border-radius:var(--radius);box-shadow:0 8px 28px rgba(0,0,0,.18);z-index:300;padding:6px;}
+.sr-empty{padding:16px;text-align:center;color:var(--ink-3);font-size:12.5px;font-style:italic;}
+.sr-item{display:flex;align-items:flex-start;gap:9px;padding:8px 10px;border-radius:var(--radius-sm);cursor:pointer;}
+.sr-item:hover{background:var(--parchment);}
+.sr-tag{font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;color:#fff;flex-shrink:0;margin-top:1px;-webkit-print-color-adjust:exact;}
+.sr-body{min-width:0;flex:1;}
+.sr-title{font-size:12.5px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sr-sub{font-size:11px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;}
+.sr-where{font-size:10px;color:var(--navy);font-weight:600;flex-shrink:0;margin-top:1px;}
+@media (max-width:1100px){ .tb-search{min-width:0;flex:1 1 100%;order:5;} .search-results{width:100%;} }
+
 /* ── DASHBOARD ───────────────────────────────────────────────── */
 .d-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:18px;flex-wrap:wrap;}
 .d-eyebrow{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:5px;}
@@ -1765,6 +1791,59 @@ function daysBetween(a,b){ return Math.round((isoParse(b)-isoParse(a))/86400000)
 function fmtNice(iso){ if(!iso) return ''; return isoParse(iso).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}); }
 function fmtMD(iso){ if(!iso) return ''; return isoParse(iso).toLocaleDateString('en-US',{month:'short',day:'numeric'}); }
 
+// ── Global search: jump to any lesson by topic, EQ, target, scripture, etc.
+function runGlobalSearch(q){
+  const box = document.getElementById('search-results');
+  if(!box) return;
+  q = (q||'').trim().toLowerCase();
+  if(q.length < 2){ box.style.display='none'; box.innerHTML=''; return; }
+
+  const strip = s => String(s||'').replace(/<[^>]*>/g,' ');
+  const hits = [];
+  UNIT_META.forEach(u=>{
+    const c = COLOR_MAP[u.color] || {br:'#8a8a8a'};
+    if(u.name && u.name.toLowerCase().includes(q)) hits.push({type:'unit', u, c});
+    (state.units[u.id]||[]).forEach((w,wi)=>{
+      (w.days||[]).forEach((d,di)=>{
+        const hay = [
+          d.topic, d.eq, (d.targets||[]).join(' '), (d.vocab||[]).join(' '),
+          (d.lessonScripture||[]).join(' '), (d.lessonSaints||[]).join(' '),
+          (d.knowledgeIntroduced||[]).join(' '), (d.skillsCovered||[]).join(' '),
+          strip(d.topicDesc), strip(d.assessment), strip(d.homework), d.brainstorm,
+          (d.activities||[]).map(a=>a.name+' '+(a.notes||'')).join(' '),
+        ].join('  ').toLowerCase();
+        if(hay.includes(q)) hits.push({type:'day', u, c, wi, di, d});
+      });
+    });
+  });
+
+  if(!hits.length){
+    box.innerHTML = `<div class="sr-empty">No matches for “${esc(q)}”.</div>`;
+    box.style.display='block';
+    return;
+  }
+
+  box.innerHTML = hits.slice(0,14).map(h=>{
+    if(h.type==='unit'){
+      return `<div class="sr-item" onmousedown="nav('unit',${h.u.id});clearGlobalSearch()">
+        <span class="sr-tag" style="background:${h.c.br}">U${h.u.id}</span>
+        <div class="sr-body"><div class="sr-title">${esc(h.u.name)}</div><div class="sr-sub">Open unit</div></div>
+      </div>`;
+    }
+    const d=h.d;
+    const sub = d.topic ? esc(d.topic) : (d.eq ? esc(d.eq) : 'No topic yet');
+    return `<div class="sr-item" onmousedown="openGridDay(${h.u.id},${h.wi},${h.di});clearGlobalSearch()">
+      <span class="sr-tag" style="background:${h.c.br}">U${h.u.id}</span>
+      <div class="sr-body"><div class="sr-title">${esc(d.label)} · ${sub}</div><div class="sr-sub">${esc(h.u.name)}</div></div>
+    </div>`;
+  }).join('') + (hits.length>14 ? `<div class="sr-empty" style="padding:8px">+${hits.length-14} more — keep typing to narrow</div>` : '');
+  box.style.display='block';
+}
+function clearGlobalSearch(){
+  const inp=document.getElementById('global-search'); if(inp) inp.value='';
+  const box=document.getElementById('search-results'); if(box){ box.style.display='none'; box.innerHTML=''; }
+}
+
 // Every dated class session (each A/B block that has a date), sorted.
 function collectClasses(){
   const out=[];
@@ -1797,6 +1876,22 @@ function addDashTodo(){
 function toggleDashTodo(id){
   const t = (state.todos||[]).find(x=>x.id===id);
   if(t){ t.done=!t.done; saveState(); renderDashboard(); }
+}
+// Quick-add a to-do from a lesson's day panel — pre-filled from the day's
+// topic and dated to its class date, so it lands in the dashboard To-Do.
+function addTaskFromDay(i){
+  const d = getDay(i);
+  const u = UNIT_META.find(m=>m.id===currentUnit);
+  const label = d.label || 'this lesson';
+  const suggested = d.topic ? `Prep: ${d.topic}` : `Prep ${label}`;
+  const text = prompt(`Add a to-do for ${u?u.name:'this unit'} — ${label}:`, suggested);
+  if(text===null) return;
+  const t = text.trim(); if(!t) return;
+  if(!state.todos) state.todos = [];
+  const due = d.dateA || d.dateB || '';
+  state.todos.push({ id: uid(), text: `${t} — ${label}`, due, done:false });
+  saveState();
+  toast('Added to your dashboard To-Do ✓');
 }
 function deleteDashTodo(id){
   state.todos = (state.todos||[]).filter(x=>x.id!==id);
@@ -3899,6 +3994,13 @@ function dailyPanelHTML(d, i) {
       >${esc(d.eq)}</div>
     </div>
     <div class="dp-head-right">
+      <button onclick="addTaskFromDay(${i})"
+        title="Add a task about this lesson to your dashboard To-Do list"
+        style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);color:#fff;font-size:11px;font-weight:600;border-radius:5px;padding:5px 10px;cursor:pointer;font-family:inherit"
+        onmouseenter="this.style.background='rgba(255,255,255,.22)'" onmouseleave="this.style.background='rgba(255,255,255,.12)'">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+        + To-Do
+      </button>
       <button class="dp-simple-toggle ${simpleMode?'on':''}" onclick="toggleSimpleMode()"
         title="Simple mode (beta): hides deep-planning sections and shows activities as a clean table. Nothing is deleted — toggle back anytime.">
         Simple mode <span class="beta-tag">BETA</span>
@@ -5340,7 +5442,6 @@ function exportPacingGuidePDF() {
   const u     = UNIT_META.find(m => m.id === currentUnit);
   const weeks = state.units[currentUnit];
   const co    = getCourse();
-  const uov   = getUOV(currentUnit);
 
   const NAVY = '#1B3A6B';
   const MAROON = '#7B1A2E';
@@ -5350,27 +5451,8 @@ function exportPacingGuidePDF() {
   const allDays = [];
   weeks.forEach((w, wi) => (w.days||[]).forEach((d, di) => allDays.push({d, wi, di, weekLabel: w.weekLabel})));
 
-  // Objectives table rows
-  const obj = uov.objTable || {};
-  const objCols = ['knowledge','understanding','skills','attitudes'];
-  const objLabels = ['Knowledge','Understanding','Skills','Attitudes'];
-  const hasObj = objCols.some(c => obj[c] && obj[c][0] && obj[c][0].trim() && obj[c][0] !== '<br>');
-
-  const objTableHTML = hasObj ? `
-    <table style="width:100%;border-collapse:collapse;margin-bottom:22px">
-      <thead>
-        <tr>
-          ${objLabels.map(l => `<th style="background:${NAVY};color:white;padding:7px 12px;font-size:10px;font-style:italic;font-weight:600;text-align:left;border:1px solid ${NAVY};-webkit-print-color-adjust:exact;print-color-adjust:exact"><em>${l}</em></th>`).join('')}
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          ${objCols.map(c => `<td style="vertical-align:top;border:1px solid #D6D8DC;padding:8px 10px;width:25%;font-size:11px;line-height:1.55;color:#1C1917">${(obj[c]||[])[0]||'—'}</td>`).join('')}
-        </tr>
-      </tbody>
-    </table>` : '';
-
-  // Pacing guide rows
+  // Pacing guide rows — mirror the on-screen pacing table exactly:
+  // Topic/Day · Description of Content · Learning Targets · Assessment / HW
   const rows = allDays.map(({d, wi, di, weekLabel}) => {
     const assessBadge = d.assessType
       ? `<span style="font-size:9px;font-weight:600;padding:1px 7px;border-radius:999px;background:${ASSESS_COLORS[d.assessType]?.bg};color:${ASSESS_COLORS[d.assessType]?.tx};-webkit-print-color-adjust:exact;print-color-adjust:exact">${escPDF(d.assessType)}</span>`
@@ -5379,19 +5461,25 @@ function exportPacingGuidePDF() {
     const targetsHTML = (d.targets||[]).length
       ? (d.targets||[]).map(t => `<div style="font-size:9px;color:#1B3A6B;line-height:1.4;padding-left:10px;position:relative"><span style="position:absolute;left:2px">·</span>SWBAT ${escPDF(t)}</div>`).join('')
       : '<span style="font-size:10px;color:#aaa;font-style:italic">—</span>';
+    const assessHTML = d.assessment
+      ? `<div class="rte-pdf-content" style="font-size:10px;color:#1C1917;line-height:1.5">${d.assessment}</div>`
+      : '<span style="font-size:10px;color:#aaa;font-style:italic">—</span>';
 
     return `<tr style="border-bottom:1px solid #E7E5E0">
-      <td style="padding:8px 10px;vertical-align:top;background:#FDF5F0;border-right:1px solid #E7E5E0;-webkit-print-color-adjust:exact;print-color-adjust:exact;width:16%">
+      <td style="padding:8px 10px;vertical-align:top;background:#FDF5F0;border-right:1px solid #E7E5E0;-webkit-print-color-adjust:exact;print-color-adjust:exact;width:15%">
         <div style="font-size:10px;font-weight:700;color:${NAVY};margin-bottom:3px">${escPDF(d.label)}</div>
         ${dateStr ? `<div style="font-size:9px;color:#888;margin-bottom:4px">${escPDF(dateStr)}</div>` : ''}
         <div style="font-size:11px;font-weight:600;color:${MAROON};line-height:1.35">${d.topic ? escPDF(d.topic) : '<span style="color:#ccc;font-weight:400;font-style:italic">No topic</span>'}</div>
         ${assessBadge ? `<div style="margin-top:5px">${assessBadge}</div>` : ''}
       </td>
-      <td style="padding:8px 10px;vertical-align:top;border-right:1px solid #E7E5E0;width:42%">
+      <td style="padding:8px 10px;vertical-align:top;border-right:1px solid #E7E5E0;width:37%">
         <div class="rte-pdf-content" style="font-size:11px;color:#1C1917;line-height:1.55">${d.topicDesc || '<span style="color:#bbb;font-style:italic">—</span>'}</div>
       </td>
-      <td style="padding:8px 10px;vertical-align:top;width:42%">
+      <td style="padding:8px 10px;vertical-align:top;border-right:1px solid #E7E5E0;width:25%">
         ${targetsHTML}
+      </td>
+      <td style="padding:8px 10px;vertical-align:top;width:23%">
+        ${assessHTML}
       </td>
     </tr>`;
   }).join('');
@@ -5429,22 +5517,19 @@ function exportPacingGuidePDF() {
     <div style="border-bottom:3px solid ${GOLD};margin-bottom:16px"></div>
 
     <!-- UNIT TITLE -->
-    <div style="margin-bottom:16px">
-      <div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#888;margin-bottom:4px">Unit ${u.id} · Semester ${u.sem}</div>
+    <div style="margin-bottom:14px">
+      <div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#888;margin-bottom:4px">Unit ${u.id} · Semester ${u.sem} · Pacing Guide</div>
       <div style="font-size:20px;font-weight:700;color:${NAVY};line-height:1.2">${escPDF(u.name)}</div>
-      ${u.desc ? `<div style="font-size:11px;color:#555;margin-top:6px;line-height:1.5;font-style:italic">${escPDF(u.desc)}</div>` : ''}
     </div>
 
-    ${hasObj ? `<div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:${NAVY};margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid ${NAVY}">Unit Objectives</div>${objTableHTML}` : ''}
-
     <!-- PACING GUIDE -->
-    <div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:${NAVY};margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid ${NAVY}">Pacing Guide</div>
     <table style="width:100%;border-collapse:collapse">
       <thead>
         <tr style="-webkit-print-color-adjust:exact;print-color-adjust:exact">
-          <th style="background:${NAVY};color:white;padding:7px 10px;font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;text-align:left;border:1px solid ${NAVY};width:16%">Topic / Day</th>
-          <th style="background:${NAVY};color:white;padding:7px 10px;font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;text-align:left;border:1px solid ${NAVY};width:42%">Description of Content</th>
-          <th style="background:${NAVY};color:white;padding:7px 10px;font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;text-align:left;border:1px solid ${NAVY};width:42%">Learning Targets</th>
+          <th style="background:${NAVY};color:white;padding:7px 10px;font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;text-align:left;border:1px solid ${NAVY};width:15%">Topic / Day</th>
+          <th style="background:${NAVY};color:white;padding:7px 10px;font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;text-align:left;border:1px solid ${NAVY};width:37%">Description of Content</th>
+          <th style="background:${NAVY};color:white;padding:7px 10px;font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;text-align:left;border:1px solid ${NAVY};width:25%">Learning Targets</th>
+          <th style="background:${NAVY};color:white;padding:7px 10px;font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;text-align:left;border:1px solid ${NAVY};width:23%">Assessment / HW</th>
         </tr>
       </thead>
       <tbody>${rows}</tbody>
