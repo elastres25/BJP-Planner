@@ -216,6 +216,33 @@ button, input, textarea, select { font-family: inherit; }
   font-family: inherit; line-height: 1;
 }
 .obj-tb-btn:hover { background: var(--rule); }
+/* Unit summative assessment designer */
+.sum-card { background: var(--white); border: 1px solid var(--rule); border-radius: var(--radius); margin-bottom: 18px; overflow: hidden; }
+.sum-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 14px 16px 12px; background: linear-gradient(180deg, var(--gold-bg), #FCFAF3); border-bottom: 1px solid #EBD9A8; flex-wrap: wrap; }
+.sum-eyebrow { font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #8a6d1a; margin-bottom: 3px; }
+.sum-title { font-family: 'Crimson Pro', Georgia, serif; font-size: 17px; font-weight: 600; color: var(--navy); }
+.sum-ai-btn { display: inline-flex; align-items: center; gap: 6px; background: var(--navy); color: #fff; border: none; border-radius: var(--radius-sm); padding: 8px 14px; font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer; transition: opacity .12s; white-space: nowrap; }
+.sum-ai-btn:hover { opacity: .88; }
+.sum-ai-btn:disabled { opacity: .6; cursor: default; }
+.sum-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 14px; }
+.sum-row { display: flex; flex-direction: column; gap: 6px; }
+.sum-lbl { font-size: 11px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-2); }
+.sum-hint { font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--ink-3); font-style: italic; }
+.sum-type { align-self: flex-start; border: 1px solid var(--rule); border-radius: var(--radius-sm); padding: 7px 12px; font-size: 13px; font-family: inherit; color: var(--ink); background: var(--white); cursor: pointer; min-width: 180px; outline: none; }
+.sum-type:focus { border-color: var(--navy); }
+.sum-prompt { border: 1px solid var(--rule); border-radius: var(--radius-sm); padding: 9px 11px; font-size: 13px; font-family: inherit; color: var(--ink); line-height: 1.5; resize: vertical; outline: none; }
+.sum-prompt:focus { border-color: var(--navy); }
+.sum-comps { display: flex; flex-direction: column; gap: 6px; }
+.sum-comp { display: flex; align-items: center; gap: 8px; }
+.sum-comp-num { width: 20px; height: 20px; flex-shrink: 0; border-radius: 50%; background: var(--ph-guided-bg); color: var(--ph-guided-tx); font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.sum-comp-inp { flex: 1; border: 1px solid var(--rule); border-radius: var(--radius-sm); padding: 6px 10px; font-size: 12.5px; font-family: inherit; color: var(--ink); outline: none; }
+.sum-comp-inp:focus { border-color: var(--navy); }
+.sum-comp-x { border: none; background: none; color: var(--ink-3); font-size: 16px; line-height: 1; padding: 2px 4px; cursor: pointer; flex-shrink: 0; }
+.sum-comp-x:hover { color: var(--maroon); }
+.sum-comp-add { border: 1px dashed var(--rule-dark); border-radius: var(--radius-sm); padding: 7px 11px; font-size: 12.5px; font-family: inherit; color: var(--ink); outline: none; background: transparent; }
+.sum-comp-add:focus { border-color: var(--navy); border-style: solid; }
+.sum-empty { font-size: 12px; color: var(--ink-3); font-style: italic; padding: 4px 0; }
+
 /* Pacing guide table */
 .pace-table { width: 100%; border-collapse: collapse; }
 .pace-table th {
@@ -3555,10 +3582,144 @@ function setUnitTab(tab, btn) {
 }
 
 // ── PACING GUIDE ──────────────────────────────────────────────────
-// The standalone Pacing Guide tab reuses the same editable table as the
-// Unit Overview so the two always look identical.
+// The standalone Pacing Guide tab shows the Unit Summative Assessment designer
+// (backwards design: design the assessment first) above the editable pacing
+// table that the lessons are scaffolded across.
 function pacingGuideHTML(u, weeks) {
-  return pacingTableBlockHTML(u, weeks);
+  return summativeDesignerHTML(u) + pacingTableBlockHTML(u, weeks);
+}
+
+// ── UNIT SUMMATIVE ASSESSMENT (backwards design, stage 2) ─────────
+const SUMMATIVE_TYPES = ['Essay','Project','Presentation','Performance Task','Portfolio','Test','Other'];
+
+function getSummative(uid){
+  if(!state.summative) state.summative = {};
+  if(!state.summative[uid]) state.summative[uid] = { type:'', prompt:'', components:[] };
+  return state.summative[uid];
+}
+function updateSummative(uid, field, val){
+  const s = getSummative(uid); s[field] = val; saveState();
+}
+function addSummativeComponent(e, uid){
+  if(e.key !== 'Enter') return;
+  e.preventDefault();
+  const val = e.target.value.trim(); if(!val) return;
+  const s = getSummative(uid);
+  s.components.push({ id: uid+'-'+uid+'-'+Date.now().toString(36)+Math.random().toString(36).slice(2,5), text: val });
+  saveState(); e.target.value=''; renderUnit();
+  setTimeout(()=>document.getElementById('sum-comp-add-'+uid)?.focus(), 30);
+}
+function removeSummativeComponent(uid, idx){
+  const s = getSummative(uid); s.components.splice(idx,1); saveState(); renderUnit();
+}
+function editSummativeComponent(uid, idx, val){
+  const s = getSummative(uid); if(s.components[idx]) { s.components[idx].text = val.trim(); saveState(); }
+}
+
+// Gather the unit's stage-1 (backwards-design) outcomes as plain text.
+function unitStage1Summary(uid){
+  const uov = getUOV(uid);
+  const strip = a => (a||[]).map(x=>String(x).replace(/<[^>]*>/g,' ').replace(/&nbsp;/g,' ').trim()).filter(Boolean);
+  const know = (uov.knowledgeCategories||[]).map(c=>`${c.name}: ${(c.items||[]).join(', ')}`);
+  return {
+    eq: strip(uov.eqItems),
+    goals: strip(uov.unitGoalItems),
+    skills: strip(uov.skillItems),
+    knowledge: know,
+    understanding: strip(uov.objTable && uov.objTable.understanding),
+  };
+}
+
+async function suggestSummativeWithClaude(uid){
+  if(!claudeKey){
+    toast('Add your Anthropic API key in the Claude panel first');
+    toggleClaudePanel();
+    return;
+  }
+  const u = UNIT_META.find(m=>m.id===uid);
+  const btn = document.getElementById('sum-ai-btn-'+uid);
+  if(btn){ btn.disabled=true; btn.dataset.label=btn.textContent; btn.textContent='Drafting…'; }
+  const s1 = unitStage1Summary(uid);
+  const sys = `You are an expert instructional designer trained in Understanding by Design (backwards design) and Gradual Release of Responsibility, helping a theology teacher at Belen Jesuit Preparatory School (Ignatian pedagogy: cura personalis, magis, AMDG). Design assessments that require genuine transfer of understanding, not just recall.`;
+  const prompt = `Design a UNIT SUMMATIVE ASSESSMENT for this theology unit using backwards design.
+
+Return ONLY valid JSON (no markdown, no prose) in exactly this shape:
+{"type":"<one of: ${SUMMATIVE_TYPES.join(', ')}>","prompt":"<student-facing prompt, 2-4 sentences, requiring transfer of the understandings>","components":["<building block 1>","<building block 2>", "..."]}
+
+"components" = 4 to 7 discrete knowledge/skill building blocks a student must master to succeed on this assessment, each phrased starting with "Student can ...". These will become the scaffold targets embedded across the unit's lessons.
+
+UNIT: ${u ? u.name : ''}
+ESSENTIAL QUESTIONS: ${s1.eq.join(' | ') || '(none)'}
+UNIT GOALS: ${s1.goals.join(' | ') || '(none)'}
+ENDURING UNDERSTANDINGS: ${s1.understanding.join(' | ') || '(none)'}
+KNOWLEDGE: ${s1.knowledge.join(' | ') || '(none)'}
+SKILLS: ${s1.skills.join(' | ') || '(none)'}`;
+
+  try{
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'x-api-key':claudeKey, 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
+      body: JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:1024, system:sys, messages:[{role:'user', content:prompt}] })
+    });
+    const data = await res.json();
+    if(data.error) throw new Error(data.error.message||'API error');
+    let txt = data.content?.[0]?.text || '';
+    txt = txt.replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,'').trim();
+    const start = txt.indexOf('{'), end = txt.lastIndexOf('}');
+    if(start>=0 && end>start) txt = txt.slice(start, end+1);
+    const parsed = JSON.parse(txt);
+    const s = getSummative(uid);
+    if(parsed.type && SUMMATIVE_TYPES.includes(parsed.type)) s.type = parsed.type;
+    if(parsed.prompt) s.prompt = String(parsed.prompt);
+    if(Array.isArray(parsed.components)) s.components = parsed.components.filter(Boolean).map(c=>({ id:uid+'-'+Date.now().toString(36)+Math.random().toString(36).slice(2,5), text:String(c) }));
+    saveState(); renderUnit();
+    toast('Assessment drafted — review and edit ✓');
+  }catch(err){
+    if(btn){ btn.disabled=false; btn.textContent=btn.dataset.label||'✨ Suggest with Claude'; }
+    toast('Couldn\'t draft: ' + (err.message||'error'));
+  }
+}
+
+function summativeDesignerHTML(u){
+  const s = getSummative(u.id);
+  const hasComps = (s.components||[]).length;
+  const typeOpts = ['<option value="">Type…</option>'].concat(
+    SUMMATIVE_TYPES.map(t=>`<option value="${t}" ${s.type===t?'selected':''}>${t}</option>`)).join('');
+  const compRows = (s.components||[]).map((c,idx)=>`
+    <div class="sum-comp">
+      <span class="sum-comp-num">${idx+1}</span>
+      <input class="sum-comp-inp" value="${esc(c.text)}" placeholder="Student can…"
+        onchange="editSummativeComponent(${u.id},${idx},this.value)">
+      <button class="sum-comp-x" title="Remove" onclick="removeSummativeComponent(${u.id},${idx})">&times;</button>
+    </div>`).join('');
+
+  return `
+  <div class="sum-card">
+    <div class="sum-head">
+      <div>
+        <div class="sum-eyebrow">Backwards Design · Stage 2 — design this before planning lessons</div>
+        <h2 class="sum-title">Unit Summative Assessment</h2>
+      </div>
+      <button id="sum-ai-btn-${u.id}" class="sum-ai-btn" onclick="suggestSummativeWithClaude(${u.id})" title="Draft an assessment from this unit's goals, essential questions and skills">✨ Suggest with Claude</button>
+    </div>
+    <div class="sum-body">
+      <div class="sum-row">
+        <label class="sum-lbl">Assessment type</label>
+        <select class="sum-type" onchange="updateSummative(${u.id},'type',this.value)">${typeOpts}</select>
+      </div>
+      <div class="sum-row">
+        <label class="sum-lbl">Prompt <span class="sum-hint">— what students will do to show transfer</span></label>
+        <textarea class="sum-prompt" rows="3" placeholder="e.g. Analyze how a passage from the Gospel of Mark reveals Jesus's identity, using close reading and course concepts…"
+          onchange="updateSummative(${u.id},'prompt',this.value)">${esc(s.prompt||'')}</textarea>
+      </div>
+      <div class="sum-row">
+        <label class="sum-lbl">Components to scaffold <span class="sum-hint">— the knowledge &amp; skills each lesson will build toward this</span></label>
+        ${hasComps ? `<div class="sum-comps">${compRows}</div>` : `<div class="sum-empty">No components yet. Add the building blocks students need — or let Claude draft them from your unit goals.</div>`}
+        <input id="sum-comp-add-${u.id}" class="sum-comp-add" placeholder="+ Add a component (press Enter) — e.g. Student can cite textual evidence"
+          onkeydown="addSummativeComponent(event,${u.id})">
+      </div>
+    </div>
+  </div>`;
 }
 
 // Shared editable pacing table. Rendered in the Pacing Guide tab.
