@@ -5709,21 +5709,20 @@ function exportPDF() {
 
   // ── ACTIVITIES ──
   const blockDur = d.blockDuration || 90;
-  const totalMins = (d.activities||[]).reduce((s,a)=>s+a.dur,0) + 3;
+  const totalMins = (d.activities||[]).reduce((s,a)=>s+a.dur,0) + journalOffsetMin(d);
   const pct = Math.min(100, Math.round(totalMins/blockDur*100));
-  let startMin = 3;
+  let startMin = journalOffsetMin(d);
 
   const actHTML = (d.activities||[]).map(a => {
-    const h = Math.floor(startMin/60), m = startMin%60;
-    const startStr = `${h}:${String(m).padStart(2,'0')}`;
+    const windowStr = `${fmtClock(startMin)}–${fmtClock(startMin + (a.dur||0))}`;
     startMin += a.dur;
     const grr = GRR_COLORS_PDF[a.grr];
     const ipp = IPP_COLORS_PDF[a.ipp];
     const accentColor = grr ? grr.br : '#ccc';
 
-    return `<div style="display:grid;grid-template-columns:58px 5px 1fr;border-bottom:1px solid #E7E5E0;page-break-inside:avoid;-webkit-print-color-adjust:exact;print-color-adjust:exact">
+    return `<div style="display:grid;grid-template-columns:78px 5px 1fr;border-bottom:1px solid #E7E5E0;page-break-inside:avoid;-webkit-print-color-adjust:exact;print-color-adjust:exact">
       <div style="padding:10px 6px;display:flex;flex-direction:column;align-items:center;background:#F7F5F0;border-right:1px solid #E7E5E0;-webkit-print-color-adjust:exact;print-color-adjust:exact">
-        <div style="font-size:12px;font-weight:700;color:#1C1917;font-variant-numeric:tabular-nums">${startStr}</div>
+        <div style="font-size:10px;font-style:italic;font-weight:600;color:#57534E;font-variant-numeric:tabular-nums;white-space:nowrap">${windowStr}</div>
         <div style="font-size:9px;color:#A8A29E;margin-top:2px">${a.dur} min</div>
         <div style="width:2px;flex:1;margin:5px 0;border-radius:1px;min-height:10px;background:${accentColor};-webkit-print-color-adjust:exact;print-color-adjust:exact"></div>
       </div>
@@ -5853,7 +5852,7 @@ body{font-family:'Inter',sans-serif;background:#CBD5E1;color:#1C1917;font-size:1
 
 <!-- ── OPENING JOURNAL ─────────────────────────────────── -->
 ${d.journalOff ? '' : `<div style="background:#FDF6E3;border-bottom:2px solid #E8D89A;padding:10px 22px;display:flex;align-items:baseline;gap:10px;-webkit-print-color-adjust:exact;print-color-adjust:exact">
-  <span style="font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;background:${GOLD};color:#122850;padding:3px 9px;border-radius:999px;white-space:nowrap;flex-shrink:0;-webkit-print-color-adjust:exact;print-color-adjust:exact">Opening Journal · 0:00 · ${d.journalDur ?? 3} min</span>
+  <span style="font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;background:${GOLD};color:#122850;padding:3px 9px;border-radius:999px;white-space:nowrap;flex-shrink:0;-webkit-print-color-adjust:exact;print-color-adjust:exact">Opening Journal · ${fmtClock(0)}–${fmtClock(d.journalDur ?? 3)} · ${d.journalDur ?? 3} min</span>
   <span style="font-size:11px;font-weight:600;color:#57534E;flex-shrink:0">Prompt:</span>
   <span style="font-size:11px;color:#1C1917;font-style:italic">${escPDF(d.journalPrompt||'—')}</span>
 </div>`}
