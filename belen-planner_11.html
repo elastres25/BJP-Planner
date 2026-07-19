@@ -928,6 +928,30 @@ body.simple-mode .dp-adv { display: none !important; }
 .d-head .d-sub{font-size:12.5px;color:var(--ink-2);margin-top:6px;}
 .d-today{text-align:right;font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;}
 .d-today b{display:block;font-family:'Crimson Pro',Georgia,serif;font-size:17px;color:var(--ink);font-weight:600;letter-spacing:0;text-transform:none;}
+/* This Week view */
+.d-week-card{margin-bottom:16px;}
+.d-week-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
+.d-wday{border:1px solid var(--rule);border-radius:var(--radius-sm);overflow:hidden;display:flex;flex-direction:column;min-height:104px;min-width:0;}
+.d-wday-today{border-color:var(--navy);box-shadow:0 0 0 2px rgba(27,58,107,.1);}
+.d-wday-h{background:var(--parchment);padding:6px 9px;font-size:11px;color:var(--ink-3);font-weight:600;display:flex;align-items:center;gap:5px;border-bottom:1px solid var(--rule);}
+.d-wday-h b{color:var(--ink);}
+.d-wday-today .d-wday-h{background:var(--navy);color:rgba(255,255,255,.7);border-bottom-color:var(--navy);}
+.d-wday-today .d-wday-h b{color:#fff;}
+.d-wday-today-tag{margin-left:auto;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;background:var(--gold);color:var(--navy-dark);padding:1px 6px;border-radius:999px;}
+.d-wday-body{flex:1;padding:6px;display:flex;flex-direction:column;gap:5px;}
+.d-wk-class{border:1px solid var(--rule);border-left:3px solid var(--navy);border-radius:5px;padding:6px 8px;cursor:pointer;transition:background .12s;}
+.d-wk-class:hover{background:var(--parchment);}
+.d-wk-class.unplanned{background:#FAFAF8;border-style:dashed;}
+.d-wk-top{display:flex;align-items:center;gap:5px;margin-bottom:3px;flex-wrap:wrap;}
+.d-wk-tag{font-size:8.5px;font-weight:700;color:#fff;border-radius:3px;padding:1px 5px;white-space:nowrap;-webkit-print-color-adjust:exact;}
+.d-wk-badge{font-size:8px;font-weight:700;padding:1px 5px;border-radius:999px;white-space:nowrap;}
+.d-wk-topic{font-size:11.5px;font-weight:600;color:var(--maroon);line-height:1.3;}
+.d-wk-eq{font-size:10px;color:var(--ink-3);font-style:italic;line-height:1.3;margin-top:2px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+.d-wk-empty{font-size:10.5px;color:var(--ink-3);font-style:italic;text-align:center;padding:12px 0;}
+.d-metrics-label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin:22px 0 10px;}
+.d-kpis-3{grid-template-columns:repeat(3,1fr);}
+@media (max-width:760px){ .d-week-grid{grid-template-columns:1fr 1fr;} .d-kpis-3{grid-template-columns:1fr;} }
+@media (max-width:480px){ .d-week-grid{grid-template-columns:1fr;} }
 .d-quicknav{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
 .d-quicknav button{display:inline-flex;align-items:center;gap:8px;font-family:inherit;font-size:13px;font-weight:600;border-radius:var(--radius-sm);padding:10px 16px;cursor:pointer;transition:all .12s;}
 .d-qn-primary{background:var(--navy);color:#fff;border:1px solid var(--navy);}
@@ -1781,6 +1805,9 @@ function setBreadcrumb(items) {
 // a "how far ahead am I planned" horizon (goal: 2 weeks), a month
 // calendar, upcoming assessments, unit progress and teaching balance.
 let dashCalMonth = null; // {y, m(0-based)} for the mini calendar; null = current month
+let dashWeekOffset = 0;   // 0 = current week for the "This Week" view
+function dashWeekStep(delta){ dashWeekOffset += delta; renderDashboard(); }
+function dashWeekToday(){ dashWeekOffset = 0; renderDashboard(); }
 
 function dayIsPlanned(d){ return !!(d && (d.topic || d.eq || (d.activities||[]).length || (d.targets||[]).length)); }
 function isoToday(){ const t=new Date(); return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`; }
@@ -1959,9 +1986,10 @@ function renderDashboard(){
 
   const nextClick = nextClass ? ` style="cursor:pointer" onclick="openGridDay(${nextClass.uid},${nextClass.wi},${nextClass.di})" title="Open this lesson"` : '';
 
-  const kpis = `
-    <div class="d-kpis">
-      <div class="d-kpi d-accent"${nextClick}><div class="d-lbl">Next Class</div>${nextKpi}</div>
+  // Metrics moved to the bottom of the dashboard (below the week + cards).
+  const bottomMetrics = `
+    <div class="d-metrics-label">Planning snapshot</div>
+    <div class="d-kpis d-kpis-3">
       <div class="d-kpi"><div class="d-lbl">Planning Runway</div>${runwayKpi}</div>
       <div class="d-kpi"><div class="d-lbl">Course Planned</div>
         <div class="d-ringrow">
@@ -1973,6 +2001,47 @@ function renderDashboard(){
         <div class="d-big">${(plannedMin/60).toFixed(plannedMin%60?1:0)} hrs</div>
         <div class="d-small">${built} block${built===1?'':'s'} planned · <b>${total-built} left</b> to build</div>
       </div>
+    </div>`;
+
+  // ============ THIS WEEK ============
+  const wkMon = new Date();
+  wkMon.setHours(0,0,0,0);
+  wkMon.setDate(wkMon.getDate() - ((wkMon.getDay()+6)%7) + dashWeekOffset*7);
+  const weekDays = [];
+  for(let k=0;k<5;k++){ const dt=new Date(wkMon); dt.setDate(wkMon.getDate()+k); weekDays.push(dt); }
+  const dateMapW = {};
+  classes.forEach(c=>{ (dateMapW[c.date]=dateMapW[c.date]||[]).push(c); });
+  const wkRange = `${wkMon.toLocaleDateString('en-US',{month:'short',day:'numeric'})} – ${weekDays[4].toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
+  const weekCols = weekDays.map(dt=>{
+    const iso=isoOf(dt), isToday=iso===today, cls=(dateMapW[iso]||[]);
+    const dow=dt.toLocaleDateString('en-US',{weekday:'short'});
+    const dnum=dt.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    const body = cls.length ? cls.map(c=>{
+      const badge = c.d.assessType?`<span class="d-wk-badge" style="background:${ASSESS_COLORS[c.d.assessType]?.bg};color:${ASSESS_COLORS[c.d.assessType]?.tx}">${esc(c.d.assessType)}</span>`:'';
+      const topic = c.d.topic ? esc(c.d.topic) : (c.planned ? esc(c.d.label) : '<span style="font-style:italic;color:var(--ink-3);font-weight:500">Not planned yet</span>');
+      return `<div class="d-wk-class${c.planned?'':' unplanned'}" style="border-left-color:${c.c.br}" onclick="openGridDay(${c.uid},${c.wi},${c.di})" title="Open lesson">
+        <div class="d-wk-top"><span class="d-wk-tag" style="background:${c.c.br}">U${c.uid} · ${esc(c.block)}</span>${badge}</div>
+        <div class="d-wk-topic">${topic}</div>
+        ${c.d.eq?`<div class="d-wk-eq">${esc(c.d.eq)}</div>`:''}
+      </div>`;
+    }).join('') : `<div class="d-wk-empty">No class</div>`;
+    return `<div class="d-wday${isToday?' d-wday-today':''}">
+      <div class="d-wday-h">${dow} <b>${dnum}</b>${isToday?'<span class="d-wday-today-tag">Today</span>':''}</div>
+      <div class="d-wday-body">${body}</div>
+    </div>`;
+  }).join('');
+  const weekView = `
+    <div class="d-card d-week-card">
+      <div class="d-card-h">
+        <h2>This Week</h2>
+        <div class="d-cal-nav">
+          <span style="font-size:11px;color:var(--ink-3);margin-right:4px">${wkRange}</span>
+          <button onclick="dashWeekStep(-1)" title="Previous week">‹</button>
+          <button onclick="dashWeekStep(1)" title="Next week">›</button>
+          ${dashWeekOffset!==0?`<button onclick="dashWeekToday()" title="Back to this week" style="width:auto;padding:0 9px;font-size:11px;font-weight:600">Today</button>`:''}
+        </div>
+      </div>
+      <div class="d-week-grid">${weekCols}</div>
     </div>`;
 
   // ============ HORIZON ============
@@ -2199,11 +2268,12 @@ function renderDashboard(){
         Browse all units
       </button>
     </div>
-    ${kpis}
+    ${weekView}
     <div class="d-grid">
       <div class="d-col">${todoCard}</div>
       <div class="d-col">${calCard}${assessCard}${progressCard}${grrCard}</div>
-    </div>`;
+    </div>
+    ${bottomMetrics}`;
 }
 
 // ── COURSE VIEW ───────────────────────────────────────────────────
