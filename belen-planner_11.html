@@ -922,6 +922,8 @@ body.simple-mode .dp-adv { display: none !important; }
 @media (max-width:1100px){ .tb-search{min-width:0;flex:1 1 100%;order:5;} .search-results{width:100%;} }
 
 /* ── DASHBOARD ───────────────────────────────────────────────── */
+.d-course-accent{height:4px;border-radius:3px;margin-bottom:14px;-webkit-print-color-adjust:exact;}
+.d-course-pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:#fff;padding:5px 13px;border-radius:999px;letter-spacing:.02em;white-space:nowrap;-webkit-print-color-adjust:exact;}
 .d-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:18px;flex-wrap:wrap;}
 .d-eyebrow{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:5px;}
 .d-head h1{font-family:'Crimson Pro',Georgia,serif;font-size:28px;font-weight:600;color:var(--navy);line-height:1;}
@@ -1187,12 +1189,12 @@ function switchCourse(id) {
   currentUnit = null; currentWeek = 0; openDayIdx = null; openWeekIdx = null;
   // Reload state for new course
   state = loadState();
-  // Update UI
+  // Update UI — land on the new course's dashboard
   renderCourseToggle();
-  nav('course');
+  nav('dashboard');
   // Sync from cloud for this course
   pullFromSheets().then(ok => {
-    if (ok) { toast('Loaded ' + getCourse().name + ' ✓'); renderCourse(); }
+    if (ok) { toast('Loaded ' + getCourse().name + ' ✓'); renderDashboard(); }
   });
 }
 
@@ -2256,13 +2258,17 @@ function renderDashboard(){
 
   // ============ ASSEMBLE ============
   el.innerHTML = `
+    <div class="d-course-accent" style="background:${co.color}"></div>
     <div class="d-head">
       <div>
-        <div class="d-eyebrow">Ad Majorem Dei Gloriam</div>
+        <div class="d-eyebrow" style="color:${co.color}">Ad Majorem Dei Gloriam</div>
         <h1>Course Dashboard</h1>
         <div class="d-sub">${esc(co.fullName)} · <span>${esc(state?.teacher||'Eric Lastres, SJ')}</span></div>
       </div>
-      <div class="d-today">Today<b>${new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</b></div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:9px">
+        <span class="d-course-pill" style="background:${co.color}">${esc(co.name)} · ${esc(co.code)}</span>
+        <div class="d-today">Today<b>${new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</b></div>
+      </div>
     </div>
     <div class="d-quicknav">
       <button class="d-qn-primary" onclick="${contOnclick}">
