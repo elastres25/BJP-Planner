@@ -1109,7 +1109,8 @@ body.simple-mode .dp-adv { display: none !important; }
 .prep-lane-title .prep-u{font-weight:800;margin-right:7px;}
 .prep-lane-next{font-size:11.5px;color:var(--ink-2);}
 .prep-lane-next b{color:var(--navy);}
-.prep-stages{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.prep-stages{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+@media(max-width:960px){.prep-stages{grid-template-columns:repeat(2,1fr);}}
 .prep-arrow{display:none;}
 .prep-stage{position:relative;border:1px solid var(--rule);border-radius:10px;padding:11px 12px 12px;cursor:pointer;transition:all .12s;background:#FBFAF8;}
 .prep-stage:hover{border-color:var(--navy);box-shadow:0 2px 9px rgba(0,0,0,.07);transform:translateY(-1px);background:#fff;}
@@ -1173,6 +1174,43 @@ body.simple-mode .dp-adv { display: none !important; }
 .g-recap{display:flex;flex-direction:column;gap:8px;margin-bottom:8px;}
 .g-recap-row{display:flex;align-items:center;gap:10px;font-size:13.5px;color:var(--ink);}
 .g-recap-ic{width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex:0 0 auto;}
+
+/* ── STAGE-PAGE LAYER ── */
+.stg-head{margin:2px 0 14px;}
+.stg-head-n{font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--navy);}
+.stg-head-t{font-size:22px;font-weight:800;color:var(--ink);letter-spacing:-.01em;margin:2px 0 4px;}
+.stg-head-i{font-size:13px;color:var(--ink-2);line-height:1.55;max-width:720px;}
+.stg-rail{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:#fff;border:1px solid var(--rule);border-radius:11px;padding:9px 12px;margin-bottom:16px;}
+.stg-rail-chips{display:flex;align-items:center;gap:4px;flex-wrap:wrap;}
+.stg-rail-arrow{color:var(--ink-3);font-size:12px;margin:0 2px;}
+.stg-chip{display:inline-flex;align-items:center;gap:7px;border:1px solid transparent;background:none;border-radius:8px;padding:6px 11px;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--ink-3);cursor:pointer;transition:all .12s;}
+.stg-chip:hover{background:#F5F3EE;color:var(--ink);}
+.stg-chip.on{background:var(--navy);color:#fff;}
+.stg-chip-n{display:inline-flex;align-items:center;justify-content:center;width:19px;height:19px;border-radius:50%;background:rgba(0,0,0,.08);font-size:11px;font-weight:800;}
+.stg-chip.on .stg-chip-n{background:rgba(255,255,255,.25);}
+.stg-rail-actions{display:flex;gap:8px;align-items:center;}
+.stg-guided{background:linear-gradient(135deg,#2A3F63,#1C2B47);color:#fff;border:none;border-radius:8px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;}
+.stg-tabs-btn{background:none;border:1px solid var(--rule);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;color:var(--ink-2);cursor:pointer;font-family:inherit;}
+.stg-tabs-btn:hover{border-color:var(--navy);color:var(--navy);}
+.stg-step{background:#fff;border:1px solid var(--rule);border-radius:12px;box-shadow:0 1px 2px rgba(0,0,0,.03);margin-bottom:16px;overflow:hidden;}
+.stg-step-h{display:flex;align-items:flex-start;gap:12px;padding:14px 18px;border-bottom:1px solid var(--rule);background:#FBFAF8;}
+.stg-step-n{flex:0 0 auto;width:28px;height:28px;border-radius:50%;background:var(--navy);color:#fff;font-size:14px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;}
+.stg-step-t{font-size:15px;font-weight:700;color:var(--ink);}
+.stg-step-s{font-size:12px;color:var(--ink-3);margin-top:2px;line-height:1.45;}
+.stg-step-body{padding:16px 18px;}
+.stg-build-row{display:flex;gap:16px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--rule);}
+.stg-build-row:last-child{border-bottom:none;}
+.stg-build-day{flex:0 0 210px;}
+.stg-build-daylabel{font-size:13px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+.stg-build-topic{font-size:12px;color:var(--ink-2);margin-top:2px;}
+.stg-build-mats{flex:1;min-width:0;}
+.stg-build-input{width:100%;box-sizing:border-box;border:1px solid var(--rule);border-radius:7px;padding:7px 10px;font-size:12.5px;font-family:inherit;color:var(--ink);outline:none;}
+.stg-build-input:focus{border-color:var(--navy);}
+.stg-build-empty{font-size:12px;color:var(--ink-3);font-style:italic;}
+.stg-badge-ok{font-size:10px;font-weight:700;color:#0f6e56;background:#E1F5EE;border-radius:999px;padding:2px 8px;}
+.stg-badge-warn{font-size:10px;font-weight:700;color:#8a6d1a;background:#FBF0D6;border-radius:999px;padding:2px 8px;}
+.stg-empty{font-size:13px;color:var(--ink-3);font-style:italic;padding:8px 0;}
+@media(max-width:680px){.stg-build-row{flex-direction:column;gap:6px;}.stg-build-day{flex:auto;}}
 </style>
 
 <!-- DASHBOARD (landing) -->
@@ -1377,6 +1415,9 @@ let state;
 state = loadState();
 let currentUnit = null;
 let currentUnitTab = 'plan';   // persists across re-renders so chip edits don't bounce back to Weekly Plan
+// Unit view mode: 'tabs' = classic Overview/Weekly Plan/Pacing tabs;
+// 'design'|'pace'|'plan'|'build' = the numbered stage-page layer.
+let unitViewMode = 'tabs';
 let uovPanelOpen = {};         // per-unit open/closed state of the collapsible Unit Overview panel
 
 // ── SIMPLE MODE (BETA) — hides deep-planning sections for faster daily planning ──
@@ -1874,6 +1915,7 @@ async function pullFromSheets() {
 
 // ── NAVIGATION ────────────────────────────────────────────────────
 function nav(target, unitId) {
+  unitViewMode = 'tabs';   // any normal navigation returns the unit view to classic tabs
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   if (target === 'dashboard') {
     document.getElementById('view-dashboard').classList.add('active');
@@ -2442,10 +2484,11 @@ function navUnitTab(uid, tab){
 
 function unitPrepStats(u){
   const ws = state.units[u.id] || [];
-  let totalDays=0, plannedDays=0, matDays=0, datedDays=0, targetDays=0;
+  let totalDays=0, plannedDays=0, matDays=0, datedDays=0, targetDays=0, topicDays=0;
   ws.forEach(w=>(w.days||[]).forEach(d=>{
     totalDays++;
     if(d.dateA||d.dateB) datedDays++;
+    if(d.topic && String(d.topic).replace(/<[^>]*>/g,'').trim()) topicDays++;
     if(dayIsPlanned(d)){
       plannedDays++;
       if((d.targets||[]).length) targetDays++;
@@ -2459,20 +2502,25 @@ function unitPrepStats(u){
   const compCount = (sum.components||[]).length;
   const hasComps = compCount ? 1 : 0;
   const hasDates = datedDays>0 ? 1 : 0;
-  const s1pct = Math.round((hasOutcomes+hasAssess+hasComps+hasDates)/4*100);
-  const s2pct = totalDays ? Math.round(plannedDays/totalDays*100) : 0;
-  const s3pct = plannedDays ? Math.round(matDays/plannedDays*100) : 0;
-  return {totalDays,plannedDays,matDays,datedDays,targetDays,hasOutcomes,hasAssess,hasComps,hasDates,compCount,s1pct,s2pct,s3pct};
+  // Four stages: Design, Pace (topics mapped), Plan (blocks filled), Build (materials).
+  const designPct = Math.round((hasOutcomes+hasAssess+hasComps+hasDates)/4*100);
+  const pacePct   = totalDays ? Math.round(topicDays/totalDays*100) : 0;
+  const planPct   = totalDays ? Math.round(plannedDays/totalDays*100) : 0;
+  const buildPct  = plannedDays ? Math.round(matDays/plannedDays*100) : 0;
+  return {totalDays,plannedDays,matDays,datedDays,targetDays,topicDays,hasOutcomes,hasAssess,hasComps,hasDates,compCount,
+          designPct,pacePct,planPct,buildPct,
+          s1pct:designPct, s2pct:planPct, s3pct:buildPct};   // legacy aliases
 }
 
 function prepNextAction(st){
-  if(!st.hasOutcomes) return {t:'Define outcomes & essential questions', tab:'overview'};
-  if(!st.hasAssess)   return {t:'Design the summative assessment', tab:'pacing'};
-  if(!st.hasComps)    return {t:'Break the assessment into components', tab:'pacing'};
-  if(!st.hasDates)    return {t:'Set A/B class dates', tab:'pacing'};
-  if(st.s2pct<100){ const n=st.totalDays-st.plannedDays; return {t:`Plan ${n} more lesson day${n===1?'':'s'}`, tab:'plan'}; }
-  if(st.s3pct<100){ const n=st.plannedDays-st.matDays;   return {t:`Build materials for ${n} day${n===1?'':'s'}`, tab:'plan'}; }
-  return {t:'Fully prepped', tab:'plan', done:true};
+  if(!st.hasOutcomes) return {t:'Define outcomes & essential questions', stage:'design'};
+  if(!st.hasAssess)   return {t:'Design the summative assessment', stage:'design'};
+  if(!st.hasComps)    return {t:'Break the assessment into components', stage:'design'};
+  if(!st.hasDates)    return {t:'Set A/B class dates', stage:'design'};
+  if(st.pacePct<100){ const n=st.totalDays-st.topicDays; return {t:`Give ${n} more day${n===1?'':'s'} a topic`, stage:'pace'}; }
+  if(st.planPct<100){ const n=st.totalDays-st.plannedDays; return {t:`Fully plan ${n} more lesson${n===1?'':'s'}`, stage:'plan'}; }
+  if(st.buildPct<100){ const n=st.plannedDays-st.matDays;  return {t:`Build materials for ${n} lesson${n===1?'':'s'}`, stage:'build'}; }
+  return {t:'Fully prepped', stage:'build', done:true};
 }
 
 function renderPrep(){
@@ -2484,8 +2532,8 @@ function renderPrep(){
 
   const barColor = pc => pc>=100 ? '#1D9E75' : (pc>0 ? co.color : '#DAD7D0');
 
-  const tile = (uid, eyebrow, name, pct, checks, onclick, guided) => `
-    <div class="prep-stage" onclick="${onclick}" title="${guided?'Start guided walk-through':'Open'} — ${esc(name)}">
+  const tile = (uid, eyebrow, name, pct, checks, stage) => `
+    <div class="prep-stage" onclick="openStageChooser(${uid},'${stage}')" title="Open — ${esc(name)}">
       <div class="prep-stage-top">
         <div class="prep-stage-name"><small>${eyebrow}</small>${name}</div>
         <div class="prep-stage-pct" style="color:${pct>=100?'#1D9E75':'var(--ink-2)'}">${pct}%</div>
@@ -2494,27 +2542,30 @@ function renderPrep(){
       <div class="prep-checks">
         ${checks.map(c=>`<div class="prep-check ${c.on?'on':'off'}"><span class="pk">${c.on?'✓':'○'}</span>${esc(c.label)}</div>`).join('')}
       </div>
-      ${guided?`<div class="prep-guided-cta">▶ ${pct>0?'Continue':'Start'} guided setup</div>`:''}
+      <div class="prep-guided-cta">▶ ${pct>0?'Continue':'Start'} →</div>
     </div>`;
 
   const laneHTML = (u) => {
     const st = unitPrepStats(u);
-    if(st.s1pct===100) uDesigned++;
-    if(st.s2pct===100 && st.totalDays) uPlanned++;
-    if(st.s3pct===100 && st.plannedDays) uBuilt++;
+    if(st.designPct===100) uDesigned++;
+    if(st.planPct===100 && st.totalDays) uPlanned++;
+    if(st.buildPct===100 && st.plannedDays) uBuilt++;
     const na = prepNextAction(st);
-    const s1checks = [
+    const designChecks = [
       {on:st.hasOutcomes, label:'Outcomes & essential questions'},
       {on:st.hasAssess,   label:'Summative assessment'},
       {on:st.hasComps,    label:'Assessment components'+(st.compCount?` (${st.compCount})`:'')},
       {on:st.hasDates,    label:'Class dates set'},
     ];
-    const s2checks = [
-      {on:!!st.totalDays && st.plannedDays===st.totalDays, label:`${st.plannedDays}/${st.totalDays} lesson days planned`},
-      {on:!!st.plannedDays && st.targetDays===st.plannedDays, label:`${st.targetDays}/${st.plannedDays||0} days have learning targets`},
+    const paceChecks = [
+      {on:!!st.totalDays && st.topicDays===st.totalDays, label:`${st.topicDays}/${st.totalDays} class days have a topic`},
     ];
-    const s3checks = [
-      {on:!!st.plannedDays && st.matDays===st.plannedDays, label:`${st.matDays}/${st.plannedDays||0} planned days have materials`},
+    const planChecks = [
+      {on:!!st.totalDays && st.plannedDays===st.totalDays, label:`${st.plannedDays}/${st.totalDays} lessons fully planned`},
+      {on:!!st.plannedDays && st.targetDays===st.plannedDays, label:`${st.targetDays}/${st.plannedDays||0} have learning targets`},
+    ];
+    const buildChecks = [
+      {on:!!st.plannedDays && st.matDays===st.plannedDays, label:`${st.matDays}/${st.plannedDays||0} planned lessons have materials`},
     ];
     return `
       <div class="prep-lane">
@@ -2523,9 +2574,10 @@ function renderPrep(){
           <div class="prep-lane-next">${na.done ? '<b style="color:#1D9E75">✓ Fully prepped</b>' : `Next: <b>${esc(na.t)}</b>`}</div>
         </div>
         <div class="prep-stages">
-          ${tile(u.id,'Stage ① · Before the unit','Design the Unit',st.s1pct,s1checks,`startGuide(${u.id},1)`,true)}
-          ${tile(u.id,'Stage ② · Lesson by lesson','Plan the Lessons',st.s2pct,s2checks,`navUnitTab(${u.id},'plan')`,false)}
-          ${tile(u.id,'Stage ③ · Make it real','Build Materials',st.s3pct,s3checks,`navUnitTab(${u.id},'plan')`,false)}
+          ${tile(u.id,'Stage ① · Before the unit','Design',st.designPct,designChecks,'design')}
+          ${tile(u.id,'Stage ② · Across the weeks','Pace',st.pacePct,paceChecks,'pace')}
+          ${tile(u.id,'Stage ③ · Lesson by lesson','Plan',st.planPct,planChecks,'plan')}
+          ${tile(u.id,'Stage ④ · Make it real','Build',st.buildPct,buildChecks,'build')}
         </div>
       </div>`;
   };
@@ -2551,7 +2603,7 @@ function renderPrep(){
       </div>
     </div>`;
 
-  const intro = `<div class="prep-intro">Each unit moves left → right: <b>Design</b> the unit and its assessment before it begins, <b>Plan</b> the daily lessons that scaffold toward it, then <b>Build</b> the slides and materials. Click <b>Design the Unit</b> to be <b>walked through it step by step</b>; the other stages drop you into the planner.</div>`;
+  const intro = `<div class="prep-intro">Each unit moves left → right through four stages: <b>Design</b> the unit and its assessment, <b>Pace</b> it across the weeks, <b>Plan</b> each lesson until its time is full, then <b>Build</b> the materials. Click any stage and choose a <b>guided walk-through</b> or to <b>open the page and plan freely</b>.</div>`;
 
   const legend = `
     <div class="prep-legend">
@@ -4047,6 +4099,149 @@ function setUnitTab(tab, btn) {
   });
 }
 
+// ── NUMBERED STAGE-PAGE LAYER (Design → Pace → Plan → Build) ───────
+const STAGE_META = {
+  design:{ n:1, label:'Design the Unit',   intro:'Lock in what students should understand and how they\'ll prove it — before planning any lessons.' },
+  pace:  { n:2, label:'Pace the Unit',     intro:'Lay the unit out across the weeks: give every class day a topic so the sequence holds together.' },
+  plan:  { n:3, label:'Plan the Lessons',  intro:'Build each class period activity by activity until the block is full — that\'s when a lesson counts as planned.' },
+  build: { n:4, label:'Build the Materials',intro:'Turn the planned lessons into the slides, handouts and resources you\'ll actually teach from.' },
+};
+const STAGE_ORDER = ['design','pace','plan','build'];
+
+function stageLabel(stage){ return STAGE_META[stage]?.label || 'Stage'; }
+
+// Enter a stage page directly (planning mode).
+function openUnitStage(uid, stage){
+  closeStageChooser();
+  currentUnit = uid; currentWeek = 0; openDayIdx = null; openWeekIdx = null;
+  unitViewMode = stage;
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-unit').classList.add('active');
+  setBreadcrumb([
+    {label:'Dashboard', home:true, onclick:"nav('dashboard')"},
+    {label:'Prep Board', onclick:"nav('prep')"},
+    {label:`Unit ${uid} · ${stageLabel(stage)}`, active:true},
+  ]);
+  renderUnit();
+  window.scrollTo(0,0);
+}
+function setUnitStage(stage){ unitViewMode = stage; renderUnit(); window.scrollTo(0,0); }
+function unitShowTabs(){ unitViewMode = 'tabs'; currentUnitTab = 'overview'; renderUnit(); window.scrollTo(0,0); }
+function stageGuided(uid, stage){
+  const n = STAGE_META[stage]?.n || 1;
+  if(n===1){ startGuide(uid, 1); }
+  else {
+    openUnitStage(uid, stage);
+    toast('Step-by-step guide for this stage is coming soon — here\'s the full page.');
+  }
+}
+
+function stepCard(n, title, subtitle, inner){
+  return `<div class="stg-step">
+    <div class="stg-step-h">
+      <span class="stg-step-n">${n}</span>
+      <div><div class="stg-step-t">${title}</div>${subtitle?`<div class="stg-step-s">${subtitle}</div>`:''}</div>
+    </div>
+    <div class="stg-step-body">${inner}</div>
+  </div>`;
+}
+
+// Build stage: a per-lesson materials checklist, editable in place.
+function buildAddMat(uid, wi, di, val){
+  val = (val||'').trim(); if(!val) return;
+  const d = state.units[uid][wi].days[di];
+  d.materials = d.materials || []; d.materials.push(val);
+  saveState(); renderUnit();
+}
+function buildRemoveMat(uid, wi, di, val){
+  const d = state.units[uid][wi].days[di];
+  d.materials = (d.materials||[]).filter(m=>m!==val);
+  saveState(); renderUnit();
+}
+function stageBuildHTML(u, weeks){
+  let rows = '';
+  weeks.forEach((w,wi)=>(w.days||[]).forEach((d,di)=>{
+    if(!dayIsStarted(d)) return;
+    const planned = dayIsPlanned(d);
+    const chips = (d.materials||[]).map(m=>`<span class="mat-chip">${esc(m)}<button onclick="buildRemoveMat(${u.id},${wi},${di},'${esc(String(m)).replace(/'/g,"\\'")}')">×</button></span>`).join('');
+    rows += `<div class="stg-build-row">
+      <div class="stg-build-day">
+        <div class="stg-build-daylabel">${esc(d.label)} ${planned?'<span class="stg-badge-ok">planned</span>':'<span class="stg-badge-warn">not fully planned</span>'}</div>
+        <div class="stg-build-topic">${esc(d.topic||'(no topic yet)')}</div>
+      </div>
+      <div class="stg-build-mats">
+        <div class="mat-chips" style="display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin-bottom:6px">${chips || '<span class="stg-build-empty">No materials yet</span>'}</div>
+        <input class="stg-build-input" placeholder="+ Add material, press Enter" onkeydown="if(event.key==='Enter'){event.preventDefault();buildAddMat(${u.id},${wi},${di},this.value)}">
+      </div>
+    </div>`;
+  }));
+  if(!rows) rows = `<div class="stg-empty">No lessons started yet. Plan some lessons in Stage 3 first, then come back here to gather their materials.</div>`;
+  return rows;
+}
+
+function stagePageHTML(u, weeks, weeksHTML){
+  const stage = unitViewMode;
+  const meta = STAGE_META[stage] || STAGE_META.design;
+  let content = '';
+  if(stage==='design'){
+    content =
+      stepCard(1,'Outcomes — Unit Overview','Work top-down in backwards-design order: essential questions → enduring understandings → skills → knowledge. Everything for this unit is visible below.', unitOverviewPageHTML(u, weeks, false))
+    + stepCard(2,'Design &amp; scaffold the assessment','Decide how students show they truly understand, then break it into the components each lesson will build toward.', summativeDesignerHTML(u));
+  } else if(stage==='pace'){
+    content = stepCard(1,'Map the unit across the weeks','Give each class day a topic and rough order. Drag days to reorder; add an assessment/HW note in the last column.', pacingTableBlockHTML(u, weeks));
+  } else if(stage==='plan'){
+    content = stepCard(1,'Plan each lesson','Open a day and add activities until the time bar fills the block. A lesson only counts as planned once its time is full.', `${weeksHTML}<button class="add-week-btn" onclick="addWeek()" style="width:100%;padding:10px;margin-top:6px">+ Add another week</button>`);
+  } else {
+    content = stepCard(1,'Gather materials for each lesson','For every started lesson, list the slides, handouts and resources you still need to create.', stageBuildHTML(u, weeks));
+  }
+  const chips = STAGE_ORDER.map((k,i)=>{
+    const m = STAGE_META[k];
+    return `${i?'<span class="stg-rail-arrow">→</span>':''}<button class="stg-chip ${stage===k?'on':''}" onclick="setUnitStage('${k}')"><span class="stg-chip-n">${m.n}</span>${m.label.replace(/^(Design|Pace|Plan|Build).*/, '$1')}</button>`;
+  }).join('');
+  return `
+    <div class="stg-head">
+      <div class="stg-head-n">Stage ${meta.n} of 4</div>
+      <h2 class="stg-head-t">${meta.label}</h2>
+      <div class="stg-head-i">${meta.intro}</div>
+    </div>
+    <div class="stg-rail">
+      <div class="stg-rail-chips">${chips}</div>
+      <div class="stg-rail-actions">
+        <button class="stg-guided" onclick="stageGuided(${u.id},'${stage}')">▶ Guided walk-through</button>
+        <button class="stg-tabs-btn" onclick="unitShowTabs()">Show all tabs</button>
+      </div>
+    </div>
+    <div class="stg-content">${content}</div>`;
+}
+
+// ── Stage chooser: Guided vs. plan freely ──
+function openStageChooser(uid, stage){
+  const m = STAGE_META[stage] || STAGE_META.design;
+  const co = getCourse();
+  const overlay = document.getElementById('stage-chooser-overlay');
+  const card = document.getElementById('stage-chooser-card');
+  if(!overlay || !card) return;
+  card.innerHTML = `
+    <div style="padding:18px 22px 6px">
+      <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:${co.color}">Stage ${m.n} · U${uid}</div>
+      <div style="font-size:20px;font-weight:800;color:var(--ink);margin-top:2px">${m.label}</div>
+      <div style="font-size:13px;color:var(--ink-2);margin-top:6px;line-height:1.5">${m.intro}</div>
+    </div>
+    <div style="padding:14px 22px 20px;display:flex;flex-direction:column;gap:10px">
+      <button onclick="stageGuided(${uid},'${stage}')" style="text-align:left;background:linear-gradient(135deg,#2A3F63,#1C2B47);color:#fff;border:none;border-radius:11px;padding:14px 16px;cursor:pointer;font-family:inherit">
+        <div style="font-size:14px;font-weight:700">▶ Guided walk-through</div>
+        <div style="font-size:12px;opacity:.8;margin-top:2px">Take it one step at a time, with coaching at each stage.</div>
+      </button>
+      <button onclick="openUnitStage(${uid},'${stage}')" style="text-align:left;background:#fff;color:var(--ink);border:1px solid var(--rule-dark,#cfccc4);border-radius:11px;padding:14px 16px;cursor:pointer;font-family:inherit">
+        <div style="font-size:14px;font-weight:700">Open the page — plan freely</div>
+        <div style="font-size:12px;color:var(--ink-3);margin-top:2px">See everything for this stage at once, numbered in order.</div>
+      </button>
+      <button onclick="closeStageChooser()" style="align-self:center;background:none;border:none;color:var(--ink-3);font-size:12.5px;cursor:pointer;font-family:inherit;margin-top:2px">Cancel</button>
+    </div>`;
+  overlay.style.display = 'flex';
+}
+function closeStageChooser(){ const o=document.getElementById('stage-chooser-overlay'); if(o) o.style.display='none'; }
+
 // ── PACING GUIDE ──────────────────────────────────────────────────
 // The standalone Pacing Guide tab shows the Unit Summative Assessment designer
 // (backwards design: design the assessment first) above the editable pacing
@@ -4594,6 +4789,30 @@ function renderUnit() {
     </div>
   `).join('');
 
+  // Body is either the classic tabs, or the numbered stage-page layer.
+  const tabsBodyHTML = `
+    ${unitOverviewPanelHTML(u.id)}
+    <div style="display:flex;gap:0;border-bottom:2px solid var(--rule);margin-bottom:14px">
+      ${[['overview','Unit Overview'],['plan','Weekly Plan'],['pacing','Pacing Guide']].map(([t,label]) => {
+        const active = currentUnitTab === t;
+        return `<button onclick="setUnitTab('${t}',this)" id="utab-${t}"
+          style="padding:8px 18px;border:none;background:none;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;color:${active?'var(--navy)':'var(--ink-3)'};border-bottom:2px solid ${active?'var(--navy)':'transparent'};margin-bottom:-2px;transition:all .12s">
+          ${label}
+        </button>`;
+      }).join('')}
+    </div>
+    <div id="utab-content-overview" style="display:${currentUnitTab==='overview'?'block':'none'}">
+      ${unitOverviewPageHTML(u, weeks, false)}
+    </div>
+    <div id="utab-content-plan" style="display:${currentUnitTab==='plan'?'block':'none'}">
+      ${weeksHTML}
+      <button class="add-week-btn" onclick="addWeek()" style="width:100%;padding:10px;margin-top:6px">+ Add another week</button>
+    </div>
+    <div id="utab-content-pacing" style="display:${currentUnitTab==='pacing'?'block':'none'}">
+      ${pacingGuideHTML(u, weeks)}
+    </div>`;
+  const bodyHTML = unitViewMode==='tabs' ? tabsBodyHTML : stagePageHTML(u, weeks, weeksHTML);
+
   document.getElementById('unit-wrap').innerHTML = `
     <!-- UNIT HEADER (compact) -->
     <div class="unit-hero">
@@ -4616,35 +4835,8 @@ function renderUnit() {
       >${esc(state.unitDescs?.[currentUnit] ?? u.desc ?? '')}</div>
     </div>
 
-    <!-- UNIT OVERVIEW PANEL (collapsible) -->
-    ${unitOverviewPanelHTML(u.id)}
-
-    <!-- UNIT VIEW TABS: Overview | Weekly Plan | Pacing Guide -->
-    <div style="display:flex;gap:0;border-bottom:2px solid var(--rule);margin-bottom:14px">
-      ${[['overview','Unit Overview'],['plan','Weekly Plan'],['pacing','Pacing Guide']].map(([t,label]) => {
-        const active = currentUnitTab === t;
-        return `<button onclick="setUnitTab('${t}',this)" id="utab-${t}"
-          style="padding:8px 18px;border:none;background:none;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;color:${active?'var(--navy)':'var(--ink-3)'};border-bottom:2px solid ${active?'var(--navy)':'transparent'};margin-bottom:-2px;transition:all .12s">
-          ${label}
-        </button>`;
-      }).join('')}
-    </div>
-
-    <!-- UNIT OVERVIEW TAB -->
-    <div id="utab-content-overview" style="display:${currentUnitTab==='overview'?'block':'none'}">
-      ${unitOverviewPageHTML(u, weeks, false)}
-    </div>
-
-    <!-- WEEKLY PLAN TAB -->
-    <div id="utab-content-plan" style="display:${currentUnitTab==='plan'?'block':'none'}">
-      ${weeksHTML}
-      <button class="add-week-btn" onclick="addWeek()" style="width:100%;padding:10px;margin-top:6px">+ Add another week</button>
-    </div><!-- /utab-content-plan -->
-
-    <!-- PACING GUIDE TAB -->
-    <div id="utab-content-pacing" style="display:${currentUnitTab==='pacing'?'block':'none'}">
-      ${pacingGuideHTML(u, weeks)}
-    </div>
+    <!-- BODY: classic tabs OR the numbered stage-page layer -->
+    ${bodyHTML}
   `;
   initDayDrag();
   // Restore focus to the chip input the teacher was typing in
@@ -6947,6 +7139,11 @@ init();
 <!-- Guided Mode overlay -->
 <div id="guide-overlay" style="display:none;position:fixed;inset:0;z-index:380;background:var(--bg,#F3F1EC);overflow:auto">
   <div id="guide-wrap"></div>
+</div>
+
+<!-- Stage chooser: Guided vs. plan freely -->
+<div id="stage-chooser-overlay" style="display:none;position:fixed;inset:0;z-index:410;background:rgba(20,18,15,.5);align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)closeStageChooser()">
+  <div id="stage-chooser-card" style="background:#fff;max-width:420px;width:100%;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.35);overflow:hidden"></div>
 </div>
 
 <!-- Claude Panel -->
