@@ -602,10 +602,10 @@ body.simple-mode .dp-adv { display: none !important; }
 /* Time stamp column */
 .act-time-col {
   display: flex; flex-direction: column; align-items: center;
-  justify-content: center; width: 64px; flex-shrink: 0;
-  padding: 8px 4px; gap: 1px; border-right: 1px solid var(--rule);
+  justify-content: center; width: 82px; flex-shrink: 0;
+  padding: 8px 4px; gap: 2px; border-right: 1px solid var(--rule);
 }
-.act-time-stamp { font-size: 13px; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
+.act-time-stamp { font-size: 10.5px; font-style: italic; font-weight: 600; color: var(--ink-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .act-dur-badge {
   font-size: 10px; color: var(--ink-3); background: var(--rule);
   padding: 1px 5px; border-radius: 999px; white-space: nowrap;
@@ -4294,7 +4294,7 @@ function dailyPanelHTML(d, i) {
     <span class="journal-badge">Opening Journal</span>
     <span class="journal-time">0:00 ·
       <input type="number" min="0" max="60" value="${d.journalDur ?? 3}" title="Journal minutes"
-        onchange="updateDay(${i},'journalDur',Math.max(0,+this.value||0));refreshTracker(${i})"
+        onchange="updateDay(${i},'journalDur',Math.max(0,+this.value||0));refreshTracker(${i});refreshAllTimestamps(${i})"
         style="width:40px;border:1px solid #E8D89A;border-radius:5px;padding:2px 4px;font-size:11px;font-family:inherit;color:var(--ink);text-align:center;background:rgba(255,255,255,.7);outline:none"> min</span>
     <span class="journal-label">Prompt:</span>
     <input class="journal-input" value="${esc(d.journalPrompt)}" placeholder="Today's journal prompt…"
@@ -4711,11 +4711,16 @@ function removeVocab(di, v) {
   saveState(); renderUnit();
 }
 
+// Class-time helpers. Start time is assumed 0:00 for now (later this can be
+// swapped for a real per-day start time and rendered as clock time).
+function fmtClock(mins){ return `${Math.floor(mins/60)}:${String(mins%60).padStart(2,'0')}`; }
+function journalOffsetMin(d){ return d.journalOff ? 0 : (d.journalDur ?? 3); }
+
 function actBlockHTML(di, ai, a) {
-  const startMin = 3 + computeStartMin(di, ai);
-  const h = Math.floor(startMin/60);
-  const m = startMin % 60;
-  const startStr = `${h}:${String(m).padStart(2,'0')}`;
+  const day = getDay(di);
+  const startMin = journalOffsetMin(day) + computeStartMin(di, ai);
+  const endMin   = startMin + (a.dur || 0);
+  const startStr = `${fmtClock(startMin)}–${fmtClock(endMin)}`;
 
   // GRR accent color for left border
   const accentMap = {
@@ -4914,16 +4919,14 @@ function updateActDur(di, ai, val) {
 // every later activity's start time.
 function refreshAllTimestamps(di) {
   const d = getDay(di);
-  let startMin = 3;
+  let startMin = journalOffsetMin(d);
   (d.activities||[]).forEach((a, ai) => {
-    const h = Math.floor(startMin/60);
-    const m = startMin % 60;
-    const startStr = `${h}:${String(m).padStart(2,'0')}`;
+    const endMin = startMin + (a.dur || 0);
     const stampEl = document.querySelector(`#ablock-${di}-${ai} .act-time-stamp`);
-    if (stampEl) stampEl.textContent = startStr;
+    if (stampEl) stampEl.textContent = `${fmtClock(startMin)}–${fmtClock(endMin)}`;
     const durBadge = document.querySelector(`#ablock-${di}-${ai} .act-dur-badge`);
     if (durBadge) durBadge.textContent = a.dur + ' min';
-    startMin += a.dur;
+    startMin = endMin;
   });
 }
 
