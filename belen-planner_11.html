@@ -6568,11 +6568,14 @@ init();
   </div>
   <div id="claude-key-setup" style="padding:14px;border-bottom:1px solid var(--rule);background:#FFFBF0;flex-shrink:0;display:none">
     <div style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:5px">Anthropic API Key</div>
-    <div style="font-size:11px;color:var(--ink-3);margin-bottom:8px;line-height:1.5">Required on Netlify. Get yours at <a href="https://console.anthropic.com" target="_blank" style="color:var(--navy)">console.anthropic.com</a>. Stored in your browser only.</div>
+    <div style="font-size:11px;color:var(--ink-3);margin-bottom:8px;line-height:1.5">Get yours at <a href="https://console.anthropic.com" target="_blank" style="color:var(--navy)">console.anthropic.com</a> (API Keys). Stored in your browser only.</div>
+    <input id="claude-key-input" type="text" placeholder="sk-ant-api03-..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore data-form-type="other"
+      style="width:100%;box-sizing:border-box;border:1px solid var(--rule);border-radius:5px;padding:7px 10px;font-size:12px;font-family:monospace;outline:none;color:var(--ink);margin-bottom:6px">
     <div style="display:flex;gap:6px">
-      <input id="claude-key-input" type="password" placeholder="sk-ant-..." style="flex:1;border:1px solid var(--rule);border-radius:5px;padding:6px 10px;font-size:12px;font-family:monospace;outline:none;color:var(--ink)">
-      <button onclick="saveClaudeKey()" style="background:var(--navy);color:white;border:none;border-radius:5px;padding:6px 14px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:600">Save</button>
+      <button onclick="pasteClaudeKey()" title="Paste your key from the clipboard" style="flex:1;background:#fff;color:var(--navy);border:1px solid var(--navy);border-radius:5px;padding:6px 10px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:600">📋 Paste</button>
+      <button onclick="saveClaudeKey()" style="flex:1;background:var(--navy);color:white;border:none;border-radius:5px;padding:6px 14px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:600">Save</button>
     </div>
+    <div style="font-size:10.5px;color:var(--ink-3);margin-top:6px;line-height:1.45">Tip: the key is shown as plain text so you can check it pasted fully. It should start with <code style="font-family:monospace">sk-ant-</code>.</div>
   </div>
   <div id="claude-messages" style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column"></div>
   <div style="padding:12px;border-top:1px solid var(--rule);flex-shrink:0">
@@ -6602,11 +6605,29 @@ function toggleClaudePanel() {
   }
 }
 
+async function pasteClaudeKey() {
+  const input = document.getElementById('claude-key-input');
+  try {
+    const t = await navigator.clipboard.readText();
+    if (t && t.trim()) {
+      input.value = t.trim();
+      input.focus();
+      toast('Pasted from clipboard — now click Save');
+    } else {
+      toast('Clipboard looks empty — copy your key again first');
+    }
+  } catch (e) {
+    input.focus();
+    toast('Browser blocked clipboard access — click the box and press Ctrl+V (Cmd+V on Mac)');
+  }
+}
+
 function saveClaudeKey() {
-  const val = document.getElementById('claude-key-input').value.trim();
-  if (!val.startsWith('sk-')) { alert('That doesn\'t look like a valid Anthropic API key (should start with sk-)'); return; }
+  const val = document.getElementById('claude-key-input').value.replace(/\s+/g, '').trim();
+  if (!val.startsWith('sk-')) { alert('That doesn\'t look like a valid Anthropic API key — it should start with "sk-ant-". Make sure you copied the whole key.'); return; }
   claudeKey = val;
   localStorage.setItem('claude-assistant-key', claudeKey);
+  document.getElementById('claude-key-input').value = '';
   document.getElementById('claude-key-setup').style.display = 'none';
   toast('API key saved ✓');
 }
