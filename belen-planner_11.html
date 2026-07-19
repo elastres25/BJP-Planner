@@ -1094,6 +1094,38 @@ body.simple-mode .dp-adv { display: none !important; }
 .d-grrlegend b{margin-left:auto;color:var(--ink);font-variant-numeric:tabular-nums;}
 @media (max-width:940px){.d-kpis{grid-template-columns:repeat(2,1fr);}.d-grid{grid-template-columns:1fr;}}
 @media (max-width:560px){.d-kpis{grid-template-columns:1fr;}}
+
+/* ── PREP BOARD ── */
+.prep-intro{font-size:13px;color:var(--ink-2);margin:2px 0 16px;max-width:780px;line-height:1.55;}
+.prep-intro b{color:var(--ink);}
+.prep-legend{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin:0 0 6px;font-size:11px;color:var(--ink-3);}
+.prep-legend span{display:inline-flex;align-items:center;gap:5px;}
+.prep-legend i{width:20px;height:6px;border-radius:3px;display:inline-block;}
+.prep-legend b{color:var(--ink);font-variant-numeric:tabular-nums;}
+.prep-sem{font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin:22px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--rule);}
+.prep-lane{background:#fff;border:1px solid var(--rule);border-radius:12px;padding:14px 16px 15px;margin-bottom:12px;box-shadow:0 1px 2px rgba(0,0,0,.03);}
+.prep-lane-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
+.prep-lane-title{font-size:14px;font-weight:700;color:var(--ink);}
+.prep-lane-title .prep-u{font-weight:800;margin-right:7px;}
+.prep-lane-next{font-size:11.5px;color:var(--ink-2);}
+.prep-lane-next b{color:var(--navy);}
+.prep-stages{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.prep-arrow{display:none;}
+.prep-stage{position:relative;border:1px solid var(--rule);border-radius:10px;padding:11px 12px 12px;cursor:pointer;transition:all .12s;background:#FBFAF8;}
+.prep-stage:hover{border-color:var(--navy);box-shadow:0 2px 9px rgba(0,0,0,.07);transform:translateY(-1px);background:#fff;}
+.prep-stage-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px;}
+.prep-stage-name{font-size:12.5px;font-weight:700;color:var(--ink);line-height:1.2;}
+.prep-stage-name small{display:block;font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);margin-bottom:3px;}
+.prep-stage-pct{font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;}
+.prep-bar{height:6px;border-radius:3px;background:var(--rule);overflow:hidden;margin-bottom:9px;}
+.prep-bar i{display:block;height:100%;border-radius:3px;transition:width .35s;}
+.prep-checks{display:flex;flex-direction:column;gap:4px;}
+.prep-check{font-size:11px;color:var(--ink-2);display:flex;align-items:center;gap:6px;line-height:1.3;}
+.prep-check .pk{width:14px;height:14px;border-radius:50%;flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;line-height:1;}
+.prep-check.on .pk{background:#1D9E75;color:#fff;}
+.prep-check.off .pk{background:#DAD7D0;color:#fff;}
+.prep-check.off{color:var(--ink-3);}
+@media(max-width:720px){.prep-stages{grid-template-columns:1fr;}}
 </style>
 
 <!-- DASHBOARD (landing) -->
@@ -1136,6 +1168,11 @@ body.simple-mode .dp-adv { display: none !important; }
       <div id="semester-grid-content"></div>
     </div>
   </div>
+</div>
+
+<!-- PREP BOARD -->
+<div class="view" id="view-prep">
+  <div class="wrap" id="prep-wrap"></div>
 </div>
 
 <!-- UNIT VIEW -->
@@ -1797,6 +1834,15 @@ function nav(target, unitId) {
     setBreadcrumb([{label:'Dashboard', home:true, active:true}]);
     renderDashboard();
     window.scrollTo(0,0);
+  } else if (target === 'prep') {
+    document.getElementById('view-prep').classList.add('active');
+    currentUnit = null; currentWeek = 0; openDayIdx = null; openWeekIdx = null;
+    setBreadcrumb([
+      {label:'Dashboard', home:true, onclick:"nav('dashboard')"},
+      {label:'Prep Board', active:true},
+    ]);
+    renderPrep();
+    window.scrollTo(0,0);
   } else if (target === 'course') {
     document.getElementById('view-course').classList.add('active');
     currentUnit = null; currentWeek = 0; openDayIdx = null; openWeekIdx = null;
@@ -2302,6 +2348,10 @@ function renderDashboard(){
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4z"/></svg>
         ${contLabel}${contClass?` · ${esc(contClass.u.name)} ${esc(contClass.d.label)}`:''}
       </button>
+      <button class="d-qn-btn" onclick="nav('prep')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><polyline points="3 6 4 7 6 5"/><polyline points="3 12 4 13 6 11"/><polyline points="3 18 4 19 6 17"/></svg>
+        Prep Board
+      </button>
       <button class="d-qn-btn" onclick="nav('course')">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
         Browse all units
@@ -2312,6 +2362,142 @@ function renderDashboard(){
       <div class="d-col">${outlookCard}${todoCard}${bottomMetrics}</div>
       <div class="d-col">${calCard}${assessCard}${progressCard}${grrCard}</div>
     </div>`;
+}
+
+// ── PREP BOARD ────────────────────────────────────────────────────
+// A cover-sheet over the existing tabs. Each unit moves through three
+// stages of preparation — Design (outcomes + assessment, before the
+// unit begins) → Plan (daily lessons that scaffold toward it) → Build
+// (slides & materials) — each with its own progress bar. Clicking a
+// stage jumps straight to the tab where that work happens.
+function navUnitTab(uid, tab){
+  nav('unit', uid);
+  currentUnitTab = tab;
+  renderUnit();
+  window.scrollTo(0,0);
+}
+
+function unitPrepStats(u){
+  const ws = state.units[u.id] || [];
+  let totalDays=0, plannedDays=0, matDays=0, datedDays=0, targetDays=0;
+  ws.forEach(w=>(w.days||[]).forEach(d=>{
+    totalDays++;
+    if(d.dateA||d.dateB) datedDays++;
+    if(dayIsPlanned(d)){
+      plannedDays++;
+      if((d.targets||[]).length) targetDays++;
+      if((d.materials||[]).length) matDays++;
+    }
+  }));
+  const s1 = unitStage1Summary(u.id);
+  const hasOutcomes = (s1.eq.length||s1.understanding.length||s1.goals.length||s1.skills.length||s1.knowledge.length) ? 1 : 0;
+  const sum = getSummative(u.id);
+  const hasAssess = (sum.type && sum.prompt) ? 1 : 0;
+  const compCount = (sum.components||[]).length;
+  const hasComps = compCount ? 1 : 0;
+  const hasDates = datedDays>0 ? 1 : 0;
+  const s1pct = Math.round((hasOutcomes+hasAssess+hasComps+hasDates)/4*100);
+  const s2pct = totalDays ? Math.round(plannedDays/totalDays*100) : 0;
+  const s3pct = plannedDays ? Math.round(matDays/plannedDays*100) : 0;
+  return {totalDays,plannedDays,matDays,datedDays,targetDays,hasOutcomes,hasAssess,hasComps,hasDates,compCount,s1pct,s2pct,s3pct};
+}
+
+function prepNextAction(st){
+  if(!st.hasOutcomes) return {t:'Define outcomes & essential questions', tab:'overview'};
+  if(!st.hasAssess)   return {t:'Design the summative assessment', tab:'pacing'};
+  if(!st.hasComps)    return {t:'Break the assessment into components', tab:'pacing'};
+  if(!st.hasDates)    return {t:'Set A/B class dates', tab:'pacing'};
+  if(st.s2pct<100){ const n=st.totalDays-st.plannedDays; return {t:`Plan ${n} more lesson day${n===1?'':'s'}`, tab:'plan'}; }
+  if(st.s3pct<100){ const n=st.plannedDays-st.matDays;   return {t:`Build materials for ${n} day${n===1?'':'s'}`, tab:'plan'}; }
+  return {t:'Fully prepped', tab:'plan', done:true};
+}
+
+function renderPrep(){
+  const el = document.getElementById('prep-wrap');
+  if(!el) return;
+  const co = getCourse();
+  const N = UNIT_META.length;
+  let uDesigned=0, uPlanned=0, uBuilt=0;
+
+  const barColor = pc => pc>=100 ? '#1D9E75' : (pc>0 ? co.color : '#DAD7D0');
+
+  const tile = (uid, eyebrow, name, pct, checks, tab) => `
+    <div class="prep-stage" onclick="navUnitTab(${uid},'${tab}')" title="Open — ${esc(name)}">
+      <div class="prep-stage-top">
+        <div class="prep-stage-name"><small>${eyebrow}</small>${name}</div>
+        <div class="prep-stage-pct" style="color:${pct>=100?'#1D9E75':'var(--ink-2)'}">${pct}%</div>
+      </div>
+      <div class="prep-bar"><i style="width:${Math.max(pct,3)}%;background:${barColor(pct)}"></i></div>
+      <div class="prep-checks">
+        ${checks.map(c=>`<div class="prep-check ${c.on?'on':'off'}"><span class="pk">${c.on?'✓':'○'}</span>${esc(c.label)}</div>`).join('')}
+      </div>
+    </div>`;
+
+  const laneHTML = (u) => {
+    const st = unitPrepStats(u);
+    if(st.s1pct===100) uDesigned++;
+    if(st.s2pct===100 && st.totalDays) uPlanned++;
+    if(st.s3pct===100 && st.plannedDays) uBuilt++;
+    const na = prepNextAction(st);
+    const s1checks = [
+      {on:st.hasOutcomes, label:'Outcomes & essential questions'},
+      {on:st.hasAssess,   label:'Summative assessment'},
+      {on:st.hasComps,    label:'Assessment components'+(st.compCount?` (${st.compCount})`:'')},
+      {on:st.hasDates,    label:'Class dates set'},
+    ];
+    const s2checks = [
+      {on:!!st.totalDays && st.plannedDays===st.totalDays, label:`${st.plannedDays}/${st.totalDays} lesson days planned`},
+      {on:!!st.plannedDays && st.targetDays===st.plannedDays, label:`${st.targetDays}/${st.plannedDays||0} days have learning targets`},
+    ];
+    const s3checks = [
+      {on:!!st.plannedDays && st.matDays===st.plannedDays, label:`${st.matDays}/${st.plannedDays||0} planned days have materials`},
+    ];
+    return `
+      <div class="prep-lane">
+        <div class="prep-lane-head">
+          <div class="prep-lane-title"><span class="prep-u" style="color:${co.color}">U${u.id}</span>${esc(u.name)}</div>
+          <div class="prep-lane-next">${na.done ? '<b style="color:#1D9E75">✓ Fully prepped</b>' : `Next: <b>${esc(na.t)}</b>`}</div>
+        </div>
+        <div class="prep-stages">
+          ${tile(u.id,'Stage ① · Before the unit','Design the Unit',st.s1pct,s1checks,'pacing')}
+          ${tile(u.id,'Stage ② · Lesson by lesson','Plan the Lessons',st.s2pct,s2checks,'plan')}
+          ${tile(u.id,'Stage ③ · Make it real','Build Materials',st.s3pct,s3checks,'plan')}
+        </div>
+      </div>`;
+  };
+
+  const sems = [[1,'Semester 1'],[2,'Semester 2']];
+  const body = sems.map(([sem,lbl])=>{
+    const us = UNIT_META.filter(u=>u.sem===sem);
+    if(!us.length) return '';
+    return `<div class="prep-sem">${lbl}</div>` + us.map(laneHTML).join('');
+  }).join('');
+
+  const header = `
+    <div class="d-course-accent" style="background:${co.color}"></div>
+    <div class="d-head">
+      <div>
+        <div class="d-eyebrow" style="color:${co.color}">Backwards Design · Gradual Release</div>
+        <h1>Prep Board</h1>
+        <div class="d-sub">${esc(co.fullName)} — track every unit from outcomes to materials.</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:9px">
+        <span class="d-course-pill" style="background:${co.color}">${esc(co.name)} · ${esc(co.code)}</span>
+        <button class="d-qn-btn" onclick="nav('dashboard')" style="font-size:11px;padding:5px 11px">← Dashboard</button>
+      </div>
+    </div>`;
+
+  const intro = `<div class="prep-intro">Each unit moves left → right: <b>Design</b> the unit and its assessment before it begins, <b>Plan</b> the daily lessons that scaffold toward it, then <b>Build</b> the slides and materials. Click any stage to jump straight to that work.</div>`;
+
+  const legend = `
+    <div class="prep-legend">
+      <span><i style="background:#1D9E75"></i>Complete</span>
+      <span><i style="background:${co.color}"></i>In progress</span>
+      <span><i style="background:#DAD7D0"></i>Not started</span>
+      <span style="margin-left:auto"><b>${uDesigned}</b>/${N} designed · <b>${uPlanned}</b>/${N} planned · <b>${uBuilt}</b>/${N} materials done</span>
+    </div>`;
+
+  el.innerHTML = header + intro + legend + body;
 }
 
 // ── COURSE VIEW ───────────────────────────────────────────────────
