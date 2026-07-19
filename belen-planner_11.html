@@ -1125,7 +1125,54 @@ body.simple-mode .dp-adv { display: none !important; }
 .prep-check.on .pk{background:#1D9E75;color:#fff;}
 .prep-check.off .pk{background:#DAD7D0;color:#fff;}
 .prep-check.off{color:var(--ink-3);}
+.prep-guided-cta{margin-top:9px;font-size:11px;font-weight:700;color:var(--navy);letter-spacing:.02em;opacity:.85;}
+.prep-stage:hover .prep-guided-cta{opacity:1;}
 @media(max-width:720px){.prep-stages{grid-template-columns:1fr;}}
+
+/* ── GUIDED MODE ── */
+#guide-wrap{max-width:760px;margin:0 auto;padding:0 20px 60px;}
+.g-top{position:sticky;top:0;background:var(--bg,#F3F1EC);padding:18px 0 12px;z-index:2;}
+.g-top-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;}
+.g-crumb{font-size:12px;color:var(--ink-2);}
+.g-crumb b{color:var(--ink);}
+.g-exit{border:1px solid var(--rule);background:#fff;border-radius:7px;padding:6px 12px;font-size:12px;font-weight:600;color:var(--ink-2);cursor:pointer;font-family:inherit;}
+.g-exit:hover{border-color:var(--navy);color:var(--navy);}
+.g-progress{display:flex;align-items:center;gap:6px;}
+.g-dot{height:6px;border-radius:3px;background:var(--rule);flex:1;transition:background .2s;}
+.g-dot.done{background:#1D9E75;}
+.g-dot.cur{background:var(--navy);}
+.g-card{background:#fff;border:1px solid var(--rule);border-radius:14px;box-shadow:0 2px 10px rgba(0,0,0,.04);padding:26px 28px;}
+.g-eyebrow{font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--navy);margin-bottom:6px;}
+.g-title{font-size:23px;font-weight:800;color:var(--ink);letter-spacing:-.01em;line-height:1.2;margin-bottom:10px;}
+.g-coach{font-size:13.5px;color:var(--ink-2);line-height:1.6;margin-bottom:20px;}
+.g-coach b{color:var(--ink);}
+.g-coach .g-pill{display:inline-block;background:#EEF6F2;color:#0f6e56;border-radius:5px;padding:1px 7px;font-size:12px;font-weight:600;}
+.g-field-lbl{display:block;font-size:11px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--ink-3);margin:0 0 7px;}
+.g-input,.g-textarea,.g-select{width:100%;box-sizing:border-box;border:1px solid var(--rule);border-radius:8px;padding:9px 11px;font-size:13.5px;font-family:inherit;color:var(--ink);outline:none;transition:border-color .1s;}
+.g-input:focus,.g-textarea:focus,.g-select:focus{border-color:var(--navy);}
+.g-textarea{resize:vertical;}
+.g-list{display:flex;flex-direction:column;gap:7px;margin-bottom:12px;}
+.g-item{display:flex;align-items:center;gap:9px;background:#FBFAF8;border:1px solid var(--rule);border-radius:8px;padding:4px 6px 4px 12px;}
+.g-item-num{flex:0 0 auto;width:22px;height:22px;border-radius:50%;background:var(--navy);color:#fff;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;}
+.g-item input{flex:1;border:none;background:none;font-size:13.5px;font-family:inherit;color:var(--ink);outline:none;padding:5px 0;}
+.g-item-x{flex:0 0 auto;border:none;background:none;color:var(--ink-3);font-size:20px;cursor:pointer;line-height:1;padding:2px 8px;}
+.g-item-x:hover{color:var(--crit,#c0392b);}
+.g-addrow{display:flex;gap:8px;}
+.g-addrow .g-input{flex:1;}
+.g-addbtn{flex:0 0 auto;background:var(--navy);color:#fff;border:none;border-radius:8px;padding:0 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;}
+.g-empty{font-size:12.5px;color:var(--ink-3);font-style:italic;margin-bottom:12px;}
+.g-ai-btn{background:linear-gradient(135deg,#6D5CC0,#534AB7);color:#fff;border:none;border-radius:8px;padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:7px;box-shadow:0 2px 8px rgba(83,74,183,.25);}
+.g-ai-btn:disabled{opacity:.6;cursor:default;}
+.g-note{font-size:12px;color:var(--ink-3);margin-top:10px;line-height:1.5;}
+.g-status{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2);background:#FBFAF8;border:1px solid var(--rule);border-radius:9px;padding:11px 14px;margin-bottom:10px;}
+.g-status .g-s-ic{width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex:0 0 auto;}
+.g-foot{display:flex;align-items:center;gap:10px;margin-top:22px;}
+.g-back{border:1px solid var(--rule);background:#fff;border-radius:9px;padding:11px 18px;font-size:13.5px;font-weight:600;color:var(--ink-2);cursor:pointer;font-family:inherit;}
+.g-back:disabled{opacity:.4;cursor:default;}
+.g-next{background:var(--navy);color:#fff;border:none;border-radius:9px;padding:11px 22px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;margin-left:auto;}
+.g-recap{display:flex;flex-direction:column;gap:8px;margin-bottom:8px;}
+.g-recap-row{display:flex;align-items:center;gap:10px;font-size:13.5px;color:var(--ink);}
+.g-recap-ic{width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex:0 0 auto;}
 </style>
 
 <!-- DASHBOARD (landing) -->
@@ -1884,7 +1931,23 @@ let dashWeekOffset = 0;   // 0 = current week for the "This Week" view
 function dashWeekStep(delta){ dashWeekOffset += delta; renderDashboard(); }
 function dashWeekToday(){ dashWeekOffset = 0; renderDashboard(); }
 
-function dayIsPlanned(d){ return !!(d && (d.topic || d.eq || (d.activities||[]).length || (d.targets||[]).length)); }
+// A lesson counts as "planned" only when it's actually ready to teach:
+// it has a topic, at least one activity, and the activities (plus the
+// opening journal) fill the whole class block. "Started" days that have
+// a topic or a stray target but no filled schedule are NOT planned.
+function dayMinutesUsed(d){
+  if(!d) return 0;
+  const acts = d.activities || [];
+  return journalOffsetMin(d) + acts.reduce((s,a)=>s+(a.dur||0),0);
+}
+function dayIsStarted(d){ return !!(d && (d.topic || d.eq || (d.activities||[]).length || (d.targets||[]).length)); }
+function dayIsPlanned(d){
+  if(!d) return false;
+  if(!d.topic || !String(d.topic).replace(/<[^>]*>/g,'').trim()) return false;
+  if(!(d.activities||[]).length) return false;
+  const block = d.blockDuration || 90;
+  return dayMinutesUsed(d) >= block;
+}
 function isoToday(){ const t=new Date(); return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`; }
 function isoOf(dt){ return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`; }
 function isoParse(iso){ return new Date(iso+'T00:00:00'); }
@@ -2421,8 +2484,8 @@ function renderPrep(){
 
   const barColor = pc => pc>=100 ? '#1D9E75' : (pc>0 ? co.color : '#DAD7D0');
 
-  const tile = (uid, eyebrow, name, pct, checks, tab) => `
-    <div class="prep-stage" onclick="navUnitTab(${uid},'${tab}')" title="Open — ${esc(name)}">
+  const tile = (uid, eyebrow, name, pct, checks, onclick, guided) => `
+    <div class="prep-stage" onclick="${onclick}" title="${guided?'Start guided walk-through':'Open'} — ${esc(name)}">
       <div class="prep-stage-top">
         <div class="prep-stage-name"><small>${eyebrow}</small>${name}</div>
         <div class="prep-stage-pct" style="color:${pct>=100?'#1D9E75':'var(--ink-2)'}">${pct}%</div>
@@ -2431,6 +2494,7 @@ function renderPrep(){
       <div class="prep-checks">
         ${checks.map(c=>`<div class="prep-check ${c.on?'on':'off'}"><span class="pk">${c.on?'✓':'○'}</span>${esc(c.label)}</div>`).join('')}
       </div>
+      ${guided?`<div class="prep-guided-cta">▶ ${pct>0?'Continue':'Start'} guided setup</div>`:''}
     </div>`;
 
   const laneHTML = (u) => {
@@ -2459,9 +2523,9 @@ function renderPrep(){
           <div class="prep-lane-next">${na.done ? '<b style="color:#1D9E75">✓ Fully prepped</b>' : `Next: <b>${esc(na.t)}</b>`}</div>
         </div>
         <div class="prep-stages">
-          ${tile(u.id,'Stage ① · Before the unit','Design the Unit',st.s1pct,s1checks,'pacing')}
-          ${tile(u.id,'Stage ② · Lesson by lesson','Plan the Lessons',st.s2pct,s2checks,'plan')}
-          ${tile(u.id,'Stage ③ · Make it real','Build Materials',st.s3pct,s3checks,'plan')}
+          ${tile(u.id,'Stage ① · Before the unit','Design the Unit',st.s1pct,s1checks,`startGuide(${u.id},1)`,true)}
+          ${tile(u.id,'Stage ② · Lesson by lesson','Plan the Lessons',st.s2pct,s2checks,`navUnitTab(${u.id},'plan')`,false)}
+          ${tile(u.id,'Stage ③ · Make it real','Build Materials',st.s3pct,s3checks,`navUnitTab(${u.id},'plan')`,false)}
         </div>
       </div>`;
   };
@@ -2487,7 +2551,7 @@ function renderPrep(){
       </div>
     </div>`;
 
-  const intro = `<div class="prep-intro">Each unit moves left → right: <b>Design</b> the unit and its assessment before it begins, <b>Plan</b> the daily lessons that scaffold toward it, then <b>Build</b> the slides and materials. Click any stage to jump straight to that work.</div>`;
+  const intro = `<div class="prep-intro">Each unit moves left → right: <b>Design</b> the unit and its assessment before it begins, <b>Plan</b> the daily lessons that scaffold toward it, then <b>Build</b> the slides and materials. Click <b>Design the Unit</b> to be <b>walked through it step by step</b>; the other stages drop you into the planner.</div>`;
 
   const legend = `
     <div class="prep-legend">
@@ -2498,6 +2562,222 @@ function renderPrep(){
     </div>`;
 
   el.innerHTML = header + intro + legend + body;
+}
+
+// ── GUIDED MODE ───────────────────────────────────────────────────
+// An immersive, step-by-step walk-through of a prep stage. v1 covers
+// Stage ① (Design the Unit): outcomes → assessment → components →
+// schedule, one focused step at a time, editing real unit data.
+let guideState = null;   // { uid, stage, step }
+function guideStrip(s){ return String(s||'').replace(/<[^>]*>/g,' ').replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim(); }
+
+function startGuide(uid, stage){
+  guideState = { uid, stage: stage||1, step: 0 };
+  document.getElementById('guide-overlay').style.display='block';
+  document.body.style.overflow='hidden';
+  renderGuide();
+}
+function exitGuide(){
+  guideState=null;
+  document.getElementById('guide-overlay').style.display='none';
+  document.body.style.overflow='';
+  if(document.getElementById('view-prep').classList.contains('active')) renderPrep();
+}
+function guideStepKeys(stage){
+  if(stage===1) return ['intro','eq','understanding','skills','assessment','components','schedule','done'];
+  return ['intro','done'];
+}
+function guideGo(delta){
+  if(!guideState) return;
+  const keys = guideStepKeys(guideState.stage);
+  const next = guideState.step + delta;
+  if(next < 0) return;
+  if(next >= keys.length){ exitGuide(); return; }
+  guideState.step = next;
+  renderGuide();
+  document.getElementById('guide-overlay').scrollTo(0,0);
+}
+
+// Guided list editors — operate on unit data and re-render the guide.
+function guideListArr(uid, kind){
+  const uov = getUOV(uid);
+  if(kind==='eq') return uov.eqItems;
+  if(kind==='skill') return uov.skillItems;
+  if(kind==='und'){ uov.objTable = uov.objTable||{}; uov.objTable.understanding = uov.objTable.understanding||[]; return uov.objTable.understanding; }
+  return [];
+}
+function guideAdd(uid, kind){
+  const inp = document.getElementById('g-add-'+kind);
+  const v = (inp?.value||'').trim(); if(!v) return;
+  guideListArr(uid, kind).push(v);
+  saveState(); renderGuide();
+  setTimeout(()=>document.getElementById('g-add-'+kind)?.focus(), 20);
+}
+function guideEdit(uid, kind, idx, val){
+  const arr = guideListArr(uid, kind);
+  if(arr[idx]!=null){ arr[idx] = val.trim(); saveState(); }
+}
+function guideRemove(uid, kind, idx){
+  guideListArr(uid, kind).splice(idx,1); saveState(); renderGuide();
+}
+// Components (summative) editors for the guide
+function guideAddComp(uid){
+  const inp = document.getElementById('g-add-comp');
+  const v = (inp?.value||'').trim(); if(!v) return;
+  const s = getSummative(uid);
+  s.components.push({ id:uid+'-'+Date.now().toString(36)+Math.random().toString(36).slice(2,5), text:v });
+  saveState(); renderGuide();
+  setTimeout(()=>document.getElementById('g-add-comp')?.focus(), 20);
+}
+function guideEditComp(uid, idx, val){
+  const s = getSummative(uid); if(s.components[idx]){ s.components[idx].text = val.trim(); saveState(); }
+}
+function guideRemoveComp(uid, idx){
+  getSummative(uid).components.splice(idx,1); saveState(); renderGuide();
+}
+
+function guideListEditorHTML(uid, kind, placeholder){
+  const arr = guideListArr(uid, kind);
+  const rows = arr.map((v,i)=>`
+    <div class="g-item">
+      <span class="g-item-num">${i+1}</span>
+      <input value="${esc(guideStrip(v))}" onchange="guideEdit(${uid},'${kind}',${i},this.value)" placeholder="${esc(placeholder)}">
+      <button class="g-item-x" title="Remove" onclick="guideRemove(${uid},'${kind}',${i})">&times;</button>
+    </div>`).join('');
+  return `
+    ${arr.length ? `<div class="g-list">${rows}</div>` : `<div class="g-empty">Nothing yet — add your first one below.</div>`}
+    <div class="g-addrow">
+      <input id="g-add-${kind}" class="g-input" placeholder="${esc(placeholder)}" onkeydown="if(event.key==='Enter'){event.preventDefault();guideAdd(${uid},'${kind}')}">
+      <button class="g-addbtn" onclick="guideAdd(${uid},'${kind}')">Add</button>
+    </div>`;
+}
+
+function renderGuide(){
+  if(!guideState) return;
+  const wrap = document.getElementById('guide-wrap');
+  if(!wrap) return;
+  const { uid, stage, step } = guideState;
+  const u = UNIT_META.find(m=>m.id===uid);
+  const co = getCourse();
+  const keys = guideStepKeys(stage);
+  const key = keys[step];
+  const stageName = {1:'Design the Unit',2:'Plan the Lessons',3:'Build Materials'}[stage];
+  const s = getSummative(uid);
+
+  // ── step body ──
+  let eyebrow='', title='', coach='', bodyHTML='';
+  if(key==='intro'){
+    eyebrow = `Stage ① · Guided setup`;
+    title = `Design ${u?u.name:'this unit'}`;
+    coach = `In <b>backwards design</b> you plan the destination before the route. Over the next few steps we'll lock in <b>what students should understand</b>, then design the <b>assessment</b> that proves they got there — <i>before</i> you plan a single lesson. This is the work that makes the day-to-day planning fall into place.`;
+    bodyHTML = `<div class="g-note">Takes about 5–10 minutes. Everything saves as you go — you can stop anytime and pick up right here.</div>`;
+  }
+  else if(key==='eq'){
+    eyebrow = `Step ${step} · Stage 1 of understanding`;
+    title = `Essential Questions`;
+    coach = `These are the big, open-ended questions the unit keeps returning to — the ones without a one-sentence answer. <span class="g-pill">e.g.</span> "How do we know God is present in our lives?" Aim for <b>1–3</b>.`;
+    bodyHTML = guideListEditorHTML(uid,'eq','How do we know…?');
+  }
+  else if(key==='understanding'){
+    eyebrow = `Step ${step} · Enduring understandings`;
+    title = `What should stick years later?`;
+    coach = `The <b>enduring understandings</b> are the durable takeaways — full-sentence truths a student should still hold long after the test. <span class="g-pill">e.g.</span> "Prayer is a relationship, not a transaction." Write them as statements.`;
+    bodyHTML = guideListEditorHTML(uid,'und','Students will understand that…');
+  }
+  else if(key==='skills'){
+    eyebrow = `Step ${step} · Skills`;
+    title = `Skills students will develop`;
+    coach = `What should students be able to <b>do</b> by the end? These are the transferable skills the assessment will call on. <span class="g-pill">e.g.</span> "Close-read a Scripture passage," "Cite textual evidence."`;
+    bodyHTML = guideListEditorHTML(uid,'skill','Students will be able to…');
+  }
+  else if(key==='assessment'){
+    eyebrow = `Step ${step} · Stage 2 — the evidence`;
+    title = `Design the summative assessment`;
+    coach = `Now the keystone: <b>how will students show they truly understand?</b> Pick a type and write the prompt as a genuine <b>transfer task</b> — applying the understandings, not reciting them. Stuck? Let Claude draft one from everything above — you'll review and edit it before it's saved.`;
+    const typeOpts = ['<option value="">Choose a type…</option>'].concat(SUMMATIVE_TYPES.map(t=>`<option value="${t}" ${s.type===t?'selected':''}>${t}</option>`)).join('');
+    bodyHTML = `
+      <button class="g-ai-btn" id="sum-ai-btn-${uid}" onclick="suggestSummativeWithClaude(${uid})">✨ Suggest with Claude</button>
+      <div class="g-note" style="margin-bottom:18px">Claude reads this unit's essential questions, understandings and skills, then proposes an assessment in a pop-up you can edit or reroll.</div>
+      <label class="g-field-lbl">Assessment type</label>
+      <select class="g-select" style="margin-bottom:16px" onchange="updateSummative(${uid},'type',this.value)">${typeOpts}</select>
+      <label class="g-field-lbl">Prompt — what students actually do</label>
+      <textarea class="g-textarea" rows="4" placeholder="e.g. Analyze how a passage from the Gospel of Mark reveals Jesus's identity, drawing on close reading and course concepts to make a claim about who Jesus is." oninput="updateSummative(${uid},'prompt',this.value)">${esc(s.prompt||'')}</textarea>`;
+  }
+  else if(key==='components'){
+    eyebrow = `Step ${step} · Break it down`;
+    title = `Assessment components`;
+    coach = `Break the assessment into the <b>building blocks</b> students must master to succeed — each a "Student can…" skill or piece of knowledge. In the next stage these become the <b>scaffold targets</b> you spread across the daily lessons, so nothing on the assessment goes untaught.`;
+    const rows = (s.components||[]).map((c,i)=>`
+      <div class="g-item">
+        <span class="g-item-num">${i+1}</span>
+        <input value="${esc(c.text)}" onchange="guideEditComp(${uid},${i},this.value)" placeholder="Student can…">
+        <button class="g-item-x" title="Remove" onclick="guideRemoveComp(${uid},${i})">&times;</button>
+      </div>`).join('');
+    bodyHTML = `
+      ${(s.components||[]).length ? `<div class="g-list">${rows}</div>` : `<div class="g-empty">No components yet. Add them below, or go back a step and let Claude draft the whole assessment with components.</div>`}
+      <div class="g-addrow">
+        <input id="g-add-comp" class="g-input" placeholder="Student can…" onkeydown="if(event.key==='Enter'){event.preventDefault();guideAddComp(${uid})}">
+        <button class="g-addbtn" onclick="guideAddComp(${uid})">Add</button>
+      </div>`;
+  }
+  else if(key==='schedule'){
+    eyebrow = `Step ${step} · Put it on the calendar`;
+    title = `Schedule the unit`;
+    const ws = state.units[uid]||[]; let dated=0, totalD=0;
+    ws.forEach(w=>(w.days||[]).forEach(d=>{ totalD++; if(d.dateA||d.dateB) dated++; }));
+    const ok = dated>0;
+    coach = `A unit is "designed" once it has a <b>place in the calendar</b>. Set the A/B block dates on your lesson days so the Prep Board and Dashboard can track how far ahead you're planned.`;
+    bodyHTML = `
+      <div class="g-status">
+        <span class="g-s-ic" style="background:${ok?'#1D9E75':'#C9991A'}">${ok?'✓':'!'}</span>
+        <div>${ok ? `<b>${dated}</b> of ${totalD} lesson day${totalD===1?'':'s'} have dates set.` : `No class dates set yet across ${totalD} lesson day${totalD===1?'':'s'}.`}</div>
+      </div>
+      <button class="g-back" style="margin-left:0" onclick="exitGuide();navUnitTab(${uid},'pacing')">Open the pacing calendar to set dates →</button>
+      <div class="g-note">You can come back to this guide anytime from the Prep Board.</div>`;
+  }
+  else if(key==='done'){
+    const st = unitPrepStats(u);
+    eyebrow = `Stage ① complete`;
+    title = st.s1pct===100 ? `${u?u.name:'This unit'} is designed ✓` : `Design progress: ${st.s1pct}%`;
+    coach = `Here's where the unit's design stands. Anything unfinished you can return to — but once the assessment and its components exist, you're ready to <b>plan the lessons that scaffold toward it</b>.`;
+    const row = (on,label)=>`<div class="g-recap-row"><span class="g-recap-ic" style="background:${on?'#1D9E75':'#DAD7D0'}">${on?'✓':'○'}</span>${label}</div>`;
+    bodyHTML = `
+      <div class="g-recap">
+        ${row(st.hasOutcomes,'Outcomes & essential questions')}
+        ${row(st.hasAssess,'Summative assessment designed')}
+        ${row(st.hasComps,`Assessment components${st.compCount?` (${st.compCount})`:''}`)}
+        ${row(st.hasDates,'Class dates set')}
+      </div>
+      <div class="g-foot" style="margin-top:20px">
+        <button class="g-back" style="margin-left:0" onclick="exitGuide()">Back to Prep Board</button>
+        <button class="g-next" onclick="exitGuide();navUnitTab(${uid},'plan')">Start planning lessons →</button>
+      </div>`;
+  }
+
+  // ── chrome ──
+  const dots = keys.map((k,i)=>`<span class="g-dot ${i<step?'done':''} ${i===step?'cur':''}"></span>`).join('');
+  const isLast = step===keys.length-1;
+  const foot = key==='done' ? '' : `
+    <div class="g-foot">
+      <button class="g-back" onclick="guideGo(-1)" ${step===0?'disabled':''}>← Back</button>
+      <button class="g-next" onclick="guideGo(1)">${step===0?"Let's begin →":(isLast?'Finish':'Next →')}</button>
+    </div>`;
+
+  wrap.innerHTML = `
+    <div class="g-top">
+      <div class="g-top-row">
+        <div class="g-crumb"><b style="color:${co.color}">${esc(co.name)}</b> · U${uid} · <b>${esc(stageName)}</b> — step ${step+1} of ${keys.length}</div>
+        <button class="g-exit" onclick="exitGuide()">✕ Exit guided mode</button>
+      </div>
+      <div class="g-progress">${dots}</div>
+    </div>
+    <div class="g-card">
+      <div class="g-eyebrow">${eyebrow}</div>
+      <div class="g-title">${title}</div>
+      <div class="g-coach">${coach}</div>
+      ${bodyHTML}
+      ${foot}
+    </div>`;
 }
 
 // ── COURSE VIEW ───────────────────────────────────────────────────
@@ -3816,18 +4096,14 @@ function unitStage1Summary(uid){
   };
 }
 
-async function suggestSummativeWithClaude(uid){
-  if(!claudeKey){
-    toast('Add your Anthropic API key in the Claude panel first');
-    toggleClaudePanel();
-    return;
-  }
+// Ask Claude for a summative-assessment draft. Returns a plain object
+// {type, prompt, components:[strings]} or throws. `opts.avoid` nudges it
+// toward a distinctly different option than a draft the teacher rejected.
+async function fetchSummativeSuggestion(uid, opts={}){
   const u = UNIT_META.find(m=>m.id===uid);
-  const btn = document.getElementById('sum-ai-btn-'+uid);
-  if(btn){ btn.disabled=true; btn.dataset.label=btn.textContent; btn.textContent='Drafting…'; }
   const s1 = unitStage1Summary(uid);
   const sys = `You are an expert instructional designer trained in Understanding by Design (backwards design) and Gradual Release of Responsibility, helping a theology teacher at Belen Jesuit Preparatory School (Ignatian pedagogy: cura personalis, magis, AMDG). Design assessments that require genuine transfer of understanding, not just recall.`;
-  const prompt = `Design a UNIT SUMMATIVE ASSESSMENT for this theology unit using backwards design.
+  let prompt = `Design a UNIT SUMMATIVE ASSESSMENT for this theology unit using backwards design.
 
 Return ONLY valid JSON (no markdown, no prose) in exactly this shape:
 {"type":"<one of: ${SUMMATIVE_TYPES.join(', ')}>","prompt":"<student-facing prompt, 2-4 sentences, requiring transfer of the understandings>","components":["<building block 1>","<building block 2>", "..."]}
@@ -3840,30 +4116,136 @@ UNIT GOALS: ${s1.goals.join(' | ') || '(none)'}
 ENDURING UNDERSTANDINGS: ${s1.understanding.join(' | ') || '(none)'}
 KNOWLEDGE: ${s1.knowledge.join(' | ') || '(none)'}
 SKILLS: ${s1.skills.join(' | ') || '(none)'}`;
-
-  try{
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json', 'x-api-key':claudeKey, 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
-      body: JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:1024, system:sys, messages:[{role:'user', content:prompt}] })
-    });
-    const data = await res.json();
-    if(data.error) throw new Error(data.error.message||'API error');
-    let txt = data.content?.[0]?.text || '';
-    txt = txt.replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,'').trim();
-    const start = txt.indexOf('{'), end = txt.lastIndexOf('}');
-    if(start>=0 && end>start) txt = txt.slice(start, end+1);
-    const parsed = JSON.parse(txt);
-    const s = getSummative(uid);
-    if(parsed.type && SUMMATIVE_TYPES.includes(parsed.type)) s.type = parsed.type;
-    if(parsed.prompt) s.prompt = String(parsed.prompt);
-    if(Array.isArray(parsed.components)) s.components = parsed.components.filter(Boolean).map(c=>({ id:uid+'-'+Date.now().toString(36)+Math.random().toString(36).slice(2,5), text:String(c) }));
-    saveState(); renderUnit();
-    toast('Assessment drafted — review and edit ✓');
-  }catch(err){
-    if(btn){ btn.disabled=false; btn.textContent=btn.dataset.label||'✨ Suggest with Claude'; }
-    toast('Couldn\'t draft: ' + (err.message||'error'));
+  if(opts.avoid && (opts.avoid.type || opts.avoid.prompt)){
+    prompt += `\n\nThe teacher has already seen the draft below and wants a DISTINCTLY DIFFERENT option — choose a different assessment TYPE and a genuinely different approach or angle. Do not just reword it:\nPREVIOUS TYPE: ${opts.avoid.type||'(none)'}\nPREVIOUS PROMPT: ${opts.avoid.prompt||'(none)'}`;
   }
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method:'POST',
+    headers:{ 'Content-Type':'application/json', 'x-api-key':claudeKey, 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
+    body: JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:1024, system:sys, messages:[{role:'user', content:prompt}] })
+  });
+  const data = await res.json();
+  if(data.error) throw new Error(data.error.message||'API error');
+  let txt = data.content?.[0]?.text || '';
+  txt = txt.replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,'').trim();
+  const start = txt.indexOf('{'), end = txt.lastIndexOf('}');
+  if(start>=0 && end>start) txt = txt.slice(start, end+1);
+  const parsed = JSON.parse(txt);
+  return {
+    type: (parsed.type && SUMMATIVE_TYPES.includes(parsed.type)) ? parsed.type : '',
+    prompt: parsed.prompt ? String(parsed.prompt) : '',
+    components: Array.isArray(parsed.components) ? parsed.components.filter(Boolean).map(String) : [],
+  };
+}
+
+// The live draft being reviewed in the modal (not yet applied to the unit).
+let summativeDraft = null;
+
+async function suggestSummativeWithClaude(uid){
+  if(!claudeKey){
+    toast('Add your Anthropic API key in the Claude panel first');
+    toggleClaudePanel();
+    return;
+  }
+  const btn = document.getElementById('sum-ai-btn-'+uid);
+  if(btn){ btn.disabled=true; btn.dataset.label=btn.textContent; btn.textContent='Drafting…'; }
+  try{
+    const parsed = await fetchSummativeSuggestion(uid);
+    summativeDraft = { uid, type:parsed.type, prompt:parsed.prompt, components:parsed.components };
+    openSummativeReview();
+  }catch(err){
+    toast('Couldn\'t draft: ' + (err.message||'error'));
+  }finally{
+    if(btn){ btn.disabled=false; btn.textContent=btn.dataset.label||'✨ Suggest with Claude'; }
+  }
+}
+
+function openSummativeReview(){
+  const o=document.getElementById('sum-review-overlay');
+  if(!o) return;
+  o.style.display='flex';
+  renderSummativeReview();
+}
+function closeSummativeReview(){
+  const o=document.getElementById('sum-review-overlay');
+  if(o) o.style.display='none';
+  summativeDraft=null;
+}
+function setDraftType(v){ if(summativeDraft) summativeDraft.type=v; }
+function setDraftPrompt(v){ if(summativeDraft) summativeDraft.prompt=v; }
+function setDraftComp(i,v){ if(summativeDraft&&summativeDraft.components) summativeDraft.components[i]=v; }
+function addDraftComp(){ if(!summativeDraft) return; summativeDraft.components=summativeDraft.components||[]; summativeDraft.components.push(''); renderSummativeReview(); setTimeout(()=>{ const ins=document.querySelectorAll('#sum-review-card .sr-comp-inp'); ins[ins.length-1]?.focus(); },20); }
+function removeDraftComp(i){ if(!summativeDraft) return; summativeDraft.components.splice(i,1); renderSummativeReview(); }
+
+async function regenSummative(){
+  if(!summativeDraft) return;
+  const uid=summativeDraft.uid;
+  const btn=document.getElementById('sum-review-regen');
+  if(btn){ btn.disabled=true; btn.textContent='Thinking…'; }
+  try{
+    const parsed = await fetchSummativeSuggestion(uid, {avoid:{type:summativeDraft.type, prompt:summativeDraft.prompt}});
+    summativeDraft.type=parsed.type; summativeDraft.prompt=parsed.prompt; summativeDraft.components=parsed.components;
+    renderSummativeReview();
+    toast('Here\'s a different idea ✨');
+  }catch(err){
+    toast('Couldn\'t suggest another: '+(err.message||'error'));
+    if(btn){ btn.disabled=false; btn.textContent='🔄 Suggest a different one'; }
+  }
+}
+
+function applySummativeReview(){
+  if(!summativeDraft) return;
+  const uid=summativeDraft.uid;
+  const s=getSummative(uid);
+  s.type = summativeDraft.type||'';
+  s.prompt = summativeDraft.prompt||'';
+  s.components = (summativeDraft.components||[]).map(t=>String(t).trim()).filter(Boolean)
+    .map(t=>({ id:uid+'-'+Date.now().toString(36)+Math.random().toString(36).slice(2,5), text:t }));
+  saveState();
+  closeSummativeReview();
+  if(typeof guideState!=='undefined' && guideState) renderGuide();
+  else if(currentUnit && document.getElementById('view-unit').classList.contains('active')) renderUnit();
+  toast('Assessment applied to the unit ✓');
+}
+
+function renderSummativeReview(){
+  const card=document.getElementById('sum-review-card');
+  if(!card||!summativeDraft) return;
+  const d=summativeDraft;
+  const u=UNIT_META.find(m=>m.id===d.uid);
+  const lbl='display:block;font-size:11px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--ink-3);margin:16px 0 6px';
+  const fld='width:100%;box-sizing:border-box;border:1px solid var(--rule);border-radius:7px;padding:8px 10px;font-size:13px;font-family:inherit;color:var(--ink);outline:none';
+  const typeOpts=['<option value="">Type…</option>'].concat(SUMMATIVE_TYPES.map(t=>`<option value="${t}" ${d.type===t?'selected':''}>${t}</option>`)).join('');
+  const comps=(d.components||[]).map((c,i)=>`
+    <div style="display:flex;gap:7px;align-items:center;margin-bottom:6px">
+      <span style="flex:0 0 auto;width:20px;height:20px;border-radius:50%;background:var(--navy);color:#fff;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center">${i+1}</span>
+      <input class="sr-comp-inp" value="${esc(c)}" oninput="setDraftComp(${i},this.value)" placeholder="Student can…" style="${fld}">
+      <button onclick="removeDraftComp(${i})" title="Remove" style="flex:0 0 auto;border:none;background:none;color:var(--ink-3);font-size:20px;cursor:pointer;line-height:1;padding:0 4px">&times;</button>
+    </div>`).join('');
+  card.innerHTML=`
+    <div style="padding:15px 20px;background:var(--navy);color:#fff;display:flex;justify-content:space-between;align-items:flex-start">
+      <div>
+        <div style="font-size:10px;letter-spacing:.09em;text-transform:uppercase;opacity:.65">Claude's suggestion · review before applying</div>
+        <div style="font-size:16px;font-weight:700;margin-top:2px">Suggested Assessment${u?` — ${esc(u.name)}`:''}</div>
+      </div>
+      <button onclick="closeSummativeReview()" style="background:none;border:none;color:rgba(255,255,255,.7);font-size:24px;cursor:pointer;line-height:1;padding:0">&times;</button>
+    </div>
+    <div style="padding:16px 20px 20px;max-height:58vh;overflow:auto">
+      <div style="font-size:12px;color:var(--ink-2);background:#FFFBF0;border:1px solid #F0E6C8;border-radius:7px;padding:9px 11px">Edit anything here — nothing changes in your unit until you press <b>Apply</b>. Want a different angle? Use <b>Suggest a different one</b>.</div>
+      <label style="${lbl}">Assessment type</label>
+      <select onchange="setDraftType(this.value)" style="${fld}">${typeOpts}</select>
+      <label style="${lbl}">Prompt <span style="text-transform:none;letter-spacing:0;font-weight:500;color:var(--ink-3)">— what students do to show transfer</span></label>
+      <textarea rows="4" oninput="setDraftPrompt(this.value)" style="${fld};resize:vertical">${esc(d.prompt||'')}</textarea>
+      <label style="${lbl}">Components to scaffold <span style="text-transform:none;letter-spacing:0;font-weight:500;color:var(--ink-3)">— building blocks each lesson works toward</span></label>
+      ${comps || '<div style="font-size:12px;color:var(--ink-3);font-style:italic;margin-bottom:6px">No components — add some below.</div>'}
+      <button onclick="addDraftComp()" style="margin-top:4px;background:none;border:1px dashed var(--rule-dark,#cfccc4);border-radius:6px;padding:6px 12px;font-size:12px;font-weight:600;color:var(--navy);cursor:pointer;font-family:inherit">+ Add component</button>
+    </div>
+    <div style="padding:13px 20px;border-top:1px solid var(--rule);display:flex;gap:8px;align-items:center;background:#FBFAF8">
+      <button id="sum-review-regen" onclick="regenSummative()" style="background:#fff;border:1px solid var(--navy);color:var(--navy);border-radius:7px;padding:8px 13px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit">🔄 Suggest a different one</button>
+      <div style="flex:1"></div>
+      <button onclick="closeSummativeReview()" style="background:none;border:none;color:var(--ink-2);font-size:13px;cursor:pointer;font-family:inherit;padding:8px 10px">Cancel</button>
+      <button onclick="applySummativeReview()" style="background:var(--navy);color:#fff;border:none;border-radius:7px;padding:8px 16px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit">✓ Apply to unit</button>
+    </div>`;
 }
 
 function summativeDesignerHTML(u){
@@ -6556,6 +6938,16 @@ init();
 <button id="claude-fab" onclick="toggleClaudePanel()" title="Ask Claude" style="position:fixed;bottom:24px;right:24px;z-index:199;width:52px;height:52px;border-radius:50%;background:var(--navy);border:none;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;transition:all .15s" onmouseenter="this.style.transform='scale(1.08)'" onmouseleave="this.style.transform='scale(1)'">
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
 </button>
+
+<!-- Suggested-assessment review modal -->
+<div id="sum-review-overlay" style="display:none;position:fixed;inset:0;z-index:400;background:rgba(20,18,15,.5);align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto">
+  <div id="sum-review-card" style="background:#fff;max-width:640px;width:100%;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.35);overflow:hidden"></div>
+</div>
+
+<!-- Guided Mode overlay -->
+<div id="guide-overlay" style="display:none;position:fixed;inset:0;z-index:380;background:var(--bg,#F3F1EC);overflow:auto">
+  <div id="guide-wrap"></div>
+</div>
 
 <!-- Claude Panel -->
 <div id="claude-panel" style="position:fixed;right:0;top:0;bottom:0;width:380px;background:var(--white);border-left:1px solid var(--rule);box-shadow:-4px 0 24px rgba(0,0,0,.12);z-index:200;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s ease">
