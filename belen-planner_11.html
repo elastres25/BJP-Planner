@@ -2134,11 +2134,17 @@ function renderDashboard(){
       ${list.map(todoRow).join('')}
     </div>` : '';
 
+  // Planning Outlook — the "planned days" horizon track as its own card.
+  const outlookCard = `
+    <div class="d-card">
+      <div class="d-card-h"><h2>Planning Outlook</h2><span class="d-meta">next classes · 2-week goal</span></div>
+      ${horizon}
+    </div>`;
+
   const anyTodo = items.length>0;
   const todoCard = `
     <div class="d-card">
       <div class="d-card-h"><h2>Teacher To-Do</h2><span class="d-meta">${items.filter(i=>!i.done).length} open</span></div>
-      ${horizon}
       <div class="d-add-row">
         <input id="d-todo-text" placeholder="Add your own task…" onkeydown="if(event.key==='Enter')addDashTodo()">
         <input id="d-todo-due" type="date" title="Optional due date" style="flex:0 0 auto;width:140px">
@@ -2270,10 +2276,9 @@ function renderDashboard(){
     </div>
     ${weekView}
     <div class="d-grid">
-      <div class="d-col">${todoCard}</div>
+      <div class="d-col">${outlookCard}${todoCard}${bottomMetrics}</div>
       <div class="d-col">${calCard}${assessCard}${progressCard}${grrCard}</div>
-    </div>
-    ${bottomMetrics}`;
+    </div>`;
 }
 
 // ── COURSE VIEW ───────────────────────────────────────────────────
