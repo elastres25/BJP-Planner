@@ -106,6 +106,12 @@ button, input, textarea, select { font-family: inherit; }
 .tb-btn:hover { background: rgba(255,255,255,.2); }
 .tb-btn.gold { background: var(--gold); border-color: var(--gold); color: var(--navy-dark); }
 .tb-btn.gold:hover { background: var(--gold-light); }
+.topbar-nav { display: flex; align-items: center; gap: 2px; flex-wrap: wrap; }
+.tb-nav { background: none; border: none; cursor: pointer; font-family: inherit; font-size: 12.5px; font-weight: 500; color: rgba(255,255,255,.7); padding: 5px 10px; border-radius: 5px; white-space: nowrap; transition: color .12s, background .12s; }
+.tb-nav:hover { color: #fff; background: rgba(255,255,255,.12); }
+.tb-nav.active { color: var(--gold-light); background: rgba(255,255,255,.08); font-weight: 600; }
+.tb-nav-go { background: var(--gold); color: var(--navy-dark); font-weight: 700; margin-left: 4px; }
+.tb-nav-go:hover { background: var(--gold-light); color: var(--navy-dark); }
 .tb-btn svg { width: 13px; height: 13px; }
 
 /* ── VIEWS ─────────────────────────────────────────────────────── */
@@ -874,6 +880,15 @@ body.simple-mode .dp-adv { display: none !important; }
   <div class="topbar-divider"></div>
   <!-- COURSE TOGGLE -->
   <div id="course-toggle" style="display:flex;gap:6px;padding:0 4px"></div>
+  <div class="topbar-divider"></div>
+
+  <!-- PERSISTENT NAV -->
+  <div class="topbar-nav">
+    <button class="tb-nav" onclick="nav('dashboard')">Dashboard</button>
+    <button class="tb-nav" onclick="nav('prep')">Prep Board</button>
+    <button class="tb-nav" onclick="nav('course')">Units</button>
+    <button class="tb-nav tb-nav-go" onclick="gotoNextLesson()">▶ Next lesson</button>
+  </div>
   <div class="topbar-divider"></div>
 
   <!-- BREADCRUMB NAV -->
@@ -1956,6 +1971,21 @@ function nav(target, unitId) {
   }
 }
 
+// Jump straight to the next lesson that needs work — the next upcoming
+// unplanned class, else the next scheduled class, from anywhere in the app.
+function gotoNextLesson(){
+  const today = isoToday();
+  const upcoming = collectClasses().filter(c=>c.date>=today);
+  const target = upcoming.find(c=>!c.planned) || upcoming[0];
+  if(target){
+    openGridDay(target.uid, target.wi, target.di);
+    toast(target.planned ? 'Your next class' : 'Next lesson to plan');
+  } else {
+    nav('prep');
+    toast('No upcoming dated lessons — set class dates to use this');
+  }
+}
+
 function setBreadcrumb(items) {
   const homeIcon = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:3px;vertical-align:-1px"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`;
   document.getElementById('breadcrumb').innerHTML = items.map((it,i) => {
@@ -2996,16 +3026,13 @@ function renderSemesterGrid() {
 }
 
 function openGridDay(uid, wi, di) {
-  currentUnit = uid;
+  nav('unit', uid);          // sets currentUnit and clears open indices
   currentWeek = wi;
   openWeekIdx = wi;
   openDayIdx  = di;
-  nav('unit', uid);
-  setTimeout(() => {
-    setUnitTab('plan', document.getElementById('utab-plan'));
-    renderUnit();
-    setTimeout(() => document.getElementById('daily-panel-'+wi)?.scrollIntoView({behavior:'smooth',block:'nearest'}), 100);
-  }, 50);
+  currentUnitTab = 'plan';   // day panels live on the Weekly Plan tab
+  renderUnit();              // re-render with the target day expanded
+  setTimeout(() => document.getElementById('daily-panel-'+wi)?.scrollIntoView({behavior:'smooth',block:'nearest'}), 120);
 }
 
 function unitCardHTML(u) {
