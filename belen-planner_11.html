@@ -1109,6 +1109,9 @@ body.simple-mode .dp-adv { display: none !important; }
 .d-grrlegend b{margin-left:auto;color:var(--ink);font-variant-numeric:tabular-nums;}
 @media (max-width:940px){.d-kpis{grid-template-columns:repeat(2,1fr);}.d-grid{grid-template-columns:1fr;}}
 @media (max-width:560px){.d-kpis{grid-template-columns:1fr;}}
+.d-more{margin-top:16px;}
+.d-more-btn{width:100%;background:none;border:1px dashed var(--rule-dark,#cfccc4);border-radius:10px;padding:11px 14px;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--ink-2);cursor:pointer;text-align:left;transition:all .12s;}
+.d-more-btn:hover{border-color:var(--navy);color:var(--navy);background:#fff;}
 
 /* ── PREP BOARD ── */
 .prep-intro{font-size:13px;color:var(--ink-2);margin:2px 0 16px;max-width:780px;line-height:1.55;}
@@ -1141,6 +1144,11 @@ body.simple-mode .dp-adv { display: none !important; }
 .prep-check.on .pk{background:#1D9E75;color:#fff;}
 .prep-check.off .pk{background:#DAD7D0;color:#fff;}
 .prep-check.off{color:var(--ink-3);}
+.prep-filter{display:flex;align-items:center;gap:7px;margin:0 0 16px;flex-wrap:wrap;}
+.prep-fchip{background:#fff;border:1px solid var(--rule);border-radius:999px;padding:5px 14px;font-size:12px;font-weight:600;color:var(--ink-2);cursor:pointer;font-family:inherit;transition:all .12s;}
+.prep-fchip:hover{border-color:var(--navy);color:var(--navy);}
+.prep-fchip.on{background:var(--navy);border-color:var(--navy);color:#fff;}
+.prep-filter-note{font-size:11px;color:var(--ink-3);margin-left:2px;}
 .prep-guided-cta{margin-top:9px;font-size:11px;font-weight:700;color:var(--navy);letter-spacing:.02em;opacity:.85;}
 .prep-stage:hover .prep-guided-cta{opacity:1;}
 @media(max-width:720px){.prep-stages{grid-template-columns:1fr;}}
@@ -1960,6 +1968,7 @@ function nav(target, unitId) {
     currentUnit = unitId;
     currentWeek = 0;
     openDayIdx = null; openWeekIdx = null;
+    unitViewMode = defaultUnitStage(unitId);  // land on the numbered stage layer, at the stage that needs work
     document.getElementById('view-unit').classList.add('active');
     const u = UNIT_META.find(m=>m.id===unitId);
     setBreadcrumb([
@@ -1969,6 +1978,18 @@ function nav(target, unitId) {
     ]);
     renderUnit();
   }
+}
+
+// Which stage to open a unit on: the first one that still needs work.
+function defaultUnitStage(uid){
+  const u = UNIT_META.find(m=>m.id===uid);
+  if(!u) return 'design';
+  const st = unitPrepStats(u);
+  if(st.designPct<100) return 'design';
+  if(st.pacePct<100)   return 'pace';
+  if(st.planPct<100)   return 'plan';
+  if(st.buildPct<100)  return 'build';
+  return 'plan';   // fully prepped → day-to-day planning is the useful landing
 }
 
 // Jump straight to the next lesson that needs work — the next upcoming
@@ -2002,6 +2023,8 @@ let dashCalMonth = null; // {y, m(0-based)} for the mini calendar; null = curren
 let dashWeekOffset = 0;   // 0 = current week for the "This Week" view
 function dashWeekStep(delta){ dashWeekOffset += delta; renderDashboard(); }
 function dashWeekToday(){ dashWeekOffset = 0; renderDashboard(); }
+let dashMoreOpen = false;   // Dashboard "More" section (progress, GRR, stats) collapsed by default
+function toggleDashMore(){ dashMoreOpen = !dashMoreOpen; renderDashboard(); }
 
 // A lesson counts as "planned" only when it's actually ready to teach:
 // it has a topic, at least one activity, and the activities (plus the
@@ -2494,8 +2517,19 @@ function renderDashboard(){
     </div>
     ${weekView}
     <div class="d-grid">
-      <div class="d-col">${outlookCard}${todoCard}${bottomMetrics}</div>
-      <div class="d-col">${calCard}${assessCard}${progressCard}${grrCard}</div>
+      <div class="d-col">${todoCard}${outlookCard}</div>
+      <div class="d-col">${calCard}${assessCard}</div>
+    </div>
+    <div class="d-more">
+      <button class="d-more-btn" onclick="toggleDashMore()">
+        <span>${dashMoreOpen ? '▾ Hide' : '▸ More'} — unit progress, teaching balance &amp; planning stats</span>
+      </button>
+      ${dashMoreOpen ? `<div class="d-more-body">
+        <div class="d-grid" style="margin-top:14px">
+          <div class="d-col">${progressCard}${grrCard}</div>
+          <div class="d-col">${bottomMetrics}</div>
+        </div>
+      </div>` : ''}
     </div>`;
 }
 
@@ -2507,6 +2541,7 @@ function renderDashboard(){
 // stage jumps straight to the tab where that work happens.
 function navUnitTab(uid, tab){
   nav('unit', uid);
+  unitViewMode = 'tabs';   // explicit tab jump → classic tabbed view
   currentUnitTab = tab;
   renderUnit();
   window.scrollTo(0,0);
@@ -2553,12 +2588,40 @@ function prepNextAction(st){
   return {t:'Fully prepped', stage:'build', done:true};
 }
 
+let prepFilter = 'current';   // 'current' | 'sem' | 'all'
+function setPrepFilter(f){ prepFilter = f; renderPrep(); }
+// The unit worth focusing on: the next upcoming lesson's unit, else the
+// first unit that isn't fully prepped.
+function prepCurrentUnitId(){
+  const today = isoToday();
+  const up = collectClasses().filter(c=>c.date>=today);
+  if(up.length) return (up.find(c=>!c.planned)||up[0]).uid;
+  for(const u of UNIT_META){ const st=unitPrepStats(u); if(st.designPct<100||st.pacePct<100||st.planPct<100||st.buildPct<100) return u.id; }
+  return UNIT_META[0] ? UNIT_META[0].id : null;
+}
+
 function renderPrep(){
   const el = document.getElementById('prep-wrap');
   if(!el) return;
   const co = getCourse();
   const N = UNIT_META.length;
+
+  // Roll-up counts always reflect ALL units, regardless of the filter.
   let uDesigned=0, uPlanned=0, uBuilt=0;
+  UNIT_META.forEach(u=>{ const st=unitPrepStats(u);
+    if(st.designPct===100) uDesigned++;
+    if(st.planPct===100 && st.totalDays) uPlanned++;
+    if(st.buildPct===100 && st.plannedDays) uBuilt++;
+  });
+
+  // Which units to show, per the filter.
+  const curId = prepCurrentUnitId();
+  const curUnit = UNIT_META.find(u=>u.id===curId);
+  const curSem = curUnit ? curUnit.sem : 1;
+  let showSet;
+  if(prepFilter==='current') showSet = new Set([curId]);
+  else if(prepFilter==='sem') showSet = new Set(UNIT_META.filter(u=>u.sem===curSem).map(u=>u.id));
+  else showSet = new Set(UNIT_META.map(u=>u.id));
 
   const barColor = pc => pc>=100 ? '#1D9E75' : (pc>0 ? co.color : '#DAD7D0');
 
@@ -2577,9 +2640,6 @@ function renderPrep(){
 
   const laneHTML = (u) => {
     const st = unitPrepStats(u);
-    if(st.designPct===100) uDesigned++;
-    if(st.planPct===100 && st.totalDays) uPlanned++;
-    if(st.buildPct===100 && st.plannedDays) uBuilt++;
     const na = prepNextAction(st);
     const designChecks = [
       {on:st.hasOutcomes, label:'Outcomes & essential questions'},
@@ -2614,10 +2674,17 @@ function renderPrep(){
 
   const sems = [[1,'Semester 1'],[2,'Semester 2']];
   const body = sems.map(([sem,lbl])=>{
-    const us = UNIT_META.filter(u=>u.sem===sem);
+    const us = UNIT_META.filter(u=>u.sem===sem && showSet.has(u.id));
     if(!us.length) return '';
     return `<div class="prep-sem">${lbl}</div>` + us.map(laneHTML).join('');
-  }).join('');
+  }).join('') || `<div class="prep-intro" style="margin-top:8px">Nothing to show for this filter.</div>`;
+
+  const fchips = [['current','Current unit'],['sem','This semester'],['all',`All units (${N})`]];
+  const filterBar = `
+    <div class="prep-filter">
+      ${fchips.map(([k,label])=>`<button class="prep-fchip ${prepFilter===k?'on':''}" onclick="setPrepFilter('${k}')">${label}</button>`).join('')}
+      ${prepFilter!=='all' ? `<span class="prep-filter-note">Showing ${showSet.size} of ${N} units${curUnit && prepFilter==='current' ? ` · U${curUnit.id} ${esc(curUnit.name)}` : ''}</span>` : ''}
+    </div>`;
 
   const header = `
     <div class="d-course-accent" style="background:${co.color}"></div>
@@ -2643,7 +2710,7 @@ function renderPrep(){
       <span style="margin-left:auto"><b>${uDesigned}</b>/${N} designed · <b>${uPlanned}</b>/${N} planned · <b>${uBuilt}</b>/${N} materials done</span>
     </div>`;
 
-  el.innerHTML = header + intro + legend + body;
+  el.innerHTML = header + intro + legend + filterBar + body;
 }
 
 // ── GUIDED MODE ───────────────────────────────────────────────────
@@ -3030,7 +3097,8 @@ function openGridDay(uid, wi, di) {
   currentWeek = wi;
   openWeekIdx = wi;
   openDayIdx  = di;
-  currentUnitTab = 'plan';   // day panels live on the Weekly Plan tab
+  unitViewMode = 'plan';     // open the lesson in the Plan stage
+  currentUnitTab = 'plan';   // (and on the Weekly Plan tab if tabs are shown)
   renderUnit();              // re-render with the target day expanded
   setTimeout(() => document.getElementById('daily-panel-'+wi)?.scrollIntoView({behavior:'smooth',block:'nearest'}), 120);
 }
@@ -4819,7 +4887,7 @@ function renderUnit() {
   // Body is either the classic tabs, or the numbered stage-page layer.
   const tabsBodyHTML = `
     ${unitOverviewPanelHTML(u.id)}
-    <div style="display:flex;gap:0;border-bottom:2px solid var(--rule);margin-bottom:14px">
+    <div style="display:flex;gap:0;border-bottom:2px solid var(--rule);margin-bottom:14px;align-items:center">
       ${[['overview','Unit Overview'],['plan','Weekly Plan'],['pacing','Pacing Guide']].map(([t,label]) => {
         const active = currentUnitTab === t;
         return `<button onclick="setUnitTab('${t}',this)" id="utab-${t}"
@@ -4827,6 +4895,8 @@ function renderUnit() {
           ${label}
         </button>`;
       }).join('')}
+      <button onclick="setUnitStage(defaultUnitStage(currentUnit))" title="Switch to the numbered stage view"
+        style="margin-left:auto;margin-bottom:6px;background:none;border:1px solid var(--rule);border-radius:6px;padding:5px 11px;font-size:12px;font-weight:600;color:var(--navy);cursor:pointer;font-family:inherit">◆ Stage view</button>
     </div>
     <div id="utab-content-overview" style="display:${currentUnitTab==='overview'?'block':'none'}">
       ${unitOverviewPageHTML(u, weeks, false)}
