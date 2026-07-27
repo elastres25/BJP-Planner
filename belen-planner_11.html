@@ -58,12 +58,30 @@ button, input, textarea, select { font-family: inherit; }
   .tb-btn { padding: 6px 10px; font-size: 11px; flex: 0 0 auto; }
 }
 @media (max-width: 680px) {
-  .belen-wordmark { display: none; }
   .topbar { gap: 8px; }
   .topbar-right { gap: 5px; }
-  .tb-btn { flex: 1 1 calc(50% - 5px); justify-content: center; padding: 8px 6px; white-space: nowrap; }
-  .tb-btn.gold { flex-basis: 100%; }
-  #sync-status { flex-basis: 100%; margin: 0 0 2px; }
+}
+/* Utility buttons (Save/Backup/Restore/Export/…) collapse behind a ⋯ menu on mobile */
+.topbar-tools { display: flex; align-items: center; gap: 8px; }
+.topbar-tools-btn { display: none; }
+@media (max-width: 820px) {
+  .topbar .belen-wordmark { display: none; }
+  .topbar .topbar-breadcrumb { display: none; }
+  .topbar-right { flex-basis: 100%; margin-left: 0; align-items: center; gap: 6px; }
+  .tb-search { flex: 1; min-width: 0; }
+  .topbar-tools-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    flex: 0 0 auto; width: 40px; height: 36px; border-radius: 8px;
+    background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.22);
+    color: #fff; font-size: 22px; line-height: 1; cursor: pointer; padding: 0;
+  }
+  .topbar-tools {
+    display: none; flex-basis: 100%; order: 5;
+    flex-direction: column; align-items: stretch; gap: 6px; margin-top: 6px;
+  }
+  .topbar-tools.open { display: flex; }
+  .topbar-tools .tb-btn { width: 100%; flex: none; justify-content: center; padding: 9px 10px; }
+  .topbar-tools #sync-status { order: 99; justify-content: center; margin: 2px 0 0; }
 }
 .belen-shield {
   flex-shrink: 0; width: 36px; height: 36px;
@@ -909,37 +927,44 @@ body.simple-mode .dp-adv { display: none !important; }
         onfocus="if(this.value.trim().length>=2)runGlobalSearch(this.value)">
       <div id="search-results" class="search-results" style="display:none"></div>
     </div>
-    <div id="sync-status" style="display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(255,255,255,.5);margin-right:4px">
-      <span id="sync-dot" style="width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.3);flex-shrink:0"></span>
-      <span id="sync-label">Not synced</span>
+    <button class="topbar-tools-btn" onclick="toggleTopbarTools()" aria-label="More tools" title="More tools">⋯</button>
+    <div class="topbar-tools" id="topbar-tools">
+      <div id="sync-status" style="display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(255,255,255,.5);margin-right:4px">
+        <span id="sync-dot" style="width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.3);flex-shrink:0"></span>
+        <span id="sync-label">Not synced</span>
+      </div>
+      <div class="topbar-meta">
+        <div class="topbar-teacher" id="header-teacher" contenteditable="true"
+          onblur="state.teacher=this.textContent.trim();saveState()"
+          title="Click to edit your name">Eric Lastres, SJ</div>
+        <div class="topbar-class" id="topbar-class-label">Theology 6 · THE 8100 · 2025–2026</div>
+      </div>
+      <button class="tb-btn gold" onclick="saveAll()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Save &amp; Sync
+      </button>
+      <button class="tb-btn" onclick="exportBackup()" title="Download all your data as a backup file">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Backup
+      </button>
+      <button class="tb-btn" onclick="document.getElementById('restore-file-input').click()" title="Restore data from a backup file">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Restore
+      </button>
+      <input type="file" id="restore-file-input" accept=".json" style="display:none" onchange="importBackup(event)">
+      <button class="tb-btn" onclick="exportPDF()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 18 15 15"/></svg>
+        Export PDF
+      </button>
+      <button class="tb-btn" onclick="exportGoogleDocPrompt()" title="Export every planned lesson into one continuous document — upload to Google Drive to open as an editable Google Doc">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="14" y2="17"/></svg>
+        Google Doc
+      </button>
+      <button class="tb-btn" onclick="resetCourseData()" title="Rebuild this course's data on this device (other course untouched)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+        Reset course
+      </button>
     </div>
-    <div class="topbar-meta">
-      <div class="topbar-teacher" id="header-teacher" contenteditable="true"
-        onblur="state.teacher=this.textContent.trim();saveState()"
-        title="Click to edit your name">Eric Lastres, SJ</div>
-      <div class="topbar-class" id="topbar-class-label">Theology 6 · THE 8100 · 2025–2026</div>
-    </div>
-    <button class="tb-btn" onclick="exportBackup()" title="Download all your data as a backup file">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-      Backup
-    </button>
-    <button class="tb-btn" onclick="document.getElementById('restore-file-input').click()" title="Restore data from a backup file">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-      Restore
-    </button>
-    <input type="file" id="restore-file-input" accept=".json" style="display:none" onchange="importBackup(event)">
-    <button class="tb-btn" onclick="exportPDF()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 18 15 15"/></svg>
-      Export PDF
-    </button>
-    <button class="tb-btn" onclick="exportGoogleDocPrompt()" title="Export every planned lesson into one continuous document — upload to Google Drive to open as an editable Google Doc">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="14" y2="17"/></svg>
-      Google Doc
-    </button>
-    <button class="tb-btn gold" onclick="saveAll()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-      Save &amp; Sync
-    </button>
   </div>
 </div>
 
@@ -1368,6 +1393,30 @@ function switchCourse(id) {
   pullFromSheets().then(ok => {
     if (ok) { toast('Loaded ' + getCourse().name + ' ✓'); renderDashboard(); }
   });
+}
+
+// Detect a course whose saved data got crossed with the other course
+// (an old sync bug): its stored units contain unit IDs that don't belong
+// to this course's unit list (and aren't custom units the user added).
+function courseDataLooksCrossed(){
+  try{
+    const baseIds = getCourse().unitMeta.map(u=>u.id);
+    const custom = (state.customUnits?.[activeCourse]||[]).map(u=>u.id);
+    const valid = new Set([...baseIds, ...custom]);
+    return Object.keys(state.units||{}).some(id => !valid.has(+id));
+  }catch(e){ return false; }
+}
+
+// Wipe THIS course's data on this device and rebuild its clean, empty units.
+// The other course is untouched.
+function resetCourseData(){
+  const co = getCourse();
+  if(!confirm(`Reset all data for ${co.name} on this device?\n\nThis rebuilds ${co.name} with its correct, empty units. Your other course is NOT affected. This can't be undone — use Backup first if unsure.`)) return;
+  localStorage.removeItem(co.storageKey);
+  state = loadState();
+  currentUnit=null; currentWeek=0; openDayIdx=null; openWeekIdx=null;
+  nav('dashboard');
+  toast(`${co.name} reset to a clean start ✓`);
 }
 
 function renderCourseToggle() {
@@ -1968,7 +2017,7 @@ function nav(target, unitId) {
     currentUnit = unitId;
     currentWeek = 0;
     openDayIdx = null; openWeekIdx = null;
-    unitViewMode = defaultUnitStage(unitId);  // land on the numbered stage layer, at the stage that needs work
+    unitViewMode = 'tabs';   // default to the classic tabbed unit view (stage view stays available on demand)
     document.getElementById('view-unit').classList.add('active');
     const u = UNIT_META.find(m=>m.id===unitId);
     setBreadcrumb([
@@ -2005,6 +2054,10 @@ function gotoNextLesson(){
     nav('prep');
     toast('No upcoming dated lessons — set class dates to use this');
   }
+}
+
+function toggleTopbarTools(){
+  document.getElementById('topbar-tools')?.classList.toggle('open');
 }
 
 function setBreadcrumb(items) {
@@ -2488,7 +2541,17 @@ function renderDashboard(){
     </div>`;
 
   // ============ ASSEMBLE ============
+  const crossWarn = courseDataLooksCrossed() ? `
+    <div style="background:#FBECEC;border:1px solid #E9B9B9;border-radius:10px;padding:12px 14px;margin-bottom:14px;display:flex;gap:11px;align-items:flex-start">
+      <span style="font-size:18px;line-height:1">⚠️</span>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:700;color:#8A2A2A">${esc(co.name)}'s data looks mixed with your other course</div>
+        <div style="font-size:12px;color:#7a4a4a;margin-top:2px;line-height:1.5">This device saved ${esc(co.name)} with units that don't belong to it (from an old sync glitch). Resetting rebuilds ${esc(co.name)} with its correct units — your other course is untouched.</div>
+      </div>
+      <button onclick="resetCourseData()" style="flex:0 0 auto;background:#8A2A2A;color:#fff;border:none;border-radius:7px;padding:8px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">Reset ${esc(co.name)}</button>
+    </div>` : '';
   el.innerHTML = `
+    ${crossWarn}
     <div class="d-course-accent" style="background:${co.color}"></div>
     <div class="d-head">
       <div>
@@ -3097,8 +3160,8 @@ function openGridDay(uid, wi, di) {
   currentWeek = wi;
   openWeekIdx = wi;
   openDayIdx  = di;
-  unitViewMode = 'plan';     // open the lesson in the Plan stage
-  currentUnitTab = 'plan';   // (and on the Weekly Plan tab if tabs are shown)
+  unitViewMode = 'tabs';     // open the lesson in the classic Weekly Plan tab
+  currentUnitTab = 'plan';
   renderUnit();              // re-render with the target day expanded
   setTimeout(() => document.getElementById('daily-panel-'+wi)?.scrollIntoView({behavior:'smooth',block:'nearest'}), 120);
 }
