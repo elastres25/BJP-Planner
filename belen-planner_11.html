@@ -61,26 +61,43 @@ button, input, textarea, select { font-family: inherit; }
   .topbar { gap: 8px; }
   .topbar-right { gap: 5px; }
 }
-/* Utility buttons (Save/Backup/Restore/Export/…) collapse behind a ⋯ menu on mobile */
+/* Header hides when scrolling down, returns when scrolling up */
+.topbar { transition: transform .25s ease; }
+.topbar.topbar-hidden { transform: translateY(-100%); }
+/* Utility cluster + ⋯ menu */
 .topbar-tools { display: flex; align-items: center; gap: 8px; }
 .topbar-tools-btn { display: none; }
+
+/* ── MOBILE: single-line header; everything else behind the ⋯ menu ── */
 @media (max-width: 820px) {
+  .topbar { gap: 8px 10px; padding: 6px 12px; flex-wrap: wrap; }
   .topbar .belen-wordmark { display: none; }
+  .topbar .topbar-divider { display: none; }
   .topbar .topbar-breadcrumb { display: none; }
-  .topbar-right { flex-basis: 100%; margin-left: 0; align-items: center; gap: 6px; }
-  .tb-search { flex: 1; min-width: 0; }
+  #course-toggle { padding: 0; }
+  /* the ⋯ button sits on the top line, pushed to the right */
   .topbar-tools-btn {
     display: inline-flex; align-items: center; justify-content: center;
-    flex: 0 0 auto; width: 40px; height: 36px; border-radius: 8px;
-    background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.22);
+    flex: 0 0 auto; margin-left: auto; width: 42px; height: 36px; border-radius: 9px;
+    background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.24);
     color: #fff; font-size: 22px; line-height: 1; cursor: pointer; padding: 0;
   }
-  .topbar-tools {
-    display: none; flex-basis: 100%; order: 5;
-    flex-direction: column; align-items: stretch; gap: 6px; margin-top: 6px;
+  /* collapsed by default — only the crest + course toggle + ⋯ show */
+  .topbar .topbar-nav, .topbar .topbar-right { display: none; }
+  /* when the menu is open, stack nav + search + tools full-width below */
+  .topbar.menu-open .topbar-nav {
+    display: flex; flex-basis: 100%; order: 20; flex-wrap: wrap; gap: 4px;
+    border-top: 1px solid rgba(255,255,255,.15); padding-top: 8px; margin-top: 4px;
   }
-  .topbar-tools.open { display: flex; }
-  .topbar-tools .tb-btn { width: 100%; flex: none; justify-content: center; padding: 9px 10px; }
+  .topbar.menu-open .topbar-nav .tb-nav { flex: 1 1 40%; text-align: center; }
+  .topbar.menu-open .topbar-nav .tb-nav-go { flex-basis: 100%; }
+  .topbar.menu-open .topbar-right {
+    display: flex; flex-basis: 100%; order: 21; margin: 0;
+    flex-direction: column; align-items: stretch; gap: 7px;
+  }
+  .topbar.menu-open .tb-search { display: flex; width: 100%; }
+  .topbar.menu-open .topbar-tools { display: flex; flex-direction: column; align-items: stretch; gap: 7px; }
+  .topbar-tools .tb-btn { width: 100%; flex: none; justify-content: center; padding: 10px; }
   .topbar-tools #sync-status { order: 99; justify-content: center; margin: 2px 0 0; }
 }
 .belen-shield {
@@ -898,6 +915,7 @@ body.simple-mode .dp-adv { display: none !important; }
   <div class="topbar-divider"></div>
   <!-- COURSE TOGGLE -->
   <div id="course-toggle" style="display:flex;gap:6px;padding:0 4px"></div>
+  <button class="topbar-tools-btn" onclick="toggleMobileMenu()" aria-label="Menu" title="Menu">⋯</button>
   <div class="topbar-divider"></div>
 
   <!-- PERSISTENT NAV -->
@@ -927,7 +945,6 @@ body.simple-mode .dp-adv { display: none !important; }
         onfocus="if(this.value.trim().length>=2)runGlobalSearch(this.value)">
       <div id="search-results" class="search-results" style="display:none"></div>
     </div>
-    <button class="topbar-tools-btn" onclick="toggleTopbarTools()" aria-label="More tools" title="More tools">⋯</button>
     <div class="topbar-tools" id="topbar-tools">
       <div id="sync-status" style="display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(255,255,255,.5);margin-right:4px">
         <span id="sync-dot" style="width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.3);flex-shrink:0"></span>
@@ -2056,9 +2073,26 @@ function gotoNextLesson(){
   }
 }
 
-function toggleTopbarTools(){
-  document.getElementById('topbar-tools')?.classList.toggle('open');
+function toggleMobileMenu(){
+  document.querySelector('.topbar')?.classList.toggle('menu-open');
 }
+function closeMobileMenu(){
+  document.querySelector('.topbar')?.classList.remove('menu-open');
+}
+// Hide the header on scroll-down, reveal on scroll-up (maximizes screen space).
+let _lastScrollY = 0;
+window.addEventListener('scroll', () => {
+  const tb = document.querySelector('.topbar');
+  if (!tb) return;
+  const y = window.scrollY || document.documentElement.scrollTop || 0;
+  if (y > _lastScrollY && y > 90) {        // scrolling down, past the header
+    tb.classList.add('topbar-hidden');
+    tb.classList.remove('menu-open');
+  } else if (y < _lastScrollY) {           // scrolling up
+    tb.classList.remove('topbar-hidden');
+  }
+  _lastScrollY = y;
+}, { passive: true });
 
 function setBreadcrumb(items) {
   const homeIcon = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:3px;vertical-align:-1px"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`;
