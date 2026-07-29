@@ -687,6 +687,51 @@ body.simple-mode .dp-adv { display: none !important; }
 .sp-add { background:none; border:1px dashed var(--rule-dark,#cfccc4); border-radius:7px; padding:6px 12px;
   font-family:inherit; font-size:12px; font-weight:600; color:var(--navy); cursor:pointer; }
 .sp-add:hover { border-color:var(--navy); background:#fff; }
+.sp-band { color:#fff; vertical-align:top; padding:0; width:120px; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+.sp-band-inner { padding:10px 12px; font-weight:800; font-size:13px; }
+.sp-band-inner span { display:block; font-weight:600; font-size:11px; opacity:.9; margin-top:3px; line-height:1.3; }
+.sp-band-inner .sp-band-add { margin-top:9px; display:inline-block; background:rgba(255,255,255,.2); border:1px solid rgba(255,255,255,.35); color:#fff; border-radius:6px; padding:3px 9px; font-size:11px; font-weight:600; cursor:pointer; font-family:inherit; }
+.sp-num { font-weight:700; font-variant-numeric:tabular-nums; }
+
+/* ── DAILY LESSON (school format) ── */
+.dl-head { background:var(--navy); color:#fff; padding:13px 16px; }
+.dl-head-top { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.dl-title { font-size:15px; font-weight:700; }
+.dl-time { font-size:12px; font-weight:700; background:rgba(255,255,255,.15); padding:3px 10px; border-radius:999px; white-space:nowrap; }
+.dl-time.over { background:#993C1D; }
+.dl-meta { display:flex; gap:14px; flex-wrap:wrap; margin:9px 0 8px; }
+.dl-meta label { font-size:11px; color:rgba(255,255,255,.7); display:inline-flex; align-items:center; gap:5px; }
+.dl-meta input { background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.22); border-radius:5px; color:#fff; font-size:11px; padding:3px 7px; outline:none; font-family:inherit; }
+.dl-meta input[type=number] { width:52px; text-align:center; }
+.dl-topic { width:100%; box-sizing:border-box; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.22); border-radius:6px; color:#fff; font-size:14px; font-weight:600; padding:7px 10px; outline:none; font-family:inherit; }
+.dl-topic::placeholder { color:rgba(255,255,255,.5); }
+.dl-table { width:100%; border-collapse:collapse; }
+.dl-lbl { background:#FBE2A3; border:1px solid #E4C97A; padding:9px 11px; width:190px; vertical-align:top; font-size:12.5px; font-weight:700; color:#4A3B12; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+.dl-lbl small { display:block; font-weight:500; font-size:10px; color:#8A7433; margin-top:3px; line-height:1.35; }
+.dl-banner { background:#F2C75C; border:1px solid #E4C97A; padding:7px 12px; font-size:13px; font-weight:800; color:var(--navy); letter-spacing:.02em; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+.dl-cell { border:1px solid #E4C97A; padding:8px 10px; vertical-align:top; background:#fff; }
+.dl-li { display:flex; align-items:flex-start; gap:8px; padding:3px 0; font-size:13px; color:var(--ink); }
+.dl-li span { flex:1; line-height:1.4; }
+.dl-li button { flex:0 0 auto; border:none; background:none; color:var(--ink-3); font-size:15px; line-height:1; cursor:pointer; padding:0 2px; }
+.dl-li button:hover { color:var(--crit,#c0392b); }
+.dl-add, .dl-1line { width:100%; box-sizing:border-box; border:1px solid transparent; border-radius:6px; padding:6px 8px; font-family:inherit; font-size:13px; color:var(--ink); outline:none; margin-top:3px; }
+.dl-add { border-bottom:1px dashed var(--rule-dark,#cfccc4); border-radius:0; }
+.dl-add:focus, .dl-1line:focus { border-color:var(--navy); background:#F7F9FC; border-radius:6px; }
+.dl-1line:hover { border-color:var(--rule); }
+.dl-acts { padding:6px 10px; }
+.dl-act { display:flex; align-items:center; gap:7px; padding:4px 0; }
+.dl-actnum { flex:0 0 auto; font-weight:800; font-size:13px; color:var(--navy); width:20px; text-align:right; font-variant-numeric:tabular-nums; }
+.dl-actinp { flex:1; min-width:0; border:1px solid transparent; border-radius:6px; padding:6px 8px; font-family:inherit; font-size:13px; color:var(--ink); outline:none; }
+.dl-actinp:hover { border-color:var(--rule); } .dl-actinp:focus { border-color:var(--navy); background:#F7F9FC; }
+.dl-actphase { flex:0 0 auto; border:none; border-radius:5px; padding:4px 6px; font-family:inherit; font-size:10.5px; font-weight:700; cursor:pointer; outline:none; }
+.dl-actmin { flex:0 0 auto; width:46px; border:1px solid var(--rule); border-radius:5px; padding:4px; font-family:inherit; font-size:12px; text-align:center; outline:none; }
+.dl-minlbl { font-size:10px; color:var(--ink-3); }
+.dl-actx { flex:0 0 auto; border:none; background:none; color:var(--ink-3); font-size:17px; line-height:1; cursor:pointer; padding:0 3px; }
+.dl-actx:hover { color:var(--crit,#c0392b); }
+.dl-addact { margin-top:5px; background:none; border:1px dashed var(--rule-dark,#cfccc4); border-radius:6px; padding:5px 11px; font-family:inherit; font-size:11.5px; font-weight:600; color:var(--navy); cursor:pointer; }
+.dl-addact:hover { border-color:var(--navy); background:#F7F9FC; }
+.dl-empty { font-size:12px; color:var(--ink-3); font-style:italic; padding:2px 0; }
+@media print { .dl-actx, .dl-add, .dl-addact { display:none !important; } .dl-head { background:var(--navy) !important; } }
 .act-section-label {
   font-size: 10px; font-weight: 600; letter-spacing: .08em;
   text-transform: uppercase; color: var(--ink-3);
@@ -4657,85 +4702,81 @@ function pacingGuideHTML(u, weeks) {
 // general theme only (no learning targets or detailed planning). Every
 // row is live — editing Content/HW here writes straight to that lesson,
 // and "open" jumps to the full lesson plan.
-function savePaceCell(wi, di, field, val){
-  currentWeek = wi;
-  const d = getDay(di);
+function savePaceCellU(uid, wi, di, field, val){
+  const d = state.units[uid][wi].days[di];
   d[field] = (val||'').trim();
   saveState();
 }
-function paceAddDay(wi){ addDay(wi); }
+function paceAddDayU(uid){
+  const weeks = state.units[uid] || [];
+  const wi = Math.max(0, weeks.length-1);
+  currentUnit = uid; currentWeek = wi;
+  addDay(wi);
+}
 
-function simplePacingHTML(u, weeks){
-  const rows = [];
-  let lessonNo = 0;
-  weeks.forEach((w, wi) => (w.days||[]).forEach((d, di) => {
-    lessonNo++;
-    rows.push({d, wi, di, n:lessonNo, weekLabel:w.weekLabel});
-  }));
+// Whole-course pacing map: every unit is a colored band on the left with
+// its class days listed. General themes only — edit Content or HW here and
+// it saves straight to that lesson; "open" jumps to the full plan.
+function simplePacingHTML(){
+  const blocks = UNIT_META.map(u => {
+    const weeks = state.units[u.id] || [];
+    const days = [];
+    weeks.forEach((w, wi) => (w.days||[]).forEach((d, di) => days.push({d, wi, di})));
+    return { u, days };
+  }).filter(b => b.days.length);
 
-  const inp = (val, wi, di, field, ph) =>
-    `<input class="sp-inp" value="${esc(val||'')}" placeholder="${esc(ph||'')}"
-       onchange="savePaceCell(${wi},${di},'${field}',this.value)">`;
+  const co = getCourse();
+  const inp = (val, uid, wi, di, field, ph) =>
+    `<input class="sp-inp" value="${esc(String(val||'').replace(/<[^>]*>/g,' ').trim())}" placeholder="${esc(ph||'')}"
+       onchange="savePaceCellU(${uid},${wi},${di},'${field}',this.value)">`;
 
-  const assessOpts = ['', 'Quiz','Test','Project','Essay','Presentation','Exit Ticket'];
-
-  const body = rows.map(r => {
-    const d = r.d;
-    const date = d.dateA || d.dateB || '';
-    const planned = dayIsPlanned(d);
-    return `<tr>
-      <td class="sp-td sp-date">
-        <input type="date" class="sp-inp sp-dateinp" value="${esc(d.dateA||'')}"
-          onchange="savePaceCell(${r.wi},${r.di},'dateA',this.value)">
-      </td>
-      <td class="sp-td sp-mid"><span class="sp-daylabel">${esc(d.label||('Day '+r.n))}</span></td>
-      <td class="sp-td sp-mid">${u.id}</td>
-      <td class="sp-td sp-mid">${r.n}</td>
-      <td class="sp-td">${inp(d.topic, r.wi, r.di, 'topic', 'General theme for the day…')}</td>
-      <td class="sp-td sp-assess">
-        <select class="sp-inp sp-sel" onchange="savePaceCell(${r.wi},${r.di},'assessType',this.value)">
-          ${assessOpts.map(o=>`<option value="${o}" ${(d.assessType||'')===o?'selected':''}>${o||'—'}</option>`).join('')}
-        </select>
-      </td>
-      <td class="sp-td">${inp(d.homework, r.wi, r.di, 'homework', 'Homework…')}</td>
-      <td class="sp-td sp-mid">
-        <span class="sp-status ${planned?'ok':''}" title="${planned?'Lesson fully planned':'Not fully planned yet'}">${planned?'✓':'○'}</span>
-        <button class="sp-open" onclick="openGridDay(${u.id},${r.wi},${r.di})" title="Open the full lesson plan">open →</button>
-      </td>
-    </tr>`;
+  let globalDay = 0;
+  const body = blocks.map(b => {
+    const c = COLOR_MAP[b.u.color] || {br:'#5B6470', bg:'#eee', tx:'#333'};
+    let lessonNo = 0;
+    return b.days.map((row, idx) => {
+      globalDay++; lessonNo++;
+      const d = row.d, planned = dayIsPlanned(d);
+      const band = idx === 0
+        ? `<td class="sp-band" rowspan="${b.days.length}" style="background:${c.br}">
+             <div class="sp-band-inner">Unit ${b.u.id}<span>${esc(b.u.name)}</span>
+               <button class="sp-band-add" onclick="paceAddDayU(${b.u.id})">+ day</button></div>
+           </td>` : '';
+      return `<tr>
+        ${band}
+        <td class="sp-td sp-mid">${globalDay}</td>
+        <td class="sp-td sp-mid sp-num">${b.u.id}.${lessonNo}</td>
+        <td class="sp-td sp-content">${inp(d.topic, b.u.id, row.wi, row.di, 'topic', 'General theme for the day…')}</td>
+        <td class="sp-td">${inp(d.homework, b.u.id, row.wi, row.di, 'homework', 'Homework…')}</td>
+        <td class="sp-td sp-mid">
+          <span class="sp-status ${planned?'ok':''}" title="${planned?'Fully planned':'Not fully planned yet'}">${planned?'✓':'○'}</span>
+          <button class="sp-open" onclick="openGridDay(${b.u.id},${row.wi},${row.di})">open →</button>
+        </td>
+      </tr>`;
+    }).join('');
   }).join('');
 
   return `
   <div class="sp-wrap">
     <div class="sp-head">
       <div>
-        <h2 class="sp-title">Pacing Guide — ${esc(u.name)}</h2>
-        <div class="sp-sub">The big-picture map: general themes only. Edit Content or HW here and it saves straight to that lesson.</div>
+        <h2 class="sp-title">Pacing Guide — ${esc(co.name)}</h2>
+        <div class="sp-sub">The big-picture map across every unit: general themes only. Edit Content or HW here and it saves straight to that lesson.</div>
       </div>
-      <div class="sp-actions">
-        <button class="sp-btn" onclick="exportPacingGuidePDF()">Export</button>
-      </div>
+      <div class="sp-actions"><button class="sp-btn" onclick="exportPacingGuidePDF()">Export</button></div>
     </div>
     <div class="sp-scroll">
       <table class="sp-table">
-        <thead>
-          <tr>
-            <th style="width:132px">Date</th>
-            <th style="width:74px">Day</th>
-            <th style="width:52px">Unit</th>
-            <th style="width:62px">Lesson</th>
-            <th>Content <span class="sp-th-hint">— general theme</span></th>
-            <th style="width:118px">Assessment</th>
-            <th style="width:210px">HW</th>
-            <th style="width:104px">Plan</th>
-          </tr>
-        </thead>
-        <tbody>${body || `<tr><td class="sp-td" colspan="8" style="text-align:center;color:var(--ink-3);font-style:italic">No class days yet — add one below.</td></tr>`}</tbody>
+        <thead><tr>
+          <th style="width:120px">Unit</th>
+          <th style="width:54px">Day</th>
+          <th style="width:60px">#</th>
+          <th>Content <span class="sp-th-hint">— general theme</span></th>
+          <th style="width:200px">HW</th>
+          <th style="width:104px">Plan</th>
+        </tr></thead>
+        <tbody>${body || `<tr><td class="sp-td" colspan="6" style="text-align:center;color:var(--ink-3);font-style:italic">No class days yet.</td></tr>`}</tbody>
       </table>
-    </div>
-    <div class="sp-addrow">
-      ${weeks.map((w,wi)=>`<button class="sp-add" onclick="paceAddDay(${wi})">+ Add day to ${esc(w.weekLabel)}</button>`).join('')}
-      <button class="sp-add" onclick="addWeek()">+ Add week</button>
     </div>
   </div>`;
 }
@@ -5434,424 +5475,101 @@ function moveDayTo(srcWi, srcDi, destWi, destDi) {
 }
 
 function dailyPanelHTML(d, i) {
-  const blockDur = d.blockDuration || 90;
-  const totalMins = (d.activities||[]).reduce((s,a)=>s+a.dur,0) + (d.journalOff ? 0 : (d.journalDur ?? 3)); // + journal (0 if cancelled)
-  const pct = Math.min(100, Math.round(totalMins/blockDur*100));
-  const barColor = pct > 100 ? '#993C1D' : pct > 88 ? '#854F0B' : '#1B3A6B';
   const u = UNIT_META.find(m=>m.id===currentUnit);
+  const blockDur = d.blockDuration || 90;
+  const usedMins = (d.activities||[]).reduce((s,a)=>s+(a.dur||0),0);
+  const strip = s => String(s||'').replace(/<[^>]*>/g,' ').replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim();
+
+  // Number activities in true teaching order (by phase), then bucket them.
+  const seq = {opening:0,focus:1,guided:2,independent:3,closer:4};
+  const ordered = (d.activities||[]).map((a,ai)=>({a,ai,s:seq[normalizePhase(a.grr)] ?? 9}))
+    .sort((x,y)=> x.s-y.s || x.ai-y.ai);
+  ordered.forEach((o,n)=>o.num=n+1);
+
+  const actRow = o => {
+    const a=o.a, ai=o.ai, ph=normalizePhase(a.grr), c=PHASE_COLORS[ph]||{bg:'#888',tx:'#fff'};
+    return `<div class="dl-act">
+      <span class="dl-actnum">${o.num}.</span>
+      <input class="dl-actinp" value="${esc(strip(a.name)|| '')}" placeholder="What happens…"
+        onchange="updateActName(${i},${ai},this.value)">
+      <select class="dl-actphase" style="background:${c.bg};color:${c.tx}" onchange="updateActPhase(${i},${ai},this.value)" title="Phase">
+        ${PHASES.map(p=>`<option value="${p.v}" ${ph===p.v?'selected':''}>${p.label}</option>`).join('')}
+      </select>
+      <input class="dl-actmin" type="number" min="0" max="120" value="${a.dur||0}" onchange="updateActDur(${i},${ai},+this.value)" title="minutes">
+      <span class="dl-minlbl">min</span>
+      <button class="dl-actx" onclick="removeAct(${i},${ai})" title="Remove">&times;</button>
+    </div>`;
+  };
+  const bucket = name => ordered.filter(o=>phaseBucket(o.a.grr)===name).map(actRow).join('')
+    || `<div class="dl-empty">Nothing here yet.</div>`;
+
+  const goalRows = (d.teacherGoals||[]).map((g,gi)=>`<div class="dl-li"><span>${esc(strip(g))}</span><button onclick="dlDelGoal(${i},${gi})">&times;</button></div>`).join('');
+  const tgtRows  = (d.targets||[]).map((t,ti)=>`<div class="dl-li"><span>I can ${esc(strip(t).replace(/^I can\s*/i,''))}</span><button onclick="dlDelTarget(${i},${ti})">&times;</button></div>`).join('');
+  const resRows  = (d.materials||[]).map((m,ri)=>`<div class="dl-li"><span>${esc(strip(m))}</span><button onclick="dlDelRes(${i},${ri})">&times;</button></div>`).join('');
 
   return `
-  <!-- Print header (hidden on screen) -->
   <div class="belen-print-header">
-    <svg viewBox="0 0 36 44" fill="none" width="44" height="54"><path d="M18 2L3 8v14c0 10 7 18 15 20 8-2 15-10 15-20V8L18 2z" fill="#C9991A"/><path d="M18 5L5 10.5v11.5c0 8.5 5.5 15 13 17 7.5-2 13-8.5 13-17V10.5L18 5z" fill="#1B3A6B"/><text x="18" y="26" text-anchor="middle" font-family="serif" font-size="13" font-weight="bold" fill="#C9991A">BJ</text></svg>
-    <div>
-      <div style="font-size:14px;font-weight:600;color:var(--navy)">Belen Jesuit Preparatory School</div>
-      <div class="print-meta">
-        <span>${state.teacher||'Eric Lastres, SJ'} · Theology 6 · THE 8100</span>
-        <span>Unit ${currentUnit}: ${u.name} · ${d.label} · ${d.date||''}</span>
-      </div>
-    </div>
+    <svg viewBox="0 0 36 44" fill="none" width="40" height="48"><path d="M18 2L3 8v14c0 10 7 18 15 20 8-2 15-10 15-20V8L18 2z" fill="#C9991A"/><path d="M18 5L5 10.5v11.5c0 8.5 5.5 15 13 17 7.5-2 13-8.5 13-17V10.5L18 5z" fill="#1B3A6B"/><text x="18" y="26" text-anchor="middle" font-family="serif" font-size="13" font-weight="bold" fill="#C9991A">BJ</text></svg>
+    <div><div style="font-size:14px;font-weight:600;color:var(--navy)">Belen Jesuit Preparatory School</div>
+    <div class="print-meta"><span>${esc(state.teacher||'Eric Lastres, SJ')} · ${esc(getCourse().name)}</span><span>Unit ${currentUnit}: ${u?esc(u.name):''} · ${esc(d.label)}</span></div></div>
   </div>
 
-  <div class="dp-head">
-    <div class="dp-head-left" style="flex:1">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap">
-        <div class="dp-day-label">${d.label} · Unit ${currentUnit}</div>
-        <div style="display:flex;align-items:center;gap:6px">
-          <span style="font-size:11px;color:rgba(255,255,255,.6);font-weight:600">A Block:</span>
-          <input style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:5px;color:white;font-size:11px;padding:3px 8px;outline:none;width:130px;font-family:inherit"
-            type="date" value="${esc(d.dateA||'')}" onchange="updateDay(${i},'dateA',this.value);updateDayCard(${i})">
-        </div>
-        <div style="display:flex;align-items:center;gap:6px">
-          <span style="font-size:11px;color:rgba(255,255,255,.6);font-weight:600">B Block:</span>
-          <input style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:5px;color:white;font-size:11px;padding:3px 8px;outline:none;width:130px;font-family:inherit"
-            type="date" value="${esc(d.dateB||'')}" onchange="updateDay(${i},'dateB',this.value);updateDayCard(${i})">
-        </div>
-        <div style="display:flex;align-items:center;gap:5px">
-          <span style="font-size:11px;color:rgba(255,255,255,.6)">Block:</span>
-          <input type="number" min="30" max="180" value="${d.blockDuration||90}"
-            style="width:52px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:5px;color:white;font-size:11px;font-weight:600;padding:3px 6px;outline:none;text-align:center;font-family:inherit"
-            onchange="updateDay(${i},'blockDuration',+this.value);refreshTracker(${i})">
-          <span style="font-size:11px;color:rgba(255,255,255,.6)">min</span>
-        </div>
-      </div>
-      <div style="font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:4px">Topic</div>
-      <div contenteditable="true"
-        style="font-size:15px;font-weight:600;color:var(--gold-light);outline:none;width:100%;line-height:1.3;margin-bottom:10px;font-family:'Inter',sans-serif"
-        data-placeholder="Day topic (e.g. The Hierarchy of the Church)…"
-        onblur="updateDay(${i},'topic',this.innerText.trim());updateDayCard(${i})"
-      >${esc(d.topic||'')}</div>
-      <div style="font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--gold-light);margin-bottom:5px;opacity:.7">Essential Question</div>
-      <div class="dp-eq-input" contenteditable="true"
-        data-placeholder="The big question driving today's entire class…"
-        onblur="updateDay(${i},'eq',this.innerText.trim());updateDayCard(${i})"
-      >${esc(d.eq)}</div>
+  <div class="dl-head">
+    <div class="dl-head-top">
+      <div class="dl-title">${esc(d.label)} · Unit ${currentUnit}${u?` — ${esc(u.name)}`:''}</div>
+      <span class="dl-time ${usedMins>blockDur?'over':''}">${usedMins} / ${blockDur} min</span>
     </div>
-    <div class="dp-head-right">
-      <button onclick="addTaskFromDay(${i})"
-        title="Add a task about this lesson to your dashboard To-Do list"
-        style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);color:#fff;font-size:11px;font-weight:600;border-radius:5px;padding:5px 10px;cursor:pointer;font-family:inherit"
-        onmouseenter="this.style.background='rgba(255,255,255,.22)'" onmouseleave="this.style.background='rgba(255,255,255,.12)'">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
-        + To-Do
-      </button>
-      <button class="dp-simple-toggle ${simpleMode?'on':''}" onclick="toggleSimpleMode()"
-        title="Simple mode (beta): hides deep-planning sections and shows activities as a clean table. Nothing is deleted — toggle back anytime.">
-        Simple mode <span class="beta-tag">BETA</span>
-      </button>
-      <button class="dp-close" onclick="toggleDay(${i})">Close ×</button>
+    <div class="dl-meta">
+      <label>A block <input type="date" value="${esc(d.dateA||'')}" onchange="updateDay(${i},'dateA',this.value);updateDayCard(${i})"></label>
+      <label>B block <input type="date" value="${esc(d.dateB||'')}" onchange="updateDay(${i},'dateB',this.value);updateDayCard(${i})"></label>
+      <label>Block <input type="number" min="30" max="180" value="${blockDur}" onchange="updateDay(${i},'blockDuration',+this.value);renderUnit()"> min</label>
     </div>
+    <input class="dl-topic" value="${esc(strip(d.topic))}" placeholder="Lesson topic / title…" onchange="updateDay(${i},'topic',this.value);updateDayCard(${i})">
   </div>
 
-  <!-- TOPIC DESCRIPTION (synced with pacing guide) — collapsible -->
-  <div style="border-bottom:1px solid var(--rule)">
-    <div onclick="toggleCollapse('topicdesc-body-${i}','topicdesc-chev-${i}','topicdesc-hint-${i}')"
-      style="display:flex;align-items:center;justify-content:space-between;padding:9px 20px;cursor:pointer;background:#FAFAF8;user-select:none"
-      onmouseenter="this.style.background='#F2F0EB'" onmouseleave="this.style.background='#FAFAF8'">
-      <div style="display:flex;align-items:center;gap:8px">
-        <span id="topicdesc-chev-${i}" style="font-size:13px;color:var(--ink-3);transition:transform .15s">›</span>
-        <span style="font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)">Description of Content</span>
-        <span style="font-size:10px;color:var(--ink-3);font-style:italic">— appears in pacing guide</span>
-        ${(d.topicDesc && d.topicDesc.replace(/<[^>]*>/g,'').trim()) ? '<span style="width:7px;height:7px;border-radius:50%;background:var(--gold);flex-shrink:0" title="Has content"></span>' : ''}
-      </div>
-      <span id="topicdesc-hint-${i}" style="font-size:11px;color:var(--ink-3)">Click to expand</span>
-    </div>
-    <div id="topicdesc-body-${i}" style="display:none;padding:12px 20px 14px;background:var(--white)">
-      ${rteHTML(`rte-topic-${i}`, d.topicDesc||'', 'What will be taught in this lesson — topic, approach, key content…', i, -1, 'topicDesc', false)}
-    </div>
-  </div>
+  <table class="dl-table"><tbody>
+    <tr><td class="dl-lbl">Goals</td><td class="dl-cell">
+      ${goalRows}
+      <input id="chipin-dlgoal-${i}" class="dl-add" placeholder="+ Add a goal, press Enter" onkeydown="if(event.key==='Enter'){event.preventDefault();dlAddGoal(${i},this.value)}">
+    </td></tr>
+    <tr><td class="dl-lbl">Learning Targets<small>&ldquo;I can…&rdquo; statements</small></td><td class="dl-cell">
+      ${tgtRows}
+      <input id="chipin-dltgt-${i}" class="dl-add" placeholder="+ Add a target, press Enter" onkeydown="if(event.key==='Enter'){event.preventDefault();dlAddTarget(${i},this.value)}">
+    </td></tr>
 
-  <!-- BRAINSTORMING -->
-  <div class="dp-adv" style="border-bottom:1px solid var(--rule)">
-    <div onclick="toggleCollapse('brainstorm-body-${i}','brainstorm-chev-${i}','brainstorm-hint-${i}')"
-      style="display:flex;align-items:center;justify-content:space-between;padding:9px 20px;cursor:pointer;background:#FAFAF8;user-select:none"
-      onmouseenter="this.style.background='#F2F0EB'" onmouseleave="this.style.background='#FAFAF8'">
-      <div style="display:flex;align-items:center;gap:8px">
-        <span id="brainstorm-chev-${i}" style="font-size:13px;color:var(--ink-3);transition:transform .15s">›</span>
-        <span style="font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)">Brainstorming &amp; Pre-Planning Notes</span>
-      </div>
-      <span id="brainstorm-hint-${i}" style="font-size:11px;color:var(--ink-3)">Click to expand</span>
-    </div>
-    <div id="brainstorm-body-${i}" style="display:none;padding:12px 20px 14px;background:var(--white)">
-      ${rteHTML(`bs-notes-${i}`, d.brainstorm||'', 'Free space for pre-planning ideas — hooks, prior knowledge, potential misconceptions, risks, connections, resources…', i, -2, 'brainstorm', true)}
-    </div>
-  </div>
+    <tr><td class="dl-banner" colspan="2">Learning Activities / Tasks</td></tr>
+    <tr><td class="dl-lbl">Whole Group Learning<small>Opening · Focus · Closer</small></td><td class="dl-cell dl-acts">
+      ${bucket('whole')}
+      <button class="dl-addact" onclick="addActToBucket(${i},'whole')">+ Add activity</button>
+    </td></tr>
+    <tr><td class="dl-lbl">Independent or Collaborative Learning<small>Guided/Collaborative · Independent</small></td><td class="dl-cell dl-acts">
+      ${bucket('ic')}
+      <button class="dl-addact" onclick="addActToBucket(${i},'ic')">+ Add activity</button>
+    </td></tr>
+    <tr><td class="dl-lbl">Homework</td><td class="dl-cell">
+      <input class="dl-1line" value="${esc(strip(d.homework))}" placeholder="Homework…" onchange="updateDay(${i},'homework',this.value)">
+    </td></tr>
 
-  <div class="dp-section-bar">Section 1 · Goals &amp; Learning Targets</div>
-
-  <!-- UNIT GOALS — dropdown selector (reads from unitGoalItems — same data as unit overview chips) -->
-  ${(() => {
-    const unitObjs = (getUOV(currentUnit).unitGoalItems || []);
-    const selected = (d.lessonObjs||[]).map(oi => unitObjs[oi]).filter(Boolean);
-    if (!unitObjs.length) return `
-      <div class="dp-adv" style="border-bottom:1px solid var(--rule);padding:10px 20px;display:flex;align-items:center;gap:10px">
-        <div style="font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)">Unit Goals</div>
-        <span style="font-size:11px;color:var(--ink-3);font-style:italic">Open Unit Overview → Unit Goals and add goals there first</span>
-      </div>`;
-    const available = unitObjs.filter((_,oi) => !(d.lessonObjs||[]).includes(oi));
-    return `<div class="dp-adv" style="border-bottom:1px solid var(--rule);padding:10px 20px 12px">
-      <div style="font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px">Unit Goals — <span style="font-weight:400;letter-spacing:0;text-transform:none;font-style:italic">select which apply to this lesson</span></div>
-      <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px" id="lessonobjs-${i}">
-        ${(d.lessonObjs||[]).map(oi => {
-          const obj = unitObjs[oi]; if (!obj) return '';
-          return `<span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:500;padding:4px 12px;border-radius:999px;background:var(--purple-bg);color:var(--purple-text);border:1px solid #CECBF6" id="lobj-${i}-${oi}">
-            ${esc(obj)}
-            <button onclick="removeLessonObj(${i},${oi})" style="border:none;background:none;cursor:pointer;color:var(--purple-text);font-size:14px;line-height:1;padding:0;opacity:.6">×</button>
-          </span>`;
-        }).join('')}
-      </div>
-      ${available.length ? `<select onchange="if(this.value!==''){addLessonObj(${i},+this.value);this.value=''}"
-        style="border:1px solid var(--rule);border-radius:var(--radius-sm);padding:5px 9px;font-size:12px;font-family:inherit;color:var(--ink);outline:none;background:var(--white);cursor:pointer;max-width:100%"
-        onfocus="this.style.borderColor='var(--navy)'" onblur="this.style.borderColor='var(--rule)'">
-        <option value="">+ Select a unit goal…</option>
-        ${available.map((_,j) => {
-          const realIdx = unitObjs.indexOf(available[j]);
-          return `<option value="${realIdx}">${esc(available[j])}</option>`;
-        }).join('')}
-      </select>` : `<span style="font-size:11px;color:var(--ink-3);font-style:italic">All unit goals selected</span>`}
-    </div>`;
-  })()}
-
-  <!-- TEACHER GOALS -->
-  <div class="dp-adv" style="border-bottom:1px solid var(--rule);background:#F0FAF6">
-    <div style="padding:10px 20px 8px">
-      <div style="font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#0F6E56;margin-bottom:7px">My Teaching Goals for this Lesson <span style="font-weight:400;letter-spacing:0;text-transform:none;font-style:italic;color:var(--ink-3)">— press Enter to add</span></div>
-      <div id="tgoals-${i}" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center">
-        ${(d.teacherGoals||[]).map((g,gi) => `
-          <span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:500;padding:4px 12px;border-radius:999px;background:#0F6E56;color:white" id="tg-${i}-${gi}">
-            ${esc(g)}
-            <button onclick="removeTeacherGoal(${i},${gi})" style="border:none;background:none;cursor:pointer;color:rgba(255,255,255,.6);font-size:14px;line-height:1;padding:0;margin-left:2px">×</button>
-          </span>`).join('')}
-        <input id="tgoal-input-${i}"
-          style="border:1px dashed rgba(15,110,86,.4);border-radius:999px;padding:4px 12px;font-size:12px;font-family:inherit;color:var(--ink);outline:none;background:transparent;min-width:220px;flex:1"
-          placeholder="e.g. Wait 10 seconds before calling on a student (press Enter)"
-          onkeydown="addTeacherGoal(event,${i})"
-          onfocus="this.style.borderStyle='solid';this.style.borderColor='#0F6E56'"
-          onblur="this.style.borderStyle='dashed';this.style.borderColor='rgba(15,110,86,.4)'">
-      </div>
-    </div>
-  </div>
-
-  <!-- LEARNING TARGETS -->
-  <div style="border-bottom:1px solid var(--rule);background:var(--white)">
-    <div style="padding:10px 20px 8px">
-      <div style="font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:7px">Learning Targets <span style="font-weight:400;letter-spacing:0;text-transform:none;font-style:italic">— type and press Enter to add</span></div>
-      <div id="targets-${i}" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center">
-        ${(d.targets||[]).map((t,ti) => targetChipHTML(i, ti, t)).join('')}
-        <input id="target-input-${i}"
-          style="border:1px dashed rgba(27,58,107,.3);border-radius:999px;padding:4px 12px;font-size:12px;font-family:inherit;color:var(--ink);outline:none;background:transparent;min-width:180px;flex:1"
-          placeholder="SWBAT… (press Enter to add)"
-          onkeydown="addTargetChip(event,${i})"
-          onfocus="this.style.borderStyle='solid';this.style.borderColor='var(--navy)'"
-          onblur="this.style.borderStyle='dashed';this.style.borderColor='rgba(27,58,107,.3)'">
-      </div>
-    </div>
-  </div>
-
-  <!-- KNOWLEDGE & SKILLS FOR THIS LESSON (replaces Vocabulary section) -->
-  <div class="vocab-section dp-adv">
-    <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0">
-      <!-- KNOWLEDGE EXPECTATIONS -->
-      <div style="border-right:1px solid var(--rule);padding:10px 14px 12px;min-width:0">
-        <div style="font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px">Knowledge — select what's being introduced</div>
-        ${(() => {
-          const uovK = getUOV(currentUnit);
-          const cats = uovK.knowledgeCategories || [];
-          // Scripture / Catechism / Saints appear as extra categories in the same dropdown
-          const refCats = REF_CATS.filter(rc => (uovK[rc.uovField]||[]).length);
-          if (!cats.length && !refCats.length) return `<div style="font-size:11px;color:var(--ink-3);font-style:italic">Add Knowledge categories (or Scripture / Catechism / Saints) in the Unit Overview first</div>`;
-          const covered = d.knowledgeIntroduced || [];
-          return `
-            <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:8px" id="knowledge-chips-${i}">
-              ${covered.map(({catIdx, itemIdx}) => {
-                const cat = cats[catIdx]; if (!cat) return '';
-                const item = cat.items[itemIdx]; if (!item) return '';
-                return `<span style="display:flex;align-items:flex-start;gap:4px;width:100%;box-sizing:border-box;font-size:10px;font-weight:500;padding:4px 9px;border-radius:8px;background:#E1F5EE;color:#085041;border:1px solid #A7DEC8;line-height:1.35">
-                  <span style="opacity:.7;white-space:nowrap">${esc(cat.name)}:</span> <span style="flex:1">${esc(item)}</span>
-                  <button onclick="removeKnowledgeFromLesson(${i},${catIdx},${itemIdx})" style="border:none;background:none;cursor:pointer;color:#085041;opacity:.5;font-size:12px;line-height:1;padding:0">&times;</button>
-                </span>`;
-              }).join('')}
-              ${REF_CATS.map((rc, ri) => (d[rc.lessonField]||[]).map(idx => {
-                const item = (uovK[rc.uovField]||[])[idx]; if (!item) return '';
-                return `<span style="display:flex;align-items:flex-start;gap:4px;width:100%;box-sizing:border-box;font-size:10px;font-weight:500;padding:4px 9px;border-radius:8px;background:#EEEDFE;color:#3C3489;border:1px solid #CECBF6;line-height:1.35">
-                  <span style="opacity:.7;white-space:nowrap">${rc.name}:</span> <span style="flex:1">${esc(item)}</span>
-                  <button onclick="removeLessonRef(${i},'${rc.lessonField}',${idx})" style="border:none;background:none;cursor:pointer;color:#3C3489;opacity:.5;font-size:12px;line-height:1;padding:0">&times;</button>
-                </span>`;
-              }).join('')).join('')}
-            </div>
-            <div style="display:flex;gap:6px;flex-wrap:wrap">
-              <select id="know-cat-sel-${i}" style="border:1px solid var(--rule);border-radius:var(--radius-sm);padding:4px 8px;font-size:11px;font-family:inherit;color:var(--ink);outline:none;background:var(--white);cursor:pointer"
-                onchange="updateKnowledgeItemList(${i},this.value)"
-                onfocus="this.style.borderColor='var(--navy)'" onblur="this.style.borderColor='var(--rule)'">
-                <option value="">Category…</option>
-                ${cats.map((cat,ci) => `<option value="${ci}">${esc(cat.name)}</option>`).join('')}
-                ${refCats.map(rc => `<option value="ref:${REF_CATS.indexOf(rc)}">${rc.name}</option>`).join('')}
-              </select>
-              <select id="know-item-sel-${i}" style="border:1px solid var(--rule);border-radius:var(--radius-sm);padding:4px 8px;font-size:11px;font-family:inherit;color:var(--ink);outline:none;background:var(--white);cursor:pointer"
-                onchange="if(this.value!==''){addKnowledgeSelection(${i},document.getElementById('know-cat-sel-${i}').value,+this.value);this.value=''}"
-                onfocus="this.style.borderColor='var(--navy)'" onblur="this.style.borderColor='var(--rule)'">
-                <option value="">Item…</option>
-              </select>
-            </div>`;
-        })()}
-      </div>
-      <!-- SKILL EXPECTATIONS -->
-      <div style="padding:10px 14px 12px;min-width:0">
-        <div style="font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px">Skills — select what's being practiced</div>
-        ${(() => {
-          const skills = getUOV(currentUnit).skillItems || [];
-          if (!skills.length) return `<div style="font-size:11px;color:var(--ink-3);font-style:italic">Add skills in the Unit Overview first</div>`;
-          const covered = d.skillsCovered || [];
-          const available = skills.filter((_,si) => !covered.includes(si));
-          return `
-            <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px">
-              ${covered.map(si => {
-                const skill = skills[si]; if (!skill) return '';
-                return `<span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:500;padding:3px 8px;border-radius:999px;background:#E1F5EE;color:#085041;border:1px solid #A7DEC8">
-                  ${esc(skill)}
-                  <button onclick="removeSkillFromDay(${i},${si})" style="border:none;background:none;cursor:pointer;color:#085041;opacity:.5;font-size:12px;line-height:1;padding:0">&times;</button>
-                </span>`;
-              }).join('')}
-            </div>
-            ${available.length ? `<select onchange="if(this.value!==''){addSkillToDay(${i},currentUnit,+this.value);this.value='';renderUnit()}"
-              style="border:1px solid var(--rule);border-radius:var(--radius-sm);padding:4px 8px;font-size:11px;font-family:inherit;color:var(--ink);outline:none;background:var(--white);cursor:pointer"
-              onfocus="this.style.borderColor='var(--navy)'" onblur="this.style.borderColor='var(--rule)'">
-              <option value="">+ Select a skill…</option>
-              ${available.map((_,j) => {
-                const realIdx = skills.indexOf(available[j]);
-                return `<option value="${realIdx}">${esc(available[j])}</option>`;
-              }).join('')}
-            </select>` : `<span style="font-size:11px;color:var(--ink-3);font-style:italic">All unit skills selected</span>`}`;
-        })()}
-      </div>
-    </div>
-  </div>
-
-  <div class="dp-section-bar">Section 2 · Learning Activities / Tasks</div>
-
-  <!-- TIME TRACKER (now above the journal) -->
-  <div class="dp-tracker">
-    <span class="trk-lbl">Time planned</span>
-    <div class="trk-bar-w"><div class="trk-bar" id="tbar-${i}" style="width:${pct}%;background:${barColor}"></div></div>
-    <span class="trk-stat" id="tstat-${i}" style="color:${barColor}">${totalMins} / ${blockDur} min</span>
-  </div>
-
-  ${simpleMode ? '' : (d.journalOff ? `<!-- JOURNAL CANCELLED FOR THIS DAY -->
-  <div class="journal-row" style="background:#F5F4F0;border-bottom:1px solid var(--rule)">
-    <span class="journal-badge" style="background:var(--ink-3);color:#fff">Journal skipped</span>
-    <span style="flex:1;font-size:12px;color:var(--ink-3);font-style:italic">No opening journal for this day.</span>
-    <button onclick="updateDay(${i},'journalOff',false);renderUnit()"
-      style="border:1px solid var(--rule-dark);background:var(--white);color:var(--navy);font-size:11px;font-weight:600;border-radius:var(--radius-sm);padding:5px 11px;cursor:pointer;font-family:inherit;flex-shrink:0">＋ Add opening journal</button>
-  </div>` : `<!-- FIXED JOURNAL ROW -->
-  <div class="journal-row">
-    <span class="journal-badge">Opening Journal</span>
-    <span class="journal-time">0:00 ·
-      <input type="number" min="0" max="60" value="${d.journalDur ?? 3}" title="Journal minutes"
-        onchange="updateDay(${i},'journalDur',Math.max(0,+this.value||0));refreshTracker(${i});refreshAllTimestamps(${i})"
-        style="width:40px;border:1px solid #E8D89A;border-radius:5px;padding:2px 4px;font-size:11px;font-family:inherit;color:var(--ink);text-align:center;background:rgba(255,255,255,.7);outline:none"> min</span>
-    <span class="journal-label">Prompt:</span>
-    <input class="journal-input" value="${esc(d.journalPrompt)}" placeholder="Today's journal prompt…"
-      oninput="updateDay(${i},'journalPrompt',this.value)">
-    <button onclick="if(confirm('Cancel the opening journal for this day? You can add it back anytime.')){updateDay(${i},'journalOff',true);renderUnit()}"
-      title="Cancel the journal for this day"
-      style="border:none;background:none;color:var(--ink-3);font-size:17px;line-height:1;padding:2px 4px;cursor:pointer;flex-shrink:0"
-      onmouseenter="this.style.color='var(--maroon,#7B1A2E)'" onmouseleave="this.style.color='var(--ink-3)'">&times;</button>
-  </div>`)}
-
-  <!-- ACTIVITIES -->
-  <div class="act-section-header">
-    <span class="act-section-label">Activities</span>
-    <span class="act-section-hint">${simpleMode ? 'Click a description to edit' : 'Click any activity to expand and edit its content'}</span>
-    <button class="act-tpl-apply" onclick="applyLessonTemplate(${i})" title="Reset this lesson to the standard flow">↺ Standard flow</button>
-  </div>
-  <div class="phase-flow">
-    ${PHASES.map(p=>{
-      const used = (d.activities||[]).some(a=>normalizePhase(a.grr)===p.v);
-      const c = PHASE_COLORS[p.v];
-      return `<span class="phase-flow-step${used?'':' off'}" style="background:${c.bg};color:${c.tx}" title="${esc(p.hint)} · ${p.lo}–${p.hi} min">${p.label}</span>`;
-    }).join('')}
-  </div>
-  ${simpleMode ? actTableHTML(i, d) : `<div id="act-list-${i}">
-    ${(d.activities||[]).map((a,ai) => actBlockHTML(i, ai, a)).join('')}
-  </div>`}
-  <div class="act-tpl-row">
-    <span style="font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3)">Quick add</span>
-    <div style="position:relative;display:inline-block">
-      <select class="act-tpl-select" onchange="handleQuickAddSelect(${i}, this)">
-        <option value="">Choose a template…</option>
-        <optgroup label="Built-in" id="tpl-builtin-${i}">
-          ${ACT_TEMPLATES.map((t,ti) => `<option value="b:${ti}">${esc(t.name)} · ${t.dur}m</option>`).join('')}
-        </optgroup>
-        ${getCustomTemplates().length ? `<optgroup label="My templates">
-          ${getCustomTemplates().map((t,ti) => `<option value="c:${ti}">${esc(t.name)} · ${t.dur}m</option>`).join('')}
-        </optgroup>` : ''}
-        <option value="__new__">＋ Create new template…</option>
-        ${getCustomTemplates().length ? '<option value="__manage__">⚙ Manage my templates…</option>' : ''}
-      </select>
-    </div>
-  </div>
-  <div class="add-act-wrap">
-    <button class="add-act-btn" onclick="addActivity(${i})">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Add activity
-    </button>
-  </div>
-
-  <div class="dp-section-bar">Section 3 · Assessment, Homework &amp; Student Resources</div>
-
-  <!-- FOOTER -->
-  <div class="dp-footer">
-    <div>
-      <div class="footer-lbl">Assessment type</div>
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-        <select onchange="updateDay(${i},'assessType',this.value)"
-          style="border:1px solid var(--rule);border-radius:var(--radius-sm);padding:6px 10px;font-size:12px;font-family:inherit;color:var(--ink);outline:none;background:var(--white);cursor:pointer;flex:1"
-          onfocus="this.style.borderColor='var(--navy)'" onblur="this.style.borderColor='var(--rule)'">
-          <option value="" ${!d.assessType?'selected':''}>None</option>
-          <option value="Quiz"         ${d.assessType==='Quiz'?'selected':''}>Quiz</option>
-          <option value="Test"         ${d.assessType==='Test'?'selected':''}>Test</option>
-          <option value="Project"      ${d.assessType==='Project'?'selected':''}>Project</option>
-          <option value="Essay"        ${d.assessType==='Essay'?'selected':''}>Essay</option>
-          <option value="Presentation" ${d.assessType==='Presentation'?'selected':''}>Presentation</option>
-          <option value="Exit Ticket"  ${d.assessType==='Exit Ticket'?'selected':''}>Exit Ticket</option>
-        </select>
-        ${d.assessType ? `<span style="font-size:11px;font-weight:600;padding:4px 10px;border-radius:999px;background:${ASSESS_COLORS[d.assessType]?.bg||'var(--rule)'};color:${ASSESS_COLORS[d.assessType]?.tx||'var(--ink-2)'}">${esc(d.assessType)}</span>` : ''}
-      </div>
-      <div class="footer-lbl">Assessment / closing</div>
-      ${rteHTML(`rte-assess-${i}`, d.assessment||'', 'How will you know students got it? Exit ticket, discussion, written response…', i, -1, 'assessment', false)}
-    </div>
-    <div>
-      <div class="footer-lbl">Homework</div>
-      ${rteHTML(`rte-hw-${i}`, d.homework||'', 'What do students need to do before next class? Post to MyBelen.', i, -1, 'homework', false)}
-    </div>
-    <div class="dp-adv">
-      <div class="footer-lbl">Materials needed</div>
-      <div class="mat-row" id="mats-${i}">
-        ${(d.materials||[]).map(m=>`<span class="mat-chip">${esc(m)}<button onclick="removeMat(${i},'${esc(m)}')">×</button></span>`).join('')}
-        <input class="mat-inp" placeholder="+ Add material" onkeydown="addMat(event,${i})">
-      </div>
-    </div>
-    <div class="dp-adv">
-      <div class="footer-lbl">Tech tools</div>
-      <div class="mat-row" id="tools-${i}">
-        ${(d.techTools||[]).map(t=>`<span class="mat-chip" style="background:var(--blue-bg);border-color:var(--blue-br)">${esc(t)}<button onclick="removeTool(${i},'${esc(t)}')">×</button></span>`).join('')}
-        <input class="mat-inp" placeholder="+ Showbie, Kahoot…" onkeydown="addTool(event,${i})">
-      </div>
-    </div>
-    <div class="dp-adv" style="grid-column:1/-1">
-      <div class="footer-lbl">Presentation &amp; resource links</div>
-      <div id="links-${i}" style="display:flex;flex-direction:column;gap:6px;margin-bottom:6px">
-        ${(d.links||[]).map((lk,li) => `
-          <div style="display:flex;align-items:center;gap:6px" id="lnk-${i}-${li}">
-            <input style="flex:1;border:1px solid var(--rule);border-radius:5px;padding:5px 9px;font-size:12px;font-family:inherit;color:var(--ink);outline:none"
-              value="${esc(lk.label)}" placeholder="Label (e.g. Slide deck Day 1)"
-              oninput="updateLink(${i},${li},'label',this.value)"
-              onfocus="this.style.borderColor='var(--navy)'" onblur="this.style.borderColor='var(--rule)'">
-            <input style="flex:2;border:1px solid var(--rule);border-radius:5px;padding:5px 9px;font-size:12px;font-family:inherit;color:var(--navy);outline:none"
-              value="${esc(lk.url)}" placeholder="https://…"
-              oninput="updateLink(${i},${li},'url',this.value)"
-              onfocus="this.style.borderColor='var(--navy)'" onblur="this.style.borderColor='var(--rule)'">
-            ${lk.url ? `<a href="${esc(lk.url)}" target="_blank" style="font-size:11px;color:var(--navy);white-space:nowrap;text-decoration:none;padding:5px 8px;border:1px solid var(--rule);border-radius:5px">Open ↗</a>` : ''}
-            <button onclick="removeLink(${i},${li})" style="border:none;background:none;color:var(--ink-3);cursor:pointer;font-size:16px;line-height:1;padding:0 2px">×</button>
-          </div>`).join('')}
-      </div>
-      <button onclick="addLink(${i})" style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;color:var(--navy);background:none;border:1px dashed rgba(27,58,107,.3);border-radius:5px;padding:5px 12px;cursor:pointer;font-family:inherit">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Add link
-      </button>
-    </div>
-    <div class="dp-adv">
-      <div class="footer-lbl">Ignatian reflection prompt</div>
-      ${rteHTML(`rte-ignat-${i}`, d.ignatianReflection||'', 'The question you most want students to carry with them…', i, -1, 'ignatianReflection', false)}
-    </div>
-    <div class="dp-adv">
-      <div class="footer-lbl">Post-class notes</div>
-      ${rteHTML(`rte-notes-${i}`, d.postNotes||'', 'What went well? What would you change next time?', i, -1, 'postNotes', false)}
-    </div>
-  </div>
-
-  <!-- BLOOM'S TAXONOMY REFERENCE (screen-only — excluded from print/PDF) -->
-  <div class="blooms-ref" style="border-top:1px solid var(--rule)">
-    <div onclick="toggleBloomsRef('blooms-body-${i}')"
-      style="display:flex;align-items:center;justify-content:space-between;padding:10px 20px;cursor:pointer;background:var(--parchment);user-select:none"
-      onmouseenter="this.style.background='#EEECEA'" onmouseleave="this.style.background='var(--parchment)'">
-      <div style="display:flex;align-items:center;gap:8px">
-        <span id="blooms-chev-${i}" style="font-size:13px;color:var(--ink-3);transition:transform .15s">›</span>
-        <span style="font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)">Bloom's Taxonomy Quick Reference</span>
-      </div>
-      <span style="font-size:11px;color:var(--ink-3)">Click to expand</span>
-    </div>
-    <div id="blooms-body-${i}" style="display:none;padding:14px 20px 16px">
-      ${bloomsReferenceHTML()}
-    </div>
-  </div>
-
-  <div style="padding:10px 20px;border-top:1px solid var(--rule);background:var(--parchment);display:flex;align-items:center;justify-content:space-between">
-    <span style="font-size:11px;color:var(--ink-3);font-style:italic">A.M.D.G. — Ad Majorem Dei Gloriam</span>
-    <span style="font-size:11px;color:var(--ink-3)">Belen Jesuit Preparatory School · Miami, FL</span>
-  </div>
+    <tr><td class="dl-banner" colspan="2">Student Resources / Links / Tech Tools</td></tr>
+    <tr><td class="dl-lbl">Resources</td><td class="dl-cell">
+      ${resRows}
+      <input id="chipin-dlres-${i}" class="dl-add" placeholder="+ Add a resource, press Enter" onkeydown="if(event.key==='Enter'){event.preventDefault();dlAddRes(${i},this.value)}">
+    </td></tr>
+  </tbody></table>
   `;
 }
+
+// Simple daily-lesson editors (list rows + activities)
+function dlAddGoal(i,v){v=(v||'').trim();if(!v)return;const d=getDay(i);(d.teacherGoals=d.teacherGoals||[]).push(v);saveState();renderUnit();}
+function dlDelGoal(i,gi){getDay(i).teacherGoals.splice(gi,1);saveState();renderUnit();}
+function dlAddTarget(i,v){v=(v||'').trim();if(!v)return;const d=getDay(i);(d.targets=d.targets||[]).push(v.replace(/^I can\s*/i,''));saveState();renderUnit();}
+function dlDelTarget(i,ti){getDay(i).targets.splice(ti,1);saveState();renderUnit();}
+function dlAddRes(i,v){v=(v||'').trim();if(!v)return;const d=getDay(i);(d.materials=d.materials||[]).push(v);saveState();renderUnit();}
+function dlDelRes(i,ri){getDay(i).materials.splice(ri,1);saveState();renderUnit();}
+function updateActName(i,ai,v){const a=getDay(i).activities[ai];if(a){a.name=(v||'').trim();saveState();}}
+function updateActPhase(i,ai,v){const a=getDay(i).activities[ai];if(a){a.grr=v;saveState();renderUnit();}}
+function addActToBucket(i,bucketName){const ph=bucketName==='ic'?'guided':'focus';const p=PHASE_BY_V[ph];getDay(i).activities.push({id:uid(),name:'',dur:p?p.def:10,grr:ph,ipp:'',desc:''});saveState();renderUnit();}
+function removeAct(i,ai){getDay(i).activities.splice(ai,1);saveState();renderUnit();}
 
 // ── BLOOM'S TAXONOMY ──────────────────────────────────────────────
 // Content mirrors the UNMC "(Revised) Bloom's Taxonomy of Learning Objectives" chart
@@ -6968,52 +6686,50 @@ function importBackup(event) {
 
 // ── PACING GUIDE PDF EXPORT ───────────────────────────────────────
 function exportPacingGuidePDF() {
-  const u     = UNIT_META.find(m => m.id === currentUnit);
-  const weeks = state.units[currentUnit] || [];
-  const co    = getCourse();
-  const NAVY = '#1B3A6B', GOLD = '#C9991A';
+  const co = getCourse();
+  const NAVY = '#1B3A6B', GOLD = '#C9991A', RULE='#C9C5BC';
 
-  let n = 0;
-  const rows = [];
-  weeks.forEach((w, wi) => (w.days||[]).forEach((d) => {
-    n++;
-    const date = d.dateA || d.dateB || '';
-    rows.push(`<tr>
-      <td style="border:1px solid #D8D5CE;padding:5px 7px;font-size:9pt;white-space:nowrap">${escPDF(date)}</td>
-      <td style="border:1px solid #D8D5CE;padding:5px 7px;font-size:9pt;white-space:nowrap">${escPDF(d.label||('Day '+n))}</td>
-      <td style="border:1px solid #D8D5CE;padding:5px 7px;font-size:9pt;text-align:center">${u ? u.id : ''}</td>
-      <td style="border:1px solid #D8D5CE;padding:5px 7px;font-size:9pt;text-align:center">${n}</td>
-      <td style="border:1px solid #D8D5CE;padding:5px 7px;font-size:9.5pt">${escPDF(d.topic||'')}</td>
-      <td style="border:1px solid #D8D5CE;padding:5px 7px;font-size:9pt;text-align:center">${escPDF(d.assessType||'')}</td>
-      <td style="border:1px solid #D8D5CE;padding:5px 7px;font-size:9pt">${escPDF(d.homework||'')}</td>
-    </tr>`);
-  }));
+  const blocks = UNIT_META.map(u => {
+    const weeks = state.units[u.id] || [];
+    const days = [];
+    weeks.forEach(w => (w.days||[]).forEach(d => days.push(d)));
+    return { u, days };
+  }).filter(b => b.days.length);
 
-  const th = (t, w) => `<th style="background:${NAVY};color:#fff;font-size:9pt;font-weight:700;padding:6px 7px;text-align:left;border:1px solid ${NAVY}${w?';width:'+w:''}">${t}</th>`;
-  const html = `<!DOCTYPE html><html><head><meta charset="utf-8">
-  <title>Pacing Guide — ${escPDF(u ? u.name : '')}</title>
-  <style>
-    @page { size: letter landscape; margin: 0.5in; }
-    body { font-family: Georgia, 'Times New Roman', serif; color:#1C1917; margin:0; }
-    table { width:100%; border-collapse:collapse; }
-    tr { page-break-inside: avoid; }
-    thead { display: table-header-group; }
-  </style></head><body>
+  let globalDay = 0;
+  const rowsHTML = blocks.map(b => {
+    const c = COLOR_MAP[b.u.color] || {br:'#5B6470'};
+    let lessonNo = 0;
+    return b.days.map((d, idx) => {
+      globalDay++; lessonNo++;
+      const band = idx===0
+        ? `<td rowspan="${b.days.length}" style="background:${c.br};color:#fff;border:1px solid ${RULE};padding:6px 8px;font-size:9pt;font-weight:700;vertical-align:top;-webkit-print-color-adjust:exact;print-color-adjust:exact;width:110px">Unit ${b.u.id}<div style="font-weight:500;font-size:8pt;opacity:.9;margin-top:2px">${escPDF(b.u.name)}</div></td>`
+        : '';
+      return `<tr>
+        ${band}
+        <td style="border:1px solid ${RULE};padding:5px 7px;font-size:9pt;text-align:center">${globalDay}</td>
+        <td style="border:1px solid ${RULE};padding:5px 7px;font-size:9pt;text-align:center;font-weight:600">${b.u.id}.${lessonNo}</td>
+        <td style="border:1px solid ${RULE};padding:5px 8px;font-size:9.5pt">${escPDF(String(d.topic||'').replace(/<[^>]*>/g,' ').trim())}</td>
+        <td style="border:1px solid ${RULE};padding:5px 8px;font-size:9pt">${escPDF(String(d.homework||'').replace(/<[^>]*>/g,' ').trim())}</td>
+      </tr>`;
+    }).join('');
+  }).join('');
+
+  const th = (t,w) => `<th style="background:${NAVY};color:#fff;font-size:9pt;font-weight:700;padding:6px 8px;text-align:left;border:1px solid ${NAVY}${w?';width:'+w:''}">${t}</th>`;
+  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Pacing Guide — ${escPDF(co.name)}</title>
+  <style>@page{size:letter portrait;margin:.5in}body{font-family:Georgia,serif;color:#1C1917;margin:0}
+  table{width:100%;border-collapse:collapse}tr{page-break-inside:avoid}thead{display:table-header-group}</style></head><body>
     <div style="border-bottom:3px solid ${GOLD};padding-bottom:8px;margin-bottom:12px">
-      <div style="font-size:15pt;font-weight:700;color:${NAVY}">Pacing Guide — Unit ${u?u.id:''}: ${escPDF(u?u.name:'')}</div>
-      <div style="font-size:9.5pt;color:#57534E;margin-top:3px">${escPDF(co.name)} · ${escPDF(co.code)} · ${escPDF(state.teacher||'')} · ${new Date().toLocaleDateString()}</div>
+      <div style="font-size:15pt;font-weight:700;color:${NAVY}">Pacing Guide — ${escPDF(co.name)}</div>
+      <div style="font-size:9.5pt;color:#57534E;margin-top:3px">${escPDF(co.code)} · ${escPDF(state.teacher||'')} · ${new Date().toLocaleDateString()}</div>
     </div>
-    <table>
-      <thead><tr>
-        ${th('Date','13%')}${th('Day','8%')}${th('Unit','5%')}${th('Lesson','6%')}${th('Content')}${th('Assessment','11%')}${th('HW','22%')}
-      </tr></thead>
-      <tbody>${rows.join('') || '<tr><td colspan="7" style="border:1px solid #D8D5CE;padding:10px;text-align:center;color:#78716C">No class days yet.</td></tr>'}</tbody>
-    </table>
+    <table><thead><tr>${th('Unit','110px')}${th('Day','44px')}${th('#','54px')}${th('Content')}${th('HW','190px')}</tr></thead>
+    <tbody>${rowsHTML || '<tr><td colspan="5" style="border:1px solid '+RULE+';padding:10px;text-align:center;color:#78716C">No class days yet.</td></tr>'}</tbody></table>
   </body></html>`;
 
-  const wdw = window.open('', '_blank');
-  wdw.document.open(); wdw.document.write(html); wdw.document.close();
-  setTimeout(() => { try { wdw.print(); } catch(e){} }, 400);
+  const w = window.open('', '_blank');
+  w.document.open(); w.document.write(html); w.document.close();
+  setTimeout(()=>{ try{ w.print(); }catch(e){} }, 400);
 }
 
 function exportPDF() {
