@@ -639,7 +639,54 @@ body.simple-mode .dp-adv { display: none !important; }
   padding: 10px 20px 6px;
   border-bottom: 1px solid var(--rule);
   background: #F2F0EB;
+  gap: 10px; flex-wrap: wrap;
 }
+.act-tpl-apply {
+  margin-left: auto; background:#fff; border:1px solid var(--rule-dark,#cfccc4);
+  border-radius:6px; padding:4px 10px; font-family:inherit; font-size:11px;
+  font-weight:600; color:var(--navy); cursor:pointer; white-space:nowrap;
+}
+.act-tpl-apply:hover { border-color: var(--navy); background:#F7F9FC; }
+/* Standard lesson flow ribbon (Opening → Focus → … → Closer) */
+.phase-flow { display:flex; gap:4px; padding:9px 20px; background:#F2F0EB;
+  border-bottom:1px solid var(--rule); flex-wrap:wrap; }
+.phase-flow-step { font-size:10.5px; font-weight:700; letter-spacing:.02em;
+  padding:4px 11px; border-radius:5px; white-space:nowrap; }
+.phase-flow-step.off { opacity:.32; }
+@media print { .act-tpl-apply { display:none; } }
+
+/* ── SIMPLE PACING GUIDE ── */
+.sp-wrap { background:#fff; border:1px solid var(--rule); border-radius:12px; overflow:hidden; }
+.sp-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
+  padding:14px 18px; border-bottom:1px solid var(--rule); background:#FBFAF8; flex-wrap:wrap; }
+.sp-title { font-size:16px; font-weight:700; color:var(--ink); margin:0; }
+.sp-sub { font-size:12px; color:var(--ink-3); margin-top:3px; max-width:640px; line-height:1.5; }
+.sp-btn { background:var(--navy); color:#fff; border:none; border-radius:7px; padding:7px 15px;
+  font-family:inherit; font-size:12.5px; font-weight:600; cursor:pointer; }
+.sp-scroll { overflow-x:auto; }
+.sp-table { width:100%; border-collapse:collapse; min-width:880px; }
+.sp-table th { background:var(--navy); color:#fff; font-size:11px; font-weight:700; letter-spacing:.03em;
+  text-align:left; padding:8px 10px; white-space:nowrap; }
+.sp-th-hint { font-weight:400; opacity:.7; text-transform:none; letter-spacing:0; }
+.sp-td { border:1px solid var(--rule); padding:3px 5px; vertical-align:middle; }
+.sp-mid { text-align:center; font-size:12px; color:var(--ink-2); }
+.sp-daylabel { font-weight:600; color:var(--ink); font-size:12px; }
+.sp-inp { width:100%; box-sizing:border-box; border:1px solid transparent; background:transparent;
+  border-radius:5px; padding:6px 8px; font-family:inherit; font-size:12.5px; color:var(--ink); outline:none; }
+.sp-inp:hover { border-color:var(--rule); }
+.sp-inp:focus { border-color:var(--navy); background:#fff; }
+.sp-dateinp { font-size:11.5px; }
+.sp-sel { cursor:pointer; }
+.sp-status { font-size:13px; font-weight:800; color:var(--ink-3); margin-right:6px; }
+.sp-status.ok { color:#1D9E75; }
+.sp-open { background:none; border:none; color:var(--navy); font-family:inherit; font-size:11.5px;
+  font-weight:600; cursor:pointer; padding:2px 4px; border-radius:4px; }
+.sp-open:hover { background:var(--purple-bg,#EEEDFE); }
+.sp-addrow { display:flex; gap:8px; padding:11px 14px; flex-wrap:wrap; background:#FBFAF8;
+  border-top:1px solid var(--rule); }
+.sp-add { background:none; border:1px dashed var(--rule-dark,#cfccc4); border-radius:7px; padding:6px 12px;
+  font-family:inherit; font-size:12px; font-weight:600; color:var(--navy); cursor:pointer; }
+.sp-add:hover { border-color:var(--navy); background:#fff; }
 .act-section-label {
   font-size: 10px; font-weight: 600; letter-spacing: .08em;
   text-transform: uppercase; color: var(--ink-3);
@@ -921,8 +968,8 @@ body.simple-mode .dp-adv { display: none !important; }
   <!-- PERSISTENT NAV -->
   <div class="topbar-nav">
     <button class="tb-nav" onclick="nav('dashboard')">Dashboard</button>
-    <button class="tb-nav" onclick="nav('prep')">Prep Board</button>
     <button class="tb-nav" onclick="nav('course')">Units</button>
+    <button class="tb-nav" onclick="gotoPacing()">Pacing</button>
     <button class="tb-nav tb-nav-go" onclick="gotoNextLesson()">▶ Next lesson</button>
   </div>
   <div class="topbar-divider"></div>
@@ -976,6 +1023,11 @@ body.simple-mode .dp-adv { display: none !important; }
       <button class="tb-btn" onclick="exportGoogleDocPrompt()" title="Export every planned lesson into one continuous document — upload to Google Drive to open as an editable Google Doc">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="14" y2="17"/></svg>
         Google Doc
+      </button>
+      <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.4);padding:6px 2px 0">Advanced</div>
+      <button class="tb-btn" onclick="nav('prep')" title="Prep Board — track each unit through Design → Pace → Plan → Build">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><polyline points="3 6 4 7 6 5"/><polyline points="3 12 4 13 6 11"/><polyline points="3 18 4 19 6 17"/></svg>
+        Prep Board
       </button>
       <button class="tb-btn" onclick="resetCourseData()" title="Rebuild this course's data on this device (other course untouched)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
@@ -1468,13 +1520,28 @@ const COLOR_MAP = {
   blue:   {bg:'#E6F1FB',tx:'#0C447C',br:'#185FA5'},
 };
 
+// ── LESSON PHASES (the standard daily flow) ───────────────────────
+// Opening → Focus → Guided/Collaborative → Independent → Closer.
+// Each phase carries a default duration and the school-format bucket it
+// belongs to: 'whole' = Whole Group Learning, 'ic' = Independent or
+// Collaborative Learning.
+const PHASES = [
+  {v:'opening',     label:'Opening',              def:5,  lo:3,  hi:5,  bucket:'whole', hint:'Boardwork, prayer, manipulative · passing period +'},
+  {v:'focus',       label:'Focus',                def:15, lo:10, hi:20, bucket:'whole', hint:'Review · introduce and frame lesson · new content'},
+  {v:'guided',      label:'Guided/Collaborative', def:20, lo:10, hi:25, bucket:'ic',    hint:'Guided instruction · teacher facilitates · small groups · student-led'},
+  {v:'independent', label:'Independent',          def:25, lo:20, hi:30, bucket:'ic',    hint:'Students work individually · teacher supports or meets small groups'},
+  {v:'closer',      label:'Closer',               def:5,  lo:1,  hi:5,  bucket:'whole', hint:'Teacher summary · student reflections · short assessment · HW review'},
+];
+const PHASE_BY_V = Object.fromEntries(PHASES.map(p=>[p.v,p]));
+// Legacy GRR values → new phases, so existing lessons keep working.
+const PHASE_ALIAS = {focused:'focus', guided:'guided', collaborative:'guided', independent:'independent', reflection:'closer'};
+function normalizePhase(v){ if(!v) return ''; return PHASE_BY_V[v] ? v : (PHASE_ALIAS[v] || ''); }
+function phaseLabel(v){ const p = PHASE_BY_V[normalizePhase(v)]; return p ? p.label : ''; }
+function phaseBucket(v){ const p = PHASE_BY_V[normalizePhase(v)]; return p ? p.bucket : 'whole'; }
+
 const GRR_OPTS = [
-  {v:'',label:'— GRR phase —'},
-  {v:'focused',      label:'Focused · I do'},
-  {v:'guided',       label:'Guided · We do'},
-  {v:'collaborative',label:'Collaborative · You do together'},
-  {v:'independent',  label:'Independent · You do alone'},
-  {v:'reflection',   label:'Reflection'},
+  {v:'',label:'— phase —'},
+  ...PHASES.map(p=>({v:p.v, label:p.label})),
 ];
 const IPP_OPTS = [
   {v:'',label:'— IPP stage —'},
@@ -1485,13 +1552,20 @@ const IPP_OPTS = [
   {v:'evaluation',label:'Evaluation'},
 ];
 
-const GRR_COLORS = {
-  focused:       {bg:'var(--ph-focused-bg)',tx:'var(--ph-focused-tx)'},
-  guided:        {bg:'var(--ph-guided-bg)', tx:'var(--ph-guided-tx)'},
-  collaborative: {bg:'var(--ph-collab-bg)', tx:'var(--ph-collab-tx)'},
-  independent:   {bg:'var(--ph-indep-bg)',  tx:'var(--ph-indep-tx)'},
-  reflection:    {bg:'var(--ph-reflect-bg)',tx:'var(--ph-reflect-tx)'},
+// Phase colors follow the lesson-flow chart: dark navy → blue → light blue → grey.
+const PHASE_COLORS = {
+  opening:     {bg:'#14315C', tx:'#FFFFFF', soft:'#E4EAF3'},
+  focus:       {bg:'#1565C0', tx:'#FFFFFF', soft:'#E3EEFA'},
+  guided:      {bg:'#2E86DE', tx:'#FFFFFF', soft:'#E6F1FC'},
+  independent: {bg:'#90CAF9', tx:'#0B3A66', soft:'#EEF6FE'},
+  closer:      {bg:'#DFE1E5', tx:'#33373D', soft:'#F3F4F6'},
 };
+const GRR_COLORS = new Proxy({}, {
+  get: (_, k) => {
+    const p = PHASE_COLORS[normalizePhase(typeof k === 'string' ? k : '')];
+    return p ? {bg:p.soft, tx:p.bg} : undefined;
+  },
+});
 
 const BAR_COLORS = ['#1B3A6B','#0F6E56','#993C1D','#534AB7','#854F0B','#185FA5','#3B6D11'];
 
@@ -1864,8 +1938,21 @@ function defaultObjs() {
   return o;
 }
 
+// The standard daily flow every new lesson starts with.
+function templateActivities(){
+  return PHASES.map(p => ({ name:'', dur:p.def, grr:p.v, ipp:'', desc:'' }));
+}
+// Fill an existing lesson with the standard flow (only when it has none).
+function applyLessonTemplate(di){
+  const d = getDay(di);
+  if((d.activities||[]).length && !confirm('Replace this lesson\'s activities with the standard flow (Opening → Focus → Guided/Collaborative → Independent → Closer)?')) return;
+  d.activities = templateActivities();
+  saveState(); renderUnit();
+  toast('Standard lesson flow applied ✓');
+}
+
 function makeDay(label, date, eq) {
-  return { label, date:'', dateA:'', dateB:'', block:'A & B Block', blockDuration:90, topic:'', eq, topicDesc:'', brainstorm:'', journalPrompt:'', journalDur:3, journalGrr:'reflection', targets:[], teacherGoals:[], vocab:[], lessonObjs:[], knowledgeIntroduced:[], skillsCovered:[], lessonScripture:[], lessonCatechism:[], lessonSaints:[], activities:[], materials:[], techTools:[], links:[], assessType:'', assessment:'', homework:'', ignatianReflection:'', postNotes:'' };
+  return { label, date:'', dateA:'', dateB:'', block:'A & B Block', blockDuration:90, topic:'', eq, topicDesc:'', brainstorm:'', journalPrompt:'', journalDur:3, journalGrr:'closer', targets:[], teacherGoals:[], vocab:[], lessonObjs:[], knowledgeIntroduced:[], skillsCovered:[], lessonScripture:[], lessonCatechism:[], lessonSaints:[], activities:templateActivities(), materials:[], techTools:[], links:[], assessType:'', assessment:'', homework:'', ignatianReflection:'', postNotes:'' };
 }
 
 function demoWeek() {
@@ -2071,6 +2158,16 @@ function gotoNextLesson(){
     nav('prep');
     toast('No upcoming dated lessons — set class dates to use this');
   }
+}
+
+// Open the pacing guide for the most relevant unit (the one with the next
+// class, else the first unit).
+function gotoPacing(){
+  const today = isoToday();
+  const up = collectClasses().filter(c=>c.date>=today);
+  const uid = up.length ? up[0].uid : (UNIT_META[0] ? UNIT_META[0].id : null);
+  if(uid==null){ toast('Add a unit first'); return; }
+  navUnitTab(uid, 'pacing');
 }
 
 function toggleMobileMenu(){
@@ -2603,31 +2700,144 @@ function renderDashboard(){
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4z"/></svg>
         ${contLabel}${contClass?` · ${esc(contClass.u.name)} ${esc(contClass.d.label)}`:''}
       </button>
-      <button class="d-qn-btn" onclick="nav('prep')">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><polyline points="3 6 4 7 6 5"/><polyline points="3 12 4 13 6 11"/><polyline points="3 18 4 19 6 17"/></svg>
-        Prep Board
+      <button class="d-qn-btn" onclick="gotoPacing()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="9" y1="10" x2="9" y2="20"/></svg>
+        Pacing guide
       </button>
       <button class="d-qn-btn" onclick="nav('course')">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-        Browse all units
+        All units
+      </button>
+      <button class="d-qn-btn" onclick="openExportMenu()" title="Export for colleagues or administration">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Export
       </button>
     </div>
     ${weekView}
     <div class="d-grid">
-      <div class="d-col">${todoCard}${outlookCard}</div>
-      <div class="d-col">${calCard}${assessCard}</div>
+      <div class="d-col">${todoCard}</div>
+      <div class="d-col">${calCard}</div>
     </div>
     <div class="d-more">
       <button class="d-more-btn" onclick="toggleDashMore()">
-        <span>${dashMoreOpen ? '▾ Hide' : '▸ More'} — unit progress, teaching balance &amp; planning stats</span>
+        <span>${dashMoreOpen ? '▾ Hide' : '▸ More'} — planning outlook, upcoming assessments &amp; progress</span>
       </button>
       ${dashMoreOpen ? `<div class="d-more-body">
         <div class="d-grid" style="margin-top:14px">
-          <div class="d-col">${progressCard}${grrCard}</div>
-          <div class="d-col">${bottomMetrics}</div>
+          <div class="d-col">${outlookCard}${progressCard}</div>
+          <div class="d-col">${assessCard}${grrCard}${bottomMetrics}</div>
         </div>
       </div>` : ''}
     </div>`;
+}
+
+// ── EXPORT MENU ───────────────────────────────────────────────────
+// One place to get everything out for colleagues and administration.
+function openExportMenu(){
+  const co = getCourse();
+  const overlay = document.getElementById('stage-chooser-overlay');
+  const card = document.getElementById('stage-chooser-card');
+  if(!overlay || !card) return;
+  const opt = (title, sub, onclick) => `
+    <button onclick="closeStageChooser();${onclick}" style="text-align:left;background:#fff;color:var(--ink);border:1px solid var(--rule-dark,#cfccc4);border-radius:11px;padding:13px 15px;cursor:pointer;font-family:inherit">
+      <div style="font-size:13.5px;font-weight:700">${title}</div>
+      <div style="font-size:11.5px;color:var(--ink-3);margin-top:2px">${sub}</div>
+    </button>`;
+  card.innerHTML = `
+    <div style="padding:18px 22px 6px">
+      <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:${co.color}">${esc(co.name)}</div>
+      <div style="font-size:20px;font-weight:800;color:var(--ink);margin-top:2px">Export</div>
+      <div style="font-size:12.5px;color:var(--ink-2);margin-top:5px;line-height:1.5">Share with colleagues or submit to administration.</div>
+    </div>
+    <div style="padding:14px 22px 20px;display:flex;flex-direction:column;gap:9px">
+      ${opt('This week — lesson plans','The week in your school\'s format','exportWeekPDF()')}
+      ${opt('Pacing guide','The unit\'s big-picture map as a table','gotoPacing();setTimeout(exportPacingGuidePDF,400)')}
+      ${opt('Full lesson plans (PDF)','Every planned lesson in this unit','exportPDF()')}
+      ${opt('Google Doc','Editable document of all lessons','exportGoogleDocPrompt()')}
+      <button onclick="closeStageChooser()" style="align-self:center;background:none;border:none;color:var(--ink-3);font-size:12.5px;cursor:pointer;font-family:inherit;margin-top:2px">Cancel</button>
+    </div>`;
+  overlay.style.display = 'flex';
+}
+
+// ── WEEKLY LESSON PLAN EXPORT (school format) ─────────────────────
+// One column per class day; rows follow the required sections:
+// Goals · Learning Targets | Learning Activities (Whole Group,
+// Independent/Collaborative, Homework) | Student Resources.
+function exportWeekPDF(){
+  const co = getCourse();
+  const NAVY='#1B3A6B', GOLD='#F2C75C', RULE='#B7B3AA';
+
+  // Class days in the currently-viewed dashboard week (Mon–Fri).
+  const mon = new Date(); mon.setHours(0,0,0,0);
+  mon.setDate(mon.getDate() - ((mon.getDay()+6)%7) + dashWeekOffset*7);
+  const fri = new Date(mon); fri.setDate(mon.getDate()+4);
+  const lo = isoOf(mon), hi = isoOf(fri);
+  let cls = collectClasses().filter(c => c.date>=lo && c.date<=hi);
+  // De-duplicate A/B pairs of the same lesson into one column.
+  const seen = new Set(); const cols = [];
+  cls.forEach(c => { const k=`${c.uid}-${c.wi}-${c.di}`; if(!seen.has(k)){ seen.add(k); cols.push(c); } });
+
+  if(!cols.length){ toast('No dated classes in this week — set A/B dates first'); return; }
+
+  const li = arr => (arr||[]).filter(Boolean)
+    .map(x=>`<div style="margin:0 0 3px;padding-left:9px;text-indent:-9px">• ${escPDF(String(x).replace(/<[^>]*>/g,' ').trim())}</div>`).join('');
+
+  const actLines = (d, bucket) => (d.activities||[])
+    .filter(a => phaseBucket(a.grr)===bucket)
+    .filter(a => (a.name||'').trim() || (a.desc||'').trim())
+    .map(a => {
+      const ph = phaseLabel(a.grr);
+      const c = PHASE_COLORS[normalizePhase(a.grr)] || {bg:'#888',tx:'#fff'};
+      const body = escPDF((a.name||'').trim() || String(a.desc||'').replace(/<[^>]*>/g,' ').trim());
+      return `<div style="margin:0 0 4px;padding-left:9px;text-indent:-9px">• ${body}
+        <span style="font-size:7.5pt;font-weight:700;padding:1px 5px;border-radius:3px;background:${c.bg};color:${c.tx};-webkit-print-color-adjust:exact;print-color-adjust:exact">${escPDF(ph)}</span>
+        <span style="font-size:7.5pt;color:#78716C">${a.dur||0}m</span></div>`;
+    }).join('');
+
+  const resLines = d => li([...(d.materials||[]), ...(d.techTools||[]), ...(d.links||[])]);
+
+  const head = cols.map(c=>{
+    const dt = isoParse(c.date).toLocaleDateString('en-US',{weekday:'short', month:'short', day:'numeric'});
+    return `<th style="background:${GOLD};border:1px solid ${RULE};padding:6px 8px;font-size:9.5pt;font-weight:700;color:#1C1917;text-align:center">
+      ${escPDF(c.block)} Block · ${escPDF(dt)}<div style="font-weight:400;font-size:8pt">U${c.uid} · ${escPDF(c.d.label)}</div></th>`;
+  }).join('');
+
+  const rowLabel = (t, sub) => `<td style="background:#FDF6E3;border:1px solid ${RULE};padding:7px 9px;width:150px;vertical-align:top">
+      <div style="font-size:9.5pt;font-weight:700;color:#1C1917">${t}</div>
+      ${sub?`<div style="font-size:7.5pt;color:#78716C;margin-top:2px;line-height:1.35">${sub}</div>`:''}</td>`;
+  const cell = html => `<td style="border:1px solid ${RULE};padding:7px 9px;vertical-align:top;font-size:9pt;line-height:1.45">${html||''}</td>`;
+  const banner = t => `<tr><td colspan="${cols.length+1}" style="background:${GOLD};border:1px solid ${RULE};padding:5px 9px;font-size:9.5pt;font-weight:700;color:${NAVY}">${t}</td></tr>`;
+
+  const html = `<!DOCTYPE html><html><head><meta charset="utf-8">
+  <title>Weekly Lesson Plans — ${escPDF(co.name)}</title>
+  <style>
+    @page{size:letter landscape;margin:.45in}
+    body{font-family:Georgia,'Times New Roman',serif;color:#1C1917;margin:0}
+    table{width:100%;border-collapse:collapse}
+    tr{page-break-inside:avoid}
+  </style></head><body>
+    <div style="border-bottom:3px solid #C9991A;padding-bottom:7px;margin-bottom:10px">
+      <div style="font-size:14pt;font-weight:700;color:${NAVY}">Weekly Lesson Plans — ${escPDF(co.name)} (${escPDF(co.code)})</div>
+      <div style="font-size:9.5pt;color:#57534E;margin-top:2px">${escPDF(state.teacher||'')} · Week of ${mon.toLocaleDateString('en-US',{month:'long',day:'numeric'})} – ${fri.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</div>
+    </div>
+    <table>
+      <thead><tr><th style="background:${NAVY};border:1px solid ${NAVY};width:150px"></th>${head}</tr></thead>
+      <tbody>
+        <tr>${rowLabel('Goals','What students should know and be able to do')}${cols.map(c=>cell(li(c.d.teacherGoals) || li(c.d.eq?[c.d.eq]:[]))).join('')}</tr>
+        <tr>${rowLabel('Learning Targets','"I can…" statements')}${cols.map(c=>cell(li((c.d.targets||[]).map(t=>'I can '+String(t).replace(/^I can\\s*/i,''))))).join('')}</tr>
+        ${banner('Learning Activities / Tasks')}
+        <tr>${rowLabel('Whole Group Learning','Opening · Focus · Closer')}${cols.map(c=>cell(actLines(c.d,'whole'))).join('')}</tr>
+        <tr>${rowLabel('Independent or Collaborative Learning','Guided/Collaborative · Independent')}${cols.map(c=>cell(actLines(c.d,'ic'))).join('')}</tr>
+        <tr>${rowLabel('Homework','')}${cols.map(c=>cell(escPDF(String(c.d.homework||'').replace(/<[^>]*>/g,' ').trim()))).join('')}</tr>
+        ${banner('Student Resources / Links / Tech Tools')}
+        <tr>${rowLabel('Resources','')}${cols.map(c=>cell(resLines(c.d))).join('')}</tr>
+      </tbody>
+    </table>
+  </body></html>`;
+
+  const w = window.open('', '_blank');
+  w.document.open(); w.document.write(html); w.document.close();
+  setTimeout(()=>{ try{ w.print(); }catch(e){} }, 400);
 }
 
 // ── PREP BOARD ────────────────────────────────────────────────────
@@ -4439,7 +4649,95 @@ function closeStageChooser(){ const o=document.getElementById('stage-chooser-ove
 // (backwards design: design the assessment first) above the editable pacing
 // table that the lessons are scaffolded across.
 function pacingGuideHTML(u, weeks) {
-  return summativeDesignerHTML(u) + pacingTableBlockHTML(u, weeks);
+  return simplePacingHTML(u, weeks);
+}
+
+// ── SIMPLE PACING GUIDE ───────────────────────────────────────────
+// A quick, at-a-glance map of the unit: one row per class day with the
+// general theme only (no learning targets or detailed planning). Every
+// row is live — editing Content/HW here writes straight to that lesson,
+// and "open" jumps to the full lesson plan.
+function savePaceCell(wi, di, field, val){
+  currentWeek = wi;
+  const d = getDay(di);
+  d[field] = (val||'').trim();
+  saveState();
+}
+function paceAddDay(wi){ addDay(wi); }
+
+function simplePacingHTML(u, weeks){
+  const rows = [];
+  let lessonNo = 0;
+  weeks.forEach((w, wi) => (w.days||[]).forEach((d, di) => {
+    lessonNo++;
+    rows.push({d, wi, di, n:lessonNo, weekLabel:w.weekLabel});
+  }));
+
+  const inp = (val, wi, di, field, ph) =>
+    `<input class="sp-inp" value="${esc(val||'')}" placeholder="${esc(ph||'')}"
+       onchange="savePaceCell(${wi},${di},'${field}',this.value)">`;
+
+  const assessOpts = ['', 'Quiz','Test','Project','Essay','Presentation','Exit Ticket'];
+
+  const body = rows.map(r => {
+    const d = r.d;
+    const date = d.dateA || d.dateB || '';
+    const planned = dayIsPlanned(d);
+    return `<tr>
+      <td class="sp-td sp-date">
+        <input type="date" class="sp-inp sp-dateinp" value="${esc(d.dateA||'')}"
+          onchange="savePaceCell(${r.wi},${r.di},'dateA',this.value)">
+      </td>
+      <td class="sp-td sp-mid"><span class="sp-daylabel">${esc(d.label||('Day '+r.n))}</span></td>
+      <td class="sp-td sp-mid">${u.id}</td>
+      <td class="sp-td sp-mid">${r.n}</td>
+      <td class="sp-td">${inp(d.topic, r.wi, r.di, 'topic', 'General theme for the day…')}</td>
+      <td class="sp-td sp-assess">
+        <select class="sp-inp sp-sel" onchange="savePaceCell(${r.wi},${r.di},'assessType',this.value)">
+          ${assessOpts.map(o=>`<option value="${o}" ${(d.assessType||'')===o?'selected':''}>${o||'—'}</option>`).join('')}
+        </select>
+      </td>
+      <td class="sp-td">${inp(d.homework, r.wi, r.di, 'homework', 'Homework…')}</td>
+      <td class="sp-td sp-mid">
+        <span class="sp-status ${planned?'ok':''}" title="${planned?'Lesson fully planned':'Not fully planned yet'}">${planned?'✓':'○'}</span>
+        <button class="sp-open" onclick="openGridDay(${u.id},${r.wi},${r.di})" title="Open the full lesson plan">open →</button>
+      </td>
+    </tr>`;
+  }).join('');
+
+  return `
+  <div class="sp-wrap">
+    <div class="sp-head">
+      <div>
+        <h2 class="sp-title">Pacing Guide — ${esc(u.name)}</h2>
+        <div class="sp-sub">The big-picture map: general themes only. Edit Content or HW here and it saves straight to that lesson.</div>
+      </div>
+      <div class="sp-actions">
+        <button class="sp-btn" onclick="exportPacingGuidePDF()">Export</button>
+      </div>
+    </div>
+    <div class="sp-scroll">
+      <table class="sp-table">
+        <thead>
+          <tr>
+            <th style="width:132px">Date</th>
+            <th style="width:74px">Day</th>
+            <th style="width:52px">Unit</th>
+            <th style="width:62px">Lesson</th>
+            <th>Content <span class="sp-th-hint">— general theme</span></th>
+            <th style="width:118px">Assessment</th>
+            <th style="width:210px">HW</th>
+            <th style="width:104px">Plan</th>
+          </tr>
+        </thead>
+        <tbody>${body || `<tr><td class="sp-td" colspan="8" style="text-align:center;color:var(--ink-3);font-style:italic">No class days yet — add one below.</td></tr>`}</tbody>
+      </table>
+    </div>
+    <div class="sp-addrow">
+      ${weeks.map((w,wi)=>`<button class="sp-add" onclick="paceAddDay(${wi})">+ Add day to ${esc(w.weekLabel)}</button>`).join('')}
+      <button class="sp-add" onclick="addWeek()">+ Add week</button>
+    </div>
+  </div>`;
 }
 
 // ── UNIT SUMMATIVE ASSESSMENT (backwards design, stage 2) ─────────
@@ -5239,7 +5537,7 @@ function dailyPanelHTML(d, i) {
     </div>
   </div>
 
-  <div class="dp-section-bar">Outcomes</div>
+  <div class="dp-section-bar">Section 1 · Goals &amp; Learning Targets</div>
 
   <!-- UNIT GOALS — dropdown selector (reads from unitGoalItems — same data as unit overview chips) -->
   ${(() => {
@@ -5389,7 +5687,7 @@ function dailyPanelHTML(d, i) {
     </div>
   </div>
 
-  <div class="dp-section-bar">Lesson Sequence</div>
+  <div class="dp-section-bar">Section 2 · Learning Activities / Tasks</div>
 
   <!-- TIME TRACKER (now above the journal) -->
   <div class="dp-tracker">
@@ -5423,7 +5721,15 @@ function dailyPanelHTML(d, i) {
   <!-- ACTIVITIES -->
   <div class="act-section-header">
     <span class="act-section-label">Activities</span>
-    <span class="act-section-hint">${simpleMode ? 'Click a description to edit — formatting toolbar appears on focus' : 'Click any activity to expand and edit its content'}</span>
+    <span class="act-section-hint">${simpleMode ? 'Click a description to edit' : 'Click any activity to expand and edit its content'}</span>
+    <button class="act-tpl-apply" onclick="applyLessonTemplate(${i})" title="Reset this lesson to the standard flow">↺ Standard flow</button>
+  </div>
+  <div class="phase-flow">
+    ${PHASES.map(p=>{
+      const used = (d.activities||[]).some(a=>normalizePhase(a.grr)===p.v);
+      const c = PHASE_COLORS[p.v];
+      return `<span class="phase-flow-step${used?'':' off'}" style="background:${c.bg};color:${c.tx}" title="${esc(p.hint)} · ${p.lo}–${p.hi} min">${p.label}</span>`;
+    }).join('')}
   </div>
   ${simpleMode ? actTableHTML(i, d) : `<div id="act-list-${i}">
     ${(d.activities||[]).map((a,ai) => actBlockHTML(i, ai, a)).join('')}
@@ -5451,7 +5757,7 @@ function dailyPanelHTML(d, i) {
     </button>
   </div>
 
-  <div class="dp-section-bar">Assessment &amp; Evaluation</div>
+  <div class="dp-section-bar">Section 3 · Assessment, Homework &amp; Student Resources</div>
 
   <!-- FOOTER -->
   <div class="dp-footer">
@@ -6663,113 +6969,51 @@ function importBackup(event) {
 // ── PACING GUIDE PDF EXPORT ───────────────────────────────────────
 function exportPacingGuidePDF() {
   const u     = UNIT_META.find(m => m.id === currentUnit);
-  const weeks = state.units[currentUnit];
+  const weeks = state.units[currentUnit] || [];
   const co    = getCourse();
+  const NAVY = '#1B3A6B', GOLD = '#C9991A';
 
-  const NAVY = '#1B3A6B';
-  const MAROON = '#7B1A2E';
-  const GOLD = '#C9991A';
+  let n = 0;
+  const rows = [];
+  weeks.forEach((w, wi) => (w.days||[]).forEach((d) => {
+    n++;
+    const date = d.dateA || d.dateB || '';
+    rows.push(`<tr>
+      <td style="border:1px solid #D8D5CE;padding:5px 7px;font-size:9pt;white-space:nowrap">${escPDF(date)}</td>
+      <td style="border:1px solid #D8D5CE;padding:5px 7px;font-size:9pt;white-space:nowrap">${escPDF(d.label||('Day '+n))}</td>
+      <td style="border:1px solid #D8D5CE;padding:5px 7px;font-size:9pt;text-align:center">${u ? u.id : ''}</td>
+      <td style="border:1px solid #D8D5CE;padding:5px 7px;font-size:9pt;text-align:center">${n}</td>
+      <td style="border:1px solid #D8D5CE;padding:5px 7px;font-size:9.5pt">${escPDF(d.topic||'')}</td>
+      <td style="border:1px solid #D8D5CE;padding:5px 7px;font-size:9pt;text-align:center">${escPDF(d.assessType||'')}</td>
+      <td style="border:1px solid #D8D5CE;padding:5px 7px;font-size:9pt">${escPDF(d.homework||'')}</td>
+    </tr>`);
+  }));
 
-  // Collect all days flat
-  const allDays = [];
-  weeks.forEach((w, wi) => (w.days||[]).forEach((d, di) => allDays.push({d, wi, di, weekLabel: w.weekLabel})));
-
-  // Pacing guide rows — mirror the on-screen pacing table exactly:
-  // Topic/Day · Description of Content · Learning Targets · Assessment / HW
-  const rows = allDays.map(({d, wi, di, weekLabel}) => {
-    const assessBadge = d.assessType
-      ? `<span style="font-size:9px;font-weight:600;padding:1px 7px;border-radius:999px;background:${ASSESS_COLORS[d.assessType]?.bg};color:${ASSESS_COLORS[d.assessType]?.tx};-webkit-print-color-adjust:exact;print-color-adjust:exact">${escPDF(d.assessType)}</span>`
-      : '';
-    const dateStr = d.dateA && d.dateB ? `${d.dateA} / ${d.dateB}` : d.dateA || d.dateB || '';
-    const targetsHTML = (d.targets||[]).length
-      ? (d.targets||[]).map(t => `<div style="font-size:9px;color:#1B3A6B;line-height:1.4;padding-left:10px;position:relative"><span style="position:absolute;left:2px">·</span>SWBAT ${escPDF(t)}</div>`).join('')
-      : '<span style="font-size:10px;color:#aaa;font-style:italic">—</span>';
-    const assessHTML = d.assessment
-      ? `<div class="rte-pdf-content" style="font-size:10px;color:#1C1917;line-height:1.5">${d.assessment}</div>`
-      : '<span style="font-size:10px;color:#aaa;font-style:italic">—</span>';
-
-    return `<tr style="border-bottom:1px solid #E7E5E0">
-      <td style="padding:8px 10px;vertical-align:top;background:#FDF5F0;border-right:1px solid #E7E5E0;-webkit-print-color-adjust:exact;print-color-adjust:exact;width:15%">
-        <div style="font-size:10px;font-weight:700;color:${NAVY};margin-bottom:3px">${escPDF(d.label)}</div>
-        ${dateStr ? `<div style="font-size:9px;color:#888;margin-bottom:4px">${escPDF(dateStr)}</div>` : ''}
-        <div style="font-size:11px;font-weight:600;color:${MAROON};line-height:1.35">${d.topic ? escPDF(d.topic) : '<span style="color:#ccc;font-weight:400;font-style:italic">No topic</span>'}</div>
-        ${assessBadge ? `<div style="margin-top:5px">${assessBadge}</div>` : ''}
-      </td>
-      <td style="padding:8px 10px;vertical-align:top;border-right:1px solid #E7E5E0;width:37%">
-        <div class="rte-pdf-content" style="font-size:11px;color:#1C1917;line-height:1.55">${d.topicDesc || '<span style="color:#bbb;font-style:italic">—</span>'}</div>
-      </td>
-      <td style="padding:8px 10px;vertical-align:top;border-right:1px solid #E7E5E0;width:25%">
-        ${targetsHTML}
-      </td>
-      <td style="padding:8px 10px;vertical-align:top;width:23%">
-        ${assessHTML}
-      </td>
-    </tr>`;
-  }).join('');
-
+  const th = (t, w) => `<th style="background:${NAVY};color:#fff;font-size:9pt;font-weight:700;padding:6px 7px;text-align:left;border:1px solid ${NAVY}${w?';width:'+w:''}">${t}</th>`;
   const html = `<!DOCTYPE html><html><head><meta charset="utf-8">
-  <title>Pacing Guide — ${escPDF(u.name)}</title>
+  <title>Pacing Guide — ${escPDF(u ? u.name : '')}</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Arial', sans-serif; font-size: 11px; color: #1C1917; background: white; }
-    .rte-pdf-content ul, .rte-pdf-content ol { padding-left: 16px; margin: 2px 0; }
-    .rte-pdf-content li { margin-bottom: 2px; }
-    .rte-pdf-content p { margin: 0 0 3px; }
-    .rte-pdf-content b, .rte-pdf-content strong { font-weight: 700; }
-    .rte-pdf-content i, .rte-pdf-content em { font-style: italic; }
-    @media print {
-      @page { size: landscape; margin: 0.6in; }
-      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    }
-  </style>
-  </head><body>
-  <div style="max-width:1100px;margin:0 auto;padding:28px">
-
-    <!-- LETTERHEAD -->
-    <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px">
-      <img src="${document.querySelector('img.belen-shield')?.src||''}" style="width:44px;height:53px;object-fit:contain;flex-shrink:0" alt="Belen">
-      <div>
-        <div style="font-size:16px;font-weight:700;color:${NAVY}">Belen Jesuit Preparatory School</div>
-        <div style="font-size:9px;color:#888;letter-spacing:.08em;text-transform:uppercase;margin-top:2px">Miami, Florida · Society of Jesus</div>
-      </div>
-      <div style="margin-left:auto;text-align:right">
-        <div style="font-size:10px;color:#888">${co.name} · ${co.code}</div>
-        <div style="font-size:10px;color:#888;margin-top:2px">${state.teacher||'Eric Lastres, SJ'}</div>
-      </div>
+    @page { size: letter landscape; margin: 0.5in; }
+    body { font-family: Georgia, 'Times New Roman', serif; color:#1C1917; margin:0; }
+    table { width:100%; border-collapse:collapse; }
+    tr { page-break-inside: avoid; }
+    thead { display: table-header-group; }
+  </style></head><body>
+    <div style="border-bottom:3px solid ${GOLD};padding-bottom:8px;margin-bottom:12px">
+      <div style="font-size:15pt;font-weight:700;color:${NAVY}">Pacing Guide — Unit ${u?u.id:''}: ${escPDF(u?u.name:'')}</div>
+      <div style="font-size:9.5pt;color:#57534E;margin-top:3px">${escPDF(co.name)} · ${escPDF(co.code)} · ${escPDF(state.teacher||'')} · ${new Date().toLocaleDateString()}</div>
     </div>
-    <div style="border-bottom:3px solid ${GOLD};margin-bottom:16px"></div>
-
-    <!-- UNIT TITLE -->
-    <div style="margin-bottom:14px">
-      <div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#888;margin-bottom:4px">Unit ${u.id} · Semester ${u.sem} · Pacing Guide</div>
-      <div style="font-size:20px;font-weight:700;color:${NAVY};line-height:1.2">${escPDF(u.name)}</div>
-    </div>
-
-    <!-- PACING GUIDE -->
-    <table style="width:100%;border-collapse:collapse">
-      <thead>
-        <tr style="-webkit-print-color-adjust:exact;print-color-adjust:exact">
-          <th style="background:${NAVY};color:white;padding:7px 10px;font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;text-align:left;border:1px solid ${NAVY};width:15%">Topic / Day</th>
-          <th style="background:${NAVY};color:white;padding:7px 10px;font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;text-align:left;border:1px solid ${NAVY};width:37%">Description of Content</th>
-          <th style="background:${NAVY};color:white;padding:7px 10px;font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;text-align:left;border:1px solid ${NAVY};width:25%">Learning Targets</th>
-          <th style="background:${NAVY};color:white;padding:7px 10px;font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;text-align:left;border:1px solid ${NAVY};width:23%">Assessment / HW</th>
-        </tr>
-      </thead>
-      <tbody>${rows}</tbody>
+    <table>
+      <thead><tr>
+        ${th('Date','13%')}${th('Day','8%')}${th('Unit','5%')}${th('Lesson','6%')}${th('Content')}${th('Assessment','11%')}${th('HW','22%')}
+      </tr></thead>
+      <tbody>${rows.join('') || '<tr><td colspan="7" style="border:1px solid #D8D5CE;padding:10px;text-align:center;color:#78716C">No class days yet.</td></tr>'}</tbody>
     </table>
-
-    <!-- FOOTER -->
-    <div style="margin-top:20px;padding-top:10px;border-top:1px solid #E7E5E0;display:flex;justify-content:space-between;align-items:center">
-      <span style="font-size:9px;color:#aaa;font-style:italic">A.M.D.G. — Ad Majorem Dei Gloriam</span>
-      <span style="font-size:9px;color:#aaa">Belen Jesuit Preparatory School · Miami, FL</span>
-    </div>
-  </div>
-  <script>window.onload = () => { window.print(); }<\/script>
   </body></html>`;
 
-  const win = window.open('', '_blank');
-  win.document.write(html);
-  win.document.close();
+  const wdw = window.open('', '_blank');
+  wdw.document.open(); wdw.document.write(html); wdw.document.close();
+  setTimeout(() => { try { wdw.print(); } catch(e){} }, 400);
 }
 
 function exportPDF() {
