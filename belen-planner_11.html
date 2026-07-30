@@ -3846,7 +3846,7 @@ function unitCardHTML(u) {
   const c = getUC(u.id);
   const weeks = state.units[u.id] || [];
   const totalDays = weeks.reduce((n,w)=>n+(w.days||[]).length,0);
-  const plannedDays = weeks.reduce((n,w)=>(w.days||[]).reduce((m,d)=>m+(d.activities&&d.activities.length?1:0),0)+n,0);
+  const plannedDays = weeks.reduce((n,w)=>(w.days||[]).reduce((m,d)=>m+(dayIsPlanned(d)?1:0),0)+n,0);
   const pct = totalDays ? Math.round(plannedDays/totalDays*100) : 0;
   const desc = state.unitDescs?.[u.id] ?? u.desc ?? '';
   const idx = UNIT_META.findIndex(m => m.id === u.id);
