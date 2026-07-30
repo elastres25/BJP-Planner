@@ -1737,10 +1737,19 @@ function getUC(uid) {
   const key = (state.unitColors && state.unitColors[uid]) || (UNIT_META.find(m=>m.id===uid)||{}).color || 'purple';
   return COLOR_MAP[key] || COLOR_MAP.purple;
 }
-// Displayed unit number = its position in the current order (so moving a unit
-// renumbers it). The internal `id` stays fixed as the storage key.
+// Units in the order they're shown: Semester 1 first, then Semester 2, each
+// in its stored order. This is the single source of truth for display order.
+function orderedUnits() {
+  return UNIT_META
+    .map((u, idx) => ({ u, idx }))
+    .sort((a, b) => ((a.u.sem || 1) - (b.u.sem || 1)) || (a.idx - b.idx))
+    .map(x => x.u);
+}
+// Displayed unit number = its position in that on-screen order, so the numbers
+// always read 1,2,3… down the page and moving a unit renumbers it. The
+// internal `id` stays fixed as the storage key.
 function unitNo(uid) {
-  const i = UNIT_META.findIndex(m => m.id === uid);
+  const i = orderedUnits().findIndex(u => u.id === uid);
   return i >= 0 ? i + 1 : uid;
 }
 function setUnitColor(uid, colorKey) {
