@@ -1285,7 +1285,31 @@ body.simple-mode .dp-adv { display: none !important; }
 .d-add-row{display:flex;gap:7px;margin-bottom:13px;}
 .d-add-row input{flex:1;border:1px solid var(--rule);border-radius:var(--radius-sm);padding:7px 11px;font-size:12.5px;outline:none;color:var(--ink);}
 .d-add-row input:focus{border-color:var(--navy);}
-.d-add-row button{background:var(--navy);color:#fff;border:none;border-radius:var(--radius-sm);padding:7px 14px;font-size:12.5px;font-weight:600;}
+.d-add-row button{background:var(--navy);color:#fff;border:none;border-radius:var(--radius-sm);padding:7px 14px;font-size:12.5px;font-weight:600;cursor:pointer;}
+.d-add-row select{flex:0 0 auto;border:1px solid var(--rule);border-radius:var(--radius-sm);padding:7px 8px;font-size:12px;outline:none;color:var(--ink);background:#fff;}
+/* Category bar */
+.d-catbar{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:-4px 0 14px;font-size:11px;}
+.d-catbar-lbl{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);}
+.d-catbar-empty{font-size:11px;color:var(--ink-3);font-style:italic;}
+.d-cat-chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:2px 4px 2px 8px;border-radius:999px;border:1px solid;}
+.d-cat-chipdot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.d-cat-chip button{border:none;background:none;cursor:pointer;color:inherit;opacity:.6;font-size:14px;line-height:1;padding:0 2px;}
+.d-cat-chip button:hover{opacity:1;}
+.d-cat-new{background:none;border:1px dashed var(--rule-dark);border-radius:999px;padding:3px 10px;font-family:inherit;font-size:11px;font-weight:600;color:var(--navy);cursor:pointer;}
+.d-cat-new:hover{border-color:var(--navy);}
+.d-cat-form{display:inline-flex;align-items:center;gap:6px;background:#F7F9FC;border:1px solid var(--rule);border-radius:8px;padding:5px 8px;}
+.d-cat-form input[type=text],#todocat-name{border:1px solid var(--rule-dark);border-radius:5px;padding:4px 8px;font-family:inherit;font-size:12px;outline:none;width:130px;}
+.d-cat-swatches{display:inline-flex;gap:3px;}
+.d-cat-sw{width:16px;height:16px;border-radius:50%;cursor:pointer;position:relative;display:inline-block;border:2px solid transparent;}
+.d-cat-sw input{position:absolute;opacity:0;width:100%;height:100%;cursor:pointer;margin:0;}
+.d-cat-sw:has(input:checked){border-color:var(--ink);box-shadow:0 0 0 1px #fff inset;}
+.d-cat-add{background:var(--navy);color:#fff;border:none;border-radius:5px;padding:4px 11px;font-family:inherit;font-size:11.5px;font-weight:700;cursor:pointer;}
+.d-cat-cancel{background:none;border:1px solid var(--rule-dark);border-radius:5px;padding:4px 9px;font-family:inherit;font-size:11.5px;font-weight:600;color:var(--ink-2);cursor:pointer;}
+/* Manual-task inline edit controls */
+.d-t-dateedit{border:1px solid var(--rule);border-radius:5px;padding:2px 6px;font-family:inherit;font-size:11px;color:var(--ink-2);outline:none;background:#fff;}
+.d-t-dateedit:focus{border-color:var(--navy);}
+.d-t-catsel{border:1px solid var(--rule);border-radius:5px;padding:2px 5px;font-family:inherit;font-size:11px;outline:none;background:#fff;color:var(--ink-2);}
+.d-t-catdot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:1px;}
 .d-tg{margin-bottom:14px;}
 .d-tg:last-child{margin-bottom:0;}
 .d-tg-head{display:flex;align-items:center;gap:8px;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px;}
@@ -1853,12 +1877,34 @@ function uid() { return Date.now().toString(36)+Math.random().toString(36).slice
 function esc(s)    { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function escPDF(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
+// Remove from deletedUnits any id that still has lesson data in state.units,
+// so a unit that holds work can never stay hidden. A properly deleted unit
+// has its state.units entry removed, so it stays hidden (no days) as intended.
+function pruneHiddenPopulatedUnits(st){
+  try{
+    const del = st.deletedUnits && st.deletedUnits[activeCourse];
+    if(!del || !del.length) return;
+    const kept = del.filter(id => {
+      const weeks = st.units && st.units[id];
+      const hasDays = Array.isArray(weeks) && weeks.some(w => (w.days||[]).length);
+      return !hasDays;   // keep hidden ONLY when there is no data
+    });
+    if(kept.length !== del.length) st.deletedUnits[activeCourse] = kept;
+  }catch(e){ /* never let repair break loading */ }
+}
+
 function loadState() {
   try {
     const s = localStorage.getItem(getCourse().storageKey);
     if (s) {
       const parsed = JSON.parse(s);
       if (parsed._v === 2) {
+        // Never keep a unit hidden if it still holds lesson data. An older
+        // add-unit bug could leave a unit's lessons in state.units while its
+        // id sat in deletedUnits, so the work looked "deleted" after refresh.
+        // This un-hides any such unit (it only ever recovers data, never
+        // removes it).
+        pruneHiddenPopulatedUnits(parsed);
         // Safe one-time recovery: if Unit 1 Day 1 looks empty (lost to the
         // sync bug), restore it from the saved PDF without touching
         // anything else already in the planner.
@@ -2263,7 +2309,15 @@ function setSyncStatus(status) {
 function saveState() {
   state._v = 2;
   state.lastModified = Date.now();
-  localStorage.setItem(getCourse().storageKey, JSON.stringify(state));
+  try {
+    localStorage.setItem(getCourse().storageKey, JSON.stringify(state));
+  } catch(e) {
+    // Most likely the browser's storage quota is full — surface it loudly
+    // instead of silently dropping the change (which looks like "it won't save").
+    console.error('saveState failed:', e);
+    try { setSyncStatus('error'); } catch(_) {}
+    toast('⚠️ Could not save — device storage may be full. Use Backup to export your data.');
+  }
 }
 
 async function pushToSheets() {
@@ -2582,16 +2636,47 @@ function collectClasses(){
 function addDashTodo(){
   const ti = document.getElementById('d-todo-text');
   const di = document.getElementById('d-todo-due');
+  const ci = document.getElementById('d-todo-cat');
   const text = (ti.value||'').trim();
   if(!text){ ti.focus(); return; }
   if(!state.todos) state.todos = [];
-  state.todos.push({ id: uid(), text, due: di.value||'', done:false });
+  state.todos.push({ id: uid(), text, due: di.value||'', cat:(ci?ci.value:'')||'', done:false });
   saveState();
   renderDashboard();
 }
 function toggleDashTodo(id){
   const t = (state.todos||[]).find(x=>x.id===id);
   if(t){ t.done=!t.done; saveState(); renderDashboard(); }
+}
+function updateTodoDate(id, val){
+  const t = (state.todos||[]).find(x=>x.id===id);
+  if(t){ t.due = val||''; saveState(); renderDashboard(); }
+}
+function updateTodoCat(id, catId){
+  const t = (state.todos||[]).find(x=>x.id===id);
+  if(t){ t.cat = catId||''; saveState(); renderDashboard(); }
+}
+// ── To-do categories (user-defined, colored) ──────────────────────
+const TODO_CAT_COLORS = ['#534AB7','#0F6E56','#993C1D','#185FA5','#C9991A','#2D7A3A','#A8283F','#5B6470','#A8285C'];
+function getTodoCats(){ if(!state.todoCategories) state.todoCategories=[]; return state.todoCategories; }
+function todoCat(id){ return getTodoCats().find(c=>c.id===id) || null; }
+let todoCatFormOpen = false;
+function toggleTodoCatForm(){ todoCatFormOpen = !todoCatFormOpen; renderDashboard(); if(todoCatFormOpen) setTimeout(()=>{const el=document.getElementById('todocat-name'); if(el) el.focus();},40); }
+function addTodoCategory(){
+  const nameEl = document.getElementById('todocat-name');
+  const name = (nameEl?nameEl.value:'').trim();
+  if(!name){ if(nameEl) nameEl.focus(); return; }
+  const colorEl = document.querySelector('input[name="todocat-color"]:checked');
+  const color = colorEl ? colorEl.value : TODO_CAT_COLORS[getTodoCats().length % TODO_CAT_COLORS.length];
+  getTodoCats().push({ id:'cat-'+Date.now().toString(36), name, color });
+  todoCatFormOpen = false;
+  saveState(); renderDashboard();
+}
+function deleteTodoCategory(id){
+  state.todoCategories = getTodoCats().filter(c=>c.id!==id);
+  // Unassign this category from any tasks that used it
+  (state.todos||[]).forEach(t=>{ if(t.cat===id) t.cat=''; });
+  saveState(); renderDashboard();
 }
 // Quick-add a to-do from a lesson's day panel — pre-filled from the day's
 // topic and dated to its class date, so it lands in the dashboard To-Do.
@@ -2783,7 +2868,7 @@ function renderDashboard(){
 
   const items = [
     ...autos.map(a=>({ id:a.key, auto:true, text:a.text, due:a.due, tag:a.tag, unit:a.unit, open:a.open, done:!!(state.autoDone&&state.autoDone[a.key]) })),
-    ...(state.todos||[]).map(t=>({ id:t.id, manual:true, text:t.text, due:t.due||'', done:!!t.done })),
+    ...(state.todos||[]).map(t=>({ id:t.id, manual:true, text:t.text, due:t.due||'', done:!!t.done, cat:t.cat||'' })),
   ];
 
   const bucketOf = it => (it.due && it.due<today) ? 'over' : (it.due && it.due<=isoAddDays(today,7)) ? 'week' : 'later';
@@ -2802,16 +2887,31 @@ function renderDashboard(){
     }
     const toggle = it.auto ? `toggleAutoDone('${it.id}')` : `toggleDashTodo('${it.id}')`;
     const mainClick = it.open ? ` onclick="openGridDay(${it.open[0]},${it.open[1]},${it.open[2]})"` : '';
-    const tags = [
-      it.unit ? `<span class="d-t-tag">${esc(it.unit)}</span>` : '',
-      it.auto ? `<span class="d-t-tag auto">auto · ${esc(it.tag||'')}</span>` : '',
-      `<span class="d-t-due${dueCls}">${dueTxt}</span>`,
-    ].join('');
-    return `<div class="d-todo ${pri}${it.done?' done':''}">
+    const cat = it.manual ? todoCat(it.cat) : null;
+    const cats = getTodoCats();
+    // Manual tasks: editable date + category select. Auto tasks: static tags.
+    let sub;
+    if(it.manual){
+      const catSel = cats.length ? `<select class="d-t-catsel" onchange="updateTodoCat('${it.id}',this.value)" title="Category"${cat?` style="color:${cat.color};font-weight:600"`:''}>
+          <option value="">— category —</option>
+          ${cats.map(c=>`<option value="${c.id}" ${it.cat===c.id?'selected':''}>${esc(c.name)}</option>`).join('')}
+        </select>` : '';
+      sub = `<input type="date" class="d-t-dateedit" value="${esc(it.due||'')}" title="Due date" onchange="updateTodoDate('${it.id}',this.value)">
+        ${catSel}
+        <span class="d-t-due${dueCls}">${it.due?dueTxt:'No date'}</span>`;
+    } else {
+      sub = [
+        it.unit ? `<span class="d-t-tag">${esc(it.unit)}</span>` : '',
+        it.auto ? `<span class="d-t-tag auto">auto · ${esc(it.tag||'')}</span>` : '',
+        `<span class="d-t-due${dueCls}">${dueTxt}</span>`,
+      ].join('');
+    }
+    const catBar = cat ? `border-left:3px solid ${cat.color}` : '';
+    return `<div class="d-todo ${pri}${it.done?' done':''}"${catBar?` style="${catBar}"`:''}>
       <div class="d-cb" onclick="${toggle}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg></div>
       <div class="d-t-body">
-        <div class="d-t-main${it.open?' link':''}"${mainClick}>${esc(it.text)}</div>
-        <div class="d-t-sub">${tags}</div>
+        <div class="d-t-main${it.open?' link':''}"${mainClick}>${cat?`<span class="d-t-catdot" style="background:${cat.color}"></span>`:''}${esc(it.text)}</div>
+        <div class="d-t-sub">${sub}</div>
       </div>
       ${it.manual?`<button class="d-t-del" title="Delete" onclick="deleteDashTodo('${it.id}')">&times;</button>`:''}
     </div>`;
@@ -2837,7 +2937,23 @@ function renderDashboard(){
       <div class="d-add-row">
         <input id="d-todo-text" placeholder="Add your own task…" onkeydown="if(event.key==='Enter')addDashTodo()">
         <input id="d-todo-due" type="date" title="Optional due date" style="flex:0 0 auto;width:140px">
+        ${getTodoCats().length?`<select id="d-todo-cat" title="Category" style="flex:0 0 auto;width:130px">
+          <option value="">— category —</option>
+          ${getTodoCats().map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')}
+        </select>`:''}
         <button onclick="addDashTodo()">Add</button>
+      </div>
+      <div class="d-catbar">
+        <span class="d-catbar-lbl">Categories:</span>
+        ${getTodoCats().map(c=>`<span class="d-cat-chip" style="background:${c.color}18;color:${c.color};border-color:${c.color}55"><span class="d-cat-chipdot" style="background:${c.color}"></span>${esc(c.name)}<button title="Delete category" onclick="deleteTodoCategory('${c.id}')">&times;</button></span>`).join('') || '<span class="d-catbar-empty">none yet</span>'}
+        ${todoCatFormOpen
+          ? `<span class="d-cat-form">
+               <input id="todocat-name" placeholder="Category name" onkeydown="if(event.key==='Enter')addTodoCategory()">
+               <span class="d-cat-swatches">${TODO_CAT_COLORS.map((col,ix)=>`<label class="d-cat-sw" style="background:${col}"><input type="radio" name="todocat-color" value="${col}" ${ix===0?'checked':''}></label>`).join('')}</span>
+               <button class="d-cat-add" onclick="addTodoCategory()">Add</button>
+               <button class="d-cat-cancel" onclick="toggleTodoCatForm()">Cancel</button>
+             </span>`
+          : `<button class="d-cat-new" onclick="toggleTodoCatForm()">+ New category</button>`}
       </div>
       ${anyTodo ? (groupHTML('Overdue','var(--crit)',groups.over)+groupHTML('This Week','#8a6d1a',groups.week)+groupHTML('Next Two Weeks','var(--navy)',groups.later))
                 : `<div class="d-empty-note">You're all caught up — no tasks due. Auto-tasks appear here as classes and assessments approach.</div>`}
@@ -3736,9 +3852,10 @@ function renderSemesterGrid() {
 
   const semStart = state.semesterStart;
 
-  // Collect ALL days across ALL units, in unit/week/day order
+  // Collect ALL days across ALL units, in the same on-screen order as the
+  // pacing guide (Semester 1 then Semester 2) so the two views always match.
   const allBlocks = []; // {uid, wi, di, d, weekLabel}
-  UNIT_META.forEach(u => {
+  orderedUnits().forEach(u => {
     (state.units[u.id] || []).forEach((w, wi) => {
       (w.days || []).forEach((d, di) => {
         allBlocks.push({uid: u.id, wi, di, d, weekLabel: w.weekLabel, u});
