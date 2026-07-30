@@ -1310,6 +1310,20 @@ body.simple-mode .dp-adv { display: none !important; }
 .d-t-dateedit:focus{border-color:var(--navy);}
 .d-t-catsel{border:1px solid var(--rule);border-radius:5px;padding:2px 5px;font-family:inherit;font-size:11px;outline:none;background:#fff;color:var(--ink-2);}
 .d-t-catdot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:1px;}
+.d-sub-count{font-size:10px;font-weight:700;color:var(--ink-3);background:var(--parchment);border:1px solid var(--rule);border-radius:999px;padding:0 6px;margin-left:7px;vertical-align:1px;}
+/* Subtasks */
+.d-subs{margin-top:6px;padding-left:2px;display:flex;flex-direction:column;gap:3px;}
+.d-sub{display:flex;align-items:center;gap:6px;}
+.d-sub-cb{width:15px;height:15px;flex-shrink:0;border:1.5px solid var(--rule-dark);border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:transparent;}
+.d-sub-cb:hover{border-color:var(--navy);}
+.d-sub.done .d-sub-cb{background:var(--navy);border-color:var(--navy);color:#fff;}
+.d-sub-text{font-size:12px;color:var(--ink);line-height:1.3;}
+.d-sub.done .d-sub-text{text-decoration:line-through;color:var(--ink-3);}
+.d-sub-del{border:none;background:none;color:var(--ink-3);font-size:14px;line-height:1;cursor:pointer;padding:0 2px;opacity:0;transition:opacity .12s;}
+.d-sub:hover .d-sub-del{opacity:.7;}
+.d-sub-del:hover{opacity:1;color:var(--crit);}
+.d-sub-add{border:none;border-bottom:1px dashed var(--rule-dark);background:none;font-family:inherit;font-size:11.5px;color:var(--ink-2);outline:none;padding:2px 2px 2px 21px;width:100%;box-sizing:border-box;}
+.d-sub-add:focus{border-color:var(--navy);}
 .d-tg{margin-bottom:14px;}
 .d-tg:last-child{margin-bottom:0;}
 .d-tg-head{display:flex;align-items:center;gap:8px;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px;}
@@ -1763,12 +1777,18 @@ function getUC(uid) {
   const key = (state.unitColors && state.unitColors[uid]) || (UNIT_META.find(m=>m.id===uid)||{}).color || 'purple';
   return COLOR_MAP[key] || COLOR_MAP.purple;
 }
-// Units in the order they're shown: Semester 1 first, then Semester 2, each
-// in its stored order. This is the single source of truth for display order.
+// Units in the order they're shown: Semester 1 first, then Semester 2, and
+// within a semester in the user's chosen order (state.unitOrder) if set,
+// else their stored order. Single source of truth for display order.
 function orderedUnits() {
+  const order = (state.unitOrder && state.unitOrder[activeCourse]) || [];
+  const rank = id => { const i = order.indexOf(id); return i < 0 ? 1e6 : i; };
   return UNIT_META
     .map((u, idx) => ({ u, idx }))
-    .sort((a, b) => ((a.u.sem || 1) - (b.u.sem || 1)) || (a.idx - b.idx))
+    .sort((a, b) =>
+      ((a.u.sem || 1) - (b.u.sem || 1)) ||
+      (rank(a.u.id) - rank(b.u.id)) ||
+      (a.idx - b.idx))
     .map(x => x.u);
 }
 // Displayed unit number = its position in that on-screen order, so the numbers
@@ -2652,6 +2672,24 @@ function updateTodoDate(id, val){
   const t = (state.todos||[]).find(x=>x.id===id);
   if(t){ t.due = val||''; saveState(); renderDashboard(); }
 }
+// ── Subtasks on a manual to-do ─────────────────────────────────────
+function addSubtask(todoId, text){
+  text=(text||'').trim(); if(!text) return;
+  const t=(state.todos||[]).find(x=>x.id===todoId); if(!t) return;
+  (t.subtasks=t.subtasks||[]).push({ id:uid(), text, done:false });
+  saveState(); renderDashboard();
+  setTimeout(()=>{ const el=document.getElementById('subadd-'+todoId); if(el) el.focus(); }, 30);
+}
+function toggleSubtask(todoId, subId){
+  const t=(state.todos||[]).find(x=>x.id===todoId); if(!t) return;
+  const s=(t.subtasks||[]).find(x=>x.id===subId);
+  if(s){ s.done=!s.done; saveState(); renderDashboard(); }
+}
+function deleteSubtask(todoId, subId){
+  const t=(state.todos||[]).find(x=>x.id===todoId); if(!t) return;
+  t.subtasks=(t.subtasks||[]).filter(x=>x.id!==subId);
+  saveState(); renderDashboard();
+}
 function updateTodoCat(id, catId){
   const t = (state.todos||[]).find(x=>x.id===id);
   if(t){ t.cat = catId||''; saveState(); renderDashboard(); }
@@ -2868,7 +2906,7 @@ function renderDashboard(){
 
   const items = [
     ...autos.map(a=>({ id:a.key, auto:true, text:a.text, due:a.due, tag:a.tag, unit:a.unit, open:a.open, done:!!(state.autoDone&&state.autoDone[a.key]) })),
-    ...(state.todos||[]).map(t=>({ id:t.id, manual:true, text:t.text, due:t.due||'', done:!!t.done, cat:t.cat||'' })),
+    ...(state.todos||[]).map(t=>({ id:t.id, manual:true, text:t.text, due:t.due||'', done:!!t.done, cat:t.cat||'', subtasks:t.subtasks||[] })),
   ];
 
   const bucketOf = it => (it.due && it.due<today) ? 'over' : (it.due && it.due<=isoAddDays(today,7)) ? 'week' : 'later';
@@ -2907,11 +2945,28 @@ function renderDashboard(){
       ].join('');
     }
     const catBar = cat ? `border-left:3px solid ${cat.color}` : '';
+    // Subtasks (manual tasks only)
+    let subsHTML = '';
+    if(it.manual){
+      const subs = it.subtasks||[];
+      const doneN = subs.filter(s=>s.done).length;
+      const rows = subs.map(s=>`<div class="d-sub${s.done?' done':''}">
+          <div class="d-sub-cb" onclick="toggleSubtask('${it.id}','${s.id}')"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke-width="4"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span class="d-sub-text">${esc(s.text)}</span>
+          <button class="d-sub-del" title="Remove subtask" onclick="deleteSubtask('${it.id}','${s.id}')">&times;</button>
+        </div>`).join('');
+      subsHTML = `<div class="d-subs">
+        ${rows}
+        <input id="subadd-${it.id}" class="d-sub-add" placeholder="+ add subtask" onkeydown="if(event.key==='Enter'){event.preventDefault();addSubtask('${it.id}',this.value)}">
+      </div>`;
+      var subCount = subs.length ? `<span class="d-sub-count">${doneN}/${subs.length}</span>` : '';
+    }
     return `<div class="d-todo ${pri}${it.done?' done':''}"${catBar?` style="${catBar}"`:''}>
       <div class="d-cb" onclick="${toggle}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg></div>
       <div class="d-t-body">
-        <div class="d-t-main${it.open?' link':''}"${mainClick}>${cat?`<span class="d-t-catdot" style="background:${cat.color}"></span>`:''}${esc(it.text)}</div>
+        <div class="d-t-main${it.open?' link':''}"${mainClick}>${cat?`<span class="d-t-catdot" style="background:${cat.color}"></span>`:''}${esc(it.text)}${it.manual?(subCount||''):''}</div>
         <div class="d-t-sub">${sub}</div>
+        ${subsHTML}
       </div>
       ${it.manual?`<button class="d-t-del" title="Delete" onclick="deleteDashTodo('${it.id}')">&times;</button>`:''}
     </div>`;
@@ -3800,11 +3855,12 @@ function renderCourse() {
   if (classEl) classEl.textContent = `${co.name} · ${co.code} · 2025–2026`;
   renderCourseToggle();
   const sems = [[1,'Semester 1'],[2,'Semester 2']];
+  const ord = orderedUnits();
   document.getElementById('course-units-content').innerHTML = sems.map(([sem,lbl]) => {
-    const units = UNIT_META.filter(u=>u.sem===sem);
+    const units = ord.filter(u=>(u.sem||1)===sem);
     return `<div class="sem-block">
       <div class="section-eyebrow">${lbl}</div>
-      <div class="unit-grid">${units.map(unitCardHTML).join('')}</div>
+      <div class="unit-grid">${units.map((u,si)=>unitCardHTML(u, si, units.length)).join('')}</div>
     </div>`;
   }).join('');
   // Render semester grid
@@ -3961,15 +4017,16 @@ function openGridDay(uid, wi, di) {
   setTimeout(() => document.getElementById('daily-panel-'+wi)?.scrollIntoView({behavior:'smooth',block:'nearest'}), 120);
 }
 
-function unitCardHTML(u) {
+function unitCardHTML(u, semIdx, semCount) {
   const c = getUC(u.id);
   const weeks = state.units[u.id] || [];
   const totalDays = weeks.reduce((n,w)=>n+(w.days||[]).length,0);
   const plannedDays = weeks.reduce((n,w)=>(w.days||[]).reduce((m,d)=>m+(dayIsPlanned(d)?1:0),0)+n,0);
   const pct = totalDays ? Math.round(plannedDays/totalDays*100) : 0;
   const desc = state.unitDescs?.[u.id] ?? u.desc ?? '';
-  const idx = UNIT_META.findIndex(m => m.id === u.id);
-  const total = UNIT_META.length;
+  // Move arrows are relative to this unit's position within its semester group.
+  const idx = (semIdx !== undefined) ? semIdx : orderedUnits().filter(x=>(x.sem||1)===(u.sem||1)).findIndex(x=>x.id===u.id);
+  const total = (semCount !== undefined) ? semCount : orderedUnits().filter(x=>(x.sem||1)===(u.sem||1)).length;
   return `<div class="unit-card" style="position:relative" onclick="nav('unit',${u.id})">
     <!-- Move / Delete controls -->
     <div onclick="event.stopPropagation()" style="position:absolute;top:6px;right:6px;display:none;gap:3px;align-items:center" class="uc-controls">
@@ -4512,20 +4569,23 @@ function deleteUnit(uid) {
 }
 
 function moveUnit(uid, dir) {
-  const meta = getCourse().unitMeta;
-  const customs = state.customUnits?.[activeCourse] || [];
-  const all = [...meta, ...customs];
-  const idx = all.findIndex(u => u.id === uid);
-  const newIdx = idx + dir;
-  if (newIdx < 0 || newIdx >= all.length) return;
-  // Swap
-  [all[idx], all[newIdx]] = [all[newIdx], all[idx]];
-  // Write back - split between base and custom
-  const baseCount = meta.length;
-  all.slice(0, Math.min(all.length, baseCount)).forEach((u,i) => { meta[i] = u; });
-  if (state.customUnits?.[activeCourse]) {
-    state.customUnits[activeCourse] = all.slice(baseCount);
-  }
+  const ordered = orderedUnits();
+  const u = ordered.find(x => x.id === uid);
+  if (!u) return;
+  const sem = u.sem || 1;
+  const semUnits = ordered.filter(x => (x.sem || 1) === sem);
+  const pos = semUnits.findIndex(x => x.id === uid);
+  const swap = pos + dir;
+  if (swap < 0 || swap >= semUnits.length) return;   // already at the end
+  [semUnits[pos], semUnits[swap]] = [semUnits[swap], semUnits[pos]];
+  // Persist an explicit order: every semester's current order, this one swapped.
+  const bySem = {};
+  ordered.forEach(x => { const s = x.sem || 1; (bySem[s] = bySem[s] || []).push(x.id); });
+  bySem[sem] = semUnits.map(x => x.id);
+  const newOrder = [];
+  Object.keys(bySem).sort((a, b) => a - b).forEach(s => newOrder.push(...bySem[s]));
+  if (!state.unitOrder) state.unitOrder = {};
+  state.unitOrder[activeCourse] = newOrder;
   saveState(); renderCourse();
 }
 
