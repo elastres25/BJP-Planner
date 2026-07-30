@@ -4157,29 +4157,42 @@ function closeAddUnit(){ document.getElementById('addunit-overlay').style.displa
 function submitAddUnit() {
   const name = document.getElementById('addunit-name').value.trim();
   if (!name) { toast('Give the unit a name'); document.getElementById('addunit-name').focus(); return; }
-  const sem = document.getElementById('addunit-sem').value;
-  const colors = ['purple','teal','coral','blue','gold','green','maroon','slate','rose'];
-  const existingCount = UNIT_META.length;
-  const color = colors[existingCount % colors.length];
-  const newId = Math.max(...UNIT_META.map(u => u.id), 0) + 1;
-  const newUnit = {
-    id: newId, sem: +sem, name,
-    blocks: '— blocks', color, weeks: 1, totalBlocks: 3,
-    blocksPerWeek: [3], desc: ''
-  };
-  // Persist in state
-  if (!state.customUnits) state.customUnits = {};
-  if (!state.customUnits[activeCourse]) state.customUnits[activeCourse] = [];
-  state.customUnits[activeCourse].push(newUnit);
-  // Initialize state for this unit
-  if (!state.units) state.units = {};
-  state.units[newId] = [{ weekLabel: 'Week 1', days: [makeDay('Day 1','','')] }];
-  if (!state.unitOverviews) state.unitOverviews = {};
-  state.unitOverviews[newId] = { courseGoals:[], unitGoals:[], essentialQuestions:[], vocab:[], skills:[], scripture:[], ccc:[], readings:[], saints:[], reflection:[], objTable:{knowledge:[],understanding:[],skills:[],attitudes:[]} };
-  saveState();
-  closeAddUnit();
-  renderCourse();
-  toast(`Unit ${unitNo(newId)}: "${name}" added ✓`);
+  try {
+    const sem = document.getElementById('addunit-sem').value;
+    const colors = ['purple','teal','coral','blue','gold','green','maroon','slate','rose'];
+    const color = colors[UNIT_META.length % colors.length];
+    // New id must beat EVERY id this course has ever used — including custom
+    // units and previously DELETED ids — otherwise the UNIT_META getter, which
+    // hides ids listed in deletedUnits, would filter the new unit right back out.
+    const baseIds    = getCourse().unitMeta.map(u => u.id);
+    const customIds  = ((state.customUnits && state.customUnits[activeCourse]) || []).map(u => u.id);
+    const deletedIds = (state.deletedUnits && state.deletedUnits[activeCourse]) || [];
+    const usedIds    = Object.keys(state.units || {}).map(Number);
+    const newId = Math.max(0, ...baseIds, ...customIds, ...deletedIds, ...usedIds) + 1;
+    // Belt & suspenders: make sure this id isn't marked deleted.
+    if (state.deletedUnits && state.deletedUnits[activeCourse]) {
+      state.deletedUnits[activeCourse] = state.deletedUnits[activeCourse].filter(x => x !== newId);
+    }
+    const newUnit = {
+      id: newId, sem: +sem, name,
+      blocks: '— blocks', color, weeks: 1, totalBlocks: 3,
+      blocksPerWeek: [3], desc: ''
+    };
+    if (!state.customUnits) state.customUnits = {};
+    if (!state.customUnits[activeCourse]) state.customUnits[activeCourse] = [];
+    state.customUnits[activeCourse].push(newUnit);
+    if (!state.units) state.units = {};
+    state.units[newId] = [{ weekLabel: 'Week 1', days: [makeDay('Day 1','','')] }];
+    if (!state.unitOverviews) state.unitOverviews = {};
+    state.unitOverviews[newId] = { courseGoals:[], unitGoals:[], essentialQuestions:[], vocab:[], skills:[], scripture:[], ccc:[], readings:[], saints:[], reflection:[], objTable:{knowledge:[],understanding:[],skills:[],attitudes:[]} };
+    saveState();
+    closeAddUnit();
+    renderCourse();
+    toast(`Unit ${unitNo(newId)}: "${name}" added ✓`);
+  } catch (err) {
+    console.error('Add unit failed:', err);
+    toast('Could not add unit: ' + (err && err.message ? err.message : 'unknown error'));
+  }
 }
 
 // ── EQ CHIPS ──────────────────────────────────────────────────────
