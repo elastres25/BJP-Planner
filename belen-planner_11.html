@@ -824,7 +824,20 @@ body.simple-mode .dp-adv { display: none !important; }
 .ures-cat { border:1px solid var(--rule); border-radius:10px; background:var(--white); padding:12px; }
 .ures-cat-head { font-size:12px; font-weight:700; color:var(--navy); display:flex; align-items:center; gap:6px; margin-bottom:8px; }
 .ures-count { margin-left:auto; font-size:11px; font-weight:600; color:var(--ink-3); background:var(--parchment); border-radius:999px; padding:1px 8px; }
-.ures-item { display:flex; gap:8px; align-items:flex-start; padding:7px 8px; border:1px solid var(--rule); border-radius:7px; margin-bottom:6px; background:#FCFBF9; }
+.ures-item { display:flex; gap:8px; align-items:flex-start; padding:7px 8px; border:1px solid var(--rule); border-radius:7px; margin-bottom:6px; background:#FCFBF9; cursor:pointer; transition:border-color .12s, background .12s; }
+.ures-item:hover { border-color:var(--navy); background:#F7F9FC; }
+.ures-open { color:var(--navy); font-size:11px; font-weight:600; text-decoration:none; white-space:nowrap; }
+.ures-open:hover { text-decoration:underline; }
+/* Inline add / edit form */
+.ures-form { border:1px solid var(--navy); border-radius:8px; padding:9px; margin-bottom:6px; background:#F7F9FC; display:flex; flex-direction:column; gap:6px; }
+.ures-in { width:100%; box-sizing:border-box; border:1px solid var(--rule-dark); border-radius:6px; padding:7px 9px; font-family:inherit; font-size:12.5px; color:var(--ink); outline:none; }
+.ures-in:focus { border-color:var(--navy); }
+.ures-in-name { font-weight:600; }
+.ures-form-btns { display:flex; gap:6px; justify-content:flex-end; margin-top:1px; }
+.ures-cancel { background:none; border:1px solid var(--rule-dark); border-radius:6px; padding:6px 12px; font-family:inherit; font-size:12px; font-weight:600; color:var(--ink-2); cursor:pointer; }
+.ures-cancel:hover { border-color:var(--ink-3); }
+.ures-save { background:var(--navy); color:#fff; border:none; border-radius:6px; padding:6px 14px; font-family:inherit; font-size:12px; font-weight:700; cursor:pointer; }
+.ures-save:hover { background:var(--navy-light); }
 .ures-item-main { flex:1; min-width:0; }
 .ures-item-title { font-size:13px; font-weight:600; color:var(--ink); line-height:1.3; }
 .ures-item-note { font-size:11px; color:var(--ink-2); margin-top:2px; }
@@ -1548,6 +1561,30 @@ body.simple-mode .dp-adv { display: none !important; }
       <div style="display:flex;gap:8px;margin-top:12px;justify-content:flex-end">
         <button onclick="closeAgenda()" style="background:none;border:1px solid var(--rule-dark);border-radius:7px;padding:8px 16px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;font-family:inherit">Close</button>
         <button onclick="copyAgenda(this)" style="background:var(--navy);color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">📋 Copy to clipboard</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD UNIT MODAL -->
+<div id="addunit-overlay" style="display:none;position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.5);overflow-y:auto" onclick="if(event.target===this)closeAddUnit()">
+  <div style="background:var(--white);max-width:440px;margin:70px auto;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,.3);overflow:hidden">
+    <div style="background:var(--navy);padding:12px 16px;display:flex;align-items:center;justify-content:space-between">
+      <span style="color:#fff;font-weight:600;font-size:14px">Add a Unit</span>
+      <button onclick="closeAddUnit()" style="background:rgba(255,255,255,.15);border:none;border-radius:6px;color:#fff;font-size:20px;width:32px;height:32px;cursor:pointer;line-height:1">&times;</button>
+    </div>
+    <div style="padding:16px">
+      <label style="display:block;font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:4px">Unit name</label>
+      <input id="addunit-name" type="text" placeholder="e.g. The Sacraments" onkeydown="if(event.key==='Enter'){event.preventDefault();submitAddUnit()}"
+        style="width:100%;box-sizing:border-box;border:1px solid var(--rule-dark);border-radius:7px;padding:9px 11px;font-family:inherit;font-size:14px;color:var(--ink);outline:none;margin-bottom:12px">
+      <label style="display:block;font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:4px">Semester</label>
+      <select id="addunit-sem" style="width:100%;box-sizing:border-box;border:1px solid var(--rule-dark);border-radius:7px;padding:9px 11px;font-family:inherit;font-size:14px;color:var(--ink);outline:none;background:#fff">
+        <option value="1">Semester 1</option>
+        <option value="2">Semester 2</option>
+      </select>
+      <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end">
+        <button onclick="closeAddUnit()" style="background:none;border:1px solid var(--rule-dark);border-radius:7px;padding:8px 16px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;font-family:inherit">Cancel</button>
+        <button onclick="submitAddUnit()" style="background:var(--navy);color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">Add unit</button>
       </div>
     </div>
   </div>
@@ -4110,16 +4147,23 @@ function addUOVVocab(e, uid) {
 // ── UNIT TABS ─────────────────────────────────────────────────────
 // ── ADD UNIT ──────────────────────────────────────────────────────
 function addUnit() {
-  const name = prompt('Unit name:');
-  if (!name || !name.trim()) return;
-  const sem = prompt('Semester (1 or 2):', '1');
-  if (!sem || !['1','2'].includes(sem.trim())) { toast('Please enter 1 or 2 for semester'); return; }
-  const colors = ['purple','teal','coral','blue'];
+  const overlay = document.getElementById('addunit-overlay');
+  document.getElementById('addunit-name').value = '';
+  document.getElementById('addunit-sem').value = '1';
+  overlay.style.display = 'block';
+  setTimeout(()=>document.getElementById('addunit-name').focus(), 40);
+}
+function closeAddUnit(){ document.getElementById('addunit-overlay').style.display='none'; }
+function submitAddUnit() {
+  const name = document.getElementById('addunit-name').value.trim();
+  if (!name) { toast('Give the unit a name'); document.getElementById('addunit-name').focus(); return; }
+  const sem = document.getElementById('addunit-sem').value;
+  const colors = ['purple','teal','coral','blue','gold','green','maroon','slate','rose'];
   const existingCount = UNIT_META.length;
   const color = colors[existingCount % colors.length];
   const newId = Math.max(...UNIT_META.map(u => u.id), 0) + 1;
   const newUnit = {
-    id: newId, sem: +sem.trim(), name: name.trim(),
+    id: newId, sem: +sem, name,
     blocks: '— blocks', color, weeks: 1, totalBlocks: 3,
     blocksPerWeek: [3], desc: ''
   };
@@ -4133,8 +4177,9 @@ function addUnit() {
   if (!state.unitOverviews) state.unitOverviews = {};
   state.unitOverviews[newId] = { courseGoals:[], unitGoals:[], essentialQuestions:[], vocab:[], skills:[], scripture:[], ccc:[], readings:[], saints:[], reflection:[], objTable:{knowledge:[],understanding:[],skills:[],attitudes:[]} };
   saveState();
+  closeAddUnit();
   renderCourse();
-  toast(`Unit ${newId}: "${newUnit.name}" added ✓`);
+  toast(`Unit ${unitNo(newId)}: "${name}" added ✓`);
 }
 
 // ── EQ CHIPS ──────────────────────────────────────────────────────
@@ -4900,51 +4945,124 @@ function getUnitResources(uid){
   if(!state.unitResources[uid]) state.unitResources[uid] = [];
   return state.unitResources[uid];
 }
+// UI state for the inline resource add/edit forms (which category is adding,
+// which item id is being edited). Cleared on save / cancel.
+let resUI = { addCat:null, editId:null };
+
+function resForm(uid, cat, r){
+  // r = existing resource when editing, else null (adding)
+  const isEdit = !!r;
+  return `<div class="ures-form">
+    <input class="ures-in ures-in-name" type="text" placeholder="Name (e.g. Chapter 3 reading)"
+      value="${esc(r?.title||'')}" onkeydown="if(event.key==='Enter'){event.preventDefault();${isEdit?`resSaveEdit(${uid},'${r.id}')`:`resSaveNew(${uid},'${cat}')`}}">
+    <input class="ures-in ures-in-url" type="url" placeholder="Paste link (Google Doc, Drive, Slides, website…)"
+      value="${esc(r?.url||'')}">
+    <input class="ures-in ures-in-note" type="text" placeholder="Short note (optional)"
+      value="${esc(r?.note||'')}">
+    <div class="ures-form-btns">
+      <button class="ures-cancel" onclick="resCancel(${uid})">Cancel</button>
+      <button class="ures-save" onclick="${isEdit?`resSaveEdit(${uid},'${r.id}')`:`resSaveNew(${uid},'${cat}')`}">${isEdit?'Save changes':'Add resource'}</button>
+    </div>
+  </div>`;
+}
+
 function unitResourcesHTML(uid){
   const list = getUnitResources(uid);
+  list.forEach(r=>{ if(!r.id) r.id = uid+'-'+Math.random().toString(36).slice(2,8); });
   const c = getUC(uid);
   const cats = RESOURCE_CATS.map(cat => {
-    const items = list.map((r,ri)=>({r,ri})).filter(x=>x.r.cat===cat.key);
-    const rows = items.map(({r,ri}) => {
-      const link = r.url ? `<a href="${esc(r.url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="color:var(--navy);font-size:11px;text-decoration:none">↗ open</a>` : '';
-      return `<div class="ures-item">
+    const items = list.filter(r=>r.cat===cat.key);
+    const rows = items.map(r => {
+      if(resUI.editId === r.id) return resForm(uid, cat.key, r);
+      const link = r.url ? `<a href="${esc(r.url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="ures-open" title="Open link">↗ open</a>` : '';
+      return `<div class="ures-item" onclick="resStartEdit(${uid},'${r.id}')" title="Click to edit">
         <div class="ures-item-main">
           <div class="ures-item-title">${esc(r.title||'Untitled')}</div>
           ${r.note?`<div class="ures-item-note">${esc(r.note)}</div>`:''}
           ${r.url?`<div class="ures-item-url">${esc(r.url)}</div>`:''}
         </div>
         <div class="ures-item-actions">${link}
-          <button onclick="deleteUnitResource(${uid},${ri})" title="Remove" class="ures-del">&times;</button>
+          <button onclick="event.stopPropagation();deleteUnitResource(${uid},'${r.id}')" title="Remove" class="ures-del">&times;</button>
         </div>
       </div>`;
     }).join('');
+    const shortLabel = cat.label.replace(/ .*/,'').toLowerCase();
+    const footer = resUI.addCat === cat.key
+      ? resForm(uid, cat.key, null)
+      : `<button class="ures-add" onclick="resStartAdd(${uid},'${cat.key}')">+ Add ${shortLabel}</button>`;
     return `<div class="ures-cat">
       <div class="ures-cat-head"><span>${cat.icon}</span> ${cat.label} <span class="ures-count">${items.length||''}</span></div>
-      ${rows || `<div class="ures-empty">Nothing here yet.</div>`}
-      <button class="ures-add" onclick="addUnitResource(${uid},'${cat.key}')">+ Add ${cat.label.replace(/ .*/,'').toLowerCase()}</button>
+      ${rows || (resUI.addCat===cat.key ? '' : `<div class="ures-empty">Nothing here yet.</div>`)}
+      ${footer}
     </div>`;
   }).join('');
   return `
     <div style="margin-bottom:14px">
       <div style="font-size:15px;font-weight:700;color:var(--navy)">Unit Resources</div>
-      <div style="font-size:12px;color:var(--ink-3);margin-top:2px">Readings, slide decks, handouts, homework files and links for this whole unit — one place to find everything.</div>
+      <div style="font-size:12px;color:var(--ink-3);margin-top:2px">Readings, slide decks, handouts, homework and links for this whole unit — one place to find everything. Click any resource to edit it.</div>
     </div>
     <div class="ures-grid" style="border-top:3px solid ${c.br}">${cats}</div>`;
 }
-function addUnitResource(uid, cat){
-  const title = prompt('Resource name (e.g. "Chapter 3 reading", "Unit 1 slides"):');
-  if(title===null) return;
-  const t = title.trim(); if(!t) return;
-  const url = (prompt('Link URL (optional — paste a Google Docs / Drive / website link, or leave blank):','')||'').trim();
-  const note = (prompt('Short note (optional):','')||'').trim();
-  getUnitResources(uid).push({ id:uid+'-'+Date.now(), cat, title:t, url, note });
-  saveState();
-  if(currentUnit===uid){ renderUnit(); setUnitTab('resources'); }
+
+// Normalize a pasted link so it opens correctly (add https:// if missing).
+function normalizeUrl(u){
+  u = (u||'').trim();
+  if(!u) return '';
+  if(/^(https?:\/\/|mailto:)/i.test(u)) return u;
+  return 'https://' + u;
 }
-function deleteUnitResource(uid, ri){
-  getUnitResources(uid).splice(ri,1);
+function reRenderResources(uid){
+  if(currentUnit===uid){ currentUnitTab='resources'; renderUnit(); }
+}
+function resStartAdd(uid, cat){
+  resUI = { addCat:cat, editId:null };
+  reRenderResources(uid);
+  setTimeout(()=>{ const el=document.querySelector('.ures-form .ures-in-name'); if(el) el.focus(); }, 40);
+}
+function resStartEdit(uid, id){
+  resUI = { addCat:null, editId:id };
+  reRenderResources(uid);
+  setTimeout(()=>{ const el=document.querySelector('.ures-form .ures-in-name'); if(el){ el.focus(); el.select(); } }, 40);
+}
+function resCancel(uid){
+  resUI = { addCat:null, editId:null };
+  reRenderResources(uid);
+}
+function readResForm(){
+  const wrap = document.querySelector('.ures-form');
+  if(!wrap) return null;
+  return {
+    title: wrap.querySelector('.ures-in-name').value.trim(),
+    url:   normalizeUrl(wrap.querySelector('.ures-in-url').value),
+    note:  wrap.querySelector('.ures-in-note').value.trim(),
+  };
+}
+function resSaveNew(uid, cat){
+  const f = readResForm();
+  if(!f) return;
+  if(!f.title){ toast('Give the resource a name'); const el=document.querySelector('.ures-form .ures-in-name'); if(el) el.focus(); return; }
+  getUnitResources(uid).push({ id:uid+'-'+Date.now().toString(36), cat, title:f.title, url:f.url, note:f.note });
   saveState();
-  if(currentUnit===uid){ renderUnit(); setUnitTab('resources'); }
+  resUI = { addCat:cat, editId:null };   // keep the add form open for quick multi-add
+  reRenderResources(uid);
+  setTimeout(()=>{ const el=document.querySelector('.ures-form .ures-in-name'); if(el) el.focus(); }, 40);
+  toast('Resource added ✓');
+}
+function resSaveEdit(uid, id){
+  const f = readResForm();
+  if(!f) return;
+  if(!f.title){ toast('Give the resource a name'); return; }
+  const r = getUnitResources(uid).find(x=>x.id===id);
+  if(r){ r.title=f.title; r.url=f.url; r.note=f.note; saveState(); }
+  resUI = { addCat:null, editId:null };
+  reRenderResources(uid);
+}
+function deleteUnitResource(uid, id){
+  const list = getUnitResources(uid);
+  const idx = list.findIndex(x=>x.id===id);
+  if(idx>=0) list.splice(idx,1);
+  saveState();
+  reRenderResources(uid);
 }
 
 // ── NUMBERED STAGE-PAGE LAYER (Design → Pace → Plan → Build) ───────
