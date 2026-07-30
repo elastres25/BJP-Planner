@@ -771,12 +771,21 @@ body.simple-mode .dp-adv { display: none !important; }
 .rte-ed:empty:before { content:attr(data-ph); color:var(--ink-3); }
 .rte-ed:focus { background:#FCFCFA; }
 .rte-ed ul { margin:2px 0 2px 18px; } .rte-ed a { color:var(--navy); }
+/* Shared toolbar for the Goals / Targets lists */
+.rte-tb-shared { border:1px solid var(--rule); border-bottom:none; border-radius:6px 6px 0 0; background:#F5F4F0; margin-bottom:0; align-items:center; }
+.rte-tb-hint { font-size:10px; color:var(--ink-3); font-style:italic; margin-left:6px; }
+/* Rich-text goal / target lines */
+.dl-li-rte { align-items:flex-start; gap:6px; }
+.dl-li-ed { flex:1; min-width:0; border:1px solid transparent; border-radius:5px; padding:4px 7px; min-height:26px; font-size:13px; }
+.dl-li-ed:hover { border-color:var(--rule); }
+.dl-li-ed:focus { border-color:var(--navy); background:#FCFCFA; }
+.dl-li .dl-ican { flex:0 0 auto; font-size:12px; font-weight:600; color:var(--ink-2); padding-top:6px; }
 /* Bloom's reference collapsible */
 .dl-blooms { margin-top:14px; border:1px solid var(--rule); border-radius:9px; overflow:hidden; }
 .dl-blooms-head { width:100%; text-align:left; background:#F7F5F0; border:none; cursor:pointer; font-family:inherit; font-size:12.5px; font-weight:700; color:var(--navy); padding:9px 13px; display:flex; align-items:center; gap:7px; }
 .dl-blooms-head:hover { background:#F0EDE6; }
 .dl-blooms-body { padding:13px; }
-@media print { .dl-actx, .dl-add, .dl-addact, .dl-agenda-btn, .dl-actdetailbtn, .rte-tb { display:none !important; } .dl-head { background:var(--navy) !important; } .rte { border:none; } }
+@media print { .dl-actx, .dl-add, .dl-addact, .dl-agenda-btn, .dl-actdetailbtn, .rte-tb, .dl-blooms { display:none !important; } .dl-head { background:var(--navy) !important; } .rte { border:none; } }
 
 /* ── WEEK VIEW — school weekly-plan grid ─────────────────────────── */
 .wk-scroll { overflow-x:auto; border:1px solid var(--rule-dark); border-radius:10px; }
@@ -5912,8 +5921,15 @@ function dailyPanelHTML(d, i) {
   const bucket = name => ordered.filter(o=>phaseBucket(o.a.grr)===name).map(actRow).join('')
     || `<div class="dl-empty">Nothing here yet.</div>`;
 
-  const goalRows = (d.teacherGoals||[]).map((g,gi)=>`<div class="dl-li"><span>${esc(strip(g))}</span><button onclick="dlDelGoal(${i},${gi})">&times;</button></div>`).join('');
-  const tgtRows  = (d.targets||[]).map((t,ti)=>`<div class="dl-li"><span>I can ${esc(strip(t).replace(/^I can\s*/i,''))}</span><button onclick="dlDelTarget(${i},${ti})">&times;</button></div>`).join('');
+  const goalRows = (d.teacherGoals||[]).map((g,gi)=>`<div class="dl-li dl-li-rte">
+      <div class="rte-ed dl-li-ed" contenteditable="true" data-ph="Goal…" onkeydown="rteKey(event)"
+        oninput="updateGoal(${i},${gi},this.innerHTML)" onblur="updateGoal(${i},${gi},this.innerHTML)">${g||''}</div>
+      <button onclick="dlDelGoal(${i},${gi})" title="Remove">&times;</button></div>`).join('');
+  const tgtRows  = (d.targets||[]).map((t,ti)=>`<div class="dl-li dl-li-rte">
+      <span class="dl-ican">I can</span>
+      <div class="rte-ed dl-li-ed" contenteditable="true" data-ph="…" onkeydown="rteKey(event)"
+        oninput="updateTarget(${i},${ti},this.innerHTML)" onblur="updateTarget(${i},${ti},this.innerHTML)">${String(t||'').replace(/^\s*I can\s*/i,'')}</div>
+      <button onclick="dlDelTarget(${i},${ti})" title="Remove">&times;</button></div>`).join('');
   const resRows  = (d.materials||[]).map((m,ri)=>`<div class="dl-li"><span>${esc(strip(m))}</span><button onclick="dlDelRes(${i},${ri})">&times;</button></div>`).join('');
 
   return `
@@ -5942,10 +5958,12 @@ function dailyPanelHTML(d, i) {
 
   <table class="dl-table"><tbody>
     <tr><td class="dl-lbl">Goals</td><td class="dl-cell">
+      ${(d.teacherGoals||[]).length ? rteToolbarShared('goal') : ''}
       ${goalRows}
       <input id="chipin-dlgoal-${i}" class="dl-add" placeholder="+ Add a goal, press Enter" onkeydown="if(event.key==='Enter'){event.preventDefault();dlAddGoal(${i},this.value)}">
     </td></tr>
     <tr><td class="dl-lbl">Learning Targets<small>&ldquo;I can…&rdquo; statements</small></td><td class="dl-cell">
+      ${(d.targets||[]).length ? rteToolbarShared('target') : ''}
       ${tgtRows}
       <input id="chipin-dltgt-${i}" class="dl-add" placeholder="+ Add a target, press Enter" onkeydown="if(event.key==='Enter'){event.preventDefault();dlAddTarget(${i},this.value)}">
     </td></tr>
@@ -6009,6 +6027,38 @@ function rteLink(id){
 }
 function rteKey(e){
   if(e.key==='Tab'){ e.preventDefault(); document.execCommand(e.shiftKey?'outdent':'indent', false, null); e.target.dispatchEvent(new Event('input')); }
+}
+// Shared toolbar: acts on whichever rich-text line currently has the caret
+// (used for the Goals / Learning Targets lists, which are many small fields).
+function rteToolbarShared(what){
+  return `<div class="rte-tb rte-tb-shared">
+    <button type="button" onmousedown="event.preventDefault()" onclick="rteExec('bold')" title="Bold"><b>B</b></button>
+    <button type="button" onmousedown="event.preventDefault()" onclick="rteExec('italic')" title="Italic"><i>I</i></button>
+    <button type="button" onmousedown="event.preventDefault()" onclick="rteExec('underline')" title="Underline"><u>U</u></button>
+    <button type="button" onmousedown="event.preventDefault()" onclick="rteExec('insertUnorderedList')" title="Bullet list">• List</button>
+    <button type="button" onmousedown="event.preventDefault()" onclick="rteExecLink()" title="Insert link">🔗</button>
+    <span class="rte-tb-hint">applies to the ${what||'line'} you're editing</span>
+  </div>`;
+}
+function rteExec(cmd){
+  document.execCommand(cmd, false, null);
+  const el = document.activeElement;
+  if(el && el.classList && el.classList.contains('rte-ed')) el.dispatchEvent(new Event('input'));
+}
+function rteExecLink(){
+  const url = prompt('Link URL (include https://):', 'https://');
+  if(!url) return;
+  document.execCommand('createLink', false, url);
+  const el = document.activeElement;
+  if(el && el.classList && el.classList.contains('rte-ed')) el.dispatchEvent(new Event('input'));
+}
+function updateGoal(i, gi, html){
+  const d = getDay(i);
+  if(d.teacherGoals && gi < d.teacherGoals.length){ d.teacherGoals[gi] = html; saveState(); }
+}
+function updateTarget(i, ti, html){
+  const d = getDay(i);
+  if(d.targets && ti < d.targets.length){ d.targets[ti] = html; saveState(); }
 }
 function updateActField(i, ai, field, val){
   const a = getDay(i).activities[ai];
