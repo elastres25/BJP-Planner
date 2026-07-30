@@ -761,6 +761,8 @@ body.simple-mode .dp-adv { display: none !important; }
 .dl-actdetailbtn { flex:0 0 auto; border:1px solid var(--rule-dark,#cfccc4); background:none; border-radius:5px; padding:3px 7px; font-family:inherit; font-size:10.5px; font-weight:600; color:var(--ink-2); cursor:pointer; white-space:nowrap; }
 .dl-actdetailbtn.has { border-color:var(--navy); color:var(--navy); background:#F0F4FA; }
 .dl-actdetailbtn:hover { border-color:var(--navy); color:var(--navy); }
+.dl-acthint { padding:0 0 3px 27px; font-size:10.5px; color:var(--ink-3); line-height:1.4; }
+.dl-acthint i { font-style:italic; }
 .dl-actdetail { padding:2px 0 8px 27px; }
 /* Rich-text editor */
 .rte { border:1px solid var(--rule); border-radius:7px; overflow:hidden; background:#fff; }
@@ -1767,11 +1769,11 @@ function setUnitColor(uid, colorKey) {
 // belongs to: 'whole' = Whole Group Learning, 'ic' = Independent or
 // Collaborative Learning.
 const PHASES = [
-  {v:'opening',     label:'Opening',              def:5,  lo:3,  hi:5,  bucket:'whole', hint:'Boardwork, prayer, manipulative · passing period +'},
-  {v:'focus',       label:'Focus',                def:15, lo:10, hi:20, bucket:'whole', hint:'Review · introduce and frame lesson · new content'},
-  {v:'guided',      label:'Guided/Collaborative', def:20, lo:10, hi:25, bucket:'ic',    hint:'Guided instruction · teacher facilitates · small groups · student-led'},
-  {v:'independent', label:'Independent',          def:25, lo:20, hi:30, bucket:'ic',    hint:'Students work individually · teacher supports or meets small groups'},
-  {v:'closer',      label:'Closer',               def:5,  lo:1,  hi:5,  bucket:'whole', hint:'Teacher summary · student reflections · short assessment · HW review'},
+  {v:'opening',     label:'Opening',              def:5,  lo:3,  hi:5,  bucket:'whole', hint:'Boardwork · Prayer · Manipulative · passing period'},
+  {v:'focus',       label:'Focus',                def:15, lo:10, hi:20, bucket:'whole', hint:'Review · Introduce & frame the lesson · New content'},
+  {v:'guided',      label:'Guided/Collaborative', def:20, lo:10, hi:25, bucket:'ic',    hint:'Guided instruction with teacher · Teacher facilitates student activities · Small groups · Student-led activities'},
+  {v:'independent', label:'Independent',          def:25, lo:20, hi:30, bucket:'ic',    hint:'Students work on homework or class activity individually · Teacher supports or meets with small groups'},
+  {v:'closer',      label:'Closer',               def:5,  lo:1,  hi:5,  bucket:'whole', hint:'Teacher summary · Student reflections · Short assessment · HW review'},
 ];
 const PHASE_BY_V = Object.fromEntries(PHASES.map(p=>[p.v,p]));
 // Names a new lesson starts with in each phase — edit or clear these per lesson.
@@ -5259,7 +5261,7 @@ function paceAddDayU(uid){
 // its class days listed. General themes only — edit Content or HW here and
 // it saves straight to that lesson; "open" jumps to the full plan.
 function simplePacingHTML(){
-  const blocks = UNIT_META.map(u => {
+  const blocks = orderedUnits().map(u => {
     const weeks = state.units[u.id] || [];
     const days = [];
     weeks.forEach((w, wi) => (w.days||[]).forEach((d, di) => days.push({d, wi, di})));
@@ -5280,13 +5282,13 @@ function simplePacingHTML(){
       const d = row.d, planned = dayIsPlanned(d);
       const band = idx === 0
         ? `<td class="sp-band" rowspan="${b.days.length}" style="background:${c.br}">
-             <div class="sp-band-inner">Unit ${b.u.id}<span>${esc(b.u.name)}</span>
+             <div class="sp-band-inner">Unit ${unitNo(b.u.id)}<span>${esc(b.u.name)}</span>
                <button class="sp-band-add" onclick="paceAddDayU(${b.u.id})">+ day</button></div>
            </td>` : '';
       return `<tr>
         ${band}
         <td class="sp-td sp-mid">${globalDay}</td>
-        <td class="sp-td sp-mid sp-num">${b.u.id}.${lessonNo}</td>
+        <td class="sp-td sp-mid sp-num">${unitNo(b.u.id)}.${lessonNo}</td>
         <td class="sp-td sp-content">${inp(d.topic, b.u.id, row.wi, row.di, 'topic', 'General theme for the day…')}</td>
         <td class="sp-td">${inp(d.homework, b.u.id, row.wi, row.di, 'homework', 'Homework…')}</td>
         <td class="sp-td sp-mid">
@@ -6040,6 +6042,8 @@ function dailyPanelHTML(d, i) {
   const actRow = o => {
     const a=o.a, ai=o.ai, ph=normalizePhase(a.grr), c=PHASE_COLORS[ph]||{bg:'#888',tx:'#fff'};
     const hasDetail = !!strip(a.desc);
+    const p = PHASE_BY_V[ph];
+    const hint = p ? `<div class="dl-acthint"><i>${esc(p.hint)}${p.lo?` · ${p.lo}–${p.hi} min`:''}</i></div>` : '';
     return `<div class="dl-actwrap">
       <div class="dl-act">
         <span class="dl-actnum">${o.num}.</span>
@@ -6053,6 +6057,7 @@ function dailyPanelHTML(d, i) {
         <button class="dl-actdetailbtn${hasDetail?' has':''}" onclick="toggleActDetail(${i},${ai})" title="Add / show detail">${hasDetail?'✎ detail':'+ detail'}</button>
         <button class="dl-actx" onclick="removeAct(${i},${ai})" title="Remove">&times;</button>
       </div>
+      ${hint}
       <div class="dl-actdetail" id="actdetail-${i}-${ai}" style="display:${hasDetail?'block':'none'}">
         ${rteField(`rte-act-${i}-${ai}`, a.desc||'', `updateActField(${i},${ai},'desc',this.innerHTML)`, 'Add detail, steps, examples, links…')}
       </div>
@@ -7381,7 +7386,7 @@ function exportPacingGuidePDF() {
   const co = getCourse();
   const NAVY = '#1B3A6B', GOLD = '#C9991A', RULE='#C9C5BC';
 
-  const blocks = UNIT_META.map(u => {
+  const blocks = orderedUnits().map(u => {
     const weeks = state.units[u.id] || [];
     const days = [];
     weeks.forEach(w => (w.days||[]).forEach(d => days.push(d)));
@@ -7395,12 +7400,12 @@ function exportPacingGuidePDF() {
     return b.days.map((d, idx) => {
       globalDay++; lessonNo++;
       const band = idx===0
-        ? `<td rowspan="${b.days.length}" style="background:${c.br};color:#fff;border:1px solid ${RULE};padding:6px 8px;font-size:9pt;font-weight:700;vertical-align:top;-webkit-print-color-adjust:exact;print-color-adjust:exact;width:110px">Unit ${b.u.id}<div style="font-weight:500;font-size:8pt;opacity:.9;margin-top:2px">${escPDF(b.u.name)}</div></td>`
+        ? `<td rowspan="${b.days.length}" style="background:${c.br};color:#fff;border:1px solid ${RULE};padding:6px 8px;font-size:9pt;font-weight:700;vertical-align:top;-webkit-print-color-adjust:exact;print-color-adjust:exact;width:110px">Unit ${unitNo(b.u.id)}<div style="font-weight:500;font-size:8pt;opacity:.9;margin-top:2px">${escPDF(b.u.name)}</div></td>`
         : '';
       return `<tr>
         ${band}
         <td style="border:1px solid ${RULE};padding:5px 7px;font-size:9pt;text-align:center">${globalDay}</td>
-        <td style="border:1px solid ${RULE};padding:5px 7px;font-size:9pt;text-align:center;font-weight:600">${b.u.id}.${lessonNo}</td>
+        <td style="border:1px solid ${RULE};padding:5px 7px;font-size:9pt;text-align:center;font-weight:600">${unitNo(b.u.id)}.${lessonNo}</td>
         <td style="border:1px solid ${RULE};padding:5px 8px;font-size:9.5pt">${escPDF(String(d.topic||'').replace(/<[^>]*>/g,' ').trim())}</td>
         <td style="border:1px solid ${RULE};padding:5px 8px;font-size:9pt">${escPDF(String(d.homework||'').replace(/<[^>]*>/g,' ').trim())}</td>
       </tr>`;
