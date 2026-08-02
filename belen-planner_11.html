@@ -759,6 +759,17 @@ body.simple-mode .dp-adv { display: none !important; }
 .dl-addact { margin-top:5px; background:none; border:1px dashed var(--rule-dark,#cfccc4); border-radius:6px; padding:5px 11px; font-family:inherit; font-size:11.5px; font-weight:600; color:var(--navy); cursor:pointer; }
 .dl-addact:hover { border-color:var(--navy); background:#F7F9FC; }
 .dl-empty { font-size:12px; color:var(--ink-3); font-style:italic; padding:2px 0; }
+/* Lesson resource rows (title + hyperlink) */
+.dl-res-li { align-items:center; }
+.dl-res-link { color:var(--navy); text-decoration:none; font-weight:500; flex:1; }
+.dl-res-link:hover { text-decoration:underline; }
+.dl-res-ext { font-size:11px; color:var(--ink-3); }
+.dl-res-actions { display:inline-flex; align-items:center; gap:2px; flex:0 0 auto; }
+.dl-res-edit { border:none; background:none; color:var(--ink-3); font-size:12px; cursor:pointer; padding:0 4px; }
+.dl-res-edit:hover { color:var(--navy); }
+.dl-res-add { margin-top:5px; background:none; border:1px dashed var(--rule-dark,#cfccc4); border-radius:6px; padding:6px 12px; font-family:inherit; font-size:12px; font-weight:600; color:var(--navy); cursor:pointer; }
+.dl-res-add:hover { border-color:var(--navy); background:#F7F9FC; }
+@media print { .dl-res-add, .dl-res-edit { display:none !important; } }
 /* Essential-question field + agenda button */
 .dl-eq { width:100%; box-sizing:border-box; margin-top:6px; border:none; border-radius:6px; padding:6px 9px; font-family:inherit; font-size:12.5px; font-style:italic; color:#fff; background:rgba(255,255,255,.12); outline:none; }
 .dl-eq::placeholder { color:rgba(255,255,255,.55); }
@@ -1618,6 +1629,28 @@ body.simple-mode .dp-adv { display: none !important; }
       <button onclick="closeDayModal()" style="background:rgba(255,255,255,.15);border:none;border-radius:6px;color:#fff;font-size:20px;width:32px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1">&times;</button>
     </div>
     <div id="day-modal-content" style="padding:0"></div>
+  </div>
+</div>
+
+<!-- LESSON RESOURCE MODAL (title + hyperlink) -->
+<div id="resource-overlay" style="display:none;position:fixed;inset:0;z-index:905;background:rgba(0,0,0,.5);overflow-y:auto" onclick="if(event.target===this)closeResourceModal()">
+  <div style="background:var(--white);max-width:460px;margin:70px auto;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,.3);overflow:hidden">
+    <div style="background:var(--navy);padding:12px 16px;display:flex;align-items:center;justify-content:space-between">
+      <span style="color:#fff;font-weight:600;font-size:14px" id="resource-modal-title">Add a resource</span>
+      <button onclick="closeResourceModal()" style="background:rgba(255,255,255,.15);border:none;border-radius:6px;color:#fff;font-size:20px;width:32px;height:32px;cursor:pointer;line-height:1">&times;</button>
+    </div>
+    <div style="padding:16px">
+      <label style="display:block;font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:4px">Title</label>
+      <input id="resource-title" type="text" placeholder="e.g. Marks of the Church handout" onkeydown="if(event.key==='Enter'){event.preventDefault();submitResource()}"
+        style="width:100%;box-sizing:border-box;border:1px solid var(--rule-dark);border-radius:7px;padding:9px 11px;font-family:inherit;font-size:14px;color:var(--ink);outline:none;margin-bottom:12px">
+      <label style="display:block;font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:4px">Link <span style="font-weight:400;color:var(--ink-3)">(optional)</span></label>
+      <input id="resource-url" type="url" placeholder="Paste a Google Doc / Drive / website link…" onkeydown="if(event.key==='Enter'){event.preventDefault();submitResource()}"
+        style="width:100%;box-sizing:border-box;border:1px solid var(--rule-dark);border-radius:7px;padding:9px 11px;font-family:inherit;font-size:13.5px;color:var(--ink);outline:none">
+      <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end">
+        <button onclick="closeResourceModal()" style="background:none;border:1px solid var(--rule-dark);border-radius:7px;padding:8px 16px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;font-family:inherit">Cancel</button>
+        <button onclick="submitResource()" style="background:var(--navy);color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit" id="resource-save-btn">Add resource</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -3349,7 +3382,7 @@ function exportWeekPDF(){
         <span style="font-size:7.5pt;color:#78716C">${a.dur||0}m</span></div>`;
     }).join('');
 
-  const resLines = d => li([...(d.materials||[]), ...(d.techTools||[]), ...(d.links||[])]);
+  const resLines = d => li([...(d.materials||[]).map(matTitle), ...(d.techTools||[]), ...(d.links||[])]);
 
   const head = cols.map(c=>{
     const dt = isoParse(c.date).toLocaleDateString('en-US',{weekday:'short', month:'short', day:'numeric'});
@@ -3859,7 +3892,10 @@ function renderWeekPlan() {
     })}</td>`;
   };
   const hwCell = L => `<td class="wk-cell">${strip(L.d.homework)?`<span>${esc(strip(L.d.homework))}</span>`:'<span class="wk-empty">—</span>'}</td>`;
-  const resCell = L => `<td class="wk-cell">${bullets((L.d.materials||[]).filter(m=>strip(m)), m=>`<li>${esc(strip(m))}</li>`)}</td>`;
+  const resCell = L => `<td class="wk-cell">${bullets((L.d.materials||[]).filter(m=>matTitle(m)||matUrl(m)), m=>{
+    const t=matTitle(m)||matUrl(m), url=matUrl(m);
+    return `<li>${url?`<a href="${esc(url)}" target="_blank" rel="noopener" style="color:var(--navy)">${esc(t)}</a>`:esc(t)}</li>`;
+  })}</td>`;
   const bannerCells = label => lessons.map(()=>`<td class="wk-banner">${label}</td>`).join('');
 
   const body = lessons.length ? `
@@ -5432,9 +5468,9 @@ function buildAddMat(uid, wi, di, val){
   d.materials = d.materials || []; d.materials.push(val);
   saveState(); renderUnit();
 }
-function buildRemoveMat(uid, wi, di, val){
+function buildRemoveMat(uid, wi, di, idx){
   const d = state.units[uid][wi].days[di];
-  d.materials = (d.materials||[]).filter(m=>m!==val);
+  if(Array.isArray(d.materials) && idx>=0 && idx<d.materials.length) d.materials.splice(idx,1);
   saveState(); renderUnit();
 }
 function stageBuildHTML(u, weeks){
@@ -5442,7 +5478,7 @@ function stageBuildHTML(u, weeks){
   weeks.forEach((w,wi)=>(w.days||[]).forEach((d,di)=>{
     if(!dayIsStarted(d)) return;
     const planned = dayIsPlanned(d);
-    const chips = (d.materials||[]).map(m=>`<span class="mat-chip">${esc(m)}<button onclick="buildRemoveMat(${u.id},${wi},${di},'${esc(String(m)).replace(/'/g,"\\'")}')">×</button></span>`).join('');
+    const chips = (d.materials||[]).map((m,mi)=>`<span class="mat-chip">${esc(matTitle(m))}<button onclick="buildRemoveMat(${u.id},${wi},${di},${mi})">×</button></span>`).join('');
     rows += `<div class="stg-build-row">
       <div class="stg-build-day">
         <div class="stg-build-daylabel">${esc(d.label)} ${planned?'<span class="stg-badge-ok">planned</span>':'<span class="stg-badge-warn">not fully planned</span>'}</div>
@@ -6439,7 +6475,17 @@ function dailyPanelHTML(d, i) {
       <div class="rte-ed dl-li-ed" contenteditable="true" data-ph="…" onkeydown="rteKey(event)"
         oninput="updateTarget(${i},${ti},this.innerHTML)" onblur="updateTarget(${i},${ti},this.innerHTML)">${String(t||'').replace(/^\s*I can\s*/i,'')}</div>
       <button onclick="dlDelTarget(${i},${ti})" title="Remove">&times;</button></div>`).join('');
-  const resRows  = (d.materials||[]).map((m,ri)=>`<div class="dl-li"><span>${esc(strip(m))}</span><button onclick="dlDelRes(${i},${ri})">&times;</button></div>`).join('');
+  const resRows  = (d.materials||[]).map((m,ri)=>{
+    const t = matTitle(m), url = matUrl(m);
+    const label = url
+      ? `<a href="${esc(url)}" target="_blank" rel="noopener" class="dl-res-link" onclick="event.stopPropagation()" title="${esc(url)}">${esc(t)||esc(url)} <span class="dl-res-ext">↗</span></a>`
+      : `<span>${esc(t)}</span>`;
+    return `<div class="dl-li dl-res-li">${label}
+      <span class="dl-res-actions">
+        <button class="dl-res-edit" onclick="openAddResource(${i},${ri})" title="Edit">✎</button>
+        <button onclick="dlDelRes(${i},${ri})" title="Remove">&times;</button>
+      </span></div>`;
+  }).join('');
 
   return `
   <div class="belen-print-header">
@@ -6493,9 +6539,9 @@ function dailyPanelHTML(d, i) {
     </td></tr>
 
     <tr><td class="dl-banner" colspan="2">Student Resources / Links / Tech Tools</td></tr>
-    <tr><td class="dl-lbl">Resources</td><td class="dl-cell">
+    <tr><td class="dl-lbl">Resources</td><td class="dl-cell dl-res-cell">
       ${resRows}
-      <input id="chipin-dlres-${i}" class="dl-add" placeholder="+ Add a resource, press Enter" onkeydown="if(event.key==='Enter'){event.preventDefault();dlAddRes(${i},this.value)}">
+      <button class="dl-res-add" onclick="openAddResource(${i})">+ Add resource</button>
     </td></tr>
   </tbody></table>
 
@@ -6683,6 +6729,39 @@ function dlAddTarget(i,v){v=(v||'').trim();if(!v)return;const d=getDay(i);(d.tar
 function dlDelTarget(i,ti){getDay(i).targets.splice(ti,1);saveState();rerenderDay(i);}
 function dlAddRes(i,v){v=(v||'').trim();if(!v)return;const d=getDay(i);(d.materials=d.materials||[]).push(v);saveState();rerenderDay(i);}
 function dlDelRes(i,ri){getDay(i).materials.splice(ri,1);saveState();rerenderDay(i);}
+// A material is either a plain string (legacy) or {title, url}.
+function matTitle(m){ return typeof m==='string' ? m : ((m && m.title) || ''); }
+function matUrl(m){ return (m && typeof m==='object') ? (m.url||'') : ''; }
+// Add / edit a lesson resource via the popup (title + hyperlink).
+let _resEdit = null;   // {i, ri} when editing, or {i, ri:null} when adding
+function openAddResource(i, ri){
+  const editing = (ri!==undefined && ri!==null);
+  _resEdit = { i, ri: editing ? ri : null };
+  const m = editing ? getDay(i).materials[ri] : null;
+  document.getElementById('resource-modal-title').textContent = editing ? 'Edit resource' : 'Add a resource';
+  document.getElementById('resource-save-btn').textContent = editing ? 'Save changes' : 'Add resource';
+  document.getElementById('resource-title').value = m ? matTitle(m) : '';
+  document.getElementById('resource-url').value = m ? matUrl(m) : '';
+  document.getElementById('resource-overlay').style.display = 'block';
+  setTimeout(()=>document.getElementById('resource-title').focus(), 40);
+}
+function closeResourceModal(){ document.getElementById('resource-overlay').style.display='none'; _resEdit=null; }
+function submitResource(){
+  if(!_resEdit) return;
+  const title = document.getElementById('resource-title').value.trim();
+  let url = document.getElementById('resource-url').value.trim();
+  if(!title && !url){ document.getElementById('resource-title').focus(); return; }
+  if(url && !/^(https?:\/\/|mailto:)/i.test(url)) url = 'https://' + url;
+  const d = getDay(_resEdit.i);
+  d.materials = d.materials || [];
+  const entry = url ? { title: title || url, url } : (title || url);
+  if(_resEdit.ri!==null) d.materials[_resEdit.ri] = entry;
+  else d.materials.push(entry);
+  saveState();
+  const i = _resEdit.i;
+  closeResourceModal();
+  rerenderDay(i);
+}
 function updateActName(i,ai,v){const a=getDay(i).activities[ai];if(a){a.name=(v||'').trim();saveState();}}
 function updateActPhase(i,ai,v){const a=getDay(i).activities[ai];if(a){a.grr=v;saveState();rerenderDay(i);}}
 function addActToBucket(i,bucketName){const ph=bucketName==='ic'?'guided':'focus';const p=PHASE_BY_V[ph];getDay(i).activities.push({id:uid(),name:'',dur:p?p.def:10,grr:ph,ipp:'',desc:''});saveState();rerenderDay(i);}
@@ -8082,7 +8161,7 @@ ${actHTML || `<div style="padding:12px 22px;font-size:11px;color:#aaa;font-style
 
   <div style="padding:12px 18px;border-right:1px solid #E7E5E0;border-bottom:1px solid #E7E5E0">
     <div style="font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#A8A29E;margin-bottom:5px">Materials Needed</div>
-    <div style="display:flex;flex-wrap:wrap;gap:4px">${chips(d.materials,'#F7F5F0','#57534E','#E7E5E0')}</div>
+    <div style="display:flex;flex-wrap:wrap;gap:4px">${chips((d.materials||[]).map(matTitle),'#F7F5F0','#57534E','#E7E5E0')}</div>
   </div>
   <div style="padding:12px 18px;border-bottom:1px solid #E7E5E0">
     <div style="font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#A8A29E;margin-bottom:5px">Tech Tools</div>
@@ -8241,7 +8320,7 @@ function exportGoogleDoc(scope) {
       <td style="${cellBorder};${pad};vertical-align:top;width:390pt"><p style="margin:0;font-family:${FF};font-size:10pt;color:#000000">${it.body||''}</p></td>
     </tr>`).join('');
 
-    const materials = (d.materials||[]).concat(d.techTools||[]).filter(Boolean);
+    const materials = (d.materials||[]).map(matTitle).concat(d.techTools||[]).filter(Boolean);
     const ippStages = [...new Set((d.activities||[]).map(a=>a.ipp).filter(Boolean))].map(s=>IPP_LABELS[s]||s);
 
     return `
