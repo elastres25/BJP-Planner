@@ -756,6 +756,27 @@ body.simple-mode .dp-adv { display: none !important; }
 .dl-eq:focus { background:rgba(255,255,255,.2); }
 .dl-agenda-btn { background:var(--gold); color:var(--navy-dark); border:none; border-radius:6px; padding:5px 11px; font-family:inherit; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap; }
 .dl-agenda-btn:hover { background:var(--gold-light); }
+.dl-brainstorm-btn { background:rgba(255,255,255,.15); color:#fff; border:1px solid rgba(255,255,255,.3); border-radius:6px; padding:5px 11px; font-family:inherit; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap; }
+.dl-brainstorm-btn:hover { background:rgba(255,255,255,.28); }
+.dl-brainstorm-btn.has { background:var(--gold-light); color:var(--navy-dark); border-color:var(--gold-light); }
+/* Lesson prep to-dos */
+.dl-todos { margin-top:12px; border:1px solid var(--rule); border-radius:9px; padding:10px 12px; background:#FBFBF9; }
+.dl-todos-head { font-size:12px; font-weight:700; color:var(--navy); display:flex; align-items:baseline; gap:8px; margin-bottom:6px; }
+.dl-todos-note { font-size:10px; font-weight:400; color:var(--ink-3); font-style:italic; }
+.dl-todos-empty { font-size:12px; color:var(--ink-3); font-style:italic; margin-bottom:4px; }
+.dl-todo { display:flex; align-items:center; gap:8px; padding:3px 0; }
+.dl-todo-cb { width:16px; height:16px; flex-shrink:0; border:1.5px solid var(--rule-dark); border-radius:4px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:transparent; }
+.dl-todo-cb:hover { border-color:var(--navy); }
+.dl-todo.done .dl-todo-cb { background:var(--navy); border-color:var(--navy); color:#fff; }
+.dl-todo-text { font-size:13px; color:var(--ink); flex:1; }
+.dl-todo.done .dl-todo-text { text-decoration:line-through; color:var(--ink-3); }
+.dl-todo-del { border:none; background:none; color:var(--ink-3); font-size:16px; line-height:1; cursor:pointer; padding:0 3px; }
+.dl-todo-del:hover { color:var(--crit); }
+.dl-todos-add { width:100%; box-sizing:border-box; margin-top:5px; border:none; border-top:1px dashed var(--rule-dark); background:none; font-family:inherit; font-size:12px; color:var(--ink-2); outline:none; padding:6px 2px 2px; }
+.dl-todos-add:focus { border-color:var(--navy); }
+.d-t-tag.lesson { cursor:pointer; background:rgba(35,74,135,.08); border-color:rgba(35,74,135,.2); color:var(--navy-light); }
+.d-t-tag.lesson:hover { background:rgba(35,74,135,.16); }
+@media print { .no-print { display:none !important; } }
 /* Collapsible per-activity detail */
 .dl-actwrap { border-bottom:1px solid transparent; }
 .dl-actdetailbtn { flex:0 0 auto; border:1px solid var(--rule-dark,#cfccc4); background:none; border-radius:5px; padding:3px 7px; font-family:inherit; font-size:10.5px; font-weight:600; color:var(--ink-2); cursor:pointer; white-space:nowrap; }
@@ -1586,6 +1607,23 @@ body.simple-mode .dp-adv { display: none !important; }
       <button onclick="closeDayModal()" style="background:rgba(255,255,255,.15);border:none;border-radius:6px;color:#fff;font-size:20px;width:32px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1">&times;</button>
     </div>
     <div id="day-modal-content" style="padding:0"></div>
+  </div>
+</div>
+
+<!-- BRAINSTORM MODAL (idea scratchpad, never exported) -->
+<div id="brainstorm-overlay" style="display:none;position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.5);overflow-y:auto" onclick="if(event.target===this)closeBrainstorm()">
+  <div style="background:var(--white);max-width:600px;margin:56px auto;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,.3);overflow:hidden">
+    <div style="background:var(--navy);padding:12px 16px;display:flex;align-items:center;justify-content:space-between">
+      <span style="color:#fff;font-weight:600;font-size:14px" id="brainstorm-title">💡 Brainstorm &amp; Ideas</span>
+      <button onclick="closeBrainstorm()" style="background:rgba(255,255,255,.15);border:none;border-radius:6px;color:#fff;font-size:20px;width:32px;height:32px;cursor:pointer;line-height:1">&times;</button>
+    </div>
+    <div style="padding:16px">
+      <div style="font-size:12px;color:var(--ink-3);margin-bottom:10px">A scratchpad for this lesson — jot ideas, questions, links, activities to try. Saved with the lesson, never printed or exported.</div>
+      <div id="brainstorm-body"></div>
+      <div style="display:flex;justify-content:flex-end;margin-top:12px">
+        <button onclick="closeBrainstorm()" style="background:var(--navy);color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">Done</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -2906,7 +2944,11 @@ function renderDashboard(){
 
   const items = [
     ...autos.map(a=>({ id:a.key, auto:true, text:a.text, due:a.due, tag:a.tag, unit:a.unit, open:a.open, done:!!(state.autoDone&&state.autoDone[a.key]) })),
-    ...(state.todos||[]).map(t=>({ id:t.id, manual:true, text:t.text, due:t.due||'', done:!!t.done, cat:t.cat||'', subtasks:t.subtasks||[] })),
+    ...(state.todos||[]).map(t=>{
+      const m={ id:t.id, manual:true, text:t.text, due:t.due||'', done:!!t.done, cat:t.cat||'', subtasks:t.subtasks||[], lesson:t.lesson||null };
+      if(t.lesson) m.open=[t.lesson.uid, t.lesson.wi, t.lesson.di];
+      return m;
+    }),
   ];
 
   const bucketOf = it => (it.due && it.due<today) ? 'over' : (it.due && it.due<=isoAddDays(today,7)) ? 'week' : 'later';
@@ -2934,8 +2976,14 @@ function renderDashboard(){
           <option value="">— category —</option>
           ${cats.map(c=>`<option value="${c.id}" ${it.cat===c.id?'selected':''}>${esc(c.name)}</option>`).join('')}
         </select>` : '';
+      let lessonTag = '';
+      if(it.lesson){
+        const uu = UNIT_META.find(m=>m.id===it.lesson.uid);
+        const dd = state.units[it.lesson.uid]?.[it.lesson.wi]?.days?.[it.lesson.di];
+        lessonTag = `<span class="d-t-tag lesson" title="Open this lesson" onclick="event.stopPropagation();openGridDay(${it.lesson.uid},${it.lesson.wi},${it.lesson.di})">📘 ${uu?'U'+unitNo(uu.id):''}${dd?' · '+esc(dd.label):''}</span>`;
+      }
       sub = `<input type="date" class="d-t-dateedit" value="${esc(it.due||'')}" title="Due date" onchange="updateTodoDate('${it.id}',this.value)">
-        ${catSel}
+        ${catSel}${lessonTag}
         <span class="d-t-due${dueCls}">${it.due?dueTxt:'No date'}</span>`;
     } else {
       sub = [
@@ -6265,6 +6313,7 @@ function dailyPanelHTML(d, i) {
     <div class="dl-head-top">
       <div class="dl-title">${esc(d.label)} · Unit ${unitNo(currentUnit)}${u?` — ${esc(u.name)}`:''}</div>
       <div style="display:flex;align-items:center;gap:8px">
+        <button class="dl-brainstorm-btn${strip(d.brainstorm)?' has':''}" onclick="openBrainstorm(${i})" title="Jot ideas for this lesson (not printed)">💡 Ideas${strip(d.brainstorm)?' •':''}</button>
         <button class="dl-agenda-btn" onclick="exportDailyAgenda(${i})" title="Copy a student-facing agenda into your slideshow">📋 Agenda</button>
         <span class="dl-time ${usedMins>blockDur?'over':''}">${usedMins} / ${blockDur} min</span>
       </div>
@@ -6309,6 +6358,13 @@ function dailyPanelHTML(d, i) {
       <input id="chipin-dlres-${i}" class="dl-add" placeholder="+ Add a resource, press Enter" onkeydown="if(event.key==='Enter'){event.preventDefault();dlAddRes(${i},this.value)}">
     </td></tr>
   </tbody></table>
+
+  <!-- Lesson to-dos — sync to the dashboard, never printed/exported -->
+  <div class="dl-todos no-print">
+    <div class="dl-todos-head">✓ Lesson prep to-dos <span class="dl-todos-note">syncs to your dashboard · not printed</span></div>
+    ${lessonTodosHTML(i)}
+    <input id="lestodo-${i}" class="dl-todos-add" placeholder="+ Add a prep task for this lesson, press Enter" onkeydown="if(event.key==='Enter'){event.preventDefault();addLessonTodo(${i},this.value)}">
+  </div>
 
   <!-- Bloom's taxonomy quick reference -->
   <div class="dl-blooms">
@@ -6425,6 +6481,59 @@ function copyAgenda(btn){
   const done = () => { const o=btn.textContent; btn.textContent='✓ Copied!'; setTimeout(()=>btn.textContent=o,1400); };
   if(navigator.clipboard){ navigator.clipboard.writeText(ta.value).then(done, ()=>{ document.execCommand('copy'); done(); }); }
   else { document.execCommand('copy'); done(); }
+}
+
+// ── Brainstorm scratchpad (per lesson, never exported) ────────────
+let _brainstormI = null;
+function openBrainstorm(i){
+  _brainstormI = i;
+  const d = getDay(i);
+  const u = UNIT_META.find(m=>m.id===currentUnit);
+  document.getElementById('brainstorm-title').innerHTML = `💡 Brainstorm — ${esc(d.label)}${u?` · ${esc(u.name)}`:''}`;
+  document.getElementById('brainstorm-body').innerHTML =
+    rteField('rte-brainstorm', d.brainstorm||'', `updateDay(${i},'brainstorm',this.innerHTML)`, 'Ideas, questions, links, activities to try…');
+  document.getElementById('brainstorm-overlay').style.display='block';
+  setTimeout(()=>{ const ed=document.getElementById('rte-brainstorm'); if(ed) ed.focus(); }, 40);
+}
+function closeBrainstorm(){
+  document.getElementById('brainstorm-overlay').style.display='none';
+  if(_brainstormI!==null){ rerenderDay(_brainstormI); _brainstormI=null; }
+}
+
+// ── Per-lesson prep to-dos (stored in the shared dashboard pool) ──
+function lessonTodos(i){
+  const ref = { uid: currentUnit, wi: currentWeek, di: i };
+  return (state.todos||[]).filter(t => t.lesson && t.lesson.uid===ref.uid && t.lesson.wi===ref.wi && t.lesson.di===ref.di);
+}
+function lessonTodosHTML(i){
+  const list = lessonTodos(i);
+  if(!list.length) return `<div class="dl-todos-empty">No prep tasks yet.</div>`;
+  return list.map(t=>`<div class="dl-todo${t.done?' done':''}">
+    <div class="dl-todo-cb" onclick="toggleLessonTodo('${t.id}',${i})"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke-width="4"><polyline points="20 6 9 17 4 12"/></svg></div>
+    <span class="dl-todo-text">${esc(t.text)}</span>
+    <button class="dl-todo-del" onclick="deleteLessonTodo('${t.id}',${i})" title="Remove">&times;</button>
+  </div>`).join('');
+}
+function addLessonTodo(i, text){
+  text=(text||'').trim(); if(!text) return;
+  const d = getDay(i);
+  if(!state.todos) state.todos = [];
+  state.todos.push({
+    id: uid(), text, done:false,
+    due: d.dateA || d.dateB || '',
+    cat:'', subtasks:[],
+    lesson: { uid: currentUnit, wi: currentWeek, di: i },
+  });
+  saveState(); rerenderDay(i);
+  setTimeout(()=>{ const el=document.getElementById('lestodo-'+i); if(el) el.focus(); }, 30);
+}
+function toggleLessonTodo(id, i){
+  const t=(state.todos||[]).find(x=>x.id===id);
+  if(t){ t.done=!t.done; saveState(); rerenderDay(i); }
+}
+function deleteLessonTodo(id, i){
+  state.todos = (state.todos||[]).filter(x=>x.id!==id);
+  saveState(); rerenderDay(i);
 }
 
 // Simple daily-lesson editors (list rows + activities)
