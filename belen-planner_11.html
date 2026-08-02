@@ -748,6 +748,10 @@ body.simple-mode .dp-adv { display: none !important; }
 .dl-1line:hover { border-color:var(--rule); }
 .dl-acts { padding:6px 10px; }
 .dl-act { display:flex; align-items:center; gap:7px; padding:4px 0; }
+.dl-actmove { flex:0 0 auto; display:inline-flex; flex-direction:column; gap:1px; }
+.dl-actmove button { border:none; background:none; cursor:pointer; color:var(--ink-3); font-size:8px; line-height:1; padding:1px 2px; border-radius:3px; }
+.dl-actmove button:hover:not(:disabled) { color:var(--navy); background:rgba(27,58,107,.1); }
+.dl-actmove button:disabled { opacity:.25; cursor:default; }
 .dl-actnum { flex:0 0 auto; font-weight:800; font-size:13px; color:var(--navy); width:20px; text-align:right; font-variant-numeric:tabular-nums; }
 .dl-actinp { flex:1; min-width:0; border:1px solid transparent; border-radius:6px; padding:6px 8px; font-family:inherit; font-size:13px; color:var(--ink); outline:none; }
 .dl-actinp:hover { border-color:var(--rule); } .dl-actinp:focus { border-color:var(--navy); background:#F7F9FC; }
@@ -830,7 +834,7 @@ body.simple-mode .dp-adv { display: none !important; }
 .dl-blooms-head { width:100%; text-align:left; background:#F7F5F0; border:none; cursor:pointer; font-family:inherit; font-size:12.5px; font-weight:700; color:var(--navy); padding:9px 13px; display:flex; align-items:center; gap:7px; }
 .dl-blooms-head:hover { background:#F0EDE6; }
 .dl-blooms-body { padding:13px; }
-@media print { .dl-actx, .dl-add, .dl-addact, .dl-agenda-btn, .dl-actdetailbtn, .rte-tb, .dl-blooms { display:none !important; } .dl-head { background:var(--navy) !important; } .rte { border:none; } }
+@media print { .dl-actx, .dl-add, .dl-addact, .dl-agenda-btn, .dl-actdetailbtn, .dl-move-btn, .dl-brainstorm-btn, .dl-actmove, .rte-tb, .dl-blooms { display:none !important; } .dl-head { background:var(--navy) !important; } .rte { border:none; } }
 
 /* ── WEEK VIEW — school weekly-plan grid ─────────────────────────── */
 .wk-scroll { overflow-x:auto; border:1px solid var(--rule-dark); border-radius:10px; }
@@ -3883,8 +3887,7 @@ function renderWeekPlan() {
   const goalsCell = L => `<td class="wk-cell">${bullets((L.d.teacherGoals||[]).filter(g=>strip(g)), g=>`<li>${esc(strip(g))}</li>`)}</td>`;
   const tgtCell = L => `<td class="wk-cell">${bullets((L.d.targets||[]).filter(t=>strip(t)), t=>`<li>I can ${esc(strip(t).replace(/^I can\s*/i,''))}</li>`)}</td>`;
   const actCell = (L, bname) => {
-    const acts = (L.d.activities||[]).slice()
-      .sort((a,b)=>(seq[normalizePhase(a.grr)]??9)-(seq[normalizePhase(b.grr)]??9))
+    const acts = (L.d.activities||[])
       .filter(a=>phaseBucket(a.grr)===bname && strip(a.name));
     return `<td class="wk-cell">${bullets(acts, a=>{
       const pc = PHASE_COLORS[normalizePhase(a.grr)]||{bg:'#ccc'};
@@ -6433,19 +6436,22 @@ function dailyPanelHTML(d, i) {
   const usedMins = (d.activities||[]).reduce((s,a)=>s+(a.dur||0),0);
   const strip = s => String(s||'').replace(/<[^>]*>/g,' ').replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim();
 
-  // Number activities in true teaching order (by phase), then bucket them.
-  const seq = {opening:0,focus:1,guided:2,independent:3,closer:4};
-  const ordered = (d.activities||[]).map((a,ai)=>({a,ai,s:seq[normalizePhase(a.grr)] ?? 9}))
-    .sort((x,y)=> x.s-y.s || x.ai-y.ai);
+  // Activities keep the teacher's own order (the array order); numbering
+  // follows that order, and each can be reordered within its section.
+  const ordered = (d.activities||[]).map((a,ai)=>({a,ai}));
   ordered.forEach((o,n)=>o.num=n+1);
 
-  const actRow = o => {
+  const actRow = (o, canUp, canDown) => {
     const a=o.a, ai=o.ai, ph=normalizePhase(a.grr), c=PHASE_COLORS[ph]||{bg:'#888',tx:'#fff'};
     const hasDetail = !!strip(a.desc);
     const p = PHASE_BY_V[ph];
     const hint = p ? `<div class="dl-acthint"><i>${esc(p.hint)}${p.lo?` · ${p.lo}–${p.hi} min`:''}</i></div>` : '';
     return `<div class="dl-actwrap">
       <div class="dl-act">
+        <span class="dl-actmove">
+          <button class="dl-actup" ${canUp?'':'disabled'} onclick="moveActInBucket(${i},${ai},-1)" title="Move up">▲</button>
+          <button class="dl-actdown" ${canDown?'':'disabled'} onclick="moveActInBucket(${i},${ai},1)" title="Move down">▼</button>
+        </span>
         <span class="dl-actnum">${o.num}.</span>
         <input class="dl-actinp" value="${esc(strip(a.name)|| '')}" placeholder="What happens…"
           onchange="updateActName(${i},${ai},this.value)">
@@ -6463,8 +6469,11 @@ function dailyPanelHTML(d, i) {
       </div>
     </div>`;
   };
-  const bucket = name => ordered.filter(o=>phaseBucket(o.a.grr)===name).map(actRow).join('')
-    || `<div class="dl-empty">Nothing here yet.</div>`;
+  const bucket = name => {
+    const list = ordered.filter(o=>phaseBucket(o.a.grr)===name);
+    return list.map((o,pos)=>actRow(o, pos>0, pos<list.length-1)).join('')
+      || `<div class="dl-empty">Nothing here yet.</div>`;
+  };
 
   const goalRows = (d.teacherGoals||[]).map((g,gi)=>`<div class="dl-li dl-li-rte">
       <div class="rte-ed dl-li-ed" contenteditable="true" data-ph="Goal…" onkeydown="rteKey(event)"
@@ -6650,9 +6659,7 @@ function exportDailyAgenda(i){
   if(goals.length) lines.push(`Today's Goal: ${goals.join('; ')}`);
   if(strip(d.eq) || goals.length) lines.push('');
   lines.push('Agenda:');
-  const acts = (d.activities||[]).slice()
-    .sort((a,b)=>(seq[normalizePhase(a.grr)]??9)-(seq[normalizePhase(b.grr)]??9))
-    .filter(a=>strip(a.name));
+  const acts = (d.activities||[]).filter(a=>strip(a.name));
   acts.forEach((a,n)=>lines.push(`${n+1}. ${strip(a.name)}${a.dur?` (${a.dur} min)`:''}`));
   if(!acts.length) lines.push('  (no activities yet)');
   if(strip(d.homework)){ lines.push(''); lines.push(`Homework: ${strip(d.homework)}`); }
@@ -6766,6 +6773,18 @@ function updateActName(i,ai,v){const a=getDay(i).activities[ai];if(a){a.name=(v|
 function updateActPhase(i,ai,v){const a=getDay(i).activities[ai];if(a){a.grr=v;saveState();rerenderDay(i);}}
 function addActToBucket(i,bucketName){const ph=bucketName==='ic'?'guided':'focus';const p=PHASE_BY_V[ph];getDay(i).activities.push({id:uid(),name:'',dur:p?p.def:10,grr:ph,ipp:'',desc:''});saveState();rerenderDay(i);}
 function removeAct(i,ai){getDay(i).activities.splice(ai,1);saveState();rerenderDay(i);}
+// Move an activity up/down within its section (Whole Group or Indep/Collab),
+// swapping it with the nearest activity in the same section.
+function moveActInBucket(i,ai,dir){
+  const acts=getDay(i).activities;
+  const a=acts[ai]; if(!a) return;
+  const b=phaseBucket(a.grr);
+  let j=ai+dir;
+  while(j>=0 && j<acts.length && phaseBucket(acts[j].grr)!==b) j+=dir;
+  if(j<0 || j>=acts.length) return;
+  [acts[ai],acts[j]]=[acts[j],acts[ai]];
+  saveState(); rerenderDay(i);
+}
 
 // ── BLOOM'S TAXONOMY ──────────────────────────────────────────────
 // Content mirrors the UNMC "(Revised) Bloom's Taxonomy of Learning Objectives" chart
