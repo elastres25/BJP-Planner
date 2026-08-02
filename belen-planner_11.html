@@ -1852,11 +1852,27 @@ function orderedUnits() {
       (a.idx - b.idx))
     .map(x => x.u);
 }
-// Displayed unit number = its position in that on-screen order, so the numbers
-// always read 1,2,3… down the page and moving a unit renumbers it. The
-// internal `id` stays fixed as the storage key.
+// A unit can be flagged as the "intro"/welcome unit — it shows as Unit 0 and
+// is skipped in the running count, so the real content units still read 1,2,3…
+function isIntroUnit(uid){ return !!(state.introUnits && state.introUnits[uid]); }
+function setIntroUnit(uid, on){
+  if(!state.introUnits) state.introUnits = {};
+  if(on) state.introUnits[uid] = true; else delete state.introUnits[uid];
+  saveState();
+  renderCourse();
+  if(currentUnit===uid) renderUnit();
+  toast(on ? 'Marked as intro — shows as Unit 0' : 'Intro flag removed');
+}
+// Displayed unit number: intro units are 0; every other unit counts 1,2,3… in
+// on-screen order, so moving a unit renumbers it. The internal `id` stays fixed.
 function unitNo(uid) {
-  const i = orderedUnits().findIndex(u => u.id === uid);
+  const ordered = orderedUnits();
+  let n = 0;
+  for (const u of ordered) {
+    if (isIntroUnit(u.id)) { if (u.id === uid) return 0; }
+    else { n++; if (u.id === uid) return n; }
+  }
+  const i = ordered.findIndex(u => u.id === uid);
   return i >= 0 ? i + 1 : uid;
 }
 function setUnitColor(uid, colorKey) {
@@ -6157,6 +6173,10 @@ function renderUnit() {
         <span style="display:inline-flex;align-items:center;gap:4px;margin-left:4px">
           ${Object.entries(COLOR_MAP).map(([k,v])=>`<button onclick="setUnitColor(${u.id},'${k}')" title="${k}" style="width:18px;height:18px;border-radius:50%;background:${v.br};border:2px solid ${(state.unitColors&&state.unitColors[u.id]||u.color)===k?'#fff':'transparent'};outline:2px solid ${(state.unitColors&&state.unitColors[u.id]||u.color)===k?v.br:'transparent'};cursor:pointer;transition:all .12s;padding:0"></button>`).join('')}
         </span>
+        <!-- INTRO / UNIT 0 TOGGLE -->
+        <button onclick="setIntroUnit(${u.id}, ${isIntroUnit(u.id)?'false':'true'})"
+          title="Intro / welcome week — shows as Unit 0 and doesn't count toward the numbering"
+          style="margin-left:6px;border:1px solid ${isIntroUnit(u.id)?'var(--navy)':'var(--rule-dark)'};background:${isIntroUnit(u.id)?'var(--navy)':'none'};color:${isIntroUnit(u.id)?'#fff':'var(--ink-2)'};border-radius:999px;padding:3px 10px;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer">${isIntroUnit(u.id)?'✓ Intro (Unit 0)':'Mark as intro (Unit 0)'}</button>
       </div>
       <div style="font-size:13px;color:var(--ink-2);line-height:1.6;margin-top:8px;padding:8px 10px;background:var(--parchment);border-radius:var(--radius-sm);border-left:3px solid ${c.br}"
         contenteditable="true"
