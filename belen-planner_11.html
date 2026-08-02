@@ -405,7 +405,16 @@ button, input, textarea, select { font-family: inherit; }
   line-height: 1.25;
 }
 .unit-hero-title:focus { background: rgba(83,74,183,.06); border-radius: 4px; padding: 2px 4px; }
-.unit-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.unit-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; align-items: center; }
+.unit-opts-btn { border: 1px solid var(--rule-dark); background: none; color: var(--ink-2); border-radius: 7px; width: 30px; height: 24px; font-size: 15px; line-height: 1; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+.unit-opts-btn:hover { border-color: var(--navy); color: var(--navy); }
+.unit-opts-menu { display: none; position: absolute; top: 100%; left: 0; margin-top: 6px; z-index: 60; background: var(--white); border: 1px solid var(--rule-dark); border-radius: 10px; box-shadow: 0 8px 28px rgba(0,0,0,.16); padding: 10px 12px; min-width: 200px; }
+.unit-opts-menu.open { display: block; }
+.uom-label { font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); margin: 2px 0 6px; }
+.uom-swatches { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.uom-intro { width: 100%; text-align: left; border: 1px solid var(--rule-dark); background: none; color: var(--ink-2); border-radius: 7px; padding: 7px 10px; font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
+.uom-intro:hover { border-color: var(--navy); color: var(--navy); }
+.uom-intro.on { background: var(--navy); border-color: var(--navy); color: #fff; }
 .unit-objs { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
 .unit-obj {
   font-size: 12px; color: var(--ink-2); line-height: 1.4;
@@ -1862,6 +1871,22 @@ function setIntroUnit(uid, on){
   renderCourse();
   if(currentUnit===uid) renderUnit();
   toast(on ? 'Marked as intro — shows as Unit 0' : 'Intro flag removed');
+}
+// Unit-options (⋯) dropdown in the unit header.
+function toggleUnitOpts(e){
+  if(e) e.stopPropagation();
+  const m = document.getElementById('unit-opts-menu');
+  if(!m) return;
+  const open = !m.classList.contains('open');
+  m.classList.toggle('open', open);
+  if(open) setTimeout(()=>document.addEventListener('click', _unitOptsOutside), 0);
+}
+function _unitOptsOutside(ev){
+  const m = document.getElementById('unit-opts-menu');
+  if(m && !m.contains(ev.target) && !ev.target.closest('.unit-opts-btn')){
+    m.classList.remove('open');
+    document.removeEventListener('click', _unitOptsOutside);
+  }
 }
 // Displayed unit number: intro units are 0; every other unit counts 1,2,3… in
 // on-screen order, so moving a unit renumbers it. The internal `id` stays fixed.
@@ -6169,14 +6194,20 @@ function renderUnit() {
         <span class="tag" style="background:${c.bg};color:${c.tx}">${u.blocks}</span>
         <span class="tag" style="background:var(--rule);color:var(--ink-2)">${weeks.length} week${weeks.length===1?'':'s'}</span>
         <span class="tag" style="background:var(--rule);color:var(--ink-2)">${totalDays} block${totalDays===1?'':'s'} total</span>
-        <!-- COLOR PICKER -->
-        <span style="display:inline-flex;align-items:center;gap:4px;margin-left:4px">
-          ${Object.entries(COLOR_MAP).map(([k,v])=>`<button onclick="setUnitColor(${u.id},'${k}')" title="${k}" style="width:18px;height:18px;border-radius:50%;background:${v.br};border:2px solid ${(state.unitColors&&state.unitColors[u.id]||u.color)===k?'#fff':'transparent'};outline:2px solid ${(state.unitColors&&state.unitColors[u.id]||u.color)===k?v.br:'transparent'};cursor:pointer;transition:all .12s;padding:0"></button>`).join('')}
+        <!-- UNIT OPTIONS (⋯) — color + intro tucked away -->
+        <span style="position:relative;margin-left:4px;display:inline-flex">
+          <button class="unit-opts-btn" onclick="toggleUnitOpts(event)" title="Unit options — color, numbering">⋯</button>
+          <div id="unit-opts-menu" class="unit-opts-menu">
+            <div class="uom-label">Unit color</div>
+            <div class="uom-swatches">
+              ${Object.entries(COLOR_MAP).map(([k,v])=>`<button onclick="setUnitColor(${u.id},'${k}')" title="${k}" style="width:20px;height:20px;border-radius:50%;background:${v.br};border:2px solid ${(state.unitColors&&state.unitColors[u.id]||u.color)===k?'#fff':'transparent'};outline:2px solid ${(state.unitColors&&state.unitColors[u.id]||u.color)===k?v.br:'transparent'};cursor:pointer;padding:0"></button>`).join('')}
+            </div>
+            <div class="uom-label">Numbering</div>
+            <button class="uom-intro${isIntroUnit(u.id)?' on':''}" onclick="setIntroUnit(${u.id}, ${isIntroUnit(u.id)?'false':'true'})">
+              ${isIntroUnit(u.id)?'✓ Intro / welcome week (Unit 0)':'Mark as intro / welcome (Unit 0)'}
+            </button>
+          </div>
         </span>
-        <!-- INTRO / UNIT 0 TOGGLE -->
-        <button onclick="setIntroUnit(${u.id}, ${isIntroUnit(u.id)?'false':'true'})"
-          title="Intro / welcome week — shows as Unit 0 and doesn't count toward the numbering"
-          style="margin-left:6px;border:1px solid ${isIntroUnit(u.id)?'var(--navy)':'var(--rule-dark)'};background:${isIntroUnit(u.id)?'var(--navy)':'none'};color:${isIntroUnit(u.id)?'#fff':'var(--ink-2)'};border-radius:999px;padding:3px 10px;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer">${isIntroUnit(u.id)?'✓ Intro (Unit 0)':'Mark as intro (Unit 0)'}</button>
       </div>
       <div style="font-size:13px;color:var(--ink-2);line-height:1.6;margin-top:8px;padding:8px 10px;background:var(--parchment);border-radius:var(--radius-sm);border-left:3px solid ${c.br}"
         contenteditable="true"
