@@ -808,7 +808,16 @@ body.simple-mode .dp-adv { display: none !important; }
 .dl-actdetailbtn { flex:0 0 auto; border:1px solid var(--rule-dark,#cfccc4); background:none; border-radius:5px; padding:3px 7px; font-family:inherit; font-size:10.5px; font-weight:600; color:var(--ink-2); cursor:pointer; white-space:nowrap; }
 .dl-actdetailbtn.has { border-color:var(--navy); color:var(--navy); background:#F0F4FA; }
 .dl-actdetailbtn:hover { border-color:var(--navy); color:var(--navy); }
-.dl-acthint { padding:0 0 3px 27px; font-size:10.5px; color:var(--ink-3); line-height:1.4; }
+.dl-actwrap { border-left:3px solid transparent; padding-left:6px; margin-left:-9px; border-radius:0 4px 4px 0; }
+.dl-bkt-whole { border-left-color:#14315C; }
+.dl-bkt-ic { border-left-color:#1565C0; }
+.dl-bkt { flex:0 0 auto; font-size:8.5px; font-weight:800; letter-spacing:.02em; padding:2px 4px; border-radius:3px; }
+.dl-bkt.wg { background:#14315C; color:#fff; }
+.dl-bkt.ic { background:#1565C0; color:#fff; }
+.dl-acthint { padding:0 0 3px 60px; font-size:10.5px; color:var(--ink-3); line-height:1.4; }
+.wk-ol { margin:0; padding-left:20px; }
+.wk-ol li { margin-bottom:3px; line-height:1.45; }
+.wk-ol li::marker { color:var(--ink-3); font-size:11px; }
 .dl-acthint i { font-style:italic; }
 .dl-actdetail { padding:2px 0 8px 27px; }
 /* Rich-text editor */
@@ -3922,12 +3931,16 @@ function renderWeekPlan() {
   const goalsCell = L => `<td class="wk-cell">${bullets((L.d.teacherGoals||[]).filter(g=>strip(g)), g=>`<li>${esc(strip(g))}</li>`)}</td>`;
   const tgtCell = L => `<td class="wk-cell">${bullets((L.d.targets||[]).filter(t=>strip(t)), t=>`<li>I can ${esc(strip(t).replace(/^I can\s*/i,''))}</li>`)}</td>`;
   const actCell = (L, bname) => {
+    const seqN = new Map();
+    (L.d.activities||[]).filter(a=>strip(a.name)).forEach((a,idx)=>seqN.set(a,idx+1));
     const acts = (L.d.activities||[])
       .filter(a=>phaseBucket(a.grr)===bname && strip(a.name));
-    return `<td class="wk-cell">${bullets(acts, a=>{
-      const pc = PHASE_COLORS[normalizePhase(a.grr)]||{bg:'#ccc'};
-      return `<li><span class="wk-dot" style="background:${pc.bg}" title="${esc(phaseLabel(a.grr))}"></span>${esc(strip(a.name))}</li>`;
-    })}</td>`;
+    return `<td class="wk-cell">${acts.length
+      ? `<ol class="wk-ol">${acts.map(a=>{
+          const pc = PHASE_COLORS[normalizePhase(a.grr)]||{bg:'#ccc'};
+          return `<li value="${seqN.get(a)}"><span class="wk-dot" style="background:${pc.bg}" title="${esc(phaseLabel(a.grr))}"></span>${esc(strip(a.name))}</li>`;
+        }).join('')}</ol>`
+      : `<span class="wk-empty">—</span>`}</td>`;
   };
   const hwCell = L => `<td class="wk-cell">${strip(L.d.homework)?`<span>${esc(strip(L.d.homework))}</span>`:'<span class="wk-empty">—</span>'}</td>`;
   const resCell = L => `<td class="wk-cell">${bullets((L.d.materials||[]).filter(m=>matTitle(m)||matUrl(m)), m=>{
@@ -6480,17 +6493,22 @@ function dailyPanelHTML(d, i) {
     const a=o.a, ai=o.ai, ph=normalizePhase(a.grr), c=PHASE_COLORS[ph]||{bg:'#888',tx:'#fff'};
     const hasDetail = !!strip(a.desc);
     const p = PHASE_BY_V[ph];
+    const bkt = phaseBucket(a.grr);   // 'whole' | 'ic'
+    const bktTag = bkt==='ic'
+      ? `<span class="dl-bkt ic" title="Independent or Collaborative">I/C</span>`
+      : `<span class="dl-bkt wg" title="Whole Group">WG</span>`;
     const hint = p ? `<div class="dl-acthint"><i>${esc(p.hint)}${p.lo?` · ${p.lo}–${p.hi} min`:''}</i></div>` : '';
-    return `<div class="dl-actwrap">
+    return `<div class="dl-actwrap dl-bkt-${bkt}">
       <div class="dl-act">
         <span class="dl-actmove">
-          <button class="dl-actup" ${canUp?'':'disabled'} onclick="moveActInBucket(${i},${ai},-1)" title="Move up">▲</button>
-          <button class="dl-actdown" ${canDown?'':'disabled'} onclick="moveActInBucket(${i},${ai},1)" title="Move down">▼</button>
+          <button class="dl-actup" ${canUp?'':'disabled'} onclick="moveAct(${i},${ai},-1)" title="Move up">▲</button>
+          <button class="dl-actdown" ${canDown?'':'disabled'} onclick="moveAct(${i},${ai},1)" title="Move down">▼</button>
         </span>
         <span class="dl-actnum">${o.num}.</span>
+        ${bktTag}
         <input class="dl-actinp" value="${esc(strip(a.name)|| '')}" placeholder="What happens…"
           onchange="updateActName(${i},${ai},this.value)">
-        <select class="dl-actphase" style="background:${c.bg};color:${c.tx}" onchange="updateActPhase(${i},${ai},this.value)" title="Phase">
+        <select class="dl-actphase" style="background:${c.bg};color:${c.tx}" onchange="updateActPhase(${i},${ai},this.value)" title="Phase (sets Whole Group vs Independent/Collaborative)">
           ${PHASES.map(p=>`<option value="${p.v}" ${ph===p.v?'selected':''}>${p.label}</option>`).join('')}
         </select>
         <input class="dl-actmin" type="number" min="0" max="120" value="${a.dur||0}" onchange="updateActDur(${i},${ai},+this.value)" title="minutes">
@@ -6504,11 +6522,10 @@ function dailyPanelHTML(d, i) {
       </div>
     </div>`;
   };
-  const bucket = name => {
-    const list = ordered.filter(o=>phaseBucket(o.a.grr)===name);
-    return list.map((o,pos)=>actRow(o, pos>0, pos<list.length-1)).join('')
-      || `<div class="dl-empty">Nothing here yet.</div>`;
-  };
+  // Single list in true teaching order — activities can flip between
+  // Whole Group and Independent/Collaborative freely.
+  const allActs = ordered.map((o,pos)=>actRow(o, pos>0, pos<ordered.length-1)).join('')
+    || `<div class="dl-empty">No activities yet — add the first one below.</div>`;
 
   const goalRows = (d.teacherGoals||[]).map((g,gi)=>`<div class="dl-li dl-li-rte">
       <div class="rte-ed dl-li-ed" contenteditable="true" data-ph="Goal…" onkeydown="rteKey(event)"
@@ -6570,13 +6587,9 @@ function dailyPanelHTML(d, i) {
     </td></tr>
 
     <tr><td class="dl-banner" colspan="2">Learning Activities / Tasks</td></tr>
-    <tr><td class="dl-lbl">Whole Group Learning<small>Opening · Focus · Closer</small></td><td class="dl-cell dl-acts">
-      ${bucket('whole')}
-      <button class="dl-addact" onclick="addActToBucket(${i},'whole')">+ Add activity</button>
-    </td></tr>
-    <tr><td class="dl-lbl">Independent or Collaborative Learning<small>Guided/Collaborative · Independent</small></td><td class="dl-cell dl-acts">
-      ${bucket('ic')}
-      <button class="dl-addact" onclick="addActToBucket(${i},'ic')">+ Add activity</button>
+    <tr><td class="dl-lbl">Activities<small>In teaching order — <span style="color:#14315C;font-weight:700">WG</span> Whole Group · <span style="color:#1565C0;font-weight:700">I/C</span> Indep/Collab. Reorder with ▲▼.</small></td><td class="dl-cell dl-acts">
+      ${allActs}
+      <button class="dl-addact" onclick="addAct(${i})">+ Add activity</button>
     </td></tr>
     <tr><td class="dl-lbl">Homework</td><td class="dl-cell">
       ${rteField(`rte-hw-${i}`, d.homework||'', `updateDay(${i},'homework',this.innerHTML)`, 'Homework…')}
@@ -6806,20 +6819,28 @@ function submitResource(){
 }
 function updateActName(i,ai,v){const a=getDay(i).activities[ai];if(a){a.name=(v||'').trim();saveState();}}
 function updateActPhase(i,ai,v){const a=getDay(i).activities[ai];if(a){a.grr=v;saveState();rerenderDay(i);}}
+// Add a new activity at the end of the lesson. Defaults to the same phase as
+// the last activity (so the flow continues), else Focus.
+function addAct(i){
+  const acts=getDay(i).activities;
+  const lastPh=acts.length?normalizePhase(acts[acts.length-1].grr):'focus';
+  const ph=lastPh||'focus'; const p=PHASE_BY_V[ph];
+  acts.push({id:uid(),name:'',dur:p?p.def:10,grr:ph,ipp:'',desc:''});
+  saveState();rerenderDay(i);
+}
+// Back-compat: old callers that added into a bucket.
 function addActToBucket(i,bucketName){const ph=bucketName==='ic'?'guided':'focus';const p=PHASE_BY_V[ph];getDay(i).activities.push({id:uid(),name:'',dur:p?p.def:10,grr:ph,ipp:'',desc:''});saveState();rerenderDay(i);}
 function removeAct(i,ai){getDay(i).activities.splice(ai,1);saveState();rerenderDay(i);}
-// Move an activity up/down within its section (Whole Group or Indep/Collab),
-// swapping it with the nearest activity in the same section.
-function moveActInBucket(i,ai,dir){
+// Move an activity up/down anywhere in the lesson's teaching order.
+function moveAct(i,ai,dir){
   const acts=getDay(i).activities;
-  const a=acts[ai]; if(!a) return;
-  const b=phaseBucket(a.grr);
-  let j=ai+dir;
-  while(j>=0 && j<acts.length && phaseBucket(acts[j].grr)!==b) j+=dir;
+  const j=ai+dir;
   if(j<0 || j>=acts.length) return;
   [acts[ai],acts[j]]=[acts[j],acts[ai]];
   saveState(); rerenderDay(i);
 }
+// Legacy alias (kept in case any handler still references it).
+function moveActInBucket(i,ai,dir){ moveAct(i,ai,dir); }
 
 // ── BLOOM'S TAXONOMY ──────────────────────────────────────────────
 // Content mirrors the UNMC "(Revised) Bloom's Taxonomy of Learning Objectives" chart
@@ -8001,14 +8022,18 @@ function exportPDF() {
   const li = arr => (arr||[]).map(strip).filter(Boolean)
     .map(x=>`<div style="margin:0 0 4px;padding-left:11px;text-indent:-11px">&bull; ${escPDF(x)}</div>`).join('') || dash;
 
+  // Number activities by their true teaching order so the printed two-section
+  // doc still reveals a Whole Group → Ind/Collab → Whole Group flow.
+  const seqNum = new Map();
+  (d.activities||[]).filter(a=>strip(a.name)||strip(a.desc)).forEach((a,idx)=>seqNum.set(a,idx+1));
   const actLines = bucket => {
     const list = (d.activities||[]).filter(a=>phaseBucket(a.grr)===bucket).filter(a=>strip(a.name)||strip(a.desc));
     if(!list.length) return dash;
-    return list.map((a,n)=>{
+    return list.map(a=>{
       const c = PHASE_COLORS[normalizePhase(a.grr)] || {bg:'#888',tx:'#fff'};
       const body = escPDF(strip(a.name)||strip(a.desc));
-      const detail = (strip(a.desc) && strip(a.name)) ? `<div style="font-size:8.5pt;color:#57534E;margin:1px 0 0 14px">${escPDF(strip(a.desc))}</div>` : '';
-      return `<div style="margin:0 0 5px;padding-left:14px;text-indent:-14px">${n+1}. ${body}
+      const detail = (strip(a.desc) && strip(a.name)) ? `<div style="font-size:8.5pt;color:#57534E;margin:1px 0 0 16px">${escPDF(strip(a.desc))}</div>` : '';
+      return `<div style="margin:0 0 5px;padding-left:16px;text-indent:-16px">${seqNum.get(a)}. ${body}
         <span style="font-size:7.5pt;font-weight:700;padding:1px 5px;border-radius:3px;background:${c.bg};color:${c.tx};-webkit-print-color-adjust:exact;print-color-adjust:exact">${escPDF(phaseLabel(a.grr))}</span>
         <span style="font-size:7.5pt;color:#78716C">${a.dur||0}m</span>${detail}</div>`;
     }).join('');
