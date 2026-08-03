@@ -1355,7 +1355,7 @@ body.simple-mode .dp-adv { display: none !important; }
 /* Manual-task inline edit controls */
 .d-t-dateedit{border:1px solid var(--rule);border-radius:5px;padding:2px 6px;font-family:inherit;font-size:11px;color:var(--ink-2);outline:none;background:#fff;}
 .d-t-dateedit:focus{border-color:var(--navy);}
-.d-t-catsel{border:1px solid var(--rule);border-radius:5px;padding:2px 5px;font-family:inherit;font-size:11px;outline:none;background:#fff;color:var(--ink-2);}
+.d-t-catsel,.d-t-linksel{border:1px solid var(--rule);border-radius:5px;padding:2px 5px;font-family:inherit;font-size:11px;outline:none;background:#fff;color:var(--ink-2);max-width:150px;}
 .d-t-catdot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:1px;}
 .d-sub-count{font-size:10px;font-weight:700;color:var(--ink-3);background:var(--parchment);border:1px solid var(--rule);border-radius:999px;padding:0 6px;margin-left:7px;vertical-align:1px;}
 /* Subtasks */
@@ -2796,12 +2796,42 @@ function addDashTodo(){
   const ti = document.getElementById('d-todo-text');
   const di = document.getElementById('d-todo-due');
   const ci = document.getElementById('d-todo-cat');
+  const li = document.getElementById('d-todo-link');
   const text = (ti.value||'').trim();
   if(!text){ ti.focus(); return; }
   if(!state.todos) state.todos = [];
-  state.todos.push({ id: uid(), text, due: di.value||'', cat:(ci?ci.value:'')||'', done:false });
+  const link = parseTodoLink(li ? li.value : '');
+  state.todos.push({ id: uid(), text, due: di.value||'', cat:(ci?ci.value:'')||'', done:false, lesson:link.lesson, unit:link.unit });
   saveState();
   renderDashboard();
+}
+// ── Link a task to a unit or a specific lesson ────────────────────
+function parseTodoLink(val){
+  if(val && val.startsWith('unit:'))   return { unit:+val.slice(5), lesson:null };
+  if(val && val.startsWith('lesson:')){ const p=val.split(':'); return { unit:null, lesson:{uid:+p[1], wi:+p[2], di:+p[3]} }; }
+  return { unit:null, lesson:null };
+}
+function todoLinkValue(t){
+  if(t.lesson) return `lesson:${t.lesson.uid}:${t.lesson.wi}:${t.lesson.di}`;
+  if(t.unit)   return `unit:${t.unit}`;
+  return '';
+}
+function todoLinkOptions(sel){
+  const strip = s => String(s||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();
+  let html = `<option value="" ${!sel?'selected':''}>— no link —</option>`;
+  const units = orderedUnits();
+  html += `<optgroup label="Units">` + units.map(u=>`<option value="unit:${u.id}" ${sel==='unit:'+u.id?'selected':''}>Unit ${unitNo(u.id)}: ${esc(u.name)}</option>`).join('') + `</optgroup>`;
+  const lessonOpts = [];
+  units.forEach(u=>(state.units[u.id]||[]).forEach((w,wi)=>(w.days||[]).forEach((dd,di)=>{
+    const v=`lesson:${u.id}:${wi}:${di}`;
+    lessonOpts.push(`<option value="${v}" ${sel===v?'selected':''}>U${unitNo(u.id)} · ${esc(dd.label)}${strip(dd.topic)?' — '+esc(strip(dd.topic)):''}</option>`);
+  })));
+  if(lessonOpts.length) html += `<optgroup label="Lessons">${lessonOpts.join('')}</optgroup>`;
+  return html;
+}
+function updateTodoLink(id, val){
+  const t = (state.todos||[]).find(x=>x.id===id);
+  if(t){ const link=parseTodoLink(val); t.lesson=link.lesson; t.unit=link.unit; saveState(); renderDashboard(); }
 }
 function toggleDashTodo(id){
   const t = (state.todos||[]).find(x=>x.id===id);
@@ -3046,7 +3076,7 @@ function renderDashboard(){
   const items = [
     ...autos.map(a=>({ id:a.key, auto:true, text:a.text, due:a.due, tag:a.tag, unit:a.unit, open:a.open, done:!!(state.autoDone&&state.autoDone[a.key]) })),
     ...(state.todos||[]).map(t=>{
-      const m={ id:t.id, manual:true, text:t.text, due:t.due||'', done:!!t.done, cat:t.cat||'', subtasks:t.subtasks||[], lesson:t.lesson||null };
+      const m={ id:t.id, manual:true, text:t.text, due:t.due||'', done:!!t.done, cat:t.cat||'', subtasks:t.subtasks||[], lesson:t.lesson||null, unit:t.unit||null };
       if(t.lesson) m.open=[t.lesson.uid, t.lesson.wi, t.lesson.di];
       return m;
     }),
@@ -3077,14 +3107,18 @@ function renderDashboard(){
           <option value="">— category —</option>
           ${cats.map(c=>`<option value="${c.id}" ${it.cat===c.id?'selected':''}>${esc(c.name)}</option>`).join('')}
         </select>` : '';
-      let lessonTag = '';
+      let linkTag = '';
       if(it.lesson){
         const uu = UNIT_META.find(m=>m.id===it.lesson.uid);
         const dd = state.units[it.lesson.uid]?.[it.lesson.wi]?.days?.[it.lesson.di];
-        lessonTag = `<span class="d-t-tag lesson" title="Open this lesson" onclick="event.stopPropagation();openGridDay(${it.lesson.uid},${it.lesson.wi},${it.lesson.di})">📘 ${uu?'U'+unitNo(uu.id):''}${dd?' · '+esc(dd.label):''}</span>`;
+        linkTag = `<span class="d-t-tag lesson" title="Open this lesson" onclick="event.stopPropagation();openGridDay(${it.lesson.uid},${it.lesson.wi},${it.lesson.di})">📘 ${uu?'U'+unitNo(uu.id):''}${dd?' · '+esc(dd.label):''}</span>`;
+      } else if(it.unit){
+        const uu = UNIT_META.find(m=>m.id===it.unit);
+        if(uu) linkTag = `<span class="d-t-tag lesson" title="Open this unit" onclick="event.stopPropagation();nav('unit',${it.unit})">📗 Unit ${unitNo(it.unit)}: ${esc(uu.name)}</span>`;
       }
+      const linkSel = `<select class="d-t-linksel" title="Link to a unit or lesson" onchange="updateTodoLink('${it.id}',this.value)">${todoLinkOptions(todoLinkValue(it))}</select>`;
       sub = `<input type="date" class="d-t-dateedit" value="${esc(it.due||'')}" title="Due date" onchange="updateTodoDate('${it.id}',this.value)">
-        ${catSel}${lessonTag}
+        ${catSel}${linkSel}${linkTag}
         <span class="d-t-due${dueCls}">${it.due?dueTxt:'No date'}</span>`;
     } else {
       sub = [
@@ -3141,10 +3175,11 @@ function renderDashboard(){
       <div class="d-add-row">
         <input id="d-todo-text" placeholder="Add your own task…" onkeydown="if(event.key==='Enter')addDashTodo()">
         <input id="d-todo-due" type="date" title="Optional due date" style="flex:0 0 auto;width:140px">
-        ${getTodoCats().length?`<select id="d-todo-cat" title="Category" style="flex:0 0 auto;width:130px">
+        ${getTodoCats().length?`<select id="d-todo-cat" title="Category" style="flex:0 0 auto;width:120px">
           <option value="">— category —</option>
           ${getTodoCats().map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')}
         </select>`:''}
+        <select id="d-todo-link" title="Link to a unit or lesson" style="flex:0 0 auto;width:150px">${todoLinkOptions('')}</select>
         <button onclick="addDashTodo()">Add</button>
       </div>
       <div class="d-catbar">
