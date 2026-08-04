@@ -1663,9 +1663,15 @@ body.simple-mode .dp-adv { display: none !important; }
   try {
     var d = JSON.parse(e.postData.contents);
     var blob = Utilities.newBlob(d.html, 'text/html', d.docName);
-    var file = Drive.Files.insert(
-      { title: d.docName, mimeType: 'application/vnd.google-apps.document',
-        parents: [{ id: d.folderId }] }, blob);
+    var meta = { mimeType: 'application/vnd.google-apps.document' };
+    var file;
+    if (Drive.Files.create) {          // Drive API v3
+      meta.name = d.docName; meta.parents = [d.folderId];
+      file = Drive.Files.create(meta, blob);
+    } else {                           // Drive API v2
+      meta.title = d.docName; meta.parents = [{ id: d.folderId }];
+      file = Drive.Files.insert(meta, blob);
+    }
     return out({ ok: true, id: file.id });
   } catch (err) { return out({ ok: false, error: String(err) }); }
 }
@@ -3586,10 +3592,15 @@ const DRIVE_APPS_SCRIPT = `function doPost(e) {
   try {
     var d = JSON.parse(e.postData.contents);
     var blob = Utilities.newBlob(d.html, 'text/html', d.docName);
-    var file = Drive.Files.insert(
-      { title: d.docName, mimeType: 'application/vnd.google-apps.document',
-        parents: [{ id: d.folderId }] },
-      blob);
+    var meta = { mimeType: 'application/vnd.google-apps.document' };
+    var file;
+    if (Drive.Files.create) {          // Drive API v3
+      meta.name = d.docName; meta.parents = [d.folderId];
+      file = Drive.Files.create(meta, blob);
+    } else {                           // Drive API v2
+      meta.title = d.docName; meta.parents = [{ id: d.folderId }];
+      file = Drive.Files.insert(meta, blob);
+    }
     return out({ ok: true, id: file.id });
   } catch (err) { return out({ ok: false, error: String(err) }); }
 }
