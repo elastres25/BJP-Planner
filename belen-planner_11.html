@@ -1659,15 +1659,20 @@ body.simple-mode .dp-adv { display: none !important; }
         <li>Open <a href="https://script.google.com/home/projects/create" target="_blank" rel="noopener" style="color:var(--navy);font-weight:600">script.google.com</a> → it makes a <b>New project</b>.</li>
         <li>Delete whatever's in the editor, then paste this and <b>Save</b> (💾):
           <div style="position:relative;margin-top:6px">
-            <pre id="drive-script-box" style="background:#0F1A2E;color:#DCE6F5;border-radius:8px;padding:11px 12px;font-size:11px;line-height:1.45;overflow-x:auto;white-space:pre;margin:0">function doPost(e) {
-  var d = JSON.parse(e.postData.contents);
-  var blob = Utilities.newBlob(d.html, 'text/html', d.docName + '.html');
-  var file = Drive.Files.insert(
-    { title: d.docName, parents: [{ id: d.folderId }],
-      mimeType: 'application/vnd.google-apps.document' },
-    blob, { convert: true });
-  return ContentService.createTextOutput(
-    JSON.stringify({ ok: true, id: file.id }));
+            <pre id="drive-script-box" style="background:#0F1A2E;color:#DCE6F5;border-radius:8px;padding:11px 12px;font-size:10.5px;line-height:1.45;overflow-x:auto;white-space:pre;margin:0">function doPost(e) {
+  try {
+    var d = JSON.parse(e.postData.contents);
+    var blob = Utilities.newBlob(d.html, 'text/html', d.docName);
+    var file = Drive.Files.insert(
+      { title: d.docName, mimeType: 'application/vnd.google-apps.document',
+        parents: [{ id: d.folderId }] }, blob);
+    return out({ ok: true, id: file.id });
+  } catch (err) { return out({ ok: false, error: String(err) }); }
+}
+function doGet() { return out({ ok: true, msg: 'Planner Drive endpoint is live' }); }
+function out(o) {
+  return ContentService.createTextOutput(JSON.stringify(o))
+    .setMimeType(ContentService.MimeType.JSON);
 }</pre>
             <button onclick="copyDriveScript(this)" style="position:absolute;top:7px;right:7px;background:var(--gold);color:var(--navy-dark);border:none;border-radius:5px;padding:3px 9px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">Copy</button>
           </div>
@@ -1680,7 +1685,8 @@ body.simple-mode .dp-adv { display: none !important; }
       <input id="drive-url-in" type="url" placeholder="https://script.google.com/macros/s/…/exec" style="width:100%;box-sizing:border-box;border:1px solid var(--rule-dark);border-radius:7px;padding:8px 10px;font-family:inherit;font-size:12.5px;color:var(--ink);outline:none;margin-bottom:10px">
       <label style="display:block;font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:4px">Drive folder link (or ID)</label>
       <input id="drive-folder-in" type="text" placeholder="https://drive.google.com/drive/folders/…" style="width:100%;box-sizing:border-box;border:1px solid var(--rule-dark);border-radius:7px;padding:8px 10px;font-family:inherit;font-size:12.5px;color:var(--ink);outline:none">
-      <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end">
+      <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end;align-items:center;flex-wrap:wrap">
+        <button onclick="driveTest()" style="background:none;border:1px solid var(--navy);border-radius:7px;padding:8px 14px;font-size:12.5px;font-weight:600;color:var(--navy);cursor:pointer;font-family:inherit;margin-right:auto">🔌 Test connection</button>
         <button onclick="closeDriveSetup()" style="background:none;border:1px solid var(--rule-dark);border-radius:7px;padding:8px 16px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;font-family:inherit">Cancel</button>
         <button onclick="saveDriveConfig()" style="background:var(--navy);color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">Save connection</button>
       </div>
@@ -3529,17 +3535,46 @@ function driveFolderIdFromInput(v){
 async function sendToDrive(docName, html){
   if(!driveConfigured()){ openDriveSetup(); return; }
   toast('Sending to Google Drive…');
+  const body = JSON.stringify({ folderId: state.driveFolderId, docName, html });
+  // Try a normal request first so we can read the script's response (real
+  // success or the actual error message). Apps Script redirects to a
+  // googleusercontent.com URL that returns CORS *, so this usually works.
   try{
-    await fetch(state.driveScriptUrl, {
+    const res = await fetch(state.driveScriptUrl, {
       method:'POST',
-      mode:'no-cors',
       headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body: JSON.stringify({ folderId: state.driveFolderId, docName, html }),
+      body, redirect:'follow',
     });
-    toast('Sent to Google Drive ✓ — check your folder');
+    let data=null; try{ data = await res.json(); }catch(e){}
+    if(data && data.ok){ toast('Saved to Google Drive ✓'); return; }
+    if(data && data.error){ console.error('Drive script error:', data.error); toast('Drive error: '+String(data.error).slice(0,90)); return; }
+    toast('Sent to Drive — check your folder');
   }catch(e){
-    console.error('Drive send failed', e);
-    toast('Could not reach the Drive script — check the web-app URL in setup');
+    // Couldn't read the response (CORS/network) — fall back to fire-and-forget.
+    console.warn('Drive cors read failed, falling back to no-cors', e);
+    try{
+      await fetch(state.driveScriptUrl, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'}, body });
+      toast('Sent to Drive (no confirmation) — check your folder');
+    }catch(e2){
+      console.error('Drive send failed', e2);
+      toast('Could not reach the Drive script — check the web-app URL & that access is "Anyone"');
+    }
+  }
+}
+// Quick check that the web-app URL is live and publicly reachable.
+async function driveTest(){
+  const url = (document.getElementById('drive-url-in').value||'').trim() || state.driveScriptUrl;
+  if(!url){ toast('Paste the web-app URL first'); return; }
+  toast('Testing connection…');
+  try{
+    const r = await fetch(url, { redirect:'follow' });
+    const t = await r.text();
+    if(/planner drive endpoint is live|"ok"\s*:\s*true/i.test(t)) toast('✓ Connection works — endpoint is live');
+    else if(/accounts\.google\.com|sign in/i.test(t)) toast('Reachable, but it asked to sign in — set deployment access to "Anyone" and redeploy');
+    else toast('Reached the URL but got an unexpected response — re-deploy the web app');
+  }catch(e){
+    console.error('Drive test failed', e);
+    toast('Could not reach that URL — make sure it ends in /exec');
   }
 }
 function driveSendWeek(){
@@ -3548,13 +3583,19 @@ function driveSendWeek(){
   sendToDrive(doc.title, doc.html);
 }
 const DRIVE_APPS_SCRIPT = `function doPost(e) {
-  var d = JSON.parse(e.postData.contents);
-  var blob = Utilities.newBlob(d.html, 'text/html', d.docName + '.html');
-  var file = Drive.Files.insert(
-    { title: d.docName, parents: [{ id: d.folderId }], mimeType: 'application/vnd.google-apps.document' },
-    blob, { convert: true }
-  );
-  return ContentService.createTextOutput(JSON.stringify({ ok: true, id: file.id }))
+  try {
+    var d = JSON.parse(e.postData.contents);
+    var blob = Utilities.newBlob(d.html, 'text/html', d.docName);
+    var file = Drive.Files.insert(
+      { title: d.docName, mimeType: 'application/vnd.google-apps.document',
+        parents: [{ id: d.folderId }] },
+      blob);
+    return out({ ok: true, id: file.id });
+  } catch (err) { return out({ ok: false, error: String(err) }); }
+}
+function doGet() { return out({ ok: true, msg: 'Planner Drive endpoint is live' }); }
+function out(o) {
+  return ContentService.createTextOutput(JSON.stringify(o))
     .setMimeType(ContentService.MimeType.JSON);
 }`;
 function openDriveSetup(){
