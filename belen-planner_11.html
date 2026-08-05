@@ -819,6 +819,7 @@ body.simple-mode .dp-adv { display: none !important; }
 .wk-ipp { font-weight:800; color:var(--navy); letter-spacing:.02em; }
 .wk-act-d { font-size:11px; color:var(--ink-2); margin:1px 0 0 12px; }
 .wk-act-d ul { margin:2px 0 2px 16px; padding:0; } .wk-act-d a { color:var(--navy); }
+.wk-qod { font-style:italic; }
 .dl-acthint i { font-style:italic; }
 .dl-actdetail { padding:2px 0 8px 27px; }
 /* Rich-text editor */
@@ -828,6 +829,10 @@ body.simple-mode .dp-adv { display: none !important; }
 .rte-tb button:hover { background:rgba(27,58,107,.1); color:var(--navy); }
 .rte-ed { min-height:38px; padding:8px 10px; font-family:inherit; font-size:13px; line-height:1.55; color:var(--ink); outline:none; }
 .rte-ed:empty:before { content:attr(data-ph); color:var(--ink-3); }
+.rte-color { display:inline-flex; align-items:center; cursor:pointer; padding:3px 6px; border-radius:4px; position:relative; }
+.rte-color:hover { background:rgba(27,58,107,.1); }
+.rte-color span { font-weight:800; font-size:12px; color:var(--ink-2); border-bottom:3px solid #B23B2E; line-height:1; }
+.rte-color input { position:absolute; inset:0; opacity:0; width:100%; height:100%; cursor:pointer; }
 .rte-ed:focus { background:#FCFCFA; }
 .rte-ed ul { margin:2px 0 2px 18px; } .rte-ed a { color:var(--navy); }
 /* Shared toolbar for the Goals / Targets lists */
@@ -2499,7 +2504,7 @@ function applyLessonTemplate(di){
 }
 
 function makeDay(label, date, eq) {
-  return { label, date:'', dateA:'', dateB:'', block:'A & B Block', blockDuration:90, topic:'', eq, topicDesc:'', brainstorm:'', journalPrompt:'', journalDur:3, journalGrr:'closer', targets:[], teacherGoals:[], vocab:[], lessonObjs:[], knowledgeIntroduced:[], skillsCovered:[], lessonScripture:[], lessonCatechism:[], lessonSaints:[], activities:templateActivities(), materials:[], techTools:[], links:[], assessType:'', assessment:'', homework:'', ignatianReflection:'', postNotes:'' };
+  return { label, date:'', dateA:'', dateB:'', block:'A & B Block', blockDuration:90, topic:'', eq, qod:'', topicDesc:'', brainstorm:'', journalPrompt:'', journalDur:3, journalGrr:'closer', targets:[], teacherGoals:[], vocab:[], lessonObjs:[], knowledgeIntroduced:[], skillsCovered:[], lessonScripture:[], lessonCatechism:[], lessonSaints:[], activities:templateActivities(), materials:[], techTools:[], links:[], assessType:'', assessment:'', homework:'', ignatianReflection:'', postNotes:'' };
 }
 
 function demoWeek() {
@@ -3533,6 +3538,7 @@ function buildWeekDoc(){
       <thead><tr><th style="background:${NAVY};border:1px solid ${NAVY};width:150px"></th>${head}</tr></thead>
       <tbody>
         <tr>${rowLabel('Goals','What students should know and be able to do')}${cols.map(c=>cell(li(c.d.teacherGoals) || li(c.d.eq?[c.d.eq]:[]))).join('')}</tr>
+        <tr>${rowLabel('Q.O.D.','Question of the Day')}${cols.map(c=>cell(String(c.d.qod||'').trim()||'')).join('')}</tr>
         <tr>${rowLabel('Learning Targets','"I can…" statements')}${cols.map(c=>cell(li((c.d.targets||[]).map(t=>'I can '+String(t).replace(/^I can\\s*/i,''))))).join('')}</tr>
         ${banner('Learning Activities / Tasks')}
         <tr>${rowLabel('Learning Activities / Tasks','C·E·R·A·V = IPP stages')}${cols.map(c=>cell(actLines(c.d))).join('')}</tr>
@@ -4108,6 +4114,7 @@ function renderWeekPlan() {
   };
 
   const goalsCell = L => `<td class="wk-cell">${bullets((L.d.teacherGoals||[]).filter(g=>strip(g)), g=>`<li>${esc(strip(g))}</li>`)}</td>`;
+  const qodCell = L => `<td class="wk-cell">${strip(L.d.qod)?`<div class="wk-qod">${L.d.qod}</div>`:'<span class="wk-empty">—</span>'}</td>`;
   const tgtCell = L => `<td class="wk-cell">${bullets((L.d.targets||[]).filter(t=>strip(t)), t=>`<li>I can ${esc(strip(t).replace(/^I can\s*/i,''))}</li>`)}</td>`;
   const actCell = L => {
     const acts = (L.d.activities||[]).filter(a=>strip(a.name)||strip(a.desc));
@@ -4134,6 +4141,7 @@ function renderWeekPlan() {
       <thead><tr><th class="wk-corner">Week of<br><span style="font-weight:400;font-size:10px;color:var(--ink-3)">${wkRange}</span></th>${lessons.map(dayHead).join('')}</tr></thead>
       <tbody>
         <tr><td class="wk-lbl">Goals<small>What students should learn</small></td>${cell(goalsCell)}</tr>
+        <tr><td class="wk-lbl">Q.O.D.<small>Question of the Day</small></td>${cell(qodCell)}</tr>
         <tr><td class="wk-lbl">Learning Targets<small>&ldquo;I can…&rdquo; statements</small></td>${cell(tgtCell)}</tr>
         <tr><td class="wk-lbl">Learning Activities / Tasks<small>with IPP stages</small></td>${cell(actCell)}</tr>
         <tr><td class="wk-lbl">Homework</td>${cell(hwCell)}</tr>
@@ -6748,6 +6756,9 @@ function dailyPanelHTML(d, i) {
       ${goalRows}
       <input id="chipin-dlgoal-${i}" class="dl-add" placeholder="+ Add a goal, press Enter" onkeydown="if(event.key==='Enter'){event.preventDefault();dlAddGoal(${i},this.value)}">
     </td></tr>
+    <tr><td class="dl-lbl">Q.O.D.<small>Question of the Day — use the A color button to change font color</small></td><td class="dl-cell">
+      ${rteField(`rte-qod-${i}`, d.qod||'', `updateDay(${i},'qod',this.innerHTML)`, 'Question of the day…')}
+    </td></tr>
     <tr><td class="dl-lbl">Learning Targets<small>&ldquo;I can…&rdquo; statements</small></td><td class="dl-cell">
       ${(d.targets||[]).length ? rteToolbarShared('target') : ''}
       ${tgtRows}
@@ -6797,10 +6808,18 @@ function rteField(id, html, saveExpr, placeholder){
       <button type="button" onmousedown="event.preventDefault()" onclick="rteCmd('${id}','underline')" title="Underline"><u>U</u></button>
       <button type="button" onmousedown="event.preventDefault()" onclick="rteCmd('${id}','insertUnorderedList')" title="Bullet list">• List</button>
       <button type="button" onmousedown="event.preventDefault()" onclick="rteLink('${id}')" title="Insert link">🔗</button>
+      <label class="rte-color" title="Text color" onmousedown="event.preventDefault()"><span>A</span><input type="color" value="#B23B2E" onchange="rteColorCmd('${id}',this.value)"></label>
     </div>
     <div id="${id}" class="rte-ed" contenteditable="true" data-ph="${esc(placeholder||'')}"
       onkeydown="rteKey(event)" oninput="${saveExpr}" onblur="${saveExpr}">${html||''}</div>
   </div>`;
+}
+function rteColorCmd(id, color){
+  const el=document.getElementById(id); if(!el) return;
+  el.focus();
+  document.execCommand('styleWithCSS', false, true);
+  document.execCommand('foreColor', false, color);
+  el.dispatchEvent(new Event('input'));
 }
 function rteCmd(id, cmd){
   const el=document.getElementById(id); if(!el) return;
@@ -8233,6 +8252,7 @@ function exportPDF() {
     </div>
     <table><tbody>
       <tr>${rowLabel('Goals','What students should learn')}${cell(li(d.teacherGoals))}</tr>
+      <tr>${rowLabel('Q.O.D.','Question of the Day')}${cell(String(d.qod||'').trim()||dash)}</tr>
       <tr>${rowLabel('Learning Targets','&ldquo;I can&hellip;&rdquo; statements')}${cell(li(targets))}</tr>
       ${banner('Learning Activities / Tasks')}
       <tr>${rowLabel('Learning Activities / Tasks','C&middot;E&middot;R&middot;A&middot;V = IPP stages')}${cell(actLines())}</tr>
