@@ -762,6 +762,47 @@ body.simple-mode .dp-adv { display: none !important; }
 .dl-actx:hover { color:var(--crit,#c0392b); }
 .dl-addact { margin-top:5px; background:none; border:1px dashed var(--rule-dark,#cfccc4); border-radius:6px; padding:5px 11px; font-family:inherit; font-size:11.5px; font-weight:600; color:var(--navy); cursor:pointer; }
 .dl-addact:hover { border-color:var(--navy); background:#F7F9FC; }
+/* Compact (collapsed) activity line — click to edit */
+.dl-actline { display:flex; align-items:center; gap:9px; padding:5px 6px; border:1px solid transparent; border-radius:6px; cursor:text; }
+.dl-actline:hover { border-color:var(--rule); background:#FCFCFA; }
+.dl-actline-body { flex:1; min-width:0; font-size:13px; color:var(--ink); line-height:1.4; }
+.dl-atag { font-weight:800; color:#7A4B00; }
+.dl-actline-ph { color:var(--ink-3); font-style:italic; }
+.dl-actline-min { flex:0 0 auto; font-size:11px; color:var(--ink-3); font-variant-numeric:tabular-nums; }
+.dl-actline-ipp { flex:0 0 auto; font-size:11px; font-weight:800; color:var(--navy); letter-spacing:.03em; }
+.dl-actline-detail { flex:0 0 auto; font-size:11px; color:var(--navy); }
+.dl-actwrap-edit { border:1px solid var(--navy); border-radius:8px; padding:2px 6px 4px; background:#FBFCFE; margin:2px 0; }
+.dl-actdone { flex:0 0 auto; border:1px solid var(--navy); background:var(--navy); color:#fff; border-radius:5px; font-family:inherit; font-size:11px; font-weight:700; padding:4px 10px; cursor:pointer; }
+.dl-actdone:hover { background:var(--navy-light,#234a87); }
+.dl-acttools { display:flex; gap:7px; margin-top:5px; align-items:center; flex-wrap:wrap; }
+.dl-tmpl-btn { background:none; border:1px dashed var(--rule-dark,#cfccc4); border-radius:6px; padding:5px 11px; font-family:inherit; font-size:11.5px; font-weight:600; color:var(--navy); cursor:pointer; }
+.dl-tmpl-btn:hover { border-color:var(--navy); background:#F7F9FC; }
+@media print { .dl-actline { cursor:default; } .dl-acttools, .dl-actdone, .dl-actmove, .dl-actx, .dl-actdetailbtn { display:none !important; } }
+/* Activity-template picker modal */
+.atl-overlay { position:fixed; inset:0; background:rgba(20,28,45,.5); z-index:2000; display:flex; align-items:flex-start; justify-content:center; padding:8vh 16px 16px; }
+.atl-modal { background:#fff; border-radius:12px; width:100%; max-width:540px; max-height:80vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,.3); }
+.atl-head { display:flex; align-items:center; justify-content:space-between; padding:13px 16px; background:var(--navy); color:#fff; font-size:15px; }
+.atl-x { background:none; border:none; color:#fff; font-size:22px; line-height:1; cursor:pointer; padding:0 4px; }
+.atl-list { padding:8px 12px; overflow-y:auto; flex:1; }
+.atl-row { display:flex; align-items:center; gap:10px; padding:9px 6px; border-bottom:1px solid var(--rule); }
+.atl-row:last-child { border-bottom:none; }
+.atl-info { flex:1; min-width:0; }
+.atl-name { font-size:13.5px; font-weight:700; color:var(--ink); }
+.atl-count { font-size:11px; font-weight:500; color:var(--ink-3); }
+.atl-prev { font-size:11.5px; color:var(--ink-2); margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.atl-acts { flex:0 0 auto; display:flex; align-items:center; gap:5px; }
+.atl-insert { background:var(--navy); color:#fff; border:none; border-radius:6px; padding:5px 11px; font-family:inherit; font-size:12px; font-weight:700; cursor:pointer; }
+.atl-replace { background:none; color:var(--navy); border:1px solid var(--rule-dark,#cfccc4); border-radius:6px; padding:5px 10px; font-family:inherit; font-size:12px; font-weight:600; cursor:pointer; }
+.atl-replace:hover { border-color:var(--navy); }
+.atl-del { background:none; border:none; color:var(--ink-3); font-size:18px; line-height:1; cursor:pointer; padding:0 3px; }
+.atl-del:hover { color:var(--crit,#c0392b); }
+.atl-empty { padding:18px 6px; font-size:12.5px; color:var(--ink-3); font-style:italic; text-align:center; }
+.atl-save { border-top:1px solid var(--rule); padding:12px 16px; background:#FBFBF9; }
+.atl-save-lbl { font-size:12px; color:var(--ink-2); margin-bottom:6px; }
+.atl-save-row { display:flex; gap:7px; }
+.atl-save-row input { flex:1; min-width:0; border:1px solid var(--rule); border-radius:6px; padding:7px 10px; font-family:inherit; font-size:13px; outline:none; }
+.atl-save-row input:focus { border-color:var(--navy); }
+.atl-save-btn { flex:0 0 auto; background:var(--gold); color:var(--navy-dark); border:none; border-radius:6px; padding:7px 14px; font-family:inherit; font-size:12.5px; font-weight:700; cursor:pointer; }
 .dl-empty { font-size:12px; color:var(--ink-3); font-style:italic; padding:2px 0; }
 /* Lesson resource rows (title + hyperlink) */
 .dl-res-li { align-items:center; }
@@ -835,8 +876,11 @@ body.simple-mode .dp-adv { display: none !important; }
 .dl-acthint i { font-style:italic; }
 .dl-actdetail { padding:2px 0 8px 27px; }
 /* Rich-text editor */
-.rte { border:1px solid var(--rule); border-radius:7px; overflow:hidden; background:#fff; }
-.rte-tb { display:flex; gap:2px; padding:4px 5px; background:#F5F4F0; border-bottom:1px solid var(--rule); }
+.rte { border:1px solid transparent; border-radius:7px; overflow:hidden; background:#fff; }
+.rte:hover { border-color:var(--rule); }
+.rte:focus-within { border-color:var(--navy); }
+.rte-tb { display:none; gap:2px; padding:4px 5px; background:#F5F4F0; border-bottom:1px solid var(--rule); }
+.rte:focus-within .rte-tb { display:flex; }
 .rte-tb button { border:none; background:none; cursor:pointer; font-family:inherit; font-size:12px; color:var(--ink-2); padding:3px 7px; border-radius:4px; line-height:1; }
 .rte-tb button:hover { background:rgba(27,58,107,.1); color:var(--navy); }
 .rte-ed { min-height:38px; padding:8px 10px; font-family:inherit; font-size:13px; line-height:1.55; color:var(--ink); outline:none; }
@@ -849,6 +893,7 @@ body.simple-mode .dp-adv { display: none !important; }
 .rte-ed ul { margin:2px 0 2px 18px; } .rte-ed a { color:var(--navy); }
 /* Shared toolbar for the Goals / Targets lists */
 .rte-tb-shared { border:1px solid var(--rule); border-bottom:none; border-radius:6px 6px 0 0; background:#F5F4F0; margin-bottom:0; align-items:center; }
+.dl-cell:focus-within .rte-tb-shared { display:flex; }
 .rte-tb-hint { font-size:10px; color:var(--ink-3); font-style:italic; margin-left:6px; }
 /* Rich-text goal / target lines */
 .dl-li-rte { align-items:flex-start; gap:6px; }
@@ -1393,6 +1438,26 @@ body.simple-mode .dp-adv { display: none !important; }
 .d-t-dateedit:focus{border-color:var(--navy);}
 .d-t-catsel,.d-t-linksel{border:1px solid var(--rule);border-radius:5px;padding:2px 5px;font-family:inherit;font-size:11px;outline:none;background:#fff;color:var(--ink-2);max-width:150px;}
 .d-t-catdot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:1px;}
+/* Task text + optional hyperlink */
+.d-t-textwrap{display:inline;}
+.d-t-linktext{display:none;border:none;background:none;cursor:pointer;font-size:12px;padding:0 3px;opacity:.7;vertical-align:1px;}
+.d-t-textwrap:hover .d-t-linktext,.d-t-textwrap:focus-within .d-t-linktext{display:inline;}
+.d-t-linktext:hover{opacity:1;}
+.d-t-text a{color:var(--navy);text-decoration:underline;text-decoration-color:var(--gold);text-underline-offset:2px;cursor:pointer;}
+.d-t-text a:hover{color:var(--navy-light);}
+/* Lesson-link chip + button */
+.d-t-chip{display:inline-flex;align-items:center;gap:2px;background:rgba(35,74,135,.08);border:1px solid rgba(35,74,135,.2);color:var(--navy-light);border-radius:999px;padding:1px 4px 1px 8px;font-size:10.5px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.d-t-chip:hover{background:rgba(35,74,135,.16);}
+.d-t-chip-x{border:none;background:none;color:inherit;font-size:13px;line-height:1;cursor:pointer;padding:0 1px;opacity:.55;}
+.d-t-chip-x:hover{opacity:1;color:var(--crit);}
+.d-t-linkbtn{background:none;border:1px dashed var(--rule-dark,#cfccc4);border-radius:999px;padding:2px 10px;font-family:inherit;font-size:10.5px;font-weight:600;color:var(--navy);cursor:pointer;}
+.d-t-linkbtn:hover{border-color:var(--navy);background:#F7F9FC;}
+/* Searchable link picker */
+.tlp-search{width:100%;box-sizing:border-box;border:1px solid var(--rule);border-radius:6px;padding:8px 10px;font-family:inherit;font-size:13px;outline:none;}
+.tlp-search:focus{border-color:var(--navy);}
+.tlp-row{display:flex;align-items:center;gap:9px;padding:8px;border-radius:6px;cursor:pointer;font-size:13px;color:var(--ink);}
+.tlp-row:hover{background:#F0F4FA;}
+.tlp-ic{flex:0 0 auto;}
 .d-sub-count{font-size:10px;font-weight:700;color:var(--ink-3);background:var(--parchment);border:1px solid var(--rule);border-radius:999px;padding:0 6px;margin-left:7px;vertical-align:1px;}
 /* Subtasks */
 .d-subs{margin-top:6px;padding-left:2px;display:flex;flex-direction:column;gap:3px;}
@@ -1714,12 +1779,15 @@ function out(o) {
         </li>
         <li>In the left sidebar, next to <b>Services</b>, click <b>+</b> → choose <b>Drive API</b> → <b>Add</b>.</li>
         <li>Click <b>Deploy → New deployment</b> → gear ⚙ → <b>Web app</b>. Set <b>Execute as: Me</b> and <b>Who has access: Anyone</b> → <b>Deploy</b> → authorize. Copy the <b>Web app URL</b>.</li>
-        <li>In Google Drive, open the folder you want plans saved to and copy its link from the address bar.</li>
+        <li>In Google Drive, open each folder you want plans saved to and copy its link from the address bar.</li>
       </ol>
-      <label style="display:block;font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:4px">Web app URL</label>
-      <input id="drive-url-in" type="url" placeholder="https://script.google.com/macros/s/…/exec" style="width:100%;box-sizing:border-box;border:1px solid var(--rule-dark);border-radius:7px;padding:8px 10px;font-family:inherit;font-size:12.5px;color:var(--ink);outline:none;margin-bottom:10px">
-      <label style="display:block;font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:4px">Drive folder link (or ID)</label>
-      <input id="drive-folder-in" type="text" placeholder="https://drive.google.com/drive/folders/…" style="width:100%;box-sizing:border-box;border:1px solid var(--rule-dark);border-radius:7px;padding:8px 10px;font-family:inherit;font-size:12.5px;color:var(--ink);outline:none">
+      <label style="display:block;font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:4px">Web app URL <span style="font-weight:400;color:var(--ink-3)">(shared by both courses)</span></label>
+      <input id="drive-url-in" type="url" placeholder="https://script.google.com/macros/s/…/exec" style="width:100%;box-sizing:border-box;border:1px solid var(--rule-dark);border-radius:7px;padding:8px 10px;font-family:inherit;font-size:12.5px;color:var(--ink);outline:none;margin-bottom:12px">
+      <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:7px">Destination folder per course</div>
+      <label style="display:block;font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:4px">📘 Theology 6 folder link (or ID)</label>
+      <input id="drive-folder6-in" type="text" placeholder="https://drive.google.com/drive/folders/…" style="width:100%;box-sizing:border-box;border:1px solid var(--rule-dark);border-radius:7px;padding:8px 10px;font-family:inherit;font-size:12.5px;color:var(--ink);outline:none;margin-bottom:10px">
+      <label style="display:block;font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:4px">📗 Theology 7 folder link (or ID)</label>
+      <input id="drive-folder7-in" type="text" placeholder="https://drive.google.com/drive/folders/…" style="width:100%;box-sizing:border-box;border:1px solid var(--rule-dark);border-radius:7px;padding:8px 10px;font-family:inherit;font-size:12.5px;color:var(--ink);outline:none">
       <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end;align-items:center;flex-wrap:wrap">
         <button onclick="driveTest()" style="background:none;border:1px solid var(--navy);border-radius:7px;padding:8px 14px;font-size:12.5px;font-weight:600;color:var(--navy);cursor:pointer;font-family:inherit;margin-right:auto">🔌 Test connection</button>
         <button onclick="closeDriveSetup()" style="background:none;border:1px solid var(--rule-dark);border-radius:7px;padding:8px 16px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;font-family:inherit">Cancel</button>
@@ -2983,11 +3051,69 @@ function updateTodoDate(id, val){
   const t = (state.todos||[]).find(x=>x.id===id);
   if(t){ t.due = val||''; saveState(); renderDashboard(); }
 }
-function updateTodoText(id, text){
+function updateTodoText(id, html){
   const t = (state.todos||[]).find(x=>x.id===id);
-  const v = (text||'').trim();
-  if(t && v){ t.text = v; saveState(); }   // no re-render — keep the caret where it is
+  // Keep the raw HTML (so links survive), but only if there's real text.
+  const plain = String(html||'').replace(/<[^>]*>/g,'').replace(/&nbsp;/g,' ').trim();
+  if(t && plain){ t.text = html; saveState(); }   // no re-render — keep the caret where it is
 }
+// Add a hyperlink to the text the user has selected inside a task.
+function linkTodoText(id, btn){
+  const span = btn.parentElement.querySelector('.d-t-text'); if(!span) return;
+  const sel = window.getSelection();
+  if(!sel || sel.isCollapsed || !span.contains(sel.anchorNode)){
+    toast('Select the words in the task first, then click 🔗');
+    span.focus(); return;
+  }
+  let url = prompt('Link URL (include https://):', 'https://');
+  if(!url) return;
+  if(!/^https?:\/\//i.test(url) && !url.startsWith('mailto:')) url = 'https://' + url.replace(/^\/+/,'');
+  document.execCommand('createLink', false, url);
+  span.querySelectorAll('a').forEach(a=>{ a.target='_blank'; a.rel='noopener'; });
+  updateTodoText(id, span.innerHTML);
+}
+// Plain click on a link inside a task opens it (instead of just placing the caret).
+function todoTextClick(e){
+  const a = e.target.closest && e.target.closest('a');
+  if(a && a.href){ e.preventDefault(); window.open(a.href, '_blank', 'noopener'); }
+}
+function unlinkTodo(id){ updateTodoLink(id, ''); }
+// ── Seamless lesson/unit link picker (searchable) ─────────────────
+let _tlpId = null;
+function openTodoLinkPicker(id){
+  _tlpId = id; closeTodoLinkPicker();
+  const ov = document.createElement('div');
+  ov.id = 'tlp-overlay'; ov.className = 'atl-overlay';
+  ov.onclick = e=>{ if(e.target===ov) closeTodoLinkPicker(); };
+  ov.innerHTML = `<div class="atl-modal" style="max-width:460px">
+    <div class="atl-head"><b>🔗 Link to a lesson or unit</b><button class="atl-x" onclick="closeTodoLinkPicker()">&times;</button></div>
+    <div style="padding:11px 14px 4px"><input id="tlp-search" class="tlp-search" placeholder="Search units and lessons…" oninput="renderTodoLinkList(this.value)"></div>
+    <div id="tlp-list" class="atl-list"></div>
+  </div>`;
+  document.body.appendChild(ov);
+  renderTodoLinkList('');
+  setTimeout(()=>{ const el=document.getElementById('tlp-search'); if(el) el.focus(); }, 30);
+}
+function renderTodoLinkList(q){
+  q = (q||'').toLowerCase().trim();
+  const strip = s => String(s||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();
+  const units = orderedUnits();
+  const rows = [];
+  units.forEach(u=>{
+    const uname = `Unit ${unitNo(u.id)}: ${u.name}`;
+    if(!q || uname.toLowerCase().includes(q))
+      rows.push(`<div class="tlp-row" onclick="pickTodoLink('unit:${u.id}')"><span class="tlp-ic">📗</span><span>${esc(uname)}</span></div>`);
+    (state.units[u.id]||[]).forEach((w,wi)=>(w.days||[]).forEach((dd,di)=>{
+      const label = `U${unitNo(u.id)} · ${dd.label}${strip(dd.topic)?' — '+strip(dd.topic):''}`;
+      if(!q || label.toLowerCase().includes(q) || uname.toLowerCase().includes(q))
+        rows.push(`<div class="tlp-row" onclick="pickTodoLink('lesson:${u.id}:${wi}:${di}')"><span class="tlp-ic">📘</span><span>${esc(label)}</span></div>`);
+    }));
+  });
+  const el = document.getElementById('tlp-list');
+  if(el) el.innerHTML = rows.join('') || '<div class="atl-empty">No matches</div>';
+}
+function pickTodoLink(val){ if(_tlpId) updateTodoLink(_tlpId, val); closeTodoLinkPicker(); }
+function closeTodoLinkPicker(){ const ov=document.getElementById('tlp-overlay'); if(ov) ov.remove(); }
 // ── Subtasks on a manual to-do ─────────────────────────────────────
 function addSubtask(todoId, text){
   text=(text||'').trim(); if(!text) return;
@@ -3254,18 +3380,19 @@ function renderDashboard(){
           <option value="">— category —</option>
           ${cats.map(c=>`<option value="${c.id}" ${it.cat===c.id?'selected':''}>${esc(c.name)}</option>`).join('')}
         </select>` : '';
-      let linkTag = '';
+      let linkChip;
       if(it.lesson){
         const uu = UNIT_META.find(m=>m.id===it.lesson.uid);
         const dd = state.units[it.lesson.uid]?.[it.lesson.wi]?.days?.[it.lesson.di];
-        linkTag = `<span class="d-t-tag lesson" title="Open this lesson" onclick="event.stopPropagation();openGridDay(${it.lesson.uid},${it.lesson.wi},${it.lesson.di})">📘 ${uu?'U'+unitNo(uu.id):''}${dd?' · '+esc(dd.label):''}</span>`;
+        linkChip = `<span class="d-t-chip lesson" title="Open this lesson" onclick="event.stopPropagation();openGridDay(${it.lesson.uid},${it.lesson.wi},${it.lesson.di})">📘 ${uu?'U'+unitNo(uu.id):''}${dd?' · '+esc(dd.label):''}<button class="d-t-chip-x" title="Unlink" onclick="event.stopPropagation();unlinkTodo('${it.id}')">&times;</button></span>`;
       } else if(it.unit){
         const uu = UNIT_META.find(m=>m.id===it.unit);
-        if(uu) linkTag = `<span class="d-t-tag lesson" title="Open this unit" onclick="event.stopPropagation();nav('unit',${it.unit})">📗 Unit ${unitNo(it.unit)}: ${esc(uu.name)}</span>`;
+        linkChip = uu ? `<span class="d-t-chip lesson" title="Open this unit" onclick="event.stopPropagation();nav('unit',${it.unit})">📗 Unit ${unitNo(it.unit)}<button class="d-t-chip-x" title="Unlink" onclick="event.stopPropagation();unlinkTodo('${it.id}')">&times;</button></span>` : '';
+      } else {
+        linkChip = `<button class="d-t-linkbtn" title="Link this task to a lesson or unit" onclick="event.stopPropagation();openTodoLinkPicker('${it.id}')">🔗 Link lesson</button>`;
       }
-      const linkSel = `<select class="d-t-linksel" title="Link to a unit or lesson" onchange="updateTodoLink('${it.id}',this.value)">${todoLinkOptions(todoLinkValue(it))}</select>`;
       sub = `<input type="date" class="d-t-dateedit" value="${esc(it.due||'')}" title="Due date" onchange="updateTodoDate('${it.id}',this.value)">
-        ${catSel}${linkSel}${linkTag}
+        ${catSel}${linkChip}
         <span class="d-t-due${dueCls}">${it.due?dueTxt:'No date'}</span>`;
     } else {
       sub = [
@@ -3295,7 +3422,7 @@ function renderDashboard(){
       <div class="d-cb" onclick="${toggle}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg></div>
       <div class="d-t-body">
         <div class="d-t-main">${cat?`<span class="d-t-catdot" style="background:${cat.color}"></span>`:''}${it.manual
-          ? `<span class="d-t-text" contenteditable="true" title="Click to edit" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}" onblur="updateTodoText('${it.id}',this.textContent)">${esc(it.text)}</span>`
+          ? `<span class="d-t-textwrap"><span class="d-t-text" contenteditable="true" title="Click to edit · select text then 🔗 to add a link" onclick="todoTextClick(event)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}" onblur="updateTodoText('${it.id}',this.innerHTML)">${it.text}</span><button class="d-t-linktext" title="Add a link to the selected text" onmousedown="event.preventDefault()" onclick="linkTodoText('${it.id}',this)">🔗</button></span>`
           : `<span class="d-t-textlink${it.open?' link':''}"${mainClick}>${esc(it.text)}</span>`}${it.manual?(subCount||''):''}</div>
         <div class="d-t-sub">${sub}</div>
         ${subsHTML}
@@ -3328,7 +3455,6 @@ function renderDashboard(){
           <option value="">— category —</option>
           ${getTodoCats().map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')}
         </select>`:''}
-        <select id="d-todo-link" title="Link to a unit or lesson">${todoLinkOptions('')}</select>
         <button onclick="addDashTodo()">Add</button>
       </div>
       <div class="d-catbar">
@@ -3624,7 +3750,24 @@ function exportWeekPDF(){
 }
 
 // ── UPLOAD WEEK PLAN TO GOOGLE DRIVE (via the user's Apps Script) ──
-function driveConfigured(){ return !!(state.driveScriptUrl && state.driveFolderId); }
+// Drive config: ONE shared script endpoint + a folder per course.
+// Stored in its own localStorage key so both courses share the endpoint.
+const DRIVE_CFG_KEY = 'belen-drive';
+function driveCfg(){
+  let c; try{ c = JSON.parse(localStorage.getItem(DRIVE_CFG_KEY)||'{}'); }catch(e){ c={}; }
+  if(!c.folders) c.folders = {};
+  // One-time migration from the old per-course state fields.
+  let changed=false;
+  if(typeof state!=='undefined' && state){
+    if(!c.url && state.driveScriptUrl){ c.url = state.driveScriptUrl; changed=true; }
+    if(!c.folders[activeCourse] && state.driveFolderId){ c.folders[activeCourse] = state.driveFolderId; changed=true; }
+  }
+  if(changed){ try{ localStorage.setItem(DRIVE_CFG_KEY, JSON.stringify(c)); }catch(e){} }
+  return c;
+}
+function driveScriptUrl(){ return driveCfg().url || ''; }
+function driveFolderId(){ return driveCfg().folders[activeCourse] || ''; }
+function driveConfigured(){ return !!(driveScriptUrl() && driveFolderId()); }
 function driveFolderIdFromInput(v){
   v = (v||'').trim();
   const m = v.match(/[-\w]{25,}/);   // a Drive folder id, or the id inside a folder URL
@@ -3632,26 +3775,27 @@ function driveFolderIdFromInput(v){
 }
 async function sendToDrive(docName, html){
   if(!driveConfigured()){ openDriveSetup(); return; }
-  toast('Sending to Google Drive…');
-  const body = JSON.stringify({ folderId: state.driveFolderId, docName, html });
+  const scriptUrl = driveScriptUrl();
+  toast(`Sending to your ${getCourse().name} Drive folder…`);
+  const body = JSON.stringify({ folderId: driveFolderId(), docName, html });
   // Try a normal request first so we can read the script's response (real
   // success or the actual error message). Apps Script redirects to a
   // googleusercontent.com URL that returns CORS *, so this usually works.
   try{
-    const res = await fetch(state.driveScriptUrl, {
+    const res = await fetch(scriptUrl, {
       method:'POST',
       headers:{'Content-Type':'text/plain;charset=utf-8'},
       body, redirect:'follow',
     });
     let data=null; try{ data = await res.json(); }catch(e){}
-    if(data && data.ok){ toast('Saved to Google Drive ✓'); return; }
+    if(data && data.ok){ toast(`Saved to your ${getCourse().name} Drive folder ✓`); return; }
     if(data && data.error){ console.error('Drive script error:', data.error); toast('Drive error: '+String(data.error).slice(0,90)); return; }
     toast('Sent to Drive — check your folder');
   }catch(e){
     // Couldn't read the response (CORS/network) — fall back to fire-and-forget.
     console.warn('Drive cors read failed, falling back to no-cors', e);
     try{
-      await fetch(state.driveScriptUrl, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'}, body });
+      await fetch(scriptUrl, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'}, body });
       toast('Sent to Drive (no confirmation) — check your folder');
     }catch(e2){
       console.error('Drive send failed', e2);
@@ -3661,7 +3805,7 @@ async function sendToDrive(docName, html){
 }
 // Quick check that the web-app URL is live and publicly reachable.
 async function driveTest(){
-  const url = (document.getElementById('drive-url-in').value||'').trim() || state.driveScriptUrl;
+  const url = (document.getElementById('drive-url-in').value||'').trim() || driveScriptUrl();
   if(!url){ toast('Paste the web-app URL first'); return; }
   toast('Testing connection…');
   try{
@@ -3703,8 +3847,10 @@ function out(o) {
 }`;
 function openDriveSetup(){
   const ov = document.getElementById('drive-setup-overlay');
-  document.getElementById('drive-url-in').value = state.driveScriptUrl || '';
-  document.getElementById('drive-folder-in').value = state.driveFolderId || '';
+  const c = driveCfg();
+  document.getElementById('drive-url-in').value = c.url || '';
+  document.getElementById('drive-folder6-in').value = c.folders[6] || '';
+  document.getElementById('drive-folder7-in').value = c.folders[7] || '';
   ov.style.display = 'block';
 }
 function closeDriveSetup(){ document.getElementById('drive-setup-overlay').style.display='none'; }
@@ -3714,14 +3860,21 @@ function copyDriveScript(btn){
 }
 function saveDriveConfig(){
   const url = document.getElementById('drive-url-in').value.trim();
-  const folder = driveFolderIdFromInput(document.getElementById('drive-folder-in').value);
+  const f6  = driveFolderIdFromInput(document.getElementById('drive-folder6-in').value);
+  const f7  = driveFolderIdFromInput(document.getElementById('drive-folder7-in').value);
   if(!url || !/^https:\/\/script\.google\.com\//.test(url)){ toast('Paste your Apps Script web-app URL (starts with https://script.google.com/…)'); return; }
-  if(!folder){ toast('Paste your Drive folder link or ID'); return; }
-  state.driveScriptUrl = url;
-  state.driveFolderId = folder;
-  saveState();
+  if(!f6 && !f7){ toast('Add a Drive folder for at least one course'); return; }
+  const c = driveCfg();
+  c.url = url;
+  c.folders = c.folders || {};
+  c.folders[6] = f6;
+  c.folders[7] = f7;
+  try{ localStorage.setItem(DRIVE_CFG_KEY, JSON.stringify(c)); }catch(e){}
+  // Drop the legacy per-course fields so they can't shadow the shared config.
+  if(state){ delete state.driveScriptUrl; delete state.driveFolderId; saveState(); }
   closeDriveSetup();
-  toast('Google Drive connected ✓');
+  const which = [f6?'Theology 6':'', f7?'Theology 7':''].filter(Boolean).join(' & ');
+  toast(`Google Drive connected for ${which} ✓`);
   if(document.getElementById('view-week')?.classList.contains('active')) renderWeekPlan();
 }
 
@@ -4267,6 +4420,7 @@ function openDayModal(uid, wi, di) {
   _modalWeek = currentWeek;
   currentUnit = uid;
   currentWeek = wi;
+  openActEdit = null;
   const overlay = document.getElementById('day-modal-overlay');
   const titleEl  = document.getElementById('day-modal-title');
   const contentEl = document.getElementById('day-modal-content');
@@ -6737,6 +6891,15 @@ function moveDayTo(srcWi, srcDi, destWi, destDi) {
   toast('Day reordered');
 }
 
+// Which activity row is currently expanded for editing ("i:ai"), or null.
+let openActEdit = null;
+function editAct(i, ai){
+  openActEdit = `${i}:${ai}`;
+  rerenderDay(i);
+  setTimeout(()=>{ const el=document.getElementById(`actinp-${i}-${ai}`); if(el){ el.focus(); el.select&&el.select(); } }, 30);
+}
+function collapseAct(i){ openActEdit = null; rerenderDay(i); }
+
 function dailyPanelHTML(d, i) {
   const u = UNIT_META.find(m=>m.id===currentUnit);
   const blockDur = d.blockDuration || 90;
@@ -6751,9 +6914,27 @@ function dailyPanelHTML(d, i) {
   const actRow = (o, canUp, canDown) => {
     const a=o.a, ai=o.ai;
     const hasDetail = !!strip(a.desc);
+    const letters = actIPPLetters(a);
+    const editing = openActEdit === `${i}:${ai}`;
+
+    // Collapsed: clean read-only line — click to edit.
+    if(!editing){
+      const nm = esc(strip(a.name));
+      return `<div class="dl-actwrap">
+        <div class="dl-actline" onclick="editAct(${i},${ai})" title="Click to edit">
+          <span class="dl-actnum">${o.num}.</span>
+          <span class="dl-actline-body">${actType(a)?`<b class="dl-atag">${esc(actType(a))}-</b> `:''}${nm||'<span class="dl-actline-ph">(empty — click to edit)</span>'}</span>
+          ${a.dur?`<span class="dl-actline-min">${a.dur} min</span>`:''}
+          ${letters?`<span class="dl-actline-ipp">${esc(letters)}</span>`:''}
+          ${hasDetail?`<span class="dl-actline-detail" title="has detail">✎</span>`:''}
+        </div>
+      </div>`;
+    }
+
+    // Expanded: full controls.
     const on = actIPP(a);
     const ippBtns = IPP_STAGES.map(s=>`<button class="dl-ippbtn${on.includes(s.v)?' on':''}" onclick="toggleActIPP(${i},${ai},'${s.v}')" title="${s.label}">${s.letter}</button>`).join('');
-    return `<div class="dl-actwrap">
+    return `<div class="dl-actwrap dl-actwrap-edit">
       <div class="dl-act">
         <span class="dl-actmove">
           <button class="dl-actup" ${canUp?'':'disabled'} onclick="moveAct(${i},${ai},-1)" title="Move up">▲</button>
@@ -6764,13 +6945,14 @@ function dailyPanelHTML(d, i) {
           <option value="">—</option>
           ${ACT_TYPES.map(t=>`<option value="${t.k}"${actType(a)===t.k?' selected':''} title="${esc(t.label)}">${esc(t.k)}</option>`).join('')}
         </select>
-        <input class="dl-actinp" value="${esc(strip(a.name)|| '')}" placeholder="What happens…"
+        <input class="dl-actinp" id="actinp-${i}-${ai}" value="${esc(strip(a.name)|| '')}" placeholder="What happens…"
           onchange="updateActName(${i},${ai},this.value)">
         <input class="dl-actmin" type="number" min="0" max="120" value="${a.dur||0}" onchange="updateActDur(${i},${ai},+this.value)" title="minutes">
         <span class="dl-minlbl">min</span>
         <span class="dl-ipp" title="Ignatian Pedagogical Paradigm stages">${ippBtns}</span>
         <button class="dl-actdetailbtn${hasDetail?' has':''}" onclick="toggleActDetail(${i},${ai})" title="Add / show detail">${hasDetail?'✎ detail':'+ detail'}</button>
         <button class="dl-actx" onclick="removeAct(${i},${ai})" title="Remove">&times;</button>
+        <button class="dl-actdone" onclick="collapseAct(${i})" title="Done editing this activity">Done</button>
       </div>
       <div class="dl-actdetail" id="actdetail-${i}-${ai}" style="display:${hasDetail?'block':'none'}">
         ${rteField(`rte-act-${i}-${ai}`, a.desc||'', `updateActField(${i},${ai},'desc',this.innerHTML)`, 'Add detail, steps, examples, links…')}
@@ -6778,7 +6960,7 @@ function dailyPanelHTML(d, i) {
     </div>`;
   };
   const allActs = ordered.map((o,pos)=>actRow(o, pos>0, pos<ordered.length-1)).join('')
-    || `<div class="dl-empty">No activities yet — add the first one below.</div>`;
+    || `<div class="dl-empty">No activities yet — add one, or start from a template.</div>`;
 
   const goalRows = (d.teacherGoals||[]).map((g,gi)=>`<div class="dl-li dl-li-rte">
       <div class="rte-ed dl-li-ed" contenteditable="true" data-ph="Goal…" onkeydown="rteKey(event)"
@@ -6843,9 +7025,12 @@ function dailyPanelHTML(d, i) {
     </td></tr>
 
     <tr><td class="dl-banner" colspan="2">Learning Activities / Tasks</td></tr>
-    <tr><td class="dl-lbl">Learning Activities / Tasks<small>Tag each with IPP stages: <b>C</b>ontext · <b>E</b>xperience · <b>R</b>eflection · <b>A</b>ction · e<b>V</b>aluation. Reorder with ▲▼.</small></td><td class="dl-cell dl-acts">
+    <tr><td class="dl-lbl">Learning Activities / Tasks<small>Click a line to edit its type, minutes &amp; IPP stages.</small></td><td class="dl-cell dl-acts">
       ${allActs}
-      <button class="dl-addact" onclick="addAct(${i})">+ Add activity</button>
+      <div class="dl-acttools">
+        <button class="dl-addact" onclick="addAct(${i})">+ Add activity</button>
+        <button class="dl-tmpl-btn" onclick="openActTemplates(${i})" title="Fill from a saved template, or save these as a template">⚡ Templates…</button>
+      </div>
     </td></tr>
     <tr><td class="dl-lbl">Homework</td><td class="dl-cell">
       ${rteField(`rte-hw-${i}`, d.homework||'', `updateDay(${i},'homework',this.innerHTML)`, 'Homework…')}
@@ -7090,21 +7275,124 @@ function addAct(i){
   const lastPh=acts.length?normalizePhase(acts[acts.length-1].grr):'focus';
   const ph=lastPh||'focus'; const p=PHASE_BY_V[ph];
   acts.push({id:uid(),name:'',dur:p?p.def:10,grr:ph,ipp:'',desc:''});
+  openActEdit = `${i}:${acts.length-1}`;   // open the new row for editing
   saveState();rerenderDay(i);
+  setTimeout(()=>{ const el=document.getElementById(`actinp-${i}-${acts.length-1}`); if(el) el.focus(); }, 30);
 }
 // Back-compat: old callers that added into a bucket.
 function addActToBucket(i,bucketName){const ph=bucketName==='ic'?'guided':'focus';const p=PHASE_BY_V[ph];getDay(i).activities.push({id:uid(),name:'',dur:p?p.def:10,grr:ph,ipp:'',desc:''});saveState();rerenderDay(i);}
-function removeAct(i,ai){getDay(i).activities.splice(ai,1);saveState();rerenderDay(i);}
+function removeAct(i,ai){getDay(i).activities.splice(ai,1);if(openActEdit===`${i}:${ai}`)openActEdit=null;saveState();rerenderDay(i);}
 // Move an activity up/down anywhere in the lesson's teaching order.
 function moveAct(i,ai,dir){
   const acts=getDay(i).activities;
   const j=ai+dir;
   if(j<0 || j>=acts.length) return;
   [acts[ai],acts[j]]=[acts[j],acts[ai]];
+  if(openActEdit===`${i}:${ai}`) openActEdit=`${i}:${j}`;   // keep editing the moved row
   saveState(); rerenderDay(i);
 }
 // Legacy alias (kept in case any handler still references it).
 function moveActInBucket(i,ai,dir){ moveAct(i,ai,dir); }
+
+// ── ACTIVITY TEMPLATES ────────────────────────────────────────────
+// Saved sets of activities the teacher can drop into any lesson.
+// Shared across both courses (own localStorage key).
+const ACT_TMPL_KEY = 'belen-act-templates';
+function loadActTemplates(){
+  let list;
+  try{ list = JSON.parse(localStorage.getItem(ACT_TMPL_KEY)||'null'); }catch(e){ list=null; }
+  if(!Array.isArray(list) || !list.length){
+    list = defaultActTemplates();
+    saveActTemplates(list);
+  }
+  return list;
+}
+function saveActTemplates(list){ try{ localStorage.setItem(ACT_TMPL_KEY, JSON.stringify(list)); }catch(e){} }
+function defaultActTemplates(){
+  return [{
+    id:'tmpl-block', name:'Standard Block Day',
+    activities:[
+      {name:'Attendance / Warm-up', dur:5,  atype:'',   ipp:['context'], desc:''},
+      {name:'Group Discussion',     dur:10, atype:'CD', ipp:['experience','reflection'], desc:''},
+      {name:'Lecture / Notes',      dur:15, atype:'DI', ipp:['context','experience'], desc:''},
+      {name:'Group Work',           dur:15, atype:'GW', ipp:['experience','reflection'], desc:''},
+      {name:'Discussion',           dur:15, atype:'CD', ipp:['reflection','evaluation'], desc:''},
+      {name:'Exit Ticket',          dur:10, atype:'IW', ipp:['evaluation','action'], desc:''},
+    ]
+  }];
+}
+// Build a fresh activity object from a template entry.
+function actFromTemplate(t){
+  return { id:uid(), name:t.name||'', dur:+t.dur||0, grr:'focus',
+           atype:t.atype||'', ipp:Array.isArray(t.ipp)?t.ipp.slice():[], desc:t.desc||'' };
+}
+function insertActTemplate(i, tid, replace){
+  const tmpl = loadActTemplates().find(t=>t.id===tid); if(!tmpl) return;
+  const acts = getDay(i).activities;
+  const add = (tmpl.activities||[]).map(actFromTemplate);
+  if(replace) getDay(i).activities = add;
+  else acts.push(...add);
+  openActEdit = null;
+  saveState(); rerenderDay(i);
+  closeActTemplates();
+  toast(`${replace?'Replaced with':'Added'} “${tmpl.name}” (${add.length} activit${add.length===1?'y':'ies'})`);
+}
+function saveLessonAsTemplate(i){
+  const src = (getDay(i).activities||[]).filter(a=>String(a.name||'').trim());
+  if(!src.length){ toast('Add at least one named activity first'); return; }
+  const nameEl = document.getElementById('acttmpl-newname');
+  const name = (nameEl && nameEl.value.trim()) || '';
+  if(!name){ toast('Give the template a name'); if(nameEl) nameEl.focus(); return; }
+  const list = loadActTemplates();
+  list.push({ id:'tmpl-'+uid(), name, activities: src.map(a=>({
+    name:String(a.name||'').trim(), dur:+a.dur||0, atype:actType(a), ipp:actIPP(a).slice(), desc:a.desc||''
+  })) });
+  saveActTemplates(list);
+  toast(`Saved template “${name}”`);
+  openActTemplates(i);   // refresh the list
+}
+function deleteActTemplate(tid, i){
+  const list = loadActTemplates().filter(t=>t.id!==tid);
+  saveActTemplates(list);
+  openActTemplates(i);
+}
+function closeActTemplates(){ const ov=document.getElementById('acttmpl-overlay'); if(ov) ov.remove(); }
+function openActTemplates(i){
+  closeActTemplates();
+  const list = loadActTemplates();
+  const rows = list.map(t=>{
+    const preview = (t.activities||[]).map(a=>(a.atype?a.atype+'- ':'')+ (a.name||'')).join(' · ');
+    return `<div class="atl-row">
+      <div class="atl-info">
+        <div class="atl-name">${esc(t.name)} <span class="atl-count">${(t.activities||[]).length} activities</span></div>
+        <div class="atl-prev">${esc(preview)}</div>
+      </div>
+      <div class="atl-acts">
+        <button class="atl-insert" onclick="insertActTemplate(${i},'${t.id}',false)" title="Add these activities to the lesson">Insert</button>
+        <button class="atl-replace" onclick="insertActTemplate(${i},'${t.id}',true)" title="Replace the lesson's activities with these">Replace</button>
+        <button class="atl-del" onclick="deleteActTemplate('${t.id}',${i})" title="Delete this template">&times;</button>
+      </div>
+    </div>`;
+  }).join('') || `<div class="atl-empty">No templates yet — save your current activities below to make one.</div>`;
+
+  const ov = document.createElement('div');
+  ov.id = 'acttmpl-overlay';
+  ov.className = 'atl-overlay';
+  ov.onclick = e=>{ if(e.target===ov) closeActTemplates(); };
+  ov.innerHTML = `<div class="atl-modal">
+    <div class="atl-head"><b>⚡ Activity templates</b><button class="atl-x" onclick="closeActTemplates()" title="Close">&times;</button></div>
+    <div class="atl-list">${rows}</div>
+    <div class="atl-save">
+      <div class="atl-save-lbl">Save this lesson's activities as a new template:</div>
+      <div class="atl-save-row">
+        <input id="acttmpl-newname" placeholder="Template name (e.g. Socratic Seminar Day)" onkeydown="if(event.key==='Enter')saveLessonAsTemplate(${i})">
+        <button class="atl-save-btn" onclick="saveLessonAsTemplate(${i})">💾 Save</button>
+      </div>
+    </div>
+  </div>`;
+  document.body.appendChild(ov);
+  setTimeout(()=>{ const el=document.getElementById('acttmpl-newname'); }, 20);
+}
 
 // ── BLOOM'S TAXONOMY ──────────────────────────────────────────────
 // Content mirrors the UNMC "(Revised) Bloom's Taxonomy of Learning Objectives" chart
