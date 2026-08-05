@@ -808,16 +808,17 @@ body.simple-mode .dp-adv { display: none !important; }
 .dl-actdetailbtn { flex:0 0 auto; border:1px solid var(--rule-dark,#cfccc4); background:none; border-radius:5px; padding:3px 7px; font-family:inherit; font-size:10.5px; font-weight:600; color:var(--ink-2); cursor:pointer; white-space:nowrap; }
 .dl-actdetailbtn.has { border-color:var(--navy); color:var(--navy); background:#F0F4FA; }
 .dl-actdetailbtn:hover { border-color:var(--navy); color:var(--navy); }
-.dl-actwrap { border-left:3px solid transparent; padding-left:6px; margin-left:-9px; border-radius:0 4px 4px 0; }
-.dl-bkt-whole { border-left-color:#14315C; }
-.dl-bkt-ic { border-left-color:#1565C0; }
-.dl-bkt { flex:0 0 auto; font-size:8.5px; font-weight:800; letter-spacing:.02em; padding:2px 4px; border-radius:3px; }
-.dl-bkt.wg { background:#14315C; color:#fff; }
-.dl-bkt.ic { background:#1565C0; color:#fff; }
+.dl-ipp { flex:0 0 auto; display:inline-flex; gap:2px; }
+.dl-ippbtn { width:20px; height:22px; border:1px solid var(--rule-dark); background:#fff; color:var(--ink-3); font-weight:800; font-size:11px; border-radius:4px; cursor:pointer; padding:0; line-height:1; }
+.dl-ippbtn:hover { border-color:var(--navy); color:var(--navy); }
+.dl-ippbtn.on { background:var(--navy); border-color:var(--navy); color:#fff; }
 .dl-acthint { padding:0 0 3px 60px; font-size:10.5px; color:var(--ink-3); line-height:1.4; }
-.wk-ol { margin:0; padding-left:20px; }
-.wk-ol li { margin-bottom:3px; line-height:1.45; }
-.wk-ol li::marker { color:var(--ink-3); font-size:11px; }
+.wk-act { margin-bottom:6px; line-height:1.4; }
+.wk-act-h { font-size:11.5px; }
+.wk-act-h b { font-weight:700; }
+.wk-ipp { font-weight:800; color:var(--navy); letter-spacing:.02em; }
+.wk-act-d { font-size:11px; color:var(--ink-2); margin:1px 0 0 12px; }
+.wk-act-d ul { margin:2px 0 2px 16px; padding:0; } .wk-act-d a { color:var(--navy); }
 .dl-acthint i { font-style:italic; }
 .dl-actdetail { padding:2px 0 8px 27px; }
 /* Rich-text editor */
@@ -2049,6 +2050,32 @@ const IPP_OPTS = [
   {v:'action',    label:'Action'},
   {v:'evaluation',label:'Evaluation'},
 ];
+// Ignatian Pedagogical Paradigm stages, each with a one-letter tag. Evaluation
+// is "V" so it doesn't clash with Experience's "E".
+const IPP_STAGES = [
+  {v:'context',    letter:'C', label:'Context'},
+  {v:'experience', letter:'E', label:'Experience'},
+  {v:'reflection', letter:'R', label:'Reflection'},
+  {v:'action',     letter:'A', label:'Action'},
+  {v:'evaluation', letter:'V', label:'Evaluation'},
+];
+const IPP_LETTER = Object.fromEntries(IPP_STAGES.map(s=>[s.v, s.letter]));
+// An activity's IPP stages — supports a legacy single-string a.ipp or an array.
+function actIPP(a){
+  if(!a) return [];
+  if(Array.isArray(a.ipp)) return a.ipp;
+  if(typeof a.ipp==='string' && a.ipp) return [a.ipp];
+  return [];
+}
+function actIPPLetters(a){ return actIPP(a).map(v=>IPP_LETTER[v]||'').filter(Boolean).join(','); }
+function toggleActIPP(i, ai, stage){
+  const a = getDay(i).activities[ai]; if(!a) return;
+  let arr = actIPP(a).slice();
+  const at = arr.indexOf(stage);
+  if(at>=0) arr.splice(at,1); else arr.push(stage);
+  a.ipp = IPP_STAGES.filter(s=>arr.includes(s.v)).map(s=>s.v);   // canonical order
+  saveState(); rerenderDay(i);
+}
 
 // Phase colors follow the lesson-flow chart: dark navy → blue → light blue → grey.
 const PHASE_COLORS = {
@@ -3472,18 +3499,14 @@ function buildWeekDoc(){
 
   const li = arr => (arr||[]).filter(Boolean)
     .map(x=>`<div style="margin:0 0 3px;padding-left:9px;text-indent:-9px">• ${escPDF(String(x).replace(/<[^>]*>/g,' ').trim())}</div>`).join('');
-  const seqNumFor = d => { const m=new Map(); (d.activities||[]).filter(a=>(a.name||'').trim()||(a.desc||'').trim()).forEach((a,idx)=>m.set(a,idx+1)); return m; };
-  const actLines = (d, bucket) => { const sn=seqNumFor(d); return (d.activities||[])
-    .filter(a => phaseBucket(a.grr)===bucket)
+  const actLines = d => (d.activities||[])
     .filter(a => (a.name||'').trim() || (a.desc||'').trim())
-    .map(a => {
-      const ph = phaseLabel(a.grr);
-      const c = PHASE_COLORS[normalizePhase(a.grr)] || {bg:'#888',tx:'#fff'};
+    .map((a,n) => {
       const body = escPDF((a.name||'').trim() || String(a.desc||'').replace(/<[^>]*>/g,' ').trim());
-      return `<div style="margin:0 0 4px;padding-left:12px;text-indent:-12px">${sn.get(a)}. ${body}
-        <span style="font-size:7.5pt;font-weight:700;padding:1px 5px;border-radius:3px;background:${c.bg};color:${c.tx};-webkit-print-color-adjust:exact;print-color-adjust:exact">${escPDF(ph)}</span>
-        <span style="font-size:7.5pt;color:#78716C">${a.dur||0}m</span></div>`;
-    }).join(''); };
+      const letters = actIPPLetters(a);
+      const detail = (a.desc||'').trim() && (a.name||'').trim() ? `<div style="margin:1px 0 0 15px;font-size:8.5pt;color:#333">${a.desc}</div>` : '';
+      return `<div style="margin:0 0 5px;padding-left:14px;text-indent:-14px"><b>${n+1}. ${body}${a.dur?` [${a.dur} min]`:''}${letters?` - ${escPDF(letters)}`:''}</b>${detail}</div>`;
+    }).join('');
   const resLines = d => (d.materials||[]).map(m=>{ const t=escPDF(matTitle(m)||matUrl(m)), url=matUrl(m); return `<div style="margin:0 0 3px;padding-left:9px;text-indent:-9px">• ${url?`<a href="${escPDF(url)}">${t}</a>`:t}</div>`; }).join('');
 
   const head = cols.map(c=>{
@@ -3512,8 +3535,7 @@ function buildWeekDoc(){
         <tr>${rowLabel('Goals','What students should know and be able to do')}${cols.map(c=>cell(li(c.d.teacherGoals) || li(c.d.eq?[c.d.eq]:[]))).join('')}</tr>
         <tr>${rowLabel('Learning Targets','"I can…" statements')}${cols.map(c=>cell(li((c.d.targets||[]).map(t=>'I can '+String(t).replace(/^I can\\s*/i,''))))).join('')}</tr>
         ${banner('Learning Activities / Tasks')}
-        <tr>${rowLabel('Whole Group Learning','Opening · Focus · Closer')}${cols.map(c=>cell(actLines(c.d,'whole'))).join('')}</tr>
-        <tr>${rowLabel('Independent or Collaborative Learning','Guided/Collaborative · Independent')}${cols.map(c=>cell(actLines(c.d,'ic'))).join('')}</tr>
+        <tr>${rowLabel('Learning Activities / Tasks','C·E·R·A·V = IPP stages')}${cols.map(c=>cell(actLines(c.d))).join('')}</tr>
         <tr>${rowLabel('Homework','')}${cols.map(c=>cell(escPDF(String(c.d.homework||'').replace(/<[^>]*>/g,' ').trim()))).join('')}</tr>
         ${banner('Student Resources / Links / Tech Tools')}
         <tr>${rowLabel('Resources','')}${cols.map(c=>cell(resLines(c.d))).join('')}</tr>
@@ -4087,17 +4109,17 @@ function renderWeekPlan() {
 
   const goalsCell = L => `<td class="wk-cell">${bullets((L.d.teacherGoals||[]).filter(g=>strip(g)), g=>`<li>${esc(strip(g))}</li>`)}</td>`;
   const tgtCell = L => `<td class="wk-cell">${bullets((L.d.targets||[]).filter(t=>strip(t)), t=>`<li>I can ${esc(strip(t).replace(/^I can\s*/i,''))}</li>`)}</td>`;
-  const actCell = (L, bname) => {
-    const seqN = new Map();
-    (L.d.activities||[]).filter(a=>strip(a.name)).forEach((a,idx)=>seqN.set(a,idx+1));
-    const acts = (L.d.activities||[])
-      .filter(a=>phaseBucket(a.grr)===bname && strip(a.name));
-    return `<td class="wk-cell">${acts.length
-      ? `<ol class="wk-ol">${acts.map(a=>{
-          const pc = PHASE_COLORS[normalizePhase(a.grr)]||{bg:'#ccc'};
-          return `<li value="${seqN.get(a)}"><span class="wk-dot" style="background:${pc.bg}" title="${esc(phaseLabel(a.grr))}"></span>${esc(strip(a.name))}</li>`;
-        }).join('')}</ol>`
-      : `<span class="wk-empty">—</span>`}</td>`;
+  const actCell = L => {
+    const acts = (L.d.activities||[]).filter(a=>strip(a.name)||strip(a.desc));
+    if(!acts.length) return `<td class="wk-cell"><span class="wk-empty">—</span></td>`;
+    return `<td class="wk-cell">${acts.map((a,n)=>{
+      const letters = actIPPLetters(a);
+      const detail = strip(a.desc);
+      return `<div class="wk-act">
+        <div class="wk-act-h"><b>${n+1}. ${esc(strip(a.name)||'—')}${a.dur?` [${a.dur} min]`:''}${letters?` <span class="wk-ipp">${esc(letters)}</span>`:''}</b></div>
+        ${detail?`<div class="wk-act-d">${a.desc}</div>`:''}
+      </div>`;
+    }).join('')}</td>`;
   };
   const hwCell = L => `<td class="wk-cell">${strip(L.d.homework)?`<span>${esc(strip(L.d.homework))}</span>`:'<span class="wk-empty">—</span>'}</td>`;
   const resCell = L => `<td class="wk-cell">${bullets((L.d.materials||[]).filter(m=>matTitle(m)||matUrl(m)), m=>{
@@ -4113,9 +4135,7 @@ function renderWeekPlan() {
       <tbody>
         <tr><td class="wk-lbl">Goals<small>What students should learn</small></td>${cell(goalsCell)}</tr>
         <tr><td class="wk-lbl">Learning Targets<small>&ldquo;I can…&rdquo; statements</small></td>${cell(tgtCell)}</tr>
-        <tr class="wk-bannerrow"><td class="wk-lbl-blank"></td>${bannerCells('Learning Activities / Tasks')}</tr>
-        <tr><td class="wk-lbl">Whole Group Learning<small>Opening · Focus · Closer</small></td>${cell(L=>actCell(L,'whole'))}</tr>
-        <tr><td class="wk-lbl">Independent or Collaborative Learning<small>Guided · Independent</small></td>${cell(L=>actCell(L,'ic'))}</tr>
+        <tr><td class="wk-lbl">Learning Activities / Tasks<small>with IPP stages</small></td>${cell(actCell)}</tr>
         <tr><td class="wk-lbl">Homework</td>${cell(hwCell)}</tr>
         <tr class="wk-bannerrow"><td class="wk-lbl-blank"></td>${bannerCells('Student Resources / Links / Tech Tools')}</tr>
         <tr><td class="wk-lbl">Resources</td>${cell(resCell)}</tr>
@@ -6648,40 +6668,30 @@ function dailyPanelHTML(d, i) {
   ordered.forEach((o,n)=>o.num=n+1);
 
   const actRow = (o, canUp, canDown) => {
-    const a=o.a, ai=o.ai, ph=normalizePhase(a.grr), c=PHASE_COLORS[ph]||{bg:'#888',tx:'#fff'};
+    const a=o.a, ai=o.ai;
     const hasDetail = !!strip(a.desc);
-    const p = PHASE_BY_V[ph];
-    const bkt = phaseBucket(a.grr);   // 'whole' | 'ic'
-    const bktTag = bkt==='ic'
-      ? `<span class="dl-bkt ic" title="Independent or Collaborative">I/C</span>`
-      : `<span class="dl-bkt wg" title="Whole Group">WG</span>`;
-    const hint = p ? `<div class="dl-acthint"><i>${esc(p.hint)}${p.lo?` · ${p.lo}–${p.hi} min`:''}</i></div>` : '';
-    return `<div class="dl-actwrap dl-bkt-${bkt}">
+    const on = actIPP(a);
+    const ippBtns = IPP_STAGES.map(s=>`<button class="dl-ippbtn${on.includes(s.v)?' on':''}" onclick="toggleActIPP(${i},${ai},'${s.v}')" title="${s.label}">${s.letter}</button>`).join('');
+    return `<div class="dl-actwrap">
       <div class="dl-act">
         <span class="dl-actmove">
           <button class="dl-actup" ${canUp?'':'disabled'} onclick="moveAct(${i},${ai},-1)" title="Move up">▲</button>
           <button class="dl-actdown" ${canDown?'':'disabled'} onclick="moveAct(${i},${ai},1)" title="Move down">▼</button>
         </span>
         <span class="dl-actnum">${o.num}.</span>
-        ${bktTag}
         <input class="dl-actinp" value="${esc(strip(a.name)|| '')}" placeholder="What happens…"
           onchange="updateActName(${i},${ai},this.value)">
-        <select class="dl-actphase" style="background:${c.bg};color:${c.tx}" onchange="updateActPhase(${i},${ai},this.value)" title="Phase (sets Whole Group vs Independent/Collaborative)">
-          ${PHASES.map(p=>`<option value="${p.v}" ${ph===p.v?'selected':''}>${p.label}</option>`).join('')}
-        </select>
         <input class="dl-actmin" type="number" min="0" max="120" value="${a.dur||0}" onchange="updateActDur(${i},${ai},+this.value)" title="minutes">
         <span class="dl-minlbl">min</span>
+        <span class="dl-ipp" title="Ignatian Pedagogical Paradigm stages">${ippBtns}</span>
         <button class="dl-actdetailbtn${hasDetail?' has':''}" onclick="toggleActDetail(${i},${ai})" title="Add / show detail">${hasDetail?'✎ detail':'+ detail'}</button>
         <button class="dl-actx" onclick="removeAct(${i},${ai})" title="Remove">&times;</button>
       </div>
-      ${hint}
       <div class="dl-actdetail" id="actdetail-${i}-${ai}" style="display:${hasDetail?'block':'none'}">
         ${rteField(`rte-act-${i}-${ai}`, a.desc||'', `updateActField(${i},${ai},'desc',this.innerHTML)`, 'Add detail, steps, examples, links…')}
       </div>
     </div>`;
   };
-  // Single list in true teaching order — activities can flip between
-  // Whole Group and Independent/Collaborative freely.
   const allActs = ordered.map((o,pos)=>actRow(o, pos>0, pos<ordered.length-1)).join('')
     || `<div class="dl-empty">No activities yet — add the first one below.</div>`;
 
@@ -6745,7 +6755,7 @@ function dailyPanelHTML(d, i) {
     </td></tr>
 
     <tr><td class="dl-banner" colspan="2">Learning Activities / Tasks</td></tr>
-    <tr><td class="dl-lbl">Activities<small>In teaching order — <span style="color:#14315C;font-weight:700">WG</span> Whole Group · <span style="color:#1565C0;font-weight:700">I/C</span> Indep/Collab. Reorder with ▲▼.</small></td><td class="dl-cell dl-acts">
+    <tr><td class="dl-lbl">Learning Activities / Tasks<small>Tag each with IPP stages: <b>C</b>ontext · <b>E</b>xperience · <b>R</b>eflection · <b>A</b>ction · e<b>V</b>aluation. Reorder with ▲▼.</small></td><td class="dl-cell dl-acts">
       ${allActs}
       <button class="dl-addact" onclick="addAct(${i})">+ Add activity</button>
     </td></tr>
@@ -8180,20 +8190,14 @@ function exportPDF() {
   const li = arr => (arr||[]).map(strip).filter(Boolean)
     .map(x=>`<div style="margin:0 0 4px;padding-left:11px;text-indent:-11px">&bull; ${escPDF(x)}</div>`).join('') || dash;
 
-  // Number activities by their true teaching order so the printed two-section
-  // doc still reveals a Whole Group → Ind/Collab → Whole Group flow.
-  const seqNum = new Map();
-  (d.activities||[]).filter(a=>strip(a.name)||strip(a.desc)).forEach((a,idx)=>seqNum.set(a,idx+1));
-  const actLines = bucket => {
-    const list = (d.activities||[]).filter(a=>phaseBucket(a.grr)===bucket).filter(a=>strip(a.name)||strip(a.desc));
+  const actLines = () => {
+    const list = (d.activities||[]).filter(a=>strip(a.name)||strip(a.desc));
     if(!list.length) return dash;
-    return list.map(a=>{
-      const c = PHASE_COLORS[normalizePhase(a.grr)] || {bg:'#888',tx:'#fff'};
+    return list.map((a,n)=>{
       const body = escPDF(strip(a.name)||strip(a.desc));
-      const detail = (strip(a.desc) && strip(a.name)) ? `<div style="font-size:8.5pt;color:#57534E;margin:1px 0 0 16px">${escPDF(strip(a.desc))}</div>` : '';
-      return `<div style="margin:0 0 5px;padding-left:16px;text-indent:-16px">${seqNum.get(a)}. ${body}
-        <span style="font-size:7.5pt;font-weight:700;padding:1px 5px;border-radius:3px;background:${c.bg};color:${c.tx};-webkit-print-color-adjust:exact;print-color-adjust:exact">${escPDF(phaseLabel(a.grr))}</span>
-        <span style="font-size:7.5pt;color:#78716C">${a.dur||0}m</span>${detail}</div>`;
+      const letters = actIPPLetters(a);
+      const detail = (strip(a.desc) && strip(a.name)) ? `<div style="font-size:9pt;color:#333;margin:1px 0 0 16px">${a.desc}</div>` : '';
+      return `<div style="margin:0 0 6px;padding-left:16px;text-indent:-16px"><b>${n+1}. ${body}${a.dur?` [${a.dur} min]`:''}${letters?` - ${escPDF(letters)}`:''}</b>${detail}</div>`;
     }).join('');
   };
 
@@ -8231,8 +8235,7 @@ function exportPDF() {
       <tr>${rowLabel('Goals','What students should learn')}${cell(li(d.teacherGoals))}</tr>
       <tr>${rowLabel('Learning Targets','&ldquo;I can&hellip;&rdquo; statements')}${cell(li(targets))}</tr>
       ${banner('Learning Activities / Tasks')}
-      <tr>${rowLabel('Whole Group Learning','Opening &middot; Focus &middot; Closer')}${cell(actLines('whole'))}</tr>
-      <tr>${rowLabel('Independent or Collaborative Learning','Guided &middot; Independent')}${cell(actLines('ic'))}</tr>
+      <tr>${rowLabel('Learning Activities / Tasks','C&middot;E&middot;R&middot;A&middot;V = IPP stages')}${cell(actLines())}</tr>
       <tr>${rowLabel('Homework','')}${cell(escPDF(strip(d.homework)) || dash)}</tr>
       ${banner('Student Resources / Links / Tech Tools')}
       <tr>${rowLabel('Resources','')}${cell(resLines())}</tr>
@@ -8356,7 +8359,7 @@ function exportGoogleDoc(scope) {
     </tr>`).join('');
 
     const materials = (d.materials||[]).map(matTitle).concat(d.techTools||[]).filter(Boolean);
-    const ippStages = [...new Set((d.activities||[]).map(a=>a.ipp).filter(Boolean))].map(s=>IPP_LABELS[s]||s);
+    const ippStages = [...new Set((d.activities||[]).flatMap(a=>actIPP(a)))].map(s=>IPP_LABELS[s]||s);
 
     return `
     <!-- HEADER TABLE (4-col grid: title spans 3, date spans 1; A/B as 2 cells; materials spans 4) -->
