@@ -808,6 +808,8 @@ body.simple-mode .dp-adv { display: none !important; }
 .dl-actdetailbtn { flex:0 0 auto; border:1px solid var(--rule-dark,#cfccc4); background:none; border-radius:5px; padding:3px 7px; font-family:inherit; font-size:10.5px; font-weight:600; color:var(--ink-2); cursor:pointer; white-space:nowrap; }
 .dl-actdetailbtn.has { border-color:var(--navy); color:var(--navy); background:#F0F4FA; }
 .dl-actdetailbtn:hover { border-color:var(--navy); color:var(--navy); }
+.dl-acttype { flex:0 0 auto; width:56px; height:26px; border:1px solid var(--rule-dark); border-radius:5px; background:#F0F4FA; color:var(--navy); font-family:inherit; font-size:11px; font-weight:800; padding:0 3px; cursor:pointer; }
+.dl-acttype:hover { border-color:var(--navy); }
 .dl-ipp { flex:0 0 auto; display:inline-flex; gap:2px; }
 .dl-ippbtn { width:20px; height:22px; border:1px solid var(--rule-dark); background:#fff; color:var(--ink-3); font-weight:800; font-size:11px; border-radius:4px; cursor:pointer; padding:0; line-height:1; }
 .dl-ippbtn:hover { border-color:var(--navy); color:var(--navy); }
@@ -817,6 +819,16 @@ body.simple-mode .dp-adv { display: none !important; }
 .wk-act-h { font-size:11.5px; }
 .wk-act-h b { font-weight:700; }
 .wk-ipp { font-weight:800; color:var(--navy); letter-spacing:.02em; }
+.wk-atype { font-weight:800; color:#7A4B00; }
+.wk-legend { border:1px solid var(--rule-dark); border-radius:8px; overflow:hidden; margin-bottom:14px; }
+.wk-legrow { display:flex; align-items:stretch; border-top:1px solid var(--rule); }
+.wk-legrow:first-child { border-top:none; }
+.wk-leglbl { flex:0 0 120px; background:#EEF1F6; color:var(--navy); font-weight:800; font-size:11px; letter-spacing:.03em; text-transform:uppercase; padding:8px 10px; display:flex; align-items:center; border-right:1px solid var(--rule); }
+.wk-legbody { flex:1; padding:8px 10px; font-size:11.5px; color:var(--ink-2); line-height:1.6; display:flex; flex-wrap:wrap; align-items:center; gap:2px 4px; }
+.wk-legbody-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:2px 12px; }
+.wk-key-i b { color:var(--navy); font-weight:800; }
+.wk-legbody-grid .wk-key-i b { color:#7A4B00; }
+.wk-key-sep { color:var(--rule-dark); margin:0 5px; }
 .wk-act-d { font-size:11px; color:var(--ink-2); margin:1px 0 0 12px; }
 .wk-act-d ul { margin:2px 0 2px 16px; padding:0; } .wk-act-d a { color:var(--navy); }
 .wk-qod { font-style:italic; }
@@ -1345,11 +1357,19 @@ body.simple-mode .dp-adv { display: none !important; }
 .d-track-legend span{display:inline-flex;align-items:center;gap:5px;}
 .d-sw{width:11px;height:11px;border-radius:3px;display:inline-block;flex-shrink:0;}
 /* todo */
-.d-add-row{display:flex;gap:7px;margin-bottom:13px;}
-.d-add-row input{flex:1;border:1px solid var(--rule);border-radius:var(--radius-sm);padding:7px 11px;font-size:12.5px;outline:none;color:var(--ink);}
+.d-add-row{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:13px;}
+.d-add-row input{flex:1;min-width:0;border:1px solid var(--rule);border-radius:var(--radius-sm);padding:7px 11px;font-size:12.5px;outline:none;color:var(--ink);}
+.d-add-row #d-todo-text{flex:1 1 100%;}
 .d-add-row input:focus{border-color:var(--navy);}
 .d-add-row button{background:var(--navy);color:#fff;border:none;border-radius:var(--radius-sm);padding:7px 14px;font-size:12.5px;font-weight:600;cursor:pointer;}
 .d-add-row select{flex:0 0 auto;border:1px solid var(--rule);border-radius:var(--radius-sm);padding:7px 8px;font-size:12px;outline:none;color:var(--ink);background:#fff;}
+.d-add-row #d-todo-due{flex:0 0 auto;width:140px;}
+.d-add-row #d-todo-cat{flex:0 0 auto;width:120px;}
+.d-add-row #d-todo-link{flex:0 0 auto;width:150px;}
+@media(max-width:560px){
+  .d-add-row #d-todo-due,.d-add-row #d-todo-cat,.d-add-row #d-todo-link{flex:1 1 auto;width:auto;min-width:0;}
+  .d-add-row button{flex:1 1 100%;}
+}
 /* Category bar */
 .d-catbar{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:-4px 0 14px;font-size:11px;}
 .d-catbar-lbl{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);}
@@ -1405,8 +1425,11 @@ body.simple-mode .dp-adv { display: none !important; }
 .d-todo.done .d-t-main{text-decoration:line-through;color:var(--ink-3);}
 .d-t-body{flex:1;min-width:0;}
 .d-t-main{font-size:13px;font-weight:600;color:var(--ink);line-height:1.35;}
-.d-t-main.link{cursor:pointer;}
-.d-t-main.link:hover{color:var(--navy);}
+.d-t-text{outline:none;border-radius:4px;padding:1px 3px;margin:-1px -3px;}
+.d-t-text:hover{background:rgba(27,58,107,.06);}
+.d-t-text:focus{background:rgba(27,58,107,.1);box-shadow:0 0 0 1px var(--navy) inset;}
+.d-t-textlink.link{cursor:pointer;}
+.d-t-textlink.link:hover{color:var(--navy);text-decoration:underline;}
 .d-t-sub{display:flex;align-items:center;gap:7px;margin-top:5px;flex-wrap:wrap;}
 .d-t-tag{font-size:9.5px;font-weight:600;padding:1px 7px;border-radius:999px;background:var(--parchment);border:1px solid var(--rule);color:var(--ink-2);}
 .d-t-tag.auto{background:rgba(35,74,135,.08);border-color:rgba(35,74,135,.2);color:var(--navy-light);}
@@ -2081,6 +2104,29 @@ function toggleActIPP(i, ai, stage){
   a.ipp = IPP_STAGES.filter(s=>arr.includes(s.v)).map(s=>s.v);   // canonical order
   saveState(); rerenderDay(i);
 }
+
+// Classroom Experience / Activity types — the abbreviation that prefixes an
+// activity (e.g. "CD- Group Discussion"). Matches the school weekly template.
+const ACT_TYPES = [
+  {k:'T/Q', label:'Test/Quiz'},
+  {k:'IW',  label:'Independent Work'},
+  {k:'GW',  label:'Group Work'},
+  {k:'CD',  label:'Class Discussion'},
+  {k:'IP',  label:'Inductive Presentation'},
+  {k:'NP',  label:'Interactive Notes/Presentation'},
+  {k:'DI',  label:'Direct Instruction'},
+  {k:'RA',  label:'Reflection/Review Activity'},
+  {k:'SS',  label:'Student Sharing'},
+];
+const ACT_TYPE_MAP = Object.fromEntries(ACT_TYPES.map(t=>[t.k, t.label]));
+function actType(a){ return (a && typeof a.atype==='string') ? a.atype : ''; }
+function updateActType(i, ai, val){
+  const a = getDay(i).activities[ai]; if(!a) return;
+  a.atype = val || '';
+  saveState(); rerenderDay(i);
+}
+// Prefix used in read-only views: "CD- " when a type is set, else "".
+function actTypePrefix(a){ const k=actType(a); return k ? k+'- ' : ''; }
 
 // Phase colors follow the lesson-flow chart: dark navy → blue → light blue → grey.
 const PHASE_COLORS = {
@@ -2937,6 +2983,11 @@ function updateTodoDate(id, val){
   const t = (state.todos||[]).find(x=>x.id===id);
   if(t){ t.due = val||''; saveState(); renderDashboard(); }
 }
+function updateTodoText(id, text){
+  const t = (state.todos||[]).find(x=>x.id===id);
+  const v = (text||'').trim();
+  if(t && v){ t.text = v; saveState(); }   // no re-render — keep the caret where it is
+}
 // ── Subtasks on a manual to-do ─────────────────────────────────────
 function addSubtask(todoId, text){
   text=(text||'').trim(); if(!text) return;
@@ -3243,7 +3294,9 @@ function renderDashboard(){
     return `<div class="d-todo ${pri}${it.done?' done':''}"${catBar?` style="${catBar}"`:''}>
       <div class="d-cb" onclick="${toggle}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg></div>
       <div class="d-t-body">
-        <div class="d-t-main${it.open?' link':''}"${mainClick}>${cat?`<span class="d-t-catdot" style="background:${cat.color}"></span>`:''}${esc(it.text)}${it.manual?(subCount||''):''}</div>
+        <div class="d-t-main">${cat?`<span class="d-t-catdot" style="background:${cat.color}"></span>`:''}${it.manual
+          ? `<span class="d-t-text" contenteditable="true" title="Click to edit" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}" onblur="updateTodoText('${it.id}',this.textContent)">${esc(it.text)}</span>`
+          : `<span class="d-t-textlink${it.open?' link':''}"${mainClick}>${esc(it.text)}</span>`}${it.manual?(subCount||''):''}</div>
         <div class="d-t-sub">${sub}</div>
         ${subsHTML}
       </div>
@@ -3270,12 +3323,12 @@ function renderDashboard(){
       <div class="d-card-h"><h2>Teacher To-Do</h2><span class="d-meta">${items.filter(i=>!i.done).length} open</span></div>
       <div class="d-add-row">
         <input id="d-todo-text" placeholder="Add your own task…" onkeydown="if(event.key==='Enter')addDashTodo()">
-        <input id="d-todo-due" type="date" title="Optional due date" style="flex:0 0 auto;width:140px">
-        ${getTodoCats().length?`<select id="d-todo-cat" title="Category" style="flex:0 0 auto;width:120px">
+        <input id="d-todo-due" type="date" title="Optional due date">
+        ${getTodoCats().length?`<select id="d-todo-cat" title="Category">
           <option value="">— category —</option>
           ${getTodoCats().map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')}
         </select>`:''}
-        <select id="d-todo-link" title="Link to a unit or lesson" style="flex:0 0 auto;width:150px">${todoLinkOptions('')}</select>
+        <select id="d-todo-link" title="Link to a unit or lesson">${todoLinkOptions('')}</select>
         <button onclick="addDashTodo()">Add</button>
       </div>
       <div class="d-catbar">
@@ -3508,9 +3561,10 @@ function buildWeekDoc(){
     .filter(a => (a.name||'').trim() || (a.desc||'').trim())
     .map((a,n) => {
       const body = escPDF((a.name||'').trim() || String(a.desc||'').replace(/<[^>]*>/g,' ').trim());
+      const pre = actType(a) ? escPDF(actType(a))+'- ' : '';
       const letters = actIPPLetters(a);
       const detail = (a.desc||'').trim() && (a.name||'').trim() ? `<div style="margin:1px 0 0 15px;font-size:8.5pt;color:#333">${a.desc}</div>` : '';
-      return `<div style="margin:0 0 5px;padding-left:14px;text-indent:-14px"><b>${n+1}. ${body}${a.dur?` [${a.dur} min]`:''}${letters?` - ${escPDF(letters)}`:''}</b>${detail}</div>`;
+      return `<div style="margin:0 0 5px;padding-left:14px;text-indent:-14px"><b>${n+1}. ${pre}${body}${a.dur?` [${a.dur} min]`:''}${letters?` ${escPDF(letters)}`:''}</b>${detail}</div>`;
     }).join('');
   const resLines = d => (d.materials||[]).map(m=>{ const t=escPDF(matTitle(m)||matUrl(m)), url=matUrl(m); return `<div style="margin:0 0 3px;padding-left:9px;text-indent:-9px">• ${url?`<a href="${escPDF(url)}">${t}</a>`:t}</div>`; }).join('');
 
@@ -3534,6 +3588,16 @@ function buildWeekDoc(){
       <div style="font-size:14pt;font-weight:700;color:${NAVY}">Weekly Lesson Plans — ${escPDF(co.name)} (${escPDF(co.code)})</div>
       <div style="font-size:9.5pt;color:#57534E;margin-top:2px">${escPDF(state.teacher||'')} · Week of ${range}</div>
     </div>
+    <table style="margin-bottom:10px">
+      <tr>
+        <td style="background:#EEF1F6;border:1px solid ${RULE};padding:5px 8px;width:150px;font-size:8.5pt;font-weight:700;color:${NAVY};vertical-align:middle">IPP Key</td>
+        <td style="border:1px solid ${RULE};padding:5px 8px;font-size:8.5pt;color:#333">${IPP_STAGES.map(s=>`<b style="color:${NAVY}">${s.letter}</b> ${s.label}`).join(' &nbsp;|&nbsp; ')}</td>
+      </tr>
+      <tr>
+        <td style="background:#EEF1F6;border:1px solid ${RULE};padding:5px 8px;font-size:8.5pt;font-weight:700;color:${NAVY};vertical-align:middle">Activity Key</td>
+        <td style="border:1px solid ${RULE};padding:5px 8px;font-size:8.5pt;color:#333">${ACT_TYPES.map(t=>`<b style="color:#7A4B00">${escPDF(t.k)}</b> ${escPDF(t.label)}`).join(' &nbsp;·&nbsp; ')}</td>
+      </tr>
+    </table>
     <table>
       <thead><tr><th style="background:${NAVY};border:1px solid ${NAVY};width:150px"></th>${head}</tr></thead>
       <tbody>
@@ -4123,7 +4187,7 @@ function renderWeekPlan() {
       const letters = actIPPLetters(a);
       const detail = strip(a.desc);
       return `<div class="wk-act">
-        <div class="wk-act-h"><b>${n+1}. ${esc(strip(a.name)||'—')}${a.dur?` [${a.dur} min]`:''}${letters?` <span class="wk-ipp">${esc(letters)}</span>`:''}</b></div>
+        <div class="wk-act-h"><b>${n+1}. ${actType(a)?`<span class="wk-atype">${esc(actType(a))}-</span> `:''}${esc(strip(a.name)||'—')}${a.dur?` [${a.dur} min]`:''}${letters?` <span class="wk-ipp">${esc(letters)}</span>`:''}</b></div>
         ${detail?`<div class="wk-act-d">${a.desc}</div>`:''}
       </div>`;
     }).join('')}</td>`;
@@ -4135,7 +4199,16 @@ function renderWeekPlan() {
   })}</td>`;
   const bannerCells = label => lessons.map(()=>`<td class="wk-banner">${label}</td>`).join('');
 
+  const ippKey = IPP_STAGES.map(s=>`<span class="wk-key-i"><b>${s.letter}</b> ${s.label}</span>`).join('<span class="wk-key-sep">|</span>');
+  const actKey = ACT_TYPES.map(t=>`<span class="wk-key-i"><b>${esc(t.k)}</b> ${esc(t.label)}</span>`).join('');
+  const legend = `
+    <div class="wk-legend">
+      <div class="wk-legrow"><span class="wk-leglbl">IPP Key</span><div class="wk-legbody">${ippKey}</div></div>
+      <div class="wk-legrow"><span class="wk-leglbl">Activity Key</span><div class="wk-legbody wk-legbody-grid">${actKey}</div></div>
+    </div>`;
+
   const body = lessons.length ? `
+    ${legend}
     <div class="wk-scroll">
     <table class="wk-table">
       <thead><tr><th class="wk-corner">Week of<br><span style="font-weight:400;font-size:10px;color:var(--ink-3)">${wkRange}</span></th>${lessons.map(dayHead).join('')}</tr></thead>
@@ -6687,6 +6760,10 @@ function dailyPanelHTML(d, i) {
           <button class="dl-actdown" ${canDown?'':'disabled'} onclick="moveAct(${i},${ai},1)" title="Move down">▼</button>
         </span>
         <span class="dl-actnum">${o.num}.</span>
+        <select class="dl-acttype" onchange="updateActType(${i},${ai},this.value)" title="Classroom experience / activity type">
+          <option value="">—</option>
+          ${ACT_TYPES.map(t=>`<option value="${t.k}"${actType(a)===t.k?' selected':''} title="${esc(t.label)}">${esc(t.k)}</option>`).join('')}
+        </select>
         <input class="dl-actinp" value="${esc(strip(a.name)|| '')}" placeholder="What happens…"
           onchange="updateActName(${i},${ai},this.value)">
         <input class="dl-actmin" type="number" min="0" max="120" value="${a.dur||0}" onchange="updateActDur(${i},${ai},+this.value)" title="minutes">
@@ -8214,9 +8291,10 @@ function exportPDF() {
     if(!list.length) return dash;
     return list.map((a,n)=>{
       const body = escPDF(strip(a.name)||strip(a.desc));
+      const pre = actType(a) ? escPDF(actType(a))+'- ' : '';
       const letters = actIPPLetters(a);
       const detail = (strip(a.desc) && strip(a.name)) ? `<div style="font-size:9pt;color:#333;margin:1px 0 0 16px">${a.desc}</div>` : '';
-      return `<div style="margin:0 0 6px;padding-left:16px;text-indent:-16px"><b>${n+1}. ${body}${a.dur?` [${a.dur} min]`:''}${letters?` - ${escPDF(letters)}`:''}</b>${detail}</div>`;
+      return `<div style="margin:0 0 6px;padding-left:16px;text-indent:-16px"><b>${n+1}. ${pre}${body}${a.dur?` [${a.dur} min]`:''}${letters?` ${escPDF(letters)}`:''}</b>${detail}</div>`;
     }).join('');
   };
 
@@ -8250,6 +8328,16 @@ function exportPDF() {
       ${strip(d.eq)?`<div style="font-size:10pt;font-style:italic;color:#4338CA;margin-top:2px">Essential Question: ${escPDF(strip(d.eq))}</div>`:''}
       <div style="font-size:8.5pt;color:#78716C;margin-top:3px">${used} / ${blockDur} min</div>
     </div>
+    <table style="margin-bottom:10px"><tbody>
+      <tr>
+        <td style="background:#EEF1F6;border:1px solid ${RULE};padding:5px 10px;width:150px;font-size:8.5pt;font-weight:700;color:${NAVY};vertical-align:middle">IPP Key</td>
+        <td style="border:1px solid ${RULE};padding:5px 10px;font-size:8.5pt;color:#333">${IPP_STAGES.map(s=>`<b style="color:${NAVY}">${s.letter}</b> ${s.label}`).join(' &nbsp;|&nbsp; ')}</td>
+      </tr>
+      <tr>
+        <td style="background:#EEF1F6;border:1px solid ${RULE};padding:5px 10px;font-size:8.5pt;font-weight:700;color:${NAVY};vertical-align:middle">Activity Key</td>
+        <td style="border:1px solid ${RULE};padding:5px 10px;font-size:8.5pt;color:#333">${ACT_TYPES.map(t=>`<b style="color:#7A4B00">${escPDF(t.k)}</b> ${escPDF(t.label)}`).join(' &nbsp;·&nbsp; ')}</td>
+      </tr>
+    </tbody></table>
     <table><tbody>
       <tr>${rowLabel('Goals','What students should learn')}${cell(li(d.teacherGoals))}</tr>
       <tr>${rowLabel('Q.O.D.','Question of the Day')}${cell(String(d.qod||'').trim()||dash)}</tr>
