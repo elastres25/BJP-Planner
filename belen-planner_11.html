@@ -9376,5 +9376,47 @@ function exportUnitOverviewPDF() {
   w.document.write(html); w.document.close();
 }
 </script>
+<!-- ── Auto-update checker ───────────────────────────────────────────
+     The app is loaded as belen-planner_11.html?v=TOKEN. This quietly checks
+     the (tiny) index.html for the latest deployed TOKEN; if it's newer than
+     the one running, it offers a one-click reload. No hard-refresh needed. -->
+<script>
+(function(){
+  function runningVer(){ try{ return new URLSearchParams(location.search).get('v') || ''; }catch(e){ return ''; } }
+  function showUpdateBanner(latest){
+    if(document.getElementById('update-banner')) return;
+    var b=document.createElement('div');
+    b.id='update-banner';
+    b.innerHTML='<span>🔄 A newer version of the planner is ready.</span>'
+      +'<button id="update-now">Update now</button>'
+      +'<button id="update-dismiss" title="Dismiss">✕</button>';
+    document.body.appendChild(b);
+    document.getElementById('update-now').onclick=function(){ location.replace('./belen-planner_11.html?v='+encodeURIComponent(latest)); };
+    document.getElementById('update-dismiss').onclick=function(){ b.remove(); };
+  }
+  function checkUpdate(){
+    fetch('./index.html?_='+Date.now(), {cache:'no-store'})
+      .then(function(r){ return r.ok ? r.text() : ''; })
+      .then(function(t){
+        var m = t.match(/belen-planner_11\.html\?v=([\w.\-]+)/);
+        var latest = m ? m[1] : '';
+        var cur = runningVer();
+        // Only prompt when we know both versions and they differ.
+        if(latest && cur && latest !== cur) showUpdateBanner(latest);
+      })
+      .catch(function(){});
+  }
+  window.addEventListener('load', function(){ setTimeout(checkUpdate, 2500); });
+  setInterval(checkUpdate, 5*60*1000);
+  document.addEventListener('visibilitychange', function(){ if(!document.hidden) checkUpdate(); });
+})();
+</script>
+<style>
+#update-banner{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:4000;display:flex;align-items:center;gap:10px;background:#1B3A6B;color:#fff;border:1px solid #F2C75C;border-radius:10px;padding:10px 12px 10px 15px;box-shadow:0 10px 34px rgba(0,0,0,.35);font-family:Georgia,serif;font-size:13.5px;max-width:92vw;}
+#update-banner button{border:none;border-radius:6px;cursor:pointer;font-family:inherit;line-height:1;}
+#update-now{background:#F2C75C;color:#1B3A6B;font-weight:700;font-size:13px;padding:7px 13px;}
+#update-dismiss{background:rgba(255,255,255,.15);color:#fff;font-size:14px;padding:6px 9px;}
+#update-dismiss:hover{background:rgba(255,255,255,.28);}
+</style>
 </body>
 </html>
