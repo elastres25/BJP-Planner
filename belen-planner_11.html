@@ -900,13 +900,17 @@ body.simple-mode .dp-adv { display: none !important; }
 .rte-color:hover { background:rgba(27,58,107,.1); }
 .rte-color span { font-weight:800; font-size:12px; color:var(--ink-2); border-bottom:3px solid #B23B2E; line-height:1; }
 .rte-color input { position:absolute; inset:0; opacity:0; width:100%; height:100%; cursor:pointer; }
-/* Toolbar-free box (lesson-plan cells) — just a corner color swatch */
+/* Toolbar-free lesson-plan box (formatting via keyboard + selection popup) */
 .rte-plain { position:relative; }
-.rte-plain .rte-ed { padding-right:28px; }
-.rte-colorchip { position:absolute; top:4px; right:4px; display:none; align-items:center; justify-content:center; width:22px; height:22px; border:1px solid var(--rule); border-radius:5px; background:#fff; cursor:pointer; overflow:hidden; }
-.rte-plain:hover .rte-colorchip, .rte-plain:focus-within .rte-colorchip { display:inline-flex; }
-.rte-colorA { font-size:12px; font-weight:800; color:#B23B2E; line-height:1; border-bottom:2px solid currentColor; pointer-events:none; }
-.rte-colorchip input { position:absolute; inset:0; opacity:0; width:100%; height:100%; cursor:pointer; }
+/* Floating format popup that appears next to a text selection */
+.rte-floater { position:fixed; z-index:3000; display:none; gap:1px; background:var(--navy,#1B3A6B); border-radius:7px; padding:3px; box-shadow:0 6px 22px rgba(0,0,0,.3); }
+.rte-floater.show { display:flex; align-items:center; }
+.rte-floater button { border:none; background:none; color:#fff; cursor:pointer; font-family:inherit; font-size:13px; padding:4px 8px; border-radius:5px; line-height:1; white-space:nowrap; }
+.rte-floater button:hover { background:rgba(255,255,255,.18); }
+.rte-floater-color { position:relative; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; padding:4px 8px; border-radius:5px; }
+.rte-floater-color:hover { background:rgba(255,255,255,.18); }
+.rte-floater-color span { color:#fff; font-weight:800; font-size:13px; border-bottom:2px solid var(--gold,#F2C75C); line-height:1; }
+.rte-floater-color input { position:absolute; inset:0; opacity:0; width:100%; height:100%; cursor:pointer; }
 .rte-ed:focus { background:#FCFCFA; }
 .rte-ed ul { margin:2px 0 2px 18px; } .rte-ed a { color:var(--navy); }
 /* Shared toolbar for the Goals / Targets lists */
@@ -7138,18 +7142,85 @@ function rteField(id, html, saveExpr, placeholder){
       onkeydown="rteKey(event)" oninput="${saveExpr}" onblur="${saveExpr}">${html||''}</div>
   </div>`;
 }
-// A plain typing box — no formatting toolbar. Just a small color swatch that
-// appears in the corner while you're in the box (used on the lesson-plan cells).
+// A plain typing box — no visible toolbar. Formatting still works via the
+// keyboard (Ctrl/Cmd+B/I/U) and via the floating popup that appears when you
+// select text (see the RTE floater below).
 function rteBox(id, html, saveExpr, placeholder){
   return `<div class="rte rte-plain">
     <div id="${id}" class="rte-ed" contenteditable="true" data-ph="${esc(placeholder||'')}"
       onkeydown="rteKey(event)" oninput="${saveExpr}" onblur="${saveExpr}">${html||''}</div>
-    <label class="rte-colorchip" title="Text color — select text, then pick a color" onmousedown="event.preventDefault()">
-      <span class="rte-colorA">A</span>
-      <input type="color" value="#B23B2E" onchange="rteColorCmd('${id}',this.value)">
-    </label>
   </div>`;
 }
+
+// ── Floating format popup ─────────────────────────────────────────
+// No persistent toolbar: this little bar appears next to a text selection
+// inside any toolbar-free lesson box, offering bold/italic/underline/list/
+// link/color, then disappears. Keyboard shortcuts still work independently.
+let _rteFloater=null, _rteSavedRange=null, _rteSavedEd=null;
+function currentRteEd(){
+  const sel=window.getSelection(); if(!sel||!sel.anchorNode) return null;
+  let n=sel.anchorNode; n=(n.nodeType===3)?n.parentElement:n;
+  return n ? n.closest('.rte-plain .rte-ed') : null;
+}
+function restoreRteSelection(){
+  if(!_rteSavedEd||!_rteSavedRange) return;
+  _rteSavedEd.focus();
+  const sel=window.getSelection(); sel.removeAllRanges(); sel.addRange(_rteSavedRange);
+}
+function rteFloaterApply(cmd){
+  restoreRteSelection();
+  if(cmd==='createLink'){
+    let url=prompt('Link URL (include https://):','https://'); if(!url) return;
+    if(!/^https?:\/\//i.test(url) && !url.startsWith('mailto:')) url='https://'+url.replace(/^\/+/,'');
+    document.execCommand('createLink',false,url);
+    if(_rteSavedEd) _rteSavedEd.querySelectorAll('a').forEach(a=>{a.target='_blank';a.rel='noopener';});
+  } else {
+    document.execCommand(cmd,false,null);
+  }
+  if(_rteSavedEd) _rteSavedEd.dispatchEvent(new Event('input'));
+  positionRteFloater();
+}
+function rteFloaterColor(v){
+  restoreRteSelection();
+  document.execCommand('styleWithCSS',false,true);
+  document.execCommand('foreColor',false,v);
+  if(_rteSavedEd) _rteSavedEd.dispatchEvent(new Event('input'));
+}
+function ensureRteFloater(){
+  if(_rteFloater) return _rteFloater;
+  const el=document.createElement('div');
+  el.id='rte-floater'; el.className='rte-floater';
+  el.innerHTML=`
+    <button type="button" title="Bold (Ctrl/Cmd+B)" onmousedown="event.preventDefault()" onclick="rteFloaterApply('bold')"><b>B</b></button>
+    <button type="button" title="Italic (Ctrl/Cmd+I)" onmousedown="event.preventDefault()" onclick="rteFloaterApply('italic')"><i>I</i></button>
+    <button type="button" title="Underline (Ctrl/Cmd+U)" onmousedown="event.preventDefault()" onclick="rteFloaterApply('underline')"><u>U</u></button>
+    <button type="button" title="Bullet list" onmousedown="event.preventDefault()" onclick="rteFloaterApply('insertUnorderedList')">•&nbsp;List</button>
+    <button type="button" title="Add link" onmousedown="event.preventDefault()" onclick="rteFloaterApply('createLink')">🔗</button>
+    <label class="rte-floater-color" title="Text color" onmousedown="event.preventDefault()"><span>A</span><input type="color" value="#B23B2E" oninput="rteFloaterColor(this.value)"></label>`;
+  document.body.appendChild(el);
+  _rteFloater=el; return el;
+}
+function positionRteFloater(){
+  const el=ensureRteFloater();
+  // Don't recompute while the user is interacting with the popup itself.
+  if(el.contains(document.activeElement)) return;
+  const sel=window.getSelection();
+  const ed=currentRteEd();
+  if(!ed || !sel || sel.isCollapsed || sel.rangeCount===0){ el.classList.remove('show'); return; }
+  const range=sel.getRangeAt(0);
+  const rect=range.getBoundingClientRect();
+  if(!rect || (rect.width===0 && rect.height===0)){ el.classList.remove('show'); return; }
+  _rteSavedRange=range.cloneRange(); _rteSavedEd=ed;
+  el.classList.add('show');
+  const ew=el.offsetWidth, eh=el.offsetHeight;
+  let top=rect.top-eh-8; if(top<8) top=rect.bottom+8;
+  let left=rect.left+rect.width/2-ew/2;
+  left=Math.max(8, Math.min(left, window.innerWidth-ew-8));
+  el.style.top=top+'px'; el.style.left=left+'px';
+}
+document.addEventListener('selectionchange', ()=>requestAnimationFrame(positionRteFloater));
+document.addEventListener('mouseup', ()=>setTimeout(positionRteFloater,0));
+document.addEventListener('scroll', ()=>{ if(_rteFloater) _rteFloater.classList.remove('show'); }, true);
 function rteColorCmd(id, color){
   const el=document.getElementById(id); if(!el) return;
   el.focus();
