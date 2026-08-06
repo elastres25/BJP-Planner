@@ -900,6 +900,13 @@ body.simple-mode .dp-adv { display: none !important; }
 .rte-color:hover { background:rgba(27,58,107,.1); }
 .rte-color span { font-weight:800; font-size:12px; color:var(--ink-2); border-bottom:3px solid #B23B2E; line-height:1; }
 .rte-color input { position:absolute; inset:0; opacity:0; width:100%; height:100%; cursor:pointer; }
+/* Toolbar-free box (lesson-plan cells) — just a corner color swatch */
+.rte-plain { position:relative; }
+.rte-plain .rte-ed { padding-right:28px; }
+.rte-colorchip { position:absolute; top:4px; right:4px; display:none; align-items:center; justify-content:center; width:22px; height:22px; border:1px solid var(--rule); border-radius:5px; background:#fff; cursor:pointer; overflow:hidden; }
+.rte-plain:hover .rte-colorchip, .rte-plain:focus-within .rte-colorchip { display:inline-flex; }
+.rte-colorA { font-size:12px; font-weight:800; color:#B23B2E; line-height:1; border-bottom:2px solid currentColor; pointer-events:none; }
+.rte-colorchip input { position:absolute; inset:0; opacity:0; width:100%; height:100%; cursor:pointer; }
 .rte-ed:focus { background:#FCFCFA; }
 .rte-ed ul { margin:2px 0 2px 18px; } .rte-ed a { color:var(--navy); }
 /* Shared toolbar for the Goals / Targets lists */
@@ -7073,22 +7080,22 @@ function dailyPanelHTML(d, i) {
 
   <table class="dl-table"><tbody>
     <tr><td class="dl-lbl">Goals</td><td class="dl-cell">
-      ${rteField(`rte-goals-${i}`, goalsHTML(d), `updateDay(${i},'goalsText',this.innerHTML)`, 'What should students learn today…')}
+      ${rteBox(`rte-goals-${i}`, goalsHTML(d), `updateDay(${i},'goalsText',this.innerHTML)`, 'What should students learn today…')}
     </td></tr>
     <tr><td class="dl-lbl">Q.O.D.<small>Question of the Day</small></td><td class="dl-cell">
-      ${rteField(`rte-qod-${i}`, d.qod||'', `updateDay(${i},'qod',this.innerHTML)`, 'Question of the day…')}
+      ${rteBox(`rte-qod-${i}`, d.qod||'', `updateDay(${i},'qod',this.innerHTML)`, 'Question of the day…')}
     </td></tr>
     <tr><td class="dl-lbl">Learning Targets<small>&ldquo;I can…&rdquo; statements</small></td><td class="dl-cell">
-      ${rteField(`rte-targets-${i}`, targetsHTML(d), `updateDay(${i},'targetsText',this.innerHTML)`, 'I can…')}
+      ${rteBox(`rte-targets-${i}`, targetsHTML(d), `updateDay(${i},'targetsText',this.innerHTML)`, 'I can…')}
     </td></tr>
 
     <tr><td class="dl-banner" colspan="2">Learning Activities / Tasks</td></tr>
     <tr><td class="dl-lbl">Learning Activities / Tasks<small>Type your list — one per line.</small></td><td class="dl-cell">
-      ${rteField(`rte-acts-${i}`, actsHTML(d), `updateDay(${i},'activitiesText',this.innerHTML)`, 'e.g. CD- Group Discussion [10 min] E,R')}
+      ${rteBox(`rte-acts-${i}`, actsHTML(d), `updateDay(${i},'activitiesText',this.innerHTML)`, 'e.g. CD- Group Discussion [10 min] E,R')}
       <button class="dl-tmpl-btn" style="margin-top:7px" onclick="openActTemplates(${i})" title="Start from a saved template, or save this list as a template">⚡ Start from a template…</button>
     </td></tr>
     <tr><td class="dl-lbl">Homework</td><td class="dl-cell">
-      ${rteField(`rte-hw-${i}`, d.homework||'', `updateDay(${i},'homework',this.innerHTML)`, 'Homework…')}
+      ${rteBox(`rte-hw-${i}`, d.homework||'', `updateDay(${i},'homework',this.innerHTML)`, 'Homework…')}
     </td></tr>
 
     <tr><td class="dl-banner" colspan="2">Student Resources / Links / Tech Tools</td></tr>
@@ -7129,6 +7136,18 @@ function rteField(id, html, saveExpr, placeholder){
     </div>
     <div id="${id}" class="rte-ed" contenteditable="true" data-ph="${esc(placeholder||'')}"
       onkeydown="rteKey(event)" oninput="${saveExpr}" onblur="${saveExpr}">${html||''}</div>
+  </div>`;
+}
+// A plain typing box — no formatting toolbar. Just a small color swatch that
+// appears in the corner while you're in the box (used on the lesson-plan cells).
+function rteBox(id, html, saveExpr, placeholder){
+  return `<div class="rte rte-plain">
+    <div id="${id}" class="rte-ed" contenteditable="true" data-ph="${esc(placeholder||'')}"
+      onkeydown="rteKey(event)" oninput="${saveExpr}" onblur="${saveExpr}">${html||''}</div>
+    <label class="rte-colorchip" title="Text color — select text, then pick a color" onmousedown="event.preventDefault()">
+      <span class="rte-colorA">A</span>
+      <input type="color" value="#B23B2E" onchange="rteColorCmd('${id}',this.value)">
+    </label>
   </div>`;
 }
 function rteColorCmd(id, color){
