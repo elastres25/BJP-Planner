@@ -762,6 +762,32 @@ body.simple-mode .dp-adv { display: none !important; }
 .dl-actx:hover { color:var(--crit,#c0392b); }
 .dl-addact { margin-top:5px; background:none; border:1px dashed var(--rule-dark,#cfccc4); border-radius:6px; padding:5px 11px; font-family:inherit; font-size:11.5px; font-weight:600; color:var(--navy); cursor:pointer; }
 .dl-addact:hover { border-color:var(--navy); background:#F7F9FC; }
+/* Guided activity rows: ▲▼ · # · type · name · minutes · IPP · ＋details · ✕ */
+.ga-row { border-bottom:1px solid var(--rule); padding:3px 0; }
+.ga-row:last-of-type { border-bottom:none; }
+.ga-main { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.ga-move { display:inline-flex; flex-direction:column; gap:1px; flex:0 0 auto; }
+.ga-move button { border:none; background:none; cursor:pointer; color:var(--ink-3); font-size:8px; line-height:1; padding:1px 2px; border-radius:3px; }
+.ga-move button:hover:not(:disabled) { color:var(--navy); background:rgba(27,58,107,.1); }
+.ga-move button:disabled { opacity:.25; cursor:default; }
+.ga-num { flex:0 0 auto; font-weight:800; font-size:12.5px; color:var(--navy); width:18px; text-align:right; font-variant-numeric:tabular-nums; }
+.ga-type { flex:0 0 auto; width:52px; height:28px; border:1px solid var(--rule-dark); border-radius:5px; background:#F0F4FA; color:var(--navy); font-family:inherit; font-size:11px; font-weight:800; padding:0 3px; cursor:pointer; }
+.ga-type:hover { border-color:var(--navy); }
+.ga-name { flex:1 1 150px; min-width:120px; border:1px solid transparent; border-radius:6px; padding:6px 8px; font-family:inherit; font-size:13px; color:var(--ink); outline:none; }
+.ga-name:hover { border-color:var(--rule); } .ga-name:focus { border-color:var(--navy); background:#F7F9FC; }
+.ga-dur { flex:0 0 auto; width:46px; border:1px solid var(--rule); border-radius:5px; padding:5px 4px; font-family:inherit; font-size:12px; text-align:center; outline:none; }
+.ga-dur:focus { border-color:var(--navy); }
+.ga-unit { flex:0 0 auto; font-size:10px; color:var(--ink-3); margin-left:-2px; }
+.ga-ipp { flex:0 0 auto; width:60px; border:1px solid var(--rule); border-radius:5px; padding:5px 6px; font-family:inherit; font-size:12px; font-weight:700; color:var(--navy); text-align:center; text-transform:uppercase; outline:none; }
+.ga-ipp::placeholder { color:var(--ink-3); font-weight:400; text-transform:none; }
+.ga-ipp:focus { border-color:var(--navy); }
+.ga-detailbtn { flex:0 0 auto; border:1px solid var(--rule-dark,#cfccc4); background:none; border-radius:5px; padding:4px 7px; font-family:inherit; font-size:10.5px; font-weight:600; color:var(--ink-2); cursor:pointer; white-space:nowrap; }
+.ga-detailbtn.has { border-color:var(--navy); color:var(--navy); background:#F0F4FA; }
+.ga-detailbtn:hover { border-color:var(--navy); color:var(--navy); }
+.ga-del { flex:0 0 auto; border:none; background:none; color:var(--ink-3); font-size:16px; line-height:1; cursor:pointer; padding:0 3px; }
+.ga-del:hover { color:var(--crit,#c0392b); }
+.ga-detail { padding:5px 0 7px 26px; }
+@media print { .ga-move, .ga-del, .ga-detailbtn, .dl-acttools { display:none !important; } }
 /* Compact (collapsed) activity line — click to edit */
 .dl-actline { display:flex; align-items:center; gap:9px; padding:5px 6px; border:1px solid transparent; border-radius:6px; cursor:text; }
 .dl-actline:hover { border-color:var(--rule); background:#FCFCFA; }
@@ -2149,7 +2175,7 @@ function targetsHTML(d){
 }
 function actLineText(a){
   const name = htmlPlain(a.name) || htmlPlain(a.desc);
-  const letters = actIPPLetters(a);
+  const letters = actIPPText(a);
   return `${actType(a)?actType(a)+'- ':''}${name}${a.dur?` [${a.dur} min]`:''}${letters?` ${letters}`:''}`.trim();
 }
 function activitiesToHTML(d){
@@ -2268,6 +2294,41 @@ function updateActType(i, ai, val){
 }
 // Prefix used in read-only views: "CD- " when a type is set, else "".
 function actTypePrefix(a){ const k=actType(a); return k ? k+'- ' : ''; }
+
+// IPP as free text (the guided editor uses a small textbox, e.g. "E, R").
+// Prefer the typed text; fall back to the older toggle-array letters.
+function actIPPText(a){
+  if(a && typeof a.ippText==='string' && a.ippText.trim()!=='') return a.ippText.trim();
+  return actIPPLetters(a);
+}
+function updateActIPPText(i, ai, v){
+  const a = getDay(i).activities[ai]; if(!a) return;
+  a.ippText = (v||'').trim();
+  a.ipp = [];              // typed text is now the source of truth (allows clearing)
+  saveState();
+}
+// Parse a free-text activities list (older "simple" mode) back into structured
+// rows, best-effort: "CD- Group Discussion [10 min] E,R" → {atype,name,dur,ippText}.
+function parseActLine(line){
+  let s = String(line||'').trim();
+  let atype='';
+  const tm = s.match(/^([A-Za-z][A-Za-z/]{0,3})-\s+/);
+  if(tm && ACT_TYPE_MAP[tm[1].toUpperCase()]){ atype = tm[1].toUpperCase(); s = s.slice(tm[0].length); }
+  let dur=0;
+  const dm = s.match(/\[(\d+)\s*min\]/i);
+  if(dm){ dur = +dm[1]; s = (s.slice(0,dm.index) + ' ' + s.slice(dm.index+dm[0].length)); }
+  let ippText='';
+  const im = s.match(/[\s\-–|]([CERAV](?:\s*,\s*[CERAV])+)\s*$/) || s.match(/\s([CERAV])\s*$/);
+  if(im){ ippText = im[1].replace(/\s+/g,''); s = s.slice(0, s.lastIndexOf(im[1])); }
+  const name = s.replace(/[\-–|]\s*$/,'').replace(/\s+/g,' ').trim();
+  return { id:uid(), name, dur, grr:'focus', atype, ipp:[], ippText, desc:'' };
+}
+function parseActText(html){
+  const liMatches = [...String(html||'').matchAll(/<li[^>]*>([\s\S]*?)<\/li>/gi)].map(m=>m[1]);
+  const raw = liMatches.length ? liMatches : String(html||'').split(/<br\s*\/?>|<\/div>|<\/p>|\n/i);
+  const lines = raw.map(htmlPlain).filter(Boolean);
+  return lines.map(parseActLine);
+}
 
 // Phase colors follow the lesson-flow chart: dark navy → blue → light blue → grey.
 const PHASE_COLORS = {
@@ -3763,7 +3824,7 @@ function buildWeekDoc(){
     .map((a,n) => {
       const body = escPDF((a.name||'').trim() || String(a.desc||'').replace(/<[^>]*>/g,' ').trim());
       const pre = actType(a) ? escPDF(actType(a))+'- ' : '';
-      const letters = actIPPLetters(a);
+      const letters = actIPPText(a);
       const detail = (a.desc||'').trim() && (a.name||'').trim() ? `<div style="margin:1px 0 0 15px;font-size:8.5pt;color:#333">${a.desc}</div>` : '';
       return `<div style="margin:0 0 5px;padding-left:14px;text-indent:-14px"><b>${n+1}. ${pre}${body}${a.dur?` [${a.dur} min]`:''}${letters?` ${escPDF(letters)}`:''}</b>${detail}</div>`;
     }).join('');
@@ -4426,7 +4487,7 @@ function renderWeekPlan() {
     const acts = (L.d.activities||[]).filter(a=>strip(a.name)||strip(a.desc));
     if(!acts.length) return `<td class="wk-cell">${emptyCell}</td>`;
     return `<td class="wk-cell">${acts.map((a,n)=>{
-      const letters = actIPPLetters(a);
+      const letters = actIPPText(a);
       const detail = strip(a.desc);
       return `<div class="wk-act">
         <div class="wk-act-h"><b>${n+1}. ${actType(a)?`<span class="wk-atype">${esc(actType(a))}-</span> `:''}${esc(strip(a.name)||'—')}${a.dur?` [${a.dur} min]`:''}${letters?` <span class="wk-ipp">${esc(letters)}</span>`:''}</b></div>
@@ -6989,56 +7050,43 @@ function dailyPanelHTML(d, i) {
   const usedMins = (d.activities||[]).reduce((s,a)=>s+(a.dur||0),0);
   const strip = s => String(s||'').replace(/<[^>]*>/g,' ').replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim();
 
+  // One-time migration: if this lesson only has a free-text activities list
+  // (older "simple" mode), parse it into structured rows so the guided editor
+  // can show it. Nothing is lost — the text is turned into real activities.
+  if((!d.activities || !d.activities.length) && hasActsText(d)){
+    const parsed = parseActText(d.activitiesText);
+    if(parsed.length){ d.activities = parsed; delete d.activitiesText; saveState(); }
+  }
+
   // Activities keep the teacher's own order (the array order); numbering
   // follows that order, and each can be reordered within its section.
   const ordered = (d.activities||[]).map((a,ai)=>({a,ai}));
   ordered.forEach((o,n)=>o.num=n+1);
 
+  // Guided activity row: ▲▼ · number · type · name · minutes · IPP · ＋details · ✕
   const actRow = (o, canUp, canDown) => {
     const a=o.a, ai=o.ai;
     const hasDetail = !!strip(a.desc);
-    const letters = actIPPLetters(a);
-    const editing = openActEdit === `${i}:${ai}`;
-
-    // Collapsed: clean read-only line — click to edit.
-    if(!editing){
-      const nm = esc(strip(a.name));
-      return `<div class="dl-actwrap">
-        <div class="dl-actline" onclick="editAct(${i},${ai})" title="Click to edit">
-          <span class="dl-actnum">${o.num}.</span>
-          <span class="dl-actline-body">${actType(a)?`<b class="dl-atag">${esc(actType(a))}-</b> `:''}${nm||'<span class="dl-actline-ph">(empty — click to edit)</span>'}</span>
-          ${a.dur?`<span class="dl-actline-min">${a.dur} min</span>`:''}
-          ${letters?`<span class="dl-actline-ipp">${esc(letters)}</span>`:''}
-          ${hasDetail?`<span class="dl-actline-detail" title="has detail">✎</span>`:''}
-        </div>
-      </div>`;
-    }
-
-    // Expanded: full controls.
-    const on = actIPP(a);
-    const ippBtns = IPP_STAGES.map(s=>`<button class="dl-ippbtn${on.includes(s.v)?' on':''}" onclick="toggleActIPP(${i},${ai},'${s.v}')" title="${s.label}">${s.letter}</button>`).join('');
-    return `<div class="dl-actwrap dl-actwrap-edit">
-      <div class="dl-act">
-        <span class="dl-actmove">
-          <button class="dl-actup" ${canUp?'':'disabled'} onclick="moveAct(${i},${ai},-1)" title="Move up">▲</button>
-          <button class="dl-actdown" ${canDown?'':'disabled'} onclick="moveAct(${i},${ai},1)" title="Move down">▼</button>
+    return `<div class="ga-row">
+      <div class="ga-main">
+        <span class="ga-move">
+          <button ${canUp?'':'disabled'} onclick="moveAct(${i},${ai},-1)" title="Move up">▲</button>
+          <button ${canDown?'':'disabled'} onclick="moveAct(${i},${ai},1)" title="Move down">▼</button>
         </span>
-        <span class="dl-actnum">${o.num}.</span>
-        <select class="dl-acttype" onchange="updateActType(${i},${ai},this.value)" title="Classroom experience / activity type">
-          <option value="">—</option>
+        <span class="ga-num">${o.num}.</span>
+        <select class="ga-type" onchange="updateActType(${i},${ai},this.value)" title="Activity type (from the Activity Key)">
+          <option value="">–</option>
           ${ACT_TYPES.map(t=>`<option value="${t.k}"${actType(a)===t.k?' selected':''} title="${esc(t.label)}">${esc(t.k)}</option>`).join('')}
         </select>
-        <input class="dl-actinp" id="actinp-${i}-${ai}" value="${esc(strip(a.name)|| '')}" placeholder="What happens…"
-          onchange="updateActName(${i},${ai},this.value)">
-        <input class="dl-actmin" type="number" min="0" max="120" value="${a.dur||0}" onchange="updateActDur(${i},${ai},+this.value)" title="minutes">
-        <span class="dl-minlbl">min</span>
-        <span class="dl-ipp" title="Ignatian Pedagogical Paradigm stages">${ippBtns}</span>
-        <button class="dl-actdetailbtn${hasDetail?' has':''}" onclick="toggleActDetail(${i},${ai})" title="Add / show detail">${hasDetail?'✎ detail':'+ detail'}</button>
-        <button class="dl-actx" onclick="removeAct(${i},${ai})" title="Remove">&times;</button>
-        <button class="dl-actdone" onclick="collapseAct(${i})" title="Done editing this activity">Done</button>
+        <input class="ga-name" id="ga-name-${i}-${ai}" value="${esc(strip(a.name)||'')}" placeholder="Activity name…" onchange="updateActName(${i},${ai},this.value)">
+        <input class="ga-dur" type="number" min="0" max="180" value="${a.dur||0}" onchange="updateActDur(${i},${ai},+this.value)" title="Minutes">
+        <span class="ga-unit">min</span>
+        <input class="ga-ipp" value="${esc(actIPPText(a))}" placeholder="IPP" title="IPP stages — e.g. E, R" onchange="updateActIPPText(${i},${ai},this.value)">
+        <button class="ga-detailbtn${hasDetail?' has':''}" onclick="toggleActDetail(${i},${ai})" title="Notes / steps for this activity">${hasDetail?'✎ details':'＋ details'}</button>
+        <button class="ga-del" onclick="removeAct(${i},${ai})" title="Remove">&times;</button>
       </div>
-      <div class="dl-actdetail" id="actdetail-${i}-${ai}" style="display:${hasDetail?'block':'none'}">
-        ${rteField(`rte-act-${i}-${ai}`, a.desc||'', `updateActField(${i},${ai},'desc',this.innerHTML)`, 'Add detail, steps, examples, links…')}
+      <div class="ga-detail" id="actdetail-${i}-${ai}" style="display:${hasDetail?'block':'none'}">
+        ${rteBox(`rte-act-${i}-${ai}`, a.desc||'', `updateActField(${i},${ai},'desc',this.innerHTML)`, 'Notes, steps, examples, links…')}
       </div>
     </div>`;
   };
@@ -7107,9 +7155,12 @@ function dailyPanelHTML(d, i) {
     </td></tr>
 
     <tr><td class="dl-banner" colspan="2">Learning Activities / Tasks</td></tr>
-    <tr><td class="dl-lbl">Learning Activities / Tasks<small>Type your list — one per line.</small></td><td class="dl-cell">
-      ${rteBox(`rte-acts-${i}`, actsHTML(d), `updateDay(${i},'activitiesText',this.innerHTML)`, 'e.g. CD- Group Discussion [10 min] E,R')}
-      <button class="dl-tmpl-btn" style="margin-top:7px" onclick="openActTemplates(${i})" title="Start from a saved template, or save this list as a template">⚡ Start from a template…</button>
+    <tr><td class="dl-lbl">Learning Activities / Tasks<small>Name · minutes · IPP. Use ＋ details for notes.</small></td><td class="dl-cell dl-acts">
+      ${allActs}
+      <div class="dl-acttools">
+        <button class="dl-addact" onclick="addAct(${i})">+ Add activity</button>
+        <button class="dl-tmpl-btn" onclick="openActTemplates(${i})" title="Fill from a saved template, or save these as a template">⚡ Templates…</button>
+      </div>
     </td></tr>
     <tr><td class="dl-lbl">Homework</td><td class="dl-cell">
       ${rteBox(`rte-hw-${i}`, d.homework||'', `updateDay(${i},'homework',this.innerHTML)`, 'Homework…')}
@@ -7429,13 +7480,12 @@ function updateActPhase(i,ai,v){const a=getDay(i).activities[ai];if(a){a.grr=v;s
 // Add a new activity at the end of the lesson. Defaults to the same phase as
 // the last activity (so the flow continues), else Focus.
 function addAct(i){
-  const acts=getDay(i).activities;
-  const lastPh=acts.length?normalizePhase(acts[acts.length-1].grr):'focus';
-  const ph=lastPh||'focus'; const p=PHASE_BY_V[ph];
-  acts.push({id:uid(),name:'',dur:p?p.def:10,grr:ph,ipp:'',desc:''});
-  openActEdit = `${i}:${acts.length-1}`;   // open the new row for editing
+  const d=getDay(i);
+  const acts=d.activities=d.activities||[];
+  acts.push({id:uid(),name:'',dur:10,grr:'focus',atype:'',ipp:[],ippText:'',desc:''});
+  delete d.activitiesText;                  // structured is now the source of truth
   saveState();rerenderDay(i);
-  setTimeout(()=>{ const el=document.getElementById(`actinp-${i}-${acts.length-1}`); if(el) el.focus(); }, 30);
+  setTimeout(()=>{ const el=document.getElementById(`ga-name-${i}-${acts.length-1}`); if(el) el.focus(); }, 30);
 }
 // Back-compat: old callers that added into a bucket.
 function addActToBucket(i,bucketName){const ph=bucketName==='ic'?'guided':'focus';const p=PHASE_BY_V[ph];getDay(i).activities.push({id:uid(),name:'',dur:p?p.def:10,grr:ph,ipp:'',desc:''});saveState();rerenderDay(i);}
@@ -7494,25 +7544,36 @@ function tmplPreview(t){
   if(t.text) return htmlPlain(t.text);
   return (t.activities||[]).map(a=>(a.atype?a.atype+'- ':'')+(a.name||'')).join(' · ');
 }
+// A template's activities as fresh structured rows (handles both the default
+// structured templates and older text templates).
+function tmplActivities(t){
+  if(Array.isArray(t.activities) && t.activities.length){
+    return t.activities.map(a=>({ id:uid(), name:a.name||'', dur:+a.dur||0, grr:'focus',
+      atype:a.atype||'', ipp:Array.isArray(a.ipp)?a.ipp.slice():[], ippText:a.ippText||'', desc:a.desc||'' }));
+  }
+  if(t.text) return parseActText(t.text);
+  return [];
+}
 function insertActTemplate(i, tid, replace){
   const tmpl = loadActTemplates().find(t=>t.id===tid); if(!tmpl) return;
-  const html = tmplHTML(tmpl);
+  const add = tmplActivities(tmpl);
   const d = getDay(i);
-  const existing = hasActsText(d) ? d.activitiesText : activitiesToHTML(d);
-  d.activitiesText = replace ? html : (existing + html);
+  if(replace) d.activities = add; else { d.activities = d.activities||[]; d.activities.push(...add); }
+  delete d.activitiesText;
   saveState(); rerenderDay(i);
   closeActTemplates();
-  toast(`${replace?'Replaced with':'Added'} “${tmpl.name}”`);
+  toast(`${replace?'Replaced with':'Added'} “${tmpl.name}” (${add.length} activit${add.length===1?'y':'ies'})`);
 }
 function saveLessonAsTemplate(i){
-  const d = getDay(i);
-  const html = hasActsText(d) ? d.activitiesText : activitiesToHTML(d);
-  if(!hasHtmlText(html)){ toast('Type some activities first'); return; }
+  const src = (getDay(i).activities||[]).filter(a=>htmlPlain(a.name));
+  if(!src.length){ toast('Add at least one named activity first'); return; }
   const nameEl = document.getElementById('acttmpl-newname');
   const name = (nameEl && nameEl.value.trim()) || '';
   if(!name){ toast('Give the template a name'); if(nameEl) nameEl.focus(); return; }
   const list = loadActTemplates();
-  list.push({ id:'tmpl-'+uid(), name, text: html });
+  list.push({ id:'tmpl-'+uid(), name, activities: src.map(a=>({
+    name:(a.name||'').trim(), dur:+a.dur||0, atype:actType(a), ipp:actIPP(a).slice(), ippText:(a.ippText||'').trim(), desc:a.desc||''
+  })) });
   saveActTemplates(list);
   toast(`Saved template “${name}”`);
   openActTemplates(i);   // refresh the list
@@ -8746,7 +8807,7 @@ function exportPDF() {
     return list.map((a,n)=>{
       const body = escPDF(strip(a.name)||strip(a.desc));
       const pre = actType(a) ? escPDF(actType(a))+'- ' : '';
-      const letters = actIPPLetters(a);
+      const letters = actIPPText(a);
       const detail = (strip(a.desc) && strip(a.name)) ? `<div style="font-size:9pt;color:#333;margin:1px 0 0 16px">${a.desc}</div>` : '';
       return `<div style="margin:0 0 6px;padding-left:16px;text-indent:-16px"><b>${n+1}. ${pre}${body}${a.dur?` [${a.dur} min]`:''}${letters?` ${escPDF(letters)}`:''}</b>${detail}</div>`;
     }).join('');
