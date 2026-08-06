@@ -1807,9 +1807,12 @@ function out(o) {
       <input id="drive-url-in" type="url" placeholder="https://script.google.com/macros/s/…/exec" style="width:100%;box-sizing:border-box;border:1px solid var(--rule-dark);border-radius:7px;padding:8px 10px;font-family:inherit;font-size:12.5px;color:var(--ink);outline:none;margin-bottom:12px">
       <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:7px">Destination folder per course</div>
       <label style="display:block;font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:4px">📘 Theology 6 folder link (or ID)</label>
-      <input id="drive-folder6-in" type="text" placeholder="https://drive.google.com/drive/folders/…" style="width:100%;box-sizing:border-box;border:1px solid var(--rule-dark);border-radius:7px;padding:8px 10px;font-family:inherit;font-size:12.5px;color:var(--ink);outline:none;margin-bottom:10px">
+      <input id="drive-folder6-in" type="text" placeholder="https://drive.google.com/drive/folders/…" style="width:100%;box-sizing:border-box;border:1px solid var(--rule-dark);border-radius:7px;padding:8px 10px;font-family:inherit;font-size:12.5px;color:var(--ink);outline:none;margin-bottom:6px">
+      <input id="drive-label6-in" type="text" placeholder="Name to use in the file (optional) — e.g. Ignatian Leadership in Action LD" style="width:100%;box-sizing:border-box;border:1px solid var(--rule);border-radius:7px;padding:7px 10px;font-family:inherit;font-size:12px;color:var(--ink-2);outline:none;margin-bottom:12px">
       <label style="display:block;font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:4px">📗 Theology 7 folder link (or ID)</label>
-      <input id="drive-folder7-in" type="text" placeholder="https://drive.google.com/drive/folders/…" style="width:100%;box-sizing:border-box;border:1px solid var(--rule-dark);border-radius:7px;padding:8px 10px;font-family:inherit;font-size:12.5px;color:var(--ink);outline:none">
+      <input id="drive-folder7-in" type="text" placeholder="https://drive.google.com/drive/folders/…" style="width:100%;box-sizing:border-box;border:1px solid var(--rule-dark);border-radius:7px;padding:8px 10px;font-family:inherit;font-size:12.5px;color:var(--ink);outline:none;margin-bottom:6px">
+      <input id="drive-label7-in" type="text" placeholder="Name to use in the file (optional)" style="width:100%;box-sizing:border-box;border:1px solid var(--rule);border-radius:7px;padding:7px 10px;font-family:inherit;font-size:12px;color:var(--ink-2);outline:none">
+      <div style="font-size:11px;color:var(--ink-3);margin-top:8px;line-height:1.5">Files are named: <b>M.D.YYYY - M.D.YYYY | Course | Year</b><br>e.g. <span style="color:var(--ink-2)">1.5.2026 - 1.9.2026 | Ignatian Leadership in Action LD | 2026</span></div>
       <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end;align-items:center;flex-wrap:wrap">
         <button onclick="driveTest()" style="background:none;border:1px solid var(--navy);border-radius:7px;padding:8px 14px;font-size:12.5px;font-weight:600;color:var(--navy);cursor:pointer;font-family:inherit;margin-right:auto">🔌 Test connection</button>
         <button onclick="closeDriveSetup()" style="background:none;border:1px solid var(--rule-dark);border-radius:7px;padding:8px 16px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;font-family:inherit">Cancel</button>
@@ -3778,7 +3781,10 @@ function buildWeekDoc(){
   const cell = html => `<td style="border:1px solid ${RULE};padding:7px 9px;vertical-align:top;font-size:9pt;line-height:1.45">${html||''}</td>`;
   const banner = t => `<tr><td colspan="${cols.length+1}" style="background:${GOLD};border:1px solid ${RULE};padding:5px 9px;font-size:9.5pt;font-weight:700;color:${NAVY}">${t}</td></tr>`;
   const range = `${mon.toLocaleDateString('en-US',{month:'long',day:'numeric'})} – ${fri.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}`;
-  const title = `Weekly Lesson Plans — ${co.name} — Week of ${mon.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}`;
+  // File name: "M.D.YYYY - M.D.YYYY | Course | Year"
+  const fmtMDY = dt => `${dt.getMonth()+1}.${dt.getDate()}.${dt.getFullYear()}`;
+  const courseLabel = driveCourseLabel() || co.name;
+  const title = `${fmtMDY(mon)} - ${fmtMDY(fri)} | ${courseLabel} | ${mon.getFullYear()}`;
 
   const html = `<!DOCTYPE html><html><head><meta charset="utf-8">
   <title>${escPDF(title)}</title>
@@ -3840,6 +3846,8 @@ function driveCfg(){
 }
 function driveScriptUrl(){ return driveCfg().url || ''; }
 function driveFolderId(){ return driveCfg().folders[activeCourse] || ''; }
+// Optional per-course name to use in the uploaded file (falls back to co.name).
+function driveCourseLabel(){ const c=driveCfg(); return (c.labels && c.labels[activeCourse]) || ''; }
 function driveConfigured(){ return !!(driveScriptUrl() && driveFolderId()); }
 function driveFolderIdFromInput(v){
   v = (v||'').trim();
@@ -3924,6 +3932,8 @@ function openDriveSetup(){
   document.getElementById('drive-url-in').value = c.url || '';
   document.getElementById('drive-folder6-in').value = c.folders[6] || '';
   document.getElementById('drive-folder7-in').value = c.folders[7] || '';
+  document.getElementById('drive-label6-in').value = (c.labels && c.labels[6]) || '';
+  document.getElementById('drive-label7-in').value = (c.labels && c.labels[7]) || '';
   ov.style.display = 'block';
 }
 function closeDriveSetup(){ document.getElementById('drive-setup-overlay').style.display='none'; }
@@ -3942,6 +3952,9 @@ function saveDriveConfig(){
   c.folders = c.folders || {};
   c.folders[6] = f6;
   c.folders[7] = f7;
+  c.labels = c.labels || {};
+  c.labels[6] = document.getElementById('drive-label6-in').value.trim();
+  c.labels[7] = document.getElementById('drive-label7-in').value.trim();
   try{ localStorage.setItem(DRIVE_CFG_KEY, JSON.stringify(c)); }catch(e){}
   // Drop the legacy per-course fields so they can't shadow the shared config.
   if(state){ delete state.driveScriptUrl; delete state.driveFolderId; saveState(); }
