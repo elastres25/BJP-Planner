@@ -861,6 +861,17 @@ body.simple-mode .dp-adv { display: none !important; }
 .wk-act-h b { font-weight:700; }
 .wk-ipp { font-weight:800; color:var(--navy); letter-spacing:.02em; }
 .wk-atype { font-weight:800; color:#7A4B00; }
+.wk-rich { font-size:11.5px; color:var(--ink); line-height:1.5; }
+.wk-rich ul { margin:2px 0 2px 16px; padding:0; } .wk-rich li { margin-bottom:2px; }
+.wk-rich a { color:var(--navy); } .wk-rich p { margin:0 0 3px; }
+/* Per-lesson ⋯ menu (simple native <details> dropdown) */
+.dl-menu { position:relative; }
+.dl-menu summary { list-style:none; cursor:pointer; background:rgba(255,255,255,.15); color:#fff; border:1px solid rgba(255,255,255,.3); border-radius:6px; padding:2px 12px 5px; font-size:17px; font-weight:800; line-height:1; user-select:none; }
+.dl-menu summary::-webkit-details-marker { display:none; }
+.dl-menu[open] summary { background:rgba(255,255,255,.3); }
+.dl-menu-body { position:absolute; right:0; top:calc(100% + 6px); background:#fff; border:1px solid var(--rule); border-radius:9px; box-shadow:0 12px 34px rgba(0,0,0,.2); padding:5px; min-width:212px; z-index:40; display:flex; flex-direction:column; }
+.dl-menu-body button { text-align:left; background:none; border:none; padding:9px 11px; border-radius:6px; font-family:inherit; font-size:13px; color:var(--ink); cursor:pointer; white-space:nowrap; }
+.dl-menu-body button:hover { background:#F0F4FA; color:var(--navy); }
 .wk-legend { border:1px solid var(--rule-dark); border-radius:8px; overflow:hidden; margin-bottom:14px; }
 .wk-legrow { display:flex; align-items:stretch; border-top:1px solid var(--rule); }
 .wk-legrow:first-child { border-top:none; }
@@ -2105,6 +2116,43 @@ function setUnitColor(uid, colorKey) {
   renderCourse();
   if (currentUnit === uid) renderUnit();
   toast('Unit color updated ✓');
+}
+
+// ── Free-text lesson fields (the "simple", type-into-a-box model) ──
+// Each planning cell (Goals, Learning Targets, Activities) is just a text
+// box. If the teacher hasn't typed one yet, we seed it from any older
+// structured data so nothing is ever lost.
+function htmlPlain(s){ return String(s||'').replace(/<[^>]*>/g,' ').replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim(); }
+function hasHtmlText(s){ return htmlPlain(s).length>0; }
+function bulletHTML(items){ return items.length ? '<ul>'+items.map(x=>`<li>${esc(x)}</li>`).join('')+'</ul>' : ''; }
+function goalsHTML(d){
+  if(hasHtmlText(d.goalsText)) return d.goalsText;
+  return bulletHTML((d.teacherGoals||[]).map(htmlPlain).filter(Boolean));
+}
+function targetsHTML(d){
+  if(hasHtmlText(d.targetsText)) return d.targetsText;
+  return bulletHTML((d.targets||[]).map(htmlPlain).filter(Boolean).map(x=>'I can '+x.replace(/^I can\s*/i,'')));
+}
+function actLineText(a){
+  const name = htmlPlain(a.name) || htmlPlain(a.desc);
+  const letters = actIPPLetters(a);
+  return `${actType(a)?actType(a)+'- ':''}${name}${a.dur?` [${a.dur} min]`:''}${letters?` ${letters}`:''}`.trim();
+}
+function activitiesToHTML(d){
+  const acts=(d.activities||[]).filter(a=>htmlPlain(a.name)||htmlPlain(a.desc));
+  return bulletHTML(acts.map(actLineText));
+}
+function hasActsText(d){ return hasHtmlText(d.activitiesText); }
+function actsHTML(d){ return hasActsText(d) ? d.activitiesText : activitiesToHTML(d); }
+// Plain lines (for the student agenda export).
+function actsLines(d){
+  if(hasActsText(d)){
+    const html=d.activitiesText;
+    const li=[...html.matchAll(/<li[^>]*>([\s\S]*?)<\/li>/gi)].map(m=>htmlPlain(m[1])).filter(Boolean);
+    if(li.length) return li;
+    return html.split(/<br\s*\/?>|<\/div>|<\/p>|\n/i).map(htmlPlain).filter(Boolean);
+  }
+  return (d.activities||[]).filter(a=>htmlPlain(a.name)).map(a=>`${htmlPlain(a.name)}${a.dur?` (${a.dur} min)`:''}`);
 }
 
 // ── LESSON PHASES (the standard daily flow) ───────────────────────
@@ -3683,7 +3731,9 @@ function buildWeekDoc(){
 
   const li = arr => (arr||[]).filter(Boolean)
     .map(x=>`<div style="margin:0 0 3px;padding-left:9px;text-indent:-9px">• ${escPDF(String(x).replace(/<[^>]*>/g,' ').trim())}</div>`).join('');
-  const actLines = d => (d.activities||[])
+  const actLines = d => {
+    if(hasActsText(d)) return d.activitiesText;   // teacher's typed list
+    return (d.activities||[])
     .filter(a => (a.name||'').trim() || (a.desc||'').trim())
     .map((a,n) => {
       const body = escPDF((a.name||'').trim() || String(a.desc||'').replace(/<[^>]*>/g,' ').trim());
@@ -3692,6 +3742,7 @@ function buildWeekDoc(){
       const detail = (a.desc||'').trim() && (a.name||'').trim() ? `<div style="margin:1px 0 0 15px;font-size:8.5pt;color:#333">${a.desc}</div>` : '';
       return `<div style="margin:0 0 5px;padding-left:14px;text-indent:-14px"><b>${n+1}. ${pre}${body}${a.dur?` [${a.dur} min]`:''}${letters?` ${escPDF(letters)}`:''}</b>${detail}</div>`;
     }).join('');
+  };
   const resLines = d => (d.materials||[]).map(m=>{ const t=escPDF(matTitle(m)||matUrl(m)), url=matUrl(m); return `<div style="margin:0 0 3px;padding-left:9px;text-indent:-9px">• ${url?`<a href="${escPDF(url)}">${t}</a>`:t}</div>`; }).join('');
 
   const head = cols.map(c=>{
@@ -3727,9 +3778,9 @@ function buildWeekDoc(){
     <table>
       <thead><tr><th style="background:${NAVY};border:1px solid ${NAVY};width:150px"></th>${head}</tr></thead>
       <tbody>
-        <tr>${rowLabel('Goals','What students should know and be able to do')}${cols.map(c=>cell(li(c.d.teacherGoals) || li(c.d.eq?[c.d.eq]:[]))).join('')}</tr>
+        <tr>${rowLabel('Goals','What students should know and be able to do')}${cols.map(c=>cell(goalsHTML(c.d))).join('')}</tr>
         <tr>${rowLabel('Q.O.D.','Question of the Day')}${cols.map(c=>cell(String(c.d.qod||'').trim()||'')).join('')}</tr>
-        <tr>${rowLabel('Learning Targets','"I can…" statements')}${cols.map(c=>cell(li((c.d.targets||[]).map(t=>'I can '+String(t).replace(/^I can\\s*/i,''))))).join('')}</tr>
+        <tr>${rowLabel('Learning Targets','"I can…" statements')}${cols.map(c=>cell(targetsHTML(c.d))).join('')}</tr>
         ${banner('Learning Activities / Tasks')}
         <tr>${rowLabel('Learning Activities / Tasks','C·E·R·A·V = IPP stages')}${cols.map(c=>cell(actLines(c.d))).join('')}</tr>
         <tr>${rowLabel('Homework','')}${cols.map(c=>cell(escPDF(String(c.d.homework||'').replace(/<[^>]*>/g,' ').trim()))).join('')}</tr>
@@ -4330,12 +4381,15 @@ function renderWeekPlan() {
     </th>`;
   };
 
-  const goalsCell = L => `<td class="wk-cell">${bullets((L.d.teacherGoals||[]).filter(g=>strip(g)), g=>`<li>${esc(strip(g))}</li>`)}</td>`;
-  const qodCell = L => `<td class="wk-cell">${strip(L.d.qod)?`<div class="wk-qod">${L.d.qod}</div>`:'<span class="wk-empty">—</span>'}</td>`;
-  const tgtCell = L => `<td class="wk-cell">${bullets((L.d.targets||[]).filter(t=>strip(t)), t=>`<li>I can ${esc(strip(t).replace(/^I can\s*/i,''))}</li>`)}</td>`;
+  const emptyCell = '<span class="wk-empty">—</span>';
+  const goalsCell = L => `<td class="wk-cell wk-rich">${hasHtmlText(goalsHTML(L.d))?goalsHTML(L.d):emptyCell}</td>`;
+  const qodCell = L => `<td class="wk-cell">${strip(L.d.qod)?`<div class="wk-qod">${L.d.qod}</div>`:emptyCell}</td>`;
+  const tgtCell = L => `<td class="wk-cell wk-rich">${hasHtmlText(targetsHTML(L.d))?targetsHTML(L.d):emptyCell}</td>`;
   const actCell = L => {
+    // Prefer the teacher's typed list; fall back to any structured activities.
+    if(hasActsText(L.d)) return `<td class="wk-cell wk-rich">${L.d.activitiesText}</td>`;
     const acts = (L.d.activities||[]).filter(a=>strip(a.name)||strip(a.desc));
-    if(!acts.length) return `<td class="wk-cell"><span class="wk-empty">—</span></td>`;
+    if(!acts.length) return `<td class="wk-cell">${emptyCell}</td>`;
     return `<td class="wk-cell">${acts.map((a,n)=>{
       const letters = actIPPLetters(a);
       const detail = strip(a.desc);
@@ -6993,17 +7047,18 @@ function dailyPanelHTML(d, i) {
   <div class="dl-head">
     <div class="dl-head-top">
       <div class="dl-title">${esc(d.label)} · Unit ${unitNo(currentUnit)}${u?` — ${esc(u.name)}`:''}</div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <button class="dl-move-btn" onclick="openMoveLesson(${i})" title="Move this lesson to another unit">⇄ Move</button>
-        <button class="dl-brainstorm-btn${strip(d.brainstorm)?' has':''}" onclick="openBrainstorm(${i})" title="Jot ideas for this lesson (not printed)">💡 Ideas${strip(d.brainstorm)?' •':''}</button>
-        <button class="dl-agenda-btn" onclick="exportDailyAgenda(${i})" title="Copy a student-facing agenda into your slideshow">📋 Agenda</button>
-        <span class="dl-time ${usedMins>blockDur?'over':''}">${usedMins} / ${blockDur} min</span>
-      </div>
+      <details class="dl-menu">
+        <summary title="More options">⋯</summary>
+        <div class="dl-menu-body">
+          <button onclick="this.closest('details').removeAttribute('open');openMoveLesson(${i})">⇄ Move to another unit</button>
+          <button onclick="this.closest('details').removeAttribute('open');openBrainstorm(${i})">💡 Ideas / brainstorm${strip(d.brainstorm)?' •':''}</button>
+          <button onclick="this.closest('details').removeAttribute('open');exportDailyAgenda(${i})">📋 Copy student agenda</button>
+        </div>
+      </details>
     </div>
     <div class="dl-meta">
       <label>A block <input type="date" value="${esc(d.dateA||'')}" onchange="updateDay(${i},'dateA',this.value);updateDayCard(${i})"></label>
       <label>B block <input type="date" value="${esc(d.dateB||'')}" onchange="updateDay(${i},'dateB',this.value);updateDayCard(${i})"></label>
-      <label>Block <input type="number" min="30" max="180" value="${blockDur}" onchange="updateDay(${i},'blockDuration',+this.value);rerenderDay(${i})"> min</label>
     </div>
     <input class="dl-topic" value="${esc(strip(d.topic))}" placeholder="Lesson topic / title…" onchange="updateDay(${i},'topic',this.value);updateDayCard(${i})">
     <input class="dl-eq" value="${esc(strip(d.eq))}" placeholder="Essential question (optional)…" onchange="updateDay(${i},'eq',this.value)">
@@ -7011,26 +7066,19 @@ function dailyPanelHTML(d, i) {
 
   <table class="dl-table"><tbody>
     <tr><td class="dl-lbl">Goals</td><td class="dl-cell">
-      ${(d.teacherGoals||[]).length ? rteToolbarShared('goal') : ''}
-      ${goalRows}
-      <input id="chipin-dlgoal-${i}" class="dl-add" placeholder="+ Add a goal, press Enter" onkeydown="if(event.key==='Enter'){event.preventDefault();dlAddGoal(${i},this.value)}">
+      ${rteField(`rte-goals-${i}`, goalsHTML(d), `updateDay(${i},'goalsText',this.innerHTML)`, 'What should students learn today…')}
     </td></tr>
-    <tr><td class="dl-lbl">Q.O.D.<small>Question of the Day — use the A color button to change font color</small></td><td class="dl-cell">
+    <tr><td class="dl-lbl">Q.O.D.<small>Question of the Day</small></td><td class="dl-cell">
       ${rteField(`rte-qod-${i}`, d.qod||'', `updateDay(${i},'qod',this.innerHTML)`, 'Question of the day…')}
     </td></tr>
     <tr><td class="dl-lbl">Learning Targets<small>&ldquo;I can…&rdquo; statements</small></td><td class="dl-cell">
-      ${(d.targets||[]).length ? rteToolbarShared('target') : ''}
-      ${tgtRows}
-      <input id="chipin-dltgt-${i}" class="dl-add" placeholder="+ Add a target, press Enter" onkeydown="if(event.key==='Enter'){event.preventDefault();dlAddTarget(${i},this.value)}">
+      ${rteField(`rte-targets-${i}`, targetsHTML(d), `updateDay(${i},'targetsText',this.innerHTML)`, 'I can…')}
     </td></tr>
 
     <tr><td class="dl-banner" colspan="2">Learning Activities / Tasks</td></tr>
-    <tr><td class="dl-lbl">Learning Activities / Tasks<small>Click a line to edit its type, minutes &amp; IPP stages.</small></td><td class="dl-cell dl-acts">
-      ${allActs}
-      <div class="dl-acttools">
-        <button class="dl-addact" onclick="addAct(${i})">+ Add activity</button>
-        <button class="dl-tmpl-btn" onclick="openActTemplates(${i})" title="Fill from a saved template, or save these as a template">⚡ Templates…</button>
-      </div>
+    <tr><td class="dl-lbl">Learning Activities / Tasks<small>Type your list — one per line.</small></td><td class="dl-cell">
+      ${rteField(`rte-acts-${i}`, actsHTML(d), `updateDay(${i},'activitiesText',this.innerHTML)`, 'e.g. CD- Group Discussion [10 min] E,R')}
+      <button class="dl-tmpl-btn" style="margin-top:7px" onclick="openActTemplates(${i})" title="Start from a saved template, or save this list as a template">⚡ Start from a template…</button>
     </td></tr>
     <tr><td class="dl-lbl">Homework</td><td class="dl-cell">
       ${rteField(`rte-hw-${i}`, d.homework||'', `updateDay(${i},'homework',this.innerHTML)`, 'Homework…')}
@@ -7152,12 +7200,12 @@ function exportDailyAgenda(i){
   lines.push(strip(d.topic) || d.label);
   lines.push('');
   if(strip(d.eq)) lines.push(`Essential Question: ${strip(d.eq)}`);
-  const goals = (d.teacherGoals||[]).map(strip).filter(Boolean);
-  if(goals.length) lines.push(`Today's Goal: ${goals.join('; ')}`);
-  if(strip(d.eq) || goals.length) lines.push('');
+  const goalTxt = strip(goalsHTML(d));
+  if(goalTxt) lines.push(`Today's Goal: ${goalTxt}`);
+  if(strip(d.eq) || goalTxt) lines.push('');
   lines.push('Agenda:');
-  const acts = (d.activities||[]).filter(a=>strip(a.name));
-  acts.forEach((a,n)=>lines.push(`${n+1}. ${strip(a.name)}${a.dur?` (${a.dur} min)`:''}`));
+  const acts = actsLines(d);
+  acts.forEach((t,n)=>lines.push(`${n+1}. ${t}`));
   if(!acts.length) lines.push('  (no activities yet)');
   if(strip(d.homework)){ lines.push(''); lines.push(`Homework: ${strip(d.homework)}`); }
   const ta = document.getElementById('agenda-text');
@@ -7321,32 +7369,40 @@ function defaultActTemplates(){
     ]
   }];
 }
-// Build a fresh activity object from a template entry.
-function actFromTemplate(t){
-  return { id:uid(), name:t.name||'', dur:+t.dur||0, grr:'focus',
-           atype:t.atype||'', ipp:Array.isArray(t.ipp)?t.ipp.slice():[], desc:t.desc||'' };
+// A template's activities as an HTML bullet list (works for both the
+// default structured templates and text templates the teacher saves).
+function tmplHTML(t){
+  if(t.text) return t.text;
+  const lines = (t.activities||[]).map(a=>{
+    const letters = (a.ipp||[]).map(v=>IPP_LETTER[v]||'').filter(Boolean).join(',');
+    return `${a.atype?a.atype+'- ':''}${a.name||''}${a.dur?` [${a.dur} min]`:''}${letters?` ${letters}`:''}`.trim();
+  });
+  return bulletHTML(lines.map(l=>l));   // esc happens inside bulletHTML
+}
+function tmplCount(t){ return t.text ? ((t.text.match(/<li/gi)||[]).length || 1) : (t.activities||[]).length; }
+function tmplPreview(t){
+  if(t.text) return htmlPlain(t.text);
+  return (t.activities||[]).map(a=>(a.atype?a.atype+'- ':'')+(a.name||'')).join(' · ');
 }
 function insertActTemplate(i, tid, replace){
   const tmpl = loadActTemplates().find(t=>t.id===tid); if(!tmpl) return;
-  const acts = getDay(i).activities;
-  const add = (tmpl.activities||[]).map(actFromTemplate);
-  if(replace) getDay(i).activities = add;
-  else acts.push(...add);
-  openActEdit = null;
+  const html = tmplHTML(tmpl);
+  const d = getDay(i);
+  const existing = hasActsText(d) ? d.activitiesText : activitiesToHTML(d);
+  d.activitiesText = replace ? html : (existing + html);
   saveState(); rerenderDay(i);
   closeActTemplates();
-  toast(`${replace?'Replaced with':'Added'} “${tmpl.name}” (${add.length} activit${add.length===1?'y':'ies'})`);
+  toast(`${replace?'Replaced with':'Added'} “${tmpl.name}”`);
 }
 function saveLessonAsTemplate(i){
-  const src = (getDay(i).activities||[]).filter(a=>String(a.name||'').trim());
-  if(!src.length){ toast('Add at least one named activity first'); return; }
+  const d = getDay(i);
+  const html = hasActsText(d) ? d.activitiesText : activitiesToHTML(d);
+  if(!hasHtmlText(html)){ toast('Type some activities first'); return; }
   const nameEl = document.getElementById('acttmpl-newname');
   const name = (nameEl && nameEl.value.trim()) || '';
   if(!name){ toast('Give the template a name'); if(nameEl) nameEl.focus(); return; }
   const list = loadActTemplates();
-  list.push({ id:'tmpl-'+uid(), name, activities: src.map(a=>({
-    name:String(a.name||'').trim(), dur:+a.dur||0, atype:actType(a), ipp:actIPP(a).slice(), desc:a.desc||''
-  })) });
+  list.push({ id:'tmpl-'+uid(), name, text: html });
   saveActTemplates(list);
   toast(`Saved template “${name}”`);
   openActTemplates(i);   // refresh the list
@@ -7361,11 +7417,10 @@ function openActTemplates(i){
   closeActTemplates();
   const list = loadActTemplates();
   const rows = list.map(t=>{
-    const preview = (t.activities||[]).map(a=>(a.atype?a.atype+'- ':'')+ (a.name||'')).join(' · ');
     return `<div class="atl-row">
       <div class="atl-info">
-        <div class="atl-name">${esc(t.name)} <span class="atl-count">${(t.activities||[]).length} activities</span></div>
-        <div class="atl-prev">${esc(preview)}</div>
+        <div class="atl-name">${esc(t.name)} <span class="atl-count">${tmplCount(t)} activities</span></div>
+        <div class="atl-prev">${esc(tmplPreview(t))}</div>
       </div>
       <div class="atl-acts">
         <button class="atl-insert" onclick="insertActTemplate(${i},'${t.id}',false)" title="Add these activities to the lesson">Insert</button>
@@ -8575,6 +8630,7 @@ function exportPDF() {
     .map(x=>`<div style="margin:0 0 4px;padding-left:11px;text-indent:-11px">&bull; ${escPDF(x)}</div>`).join('') || dash;
 
   const actLines = () => {
+    if(hasActsText(d)) return d.activitiesText;   // teacher's typed list
     const list = (d.activities||[]).filter(a=>strip(a.name)||strip(a.desc));
     if(!list.length) return dash;
     return list.map((a,n)=>{
@@ -8627,9 +8683,9 @@ function exportPDF() {
       </tr>
     </tbody></table>
     <table><tbody>
-      <tr>${rowLabel('Goals','What students should learn')}${cell(li(d.teacherGoals))}</tr>
+      <tr>${rowLabel('Goals','What students should learn')}${cell(hasHtmlText(goalsHTML(d))?goalsHTML(d):dash)}</tr>
       <tr>${rowLabel('Q.O.D.','Question of the Day')}${cell(String(d.qod||'').trim()||dash)}</tr>
-      <tr>${rowLabel('Learning Targets','&ldquo;I can&hellip;&rdquo; statements')}${cell(li(targets))}</tr>
+      <tr>${rowLabel('Learning Targets','&ldquo;I can&hellip;&rdquo; statements')}${cell(hasHtmlText(targetsHTML(d))?targetsHTML(d):dash)}</tr>
       ${banner('Learning Activities / Tasks')}
       <tr>${rowLabel('Learning Activities / Tasks','C&middot;E&middot;R&middot;A&middot;V = IPP stages')}${cell(actLines())}</tr>
       <tr>${rowLabel('Homework','')}${cell(escPDF(strip(d.homework)) || dash)}</tr>
