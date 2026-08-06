@@ -2155,6 +2155,17 @@ function actsLines(d){
   return (d.activities||[]).filter(a=>htmlPlain(a.name)).map(a=>`${htmlPlain(a.name)}${a.dur?` (${a.dur} min)`:''}`);
 }
 
+// The IPP Key + Activity Key legend rows — shared by the weekly view and
+// the daily lesson plan so both carry the same reference (like the paper).
+function keyLegendHTML(){
+  const ippKey = IPP_STAGES.map(s=>`<span class="wk-key-i"><b>${s.letter}</b> ${s.label}</span>`).join('<span class="wk-key-sep">|</span>');
+  const actKey = ACT_TYPES.map(t=>`<span class="wk-key-i"><b>${esc(t.k)}</b> ${esc(t.label)}</span>`).join('');
+  return `<div class="wk-legend">
+      <div class="wk-legrow"><span class="wk-leglbl">IPP Key</span><div class="wk-legbody">${ippKey}</div></div>
+      <div class="wk-legrow"><span class="wk-leglbl">Activity Key</span><div class="wk-legbody wk-legbody-grid">${actKey}</div></div>
+    </div>`;
+}
+
 // ── LESSON PHASES (the standard daily flow) ───────────────────────
 // Opening → Focus → Guided/Collaborative → Independent → Closer.
 // Each phase carries a default duration and the school-format bucket it
@@ -4406,13 +4417,7 @@ function renderWeekPlan() {
   })}</td>`;
   const bannerCells = label => lessons.map(()=>`<td class="wk-banner">${label}</td>`).join('');
 
-  const ippKey = IPP_STAGES.map(s=>`<span class="wk-key-i"><b>${s.letter}</b> ${s.label}</span>`).join('<span class="wk-key-sep">|</span>');
-  const actKey = ACT_TYPES.map(t=>`<span class="wk-key-i"><b>${esc(t.k)}</b> ${esc(t.label)}</span>`).join('');
-  const legend = `
-    <div class="wk-legend">
-      <div class="wk-legrow"><span class="wk-leglbl">IPP Key</span><div class="wk-legbody">${ippKey}</div></div>
-      <div class="wk-legrow"><span class="wk-leglbl">Activity Key</span><div class="wk-legbody wk-legbody-grid">${actKey}</div></div>
-    </div>`;
+  const legend = keyLegendHTML();
 
   const body = lessons.length ? `
     ${legend}
@@ -7063,6 +7068,8 @@ function dailyPanelHTML(d, i) {
     <input class="dl-topic" value="${esc(strip(d.topic))}" placeholder="Lesson topic / title…" onchange="updateDay(${i},'topic',this.value);updateDayCard(${i})">
     <input class="dl-eq" value="${esc(strip(d.eq))}" placeholder="Essential question (optional)…" onchange="updateDay(${i},'eq',this.value)">
   </div>
+
+  ${keyLegendHTML()}
 
   <table class="dl-table"><tbody>
     <tr><td class="dl-lbl">Goals</td><td class="dl-cell">
