@@ -803,6 +803,7 @@ body.simple-mode .dp-adv { display: none !important; }
 .dl-acttools { display:flex; gap:7px; margin-top:5px; align-items:center; flex-wrap:wrap; }
 .dl-tmpl-btn { background:none; border:1px dashed var(--rule-dark,#cfccc4); border-radius:6px; padding:5px 11px; font-family:inherit; font-size:11.5px; font-weight:600; color:var(--navy); cursor:pointer; }
 .dl-tmpl-btn:hover { border-color:var(--navy); background:#F7F9FC; }
+.dl-acttotal { margin-left:auto; font-size:12px; font-weight:700; color:var(--navy); background:#F0F4FA; border:1px solid var(--rule); border-radius:999px; padding:4px 12px; white-space:nowrap; }
 @media print { .dl-actline { cursor:default; } .dl-acttools, .dl-actdone, .dl-actmove, .dl-actx, .dl-actdetailbtn { display:none !important; } }
 /* Activity-template picker modal */
 .atl-overlay { position:fixed; inset:0; background:rgba(20,28,45,.5); z-index:2000; display:flex; align-items:flex-start; justify-content:center; padding:8vh 16px 16px; }
@@ -7160,6 +7161,7 @@ function dailyPanelHTML(d, i) {
       <div class="dl-acttools">
         <button class="dl-addact" onclick="addAct(${i})">+ Add activity</button>
         <button class="dl-tmpl-btn" onclick="openActTemplates(${i})" title="Fill from a saved template, or save these as a template">⚡ Templates…</button>
+        <span class="dl-acttotal" id="acttotal-${i}">Total: ${usedMins} min</span>
       </div>
     </td></tr>
     <tr><td class="dl-lbl">Homework</td><td class="dl-cell">
@@ -8100,12 +8102,14 @@ function updateActDur(di, ai, val) {
   saveState();
   refreshTracker(di);
   refreshAllTimestamps(di);
-  // Update the "X / Y min" chip in the simplified daily panel (unit view or modal)
+  // Update the live "Total: X min" under the activities (and the legacy chip).
   const d = getDay(di);
   const used = (d.activities||[]).reduce((s,a)=>s+(a.dur||0),0);
   const blockDur = d.blockDuration || 90;
   const chip = document.querySelector('#day-modal-overlay .dl-time, .daily-panel.open .dl-time');
   if (chip) { chip.textContent = `${used} / ${blockDur} min`; chip.classList.toggle('over', used>blockDur); }
+  const total = document.getElementById(`acttotal-${di}`);
+  if (total) total.textContent = `Total: ${used} min`;
 }
 
 // Recompute and redraw the start-time + duration-bar-fill for every
