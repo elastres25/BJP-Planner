@@ -1769,6 +1769,9 @@ body.simple-mode .dp-adv { display: none !important; }
       </div>
       <div id="semester-grid-content"></div>
     </div>
+
+    <!-- LIVE PACING GUIDE (embedded Google Doc) -->
+    <div style="margin-top:24px" id="pacing-doc-wrap"></div>
   </div>
 </div>
 
@@ -4915,6 +4918,54 @@ function renderSemesterGrid() {
       </div>
     </div>`;
   }).join('');
+  renderPacingDoc();
+}
+
+// ── LIVE PACING GUIDE (embedded Google Doc) ───────────────────────
+// Paste a Google Doc link; it embeds live and reflects the doc as it fills in.
+function pacingDocUrlRaw(){ return (state && state.pacingDocUrl) || ''; }
+function pacingDocEmbed(url){
+  url=(url||'').trim(); if(!url) return '';
+  if(/\/pub(\b|$|\?)/.test(url)){ return url.includes('embedded=') ? url : url + (url.includes('?')?'&':'?') + 'embedded=true'; }
+  const m = url.match(/\/document\/d\/(?:e\/)?([-\w]+)/);
+  return m ? `https://docs.google.com/document/d/${m[1]}/preview` : url;
+}
+function setPacingDoc(){
+  const v=((document.getElementById('pacing-doc-in')||{}).value||'').trim();
+  state.pacingDocUrl=v; saveState(); renderPacingDoc();
+  toast(v?'Pacing guide linked ✓':'Pacing guide cleared');
+}
+function clearPacingDoc(){ state.pacingDocUrl=''; saveState(); renderPacingDoc(); }
+function refreshPacingDoc(){ const f=document.getElementById('pacing-doc-frame'); if(f) f.src=f.src; }
+function renderPacingDoc(){
+  const el=document.getElementById('pacing-doc-wrap'); if(!el) return;
+  const url=pacingDocUrlRaw();
+  if(!url){
+    el.innerHTML=`
+      <div style="border:1px solid var(--rule);border-radius:10px;padding:16px 18px;background:#fff">
+        <div style="font-size:13px;font-weight:700;color:var(--navy)">📄 Live pacing guide (Google Doc)</div>
+        <div style="font-size:12px;color:var(--ink-2);margin:6px 0 10px;line-height:1.5">Paste a link to your semester pacing-guide Google Doc and it embeds here live — it reflects the doc as you keep filling it in.<br><span style="color:var(--ink-3)">Tip: in Google Docs use <b>Share → General access → Anyone with the link (Viewer)</b> so it shows. For a guaranteed public live view, use <b>File → Share → Publish to web</b> and paste that link instead.</span></div>
+        <div style="display:flex;gap:7px;flex-wrap:wrap">
+          <input id="pacing-doc-in" placeholder="https://docs.google.com/document/d/…" style="flex:1;min-width:220px;border:1px solid var(--rule-dark);border-radius:7px;padding:8px 10px;font-family:inherit;font-size:13px;outline:none">
+          <button onclick="setPacingDoc()" style="background:var(--navy);color:#fff;border:none;border-radius:7px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">Embed it</button>
+        </div>
+      </div>`;
+    return;
+  }
+  const embed=pacingDocEmbed(url);
+  el.innerHTML=`
+    <div style="border:1px solid var(--rule);border-radius:10px;overflow:hidden;background:#fff">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 12px;border-bottom:1px solid var(--rule);flex-wrap:wrap">
+        <div style="font-size:13px;font-weight:700;color:var(--navy)">📄 Semester Pacing Guide <span style="font-weight:400;font-size:11px;color:var(--ink-3)">· live from Google Docs</span></div>
+        <div style="display:flex;gap:6px">
+          <button onclick="refreshPacingDoc()" title="Reload the latest" style="background:none;border:1px solid var(--rule-dark);border-radius:6px;padding:5px 10px;font-size:12px;font-weight:600;color:var(--ink);cursor:pointer;font-family:inherit">↻ Refresh</button>
+          <a href="${esc(url)}" target="_blank" rel="noopener" style="background:none;border:1px solid var(--rule-dark);border-radius:6px;padding:5px 10px;font-size:12px;font-weight:600;color:var(--navy);cursor:pointer;text-decoration:none;font-family:inherit">Open in Docs ↗</a>
+          <button onclick="clearPacingDoc()" title="Remove this embed" style="background:none;border:1px solid var(--rule-dark);border-radius:6px;padding:5px 10px;font-size:12px;font-weight:600;color:var(--ink-3);cursor:pointer;font-family:inherit">Unlink</button>
+        </div>
+      </div>
+      <iframe id="pacing-doc-frame" src="${esc(embed)}" style="width:100%;height:640px;border:none;display:block" loading="lazy"></iframe>
+      <div style="font-size:11px;color:var(--ink-3);padding:6px 12px;border-top:1px solid var(--rule)">If it shows blank, the doc isn't shared publicly yet — set sharing to <b>Anyone with the link</b>, or use <b>File → Publish to web</b> and paste that link (Unlink → re-embed).</div>
+    </div>`;
 }
 
 function openGridDay(uid, wi, di) {
