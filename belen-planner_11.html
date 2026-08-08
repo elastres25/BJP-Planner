@@ -3199,6 +3199,23 @@ function assignActiveCourseDates(startISO){
   saveState();
   return n;
 }
+// Anchor: this lesson gets its class date, and every LATER lesson flows onto
+// the next class days. Earlier lessons are left untouched. Handles intro days
+// that aren't class days (e.g. Unit 0 Day 1 = orientation, Day 2 = first class).
+function fillDatesFromHere(i){
+  const cal=loadCalendar(); if(!cal||!cal.courses[activeCourse]){ openCalendarImport(); return; }
+  const dates=cal.courses[activeCourse].dates;
+  const d=getDay(i);
+  if(!d.dateA){ toast('Set this lesson’s class date first, then Fill from here'); return; }
+  let ai=dates.findIndex(x=>x>=d.dateA);
+  if(ai<0){ toast('No class days on or after that date'); return; }
+  const flat=[]; orderedUnits().forEach(u=>(state.units[u.id]||[]).forEach(w=>(w.days||[]).forEach(day=>flat.push(day))));
+  const pos=flat.indexOf(d); if(pos<0) return;
+  let n=0;
+  for(let k=pos;k<flat.length;k++){ const di=ai+(k-pos); if(di<dates.length){ flat[k].dateA=dates[di]; flat[k].dateB=''; n++; } }
+  saveState(); rerenderDay(i);
+  toast(`Dated ${n} lesson${n===1?'':'s'} from ${fmtNice(dates[ai])} onward ✓`);
+}
 function openCalendarImport(){ document.getElementById('cal-overlay').style.display='block'; renderCalImport(); }
 function closeCalendarImport(){ document.getElementById('cal-overlay').style.display='none'; }
 function onICSFile(ev){
@@ -3236,6 +3253,7 @@ function renderCalImport(){
     </div>
     <div style="font-weight:700;color:var(--navy);margin-bottom:6px">Auto-fill class dates for <u>${getCourse().name}</u></div>
     <div style="font-size:12.5px;color:var(--ink-2);margin-bottom:8px">This assigns each ${getCourse().name} lesson (in order) to its next class day. Switch the course toggle and run this again for the other course.</div>
+    <div style="font-size:11.5px;color:var(--ink-3);background:#FBF7EC;border:1px solid #EBD9A8;border-radius:7px;padding:8px 10px;margin-bottom:12px">💡 Have a non-class day first (e.g. <b>Unit 0 Day 1 = orientation</b>)? Skip this and instead open your first real class lesson, set its <b>Class date</b>, and click <b>↓ Fill dates from here</b> — every later lesson flows onto the class days and earlier days stay as you set them.</div>
     <label style="display:block;font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:4px">Start from</label>
     <input type="date" id="cal-start" value="${firstDate}" style="border:1px solid var(--rule-dark);border-radius:7px;padding:7px 10px;font-family:inherit;font-size:13px;outline:none;margin-bottom:14px">
     <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
@@ -7272,7 +7290,10 @@ function dailyPanelHTML(d, i) {
     </div>
     <div class="dl-meta">
       <label>Class date <input type="date" value="${esc(d.dateA||'')}" onchange="updateDay(${i},'dateA',this.value);updateDayCard(${i});rerenderDay(${i})"></label>
-      ${d.dateA && calClassLabel(activeCourse, d.dateA) ? `<span class="dl-classlabel">${esc(calClassLabel(activeCourse, d.dateA))}</span>` : (calImported()?'':`<button class="dl-calbtn" onclick="openCalendarImport()" title="Import your school calendar to auto-fill class dates">📅 Import calendar</button>`)}
+      ${d.dateA && calClassLabel(activeCourse, d.dateA) ? `<span class="dl-classlabel">${esc(calClassLabel(activeCourse, d.dateA))}</span>` : ''}
+      ${calImported()
+        ? `<button class="dl-calbtn" onclick="fillDatesFromHere(${i})" title="Give this lesson its class date, then flow every later lesson onto the next class days (leaves earlier days alone)">↓ Fill dates from here</button>`
+        : `<button class="dl-calbtn" onclick="openCalendarImport()" title="Import your school calendar to auto-fill class dates">📅 Import calendar</button>`}
     </div>
     <input class="dl-topic" value="${esc(strip(d.topic))}" placeholder="Lesson topic / title…" onchange="updateDay(${i},'topic',this.value);updateDayCard(${i})">
     <input class="dl-eq" value="${esc(strip(d.eq))}" placeholder="Essential question (optional)…" onchange="updateDay(${i},'eq',this.value)">
