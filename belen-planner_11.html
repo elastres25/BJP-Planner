@@ -3219,6 +3219,22 @@ function fillDatesFromHere(i){
   saveState(); rerenderDay(i);
   toast(`Dated ${n} lesson${n===1?'':'s'} from ${fmtNice(dates[ai])} onward ✓`);
 }
+// Auto-reflow (opt-in): after a lesson is added/moved/deleted, re-flow class
+// dates from the first class-dated lesson onward, keeping everything in order.
+// Anchored on the first lesson whose date is a real class day, so a non-class
+// intro day (Unit 0 Day 1) is left alone.
+function reflowDatesAuto(){
+  if(!state || !state.autoSyncDates) return false;
+  const cal=loadCalendar(); if(!cal||!cal.courses[activeCourse]) return false;
+  const dates=cal.courses[activeCourse].dates; if(!dates.length) return false;
+  const flat=[]; orderedUnits().forEach(u=>(state.units[u.id]||[]).forEach(w=>(w.days||[]).forEach(day=>flat.push(day))));
+  let anchorPos=-1, anchorIdx=-1;
+  for(let k=0;k<flat.length;k++){ const di=dates.indexOf(flat[k].dateA); if(di>=0){ anchorPos=k; anchorIdx=di; break; } }
+  if(anchorPos<0) return false;   // no class-dated lesson yet — nothing to anchor on
+  for(let k=anchorPos;k<flat.length;k++){ const di=anchorIdx+(k-anchorPos); flat[k].dateA = di<dates.length ? dates[di] : ''; flat[k].dateB=''; }
+  saveState();
+  return true;
+}
 function openCalendarImport(){ document.getElementById('cal-overlay').style.display='block'; renderCalImport(); }
 function closeCalendarImport(){ document.getElementById('cal-overlay').style.display='none'; }
 function onICSFile(ev){
@@ -3257,6 +3273,10 @@ function renderCalImport(){
     <div style="font-weight:700;color:var(--navy);margin-bottom:6px">Auto-fill class dates for <u>${getCourse().name}</u></div>
     <div style="font-size:12.5px;color:var(--ink-2);margin-bottom:8px">This assigns each ${getCourse().name} lesson (in order) to its next class day. Switch the course toggle and run this again for the other course.</div>
     <div style="font-size:11.5px;color:var(--ink-3);background:#FBF7EC;border:1px solid #EBD9A8;border-radius:7px;padding:8px 10px;margin-bottom:12px">💡 Have a non-class day first (e.g. <b>Unit 0 Day 1 = orientation</b>)? Skip this and instead open your first real class lesson, set its <b>Class date</b>, and click <b>↓ Fill dates from here</b> — every later lesson flows onto the class days and earlier days stay as you set them.</div>
+    <label style="display:flex;align-items:flex-start;gap:8px;font-size:12.5px;color:var(--ink);background:#F0F4FA;border:1px solid var(--rule);border-radius:7px;padding:9px 11px;margin-bottom:14px;cursor:pointer">
+      <input type="checkbox" ${state.autoSyncDates?'checked':''} onchange="state.autoSyncDates=this.checked;saveState();toast(this.checked?'Auto-sync dates: ON':'Auto-sync dates: OFF')" style="margin-top:2px">
+      <span><b>Auto-sync dates to the calendar</b><br><span style="color:var(--ink-3)">When you add, move, or delete a lesson, the class dates re-flow automatically from your first class day. Overwrites manual date tweaks on later lessons.</span></span>
+    </label>
     <label style="display:block;font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:4px">Start from</label>
     <input type="date" id="cal-start" value="${firstDate}" style="border:1px solid var(--rule-dark);border-radius:7px;padding:7px 10px;font-family:inherit;font-size:13px;outline:none;margin-bottom:14px">
     <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
@@ -7186,6 +7206,7 @@ function moveLessonConfirm(){
   // clear open state if the moved day was open
   if(currentUnit===srcUid && openWeekIdx===srcWi && openDayIdx===srcDi){ openWeekIdx=null; openDayIdx=null; }
   saveState();
+  reflowDatesAuto();
   closeMoveLesson();
   const du = UNIT_META.find(m=>m.id===destUid);
   if(dayModalOpen()) closeDayModal();
@@ -7237,6 +7258,7 @@ function moveDayTo(srcWi, srcDi, destWi, destDi) {
   }
 
   saveState();
+  reflowDatesAuto();
   renderUnit();
   toast('Day reordered');
 }
@@ -8824,6 +8846,7 @@ function addDay(wi) {
   let dayNum = 1;
   weeks.forEach(w => w.days.forEach(d => { d.label = `Day ${dayNum}`; dayNum++; }));
   saveState();
+  reflowDatesAuto();
   openWeekIdx = wi;
   openDayIdx = week.days.length - 1;
   currentWeek = wi;
@@ -8847,6 +8870,7 @@ function deleteDay(wi, di) {
   if (openWeekIdx === wi && openDayIdx === di) { openWeekIdx = null; openDayIdx = null; }
   else if (openWeekIdx === wi && openDayIdx !== null && openDayIdx > di) openDayIdx--;
   saveState();
+  reflowDatesAuto();
   renderUnit();
 }
 
