@@ -696,13 +696,17 @@ body.simple-mode .dp-adv { display: none !important; }
 .sp-table th { background:var(--navy); color:#fff; font-size:11px; font-weight:700; letter-spacing:.03em;
   text-align:left; padding:8px 10px; white-space:nowrap; }
 .sp-th-hint { font-weight:400; opacity:.7; text-transform:none; letter-spacing:0; }
-.sp-td { border:1px solid var(--rule); padding:3px 5px; vertical-align:middle; }
-.sp-mid { text-align:center; font-size:12px; color:var(--ink-2); }
+.sp-td { border:1px solid var(--rule); padding:3px 5px; vertical-align:top; }
+.sp-mid { text-align:center; font-size:12px; color:var(--ink-2); vertical-align:middle; }
 .sp-daylabel { font-weight:600; color:var(--ink); font-size:12px; }
 .sp-inp { width:100%; box-sizing:border-box; border:1px solid transparent; background:transparent;
   border-radius:5px; padding:6px 8px; font-family:inherit; font-size:12.5px; color:var(--ink); outline:none; }
 .sp-inp:hover { border-color:var(--rule); }
 .sp-inp:focus { border-color:var(--navy); background:#fff; }
+/* Content / HW cells now wrap so the full text is readable */
+.sp-cell { min-height:34px; line-height:1.5; white-space:normal; overflow-wrap:anywhere; word-break:break-word; }
+.sp-cell:empty:before { content:attr(data-ph); color:var(--ink-3); pointer-events:none; }
+.sp-content { min-width:260px; }
 .sp-dateinp { font-size:11.5px; }
 .sp-sel { cursor:pointer; }
 .sp-status { font-size:13px; font-weight:800; color:var(--ink-3); margin-right:6px; }
@@ -769,10 +773,12 @@ body.simple-mode .dp-adv { display: none !important; }
 .ga-row { border-bottom:1px solid var(--rule); padding:3px 0; }
 .ga-row:last-of-type { border-bottom:none; }
 .ga-main { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
-.ga-move { display:inline-flex; flex-direction:column; gap:1px; flex:0 0 auto; }
-.ga-move button { border:none; background:none; cursor:pointer; color:var(--ink-3); font-size:8px; line-height:1; padding:1px 2px; border-radius:3px; }
-.ga-move button:hover:not(:disabled) { color:var(--navy); background:rgba(27,58,107,.1); }
-.ga-move button:disabled { opacity:.25; cursor:default; }
+.ga-drag { flex:0 0 auto; cursor:grab; color:var(--ink-3); font-size:13px; line-height:1; padding:2px 3px; border-radius:4px; user-select:none; }
+.ga-drag:hover { color:var(--navy); background:rgba(27,58,107,.08); }
+.ga-drag:active { cursor:grabbing; }
+[data-actitem].ga-dragging { opacity:.4; }
+[data-actitem].ga-dropbefore { box-shadow:0 -2px 0 0 var(--navy); }
+[data-actitem].ga-dropafter { box-shadow:0 2px 0 0 var(--navy); }
 .ga-num { flex:0 0 auto; font-weight:800; font-size:12.5px; color:var(--navy); width:18px; text-align:right; font-variant-numeric:tabular-nums; }
 .ga-type { flex:0 0 auto; width:52px; height:28px; border:1px solid var(--rule-dark); border-radius:5px; background:#F0F4FA; color:var(--navy); font-family:inherit; font-size:11px; font-weight:800; padding:0 3px; cursor:pointer; }
 .ga-type:hover { border-color:var(--navy); }
@@ -6443,8 +6449,9 @@ function simplePacingHTML(){
 
   const co = getCourse();
   const inp = (val, uid, wi, di, field, ph) =>
-    `<input class="sp-inp" value="${esc(String(val||'').replace(/<[^>]*>/g,' ').trim())}" placeholder="${esc(ph||'')}"
-       onchange="savePaceCellU(${uid},${wi},${di},'${field}',this.value)">`;
+    `<div class="sp-inp sp-cell" contenteditable="true" data-ph="${esc(ph||'')}"
+       onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.blur();}"
+       onblur="savePaceCellU(${uid},${wi},${di},'${field}',this.textContent)">${esc(String(val||'').replace(/<[^>]*>/g,' ').trim())}</div>`;
 
   let globalDay = 0;
   const body = blocks.map(b => {
@@ -6488,7 +6495,7 @@ function simplePacingHTML(){
           <th style="width:54px">Day</th>
           <th style="width:60px">#</th>
           <th>Content <span class="sp-th-hint">— general theme</span></th>
-          <th style="width:200px">HW</th>
+          <th style="width:240px">HW</th>
           <th style="width:104px">Plan</th>
         </tr></thead>
         <tbody>${body || `<tr><td class="sp-td" colspan="6" style="text-align:center;color:var(--ink-3);font-style:italic">No class days yet.</td></tr>`}</tbody>
@@ -7316,11 +7323,8 @@ function dailyPanelHTML(d, i) {
   const actRow = (o, canUp, canDown) => {
     const a=o.a, ai=o.ai;
     if(a.brk){
-      return `<div class="dl-actwrap dl-break">
-        <span class="ga-move">
-          <button ${canUp?'':'disabled'} onclick="moveAct(${i},${ai},-1)" title="Move up">▲</button>
-          <button ${canDown?'':'disabled'} onclick="moveAct(${i},${ai},1)" title="Move down">▼</button>
-        </span>
+      return `<div class="dl-actwrap dl-break" data-actitem ondragover="actDragOver(event,${i},${ai})" ondragleave="actDragLeave(event)" ondrop="actDrop(event,${i},${ai})">
+        <span class="ga-drag" draggable="true" ondragstart="actDragStart(event,${i},${ai})" ondragend="actDragEnd(event)" title="Drag to reorder">⠿</span>
         <span class="dl-break-rule"></span>
         <span class="dl-break-mid">🍽 <input class="dl-break-in" value="${esc(a.name||'Lunch')}" placeholder="Lunch" onchange="updateActField(${i},${ai},'name',this.value)"></span>
         <span class="dl-break-sub" id="brksub-${i}-${ai}">${o.before} min before</span>
@@ -7329,12 +7333,9 @@ function dailyPanelHTML(d, i) {
       </div>`;
     }
     const hasDetail = !!strip(a.desc);
-    return `<div class="ga-row">
+    return `<div class="ga-row" data-actitem ondragover="actDragOver(event,${i},${ai})" ondragleave="actDragLeave(event)" ondrop="actDrop(event,${i},${ai})">
       <div class="ga-main">
-        <span class="ga-move">
-          <button ${canUp?'':'disabled'} onclick="moveAct(${i},${ai},-1)" title="Move up">▲</button>
-          <button ${canDown?'':'disabled'} onclick="moveAct(${i},${ai},1)" title="Move down">▼</button>
-        </span>
+        <span class="ga-drag" draggable="true" ondragstart="actDragStart(event,${i},${ai})" ondragend="actDragEnd(event)" title="Drag to reorder">⠿</span>
         <span class="ga-num">${o.num}.</span>
         <select class="ga-type" onchange="updateActType(${i},${ai},this.value)" title="Activity type (from the Activity Key)">
           <option value="">–</option>
@@ -7785,6 +7786,47 @@ function moveAct(i,ai,dir){
 }
 // Legacy alias (kept in case any handler still references it).
 function moveActInBucket(i,ai,dir){ moveAct(i,ai,dir); }
+
+// ── Drag-to-reorder activities (and the lunch divider) ────────────
+let _dragActI=null, _dragActAi=null;
+function actDragStart(ev, i, ai){
+  _dragActI=i; _dragActAi=ai;
+  ev.dataTransfer.effectAllowed='move';
+  try{ ev.dataTransfer.setData('text/plain', String(ai)); }catch(e){}
+  const row=ev.target.closest('[data-actitem]');
+  if(row) setTimeout(()=>row.classList.add('ga-dragging'), 0);
+}
+function actDragEnd(ev){ document.querySelectorAll('[data-actitem]').forEach(r=>r.classList.remove('ga-dragging','ga-dropbefore','ga-dropafter')); }
+function actDragOver(ev, i, ai){
+  if(_dragActI!==i) return;
+  ev.preventDefault(); ev.dataTransfer.dropEffect='move';
+  const row=ev.currentTarget, rect=row.getBoundingClientRect();
+  const after=(ev.clientY-rect.top) > rect.height/2;
+  document.querySelectorAll('[data-actitem]').forEach(r=>r.classList.remove('ga-dropbefore','ga-dropafter'));
+  row.classList.add(after?'ga-dropafter':'ga-dropbefore');
+}
+function actDragLeave(ev){ ev.currentTarget.classList.remove('ga-dropbefore','ga-dropafter'); }
+function actDrop(ev, i, ai){
+  ev.preventDefault();
+  document.querySelectorAll('[data-actitem]').forEach(r=>r.classList.remove('ga-dragging','ga-dropbefore','ga-dropafter'));
+  if(_dragActI!==i || _dragActAi==null) { _dragActI=_dragActAi=null; return; }
+  const row=ev.currentTarget, rect=row.getBoundingClientRect();
+  const after=(ev.clientY-rect.top) > rect.height/2;
+  let to=ai+(after?1:0);
+  moveActIndex(i, _dragActAi, to);
+  _dragActI=_dragActAi=null;
+}
+function moveActIndex(i, from, to){
+  const acts=getDay(i).activities;
+  if(from<0 || from>=acts.length) return;
+  const item=acts[from];
+  acts.splice(from,1);
+  if(from<to) to--;
+  to=Math.max(0, Math.min(to, acts.length));
+  acts.splice(to,0,item);
+  if(openActEdit===`${i}:${from}`) openActEdit=`${i}:${to}`;
+  saveState(); rerenderDay(i);
+}
 
 // ── ACTIVITY TEMPLATES ────────────────────────────────────────────
 // Saved sets of activities the teacher can drop into any lesson.
