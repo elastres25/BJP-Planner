@@ -790,7 +790,14 @@ body.simple-mode .dp-adv { display: none !important; }
 .ga-del { flex:0 0 auto; border:none; background:none; color:var(--ink-3); font-size:16px; line-height:1; cursor:pointer; padding:0 3px; }
 .ga-del:hover { color:var(--crit,#c0392b); }
 .ga-detail { padding:5px 0 7px 26px; }
-@media print { .ga-move, .ga-del, .ga-detailbtn, .dl-acttools { display:none !important; } }
+/* Break / lunch divider */
+.dl-break { display:flex; align-items:center; gap:8px; padding:7px 4px; }
+.dl-break-rule { flex:1; height:0; border-top:2px dashed #C9991A; }
+.dl-break-mid { flex:0 0 auto; display:inline-flex; align-items:center; gap:4px; font-size:13px; }
+.dl-break-in { border:1px solid transparent; border-radius:5px; padding:3px 7px; font-family:inherit; font-size:12.5px; font-weight:700; color:#7A4B00; background:#FBF3E0; text-align:center; width:120px; outline:none; }
+.dl-break-in:hover { border-color:#E4C97A; } .dl-break-in:focus { border-color:#C9991A; background:#fff; }
+.dl-break-sub { flex:0 0 auto; font-size:10.5px; font-weight:700; color:#7A4B00; white-space:nowrap; }
+@media print { .ga-move, .ga-del, .ga-detailbtn, .dl-acttools { display:none !important; } .dl-break-in { border:none; background:none; } }
 /* Compact (collapsed) activity line — click to edit */
 .dl-actline { display:flex; align-items:center; gap:9px; padding:5px 6px; border:1px solid transparent; border-radius:6px; cursor:text; }
 .dl-actline:hover { border-color:var(--rule); background:#FCFCFA; }
@@ -895,6 +902,7 @@ body.simple-mode .dp-adv { display: none !important; }
 .wk-act-h b { font-weight:700; }
 .wk-ipp { font-weight:800; color:var(--navy); letter-spacing:.02em; }
 .wk-atype { font-weight:800; color:#7A4B00; }
+.wk-break { font-size:10.5px; font-weight:700; color:#7A4B00; text-align:center; margin:4px 0; padding:2px 0; border-top:1px dashed #C9991A; border-bottom:1px dashed #C9991A; }
 .wk-rich { font-size:11.5px; color:var(--ink); line-height:1.5; }
 .wk-rich ul { margin:2px 0 2px 16px; padding:0; } .wk-rich li { margin-bottom:2px; }
 .wk-rich a { color:var(--navy); } .wk-rich p { margin:0 0 3px; }
@@ -2204,7 +2212,7 @@ function actLineText(a){
   return `${actType(a)?actType(a)+'- ':''}${name}${a.dur?` [${a.dur} min]`:''}${letters?` ${letters}`:''}`.trim();
 }
 function activitiesToHTML(d){
-  const acts=(d.activities||[]).filter(a=>htmlPlain(a.name)||htmlPlain(a.desc));
+  const acts=(d.activities||[]).filter(a=>!a.brk && (htmlPlain(a.name)||htmlPlain(a.desc)));
   return bulletHTML(acts.map(actLineText));
 }
 function hasActsText(d){ return hasHtmlText(d.activitiesText); }
@@ -2217,7 +2225,7 @@ function actsLines(d){
     if(li.length) return li;
     return html.split(/<br\s*\/?>|<\/div>|<\/p>|\n/i).map(htmlPlain).filter(Boolean);
   }
-  return (d.activities||[]).filter(a=>htmlPlain(a.name)).map(a=>`${htmlPlain(a.name)}${a.dur?` (${a.dur} min)`:''}`);
+  return (d.activities||[]).filter(a=>!a.brk && htmlPlain(a.name)).map(a=>`${htmlPlain(a.name)}${a.dur?` (${a.dur} min)`:''}`);
 }
 
 // The IPP Key + Activity Key legend rows — shared by the weekly view and
@@ -3997,14 +4005,17 @@ function buildWeekDoc(){
     .map(x=>`<div style="margin:0 0 3px;padding-left:9px;text-indent:-9px">• ${escPDF(String(x).replace(/<[^>]*>/g,' ').trim())}</div>`).join('');
   const actLines = d => {
     if(hasActsText(d)) return d.activitiesText;   // teacher's typed list
+    let n=0;
     return (d.activities||[])
-    .filter(a => (a.name||'').trim() || (a.desc||'').trim())
-    .map((a,n) => {
+    .filter(a => a.brk || (a.name||'').trim() || (a.desc||'').trim())
+    .map(a => {
+      if(a.brk) return `<div style="margin:4px 0;text-align:center;font-size:8pt;font-weight:700;color:#7A4B00;border-top:1px dashed #C9991A;border-bottom:1px dashed #C9991A;padding:1px 0">🍽 ${escPDF((a.name||'Lunch').trim())}</div>`;
+      n++;
       const body = escPDF((a.name||'').trim() || String(a.desc||'').replace(/<[^>]*>/g,' ').trim());
       const pre = actType(a) ? escPDF(actType(a))+'- ' : '';
       const letters = actIPPText(a);
       const detail = (a.desc||'').trim() && (a.name||'').trim() ? `<div style="margin:1px 0 0 15px;font-size:8.5pt;color:#333">${a.desc}</div>` : '';
-      return `<div style="margin:0 0 5px;padding-left:14px;text-indent:-14px"><b>${n+1}. ${pre}${body}${a.dur?` [${a.dur} min]`:''}${letters?` ${escPDF(letters)}`:''}</b>${detail}</div>`;
+      return `<div style="margin:0 0 5px;padding-left:14px;text-indent:-14px"><b>${n}. ${pre}${body}${a.dur?` [${a.dur} min]`:''}${letters?` ${escPDF(letters)}`:''}</b>${detail}</div>`;
     }).join('');
   };
   const resLines = d => (d.materials||[]).map(m=>{ const t=escPDF(matTitle(m)||matUrl(m)), url=matUrl(m); return `<div style="margin:0 0 3px;padding-left:9px;text-indent:-9px">• ${url?`<a href="${escPDF(url)}">${t}</a>`:t}</div>`; }).join('');
@@ -4662,13 +4673,16 @@ function renderWeekPlan() {
   const actCell = L => {
     // Prefer the teacher's typed list; fall back to any structured activities.
     if(hasActsText(L.d)) return `<td class="wk-cell wk-rich">${L.d.activitiesText}</td>`;
-    const acts = (L.d.activities||[]).filter(a=>strip(a.name)||strip(a.desc));
+    const acts = (L.d.activities||[]).filter(a=>a.brk||strip(a.name)||strip(a.desc));
     if(!acts.length) return `<td class="wk-cell">${emptyCell}</td>`;
-    return `<td class="wk-cell">${acts.map((a,n)=>{
+    let n=0;
+    return `<td class="wk-cell">${acts.map(a=>{
+      if(a.brk) return `<div class="wk-break">🍽 ${esc(strip(a.name)||'Lunch')}</div>`;
+      n++;
       const letters = actIPPText(a);
       const detail = strip(a.desc);
       return `<div class="wk-act">
-        <div class="wk-act-h"><b>${n+1}. ${actType(a)?`<span class="wk-atype">${esc(actType(a))}-</span> `:''}${esc(strip(a.name)||'—')}${a.dur?` [${a.dur} min]`:''}${letters?` <span class="wk-ipp">${esc(letters)}</span>`:''}</b></div>
+        <div class="wk-act-h"><b>${n}. ${actType(a)?`<span class="wk-atype">${esc(actType(a))}-</span> `:''}${esc(strip(a.name)||'—')}${a.dur?` [${a.dur} min]`:''}${letters?` <span class="wk-ipp">${esc(letters)}</span>`:''}</b></div>
         ${detail?`<div class="wk-act-d">${a.desc}</div>`:''}
       </div>`;
     }).join('')}</td>`;
@@ -7275,7 +7289,9 @@ function collapseAct(i){ openActEdit = null; rerenderDay(i); }
 function dailyPanelHTML(d, i) {
   const u = UNIT_META.find(m=>m.id===currentUnit);
   const blockDur = d.blockDuration || 90;
-  const usedMins = (d.activities||[]).reduce((s,a)=>s+(a.dur||0),0);
+  const _seg = actSegments(d.activities);
+  const usedMins = _seg.total;
+  const totalTxt = _seg.hasBreak ? `${_seg.segs.join(' + ')} = ${usedMins} / ${blockDur} min` : `Total: ${usedMins} / ${blockDur} min`;
   const strip = s => String(s||'').replace(/<[^>]*>/g,' ').replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim();
 
   // One-time migration: if this lesson only has a free-text activities list
@@ -7286,14 +7302,32 @@ function dailyPanelHTML(d, i) {
     if(parsed.length){ d.activities = parsed; delete d.activitiesText; saveState(); }
   }
 
-  // Activities keep the teacher's own order (the array order); numbering
-  // follows that order, and each can be reordered within its section.
-  const ordered = (d.activities||[]).map((a,ai)=>({a,ai}));
-  ordered.forEach((o,n)=>o.num=n+1);
+  // Activities keep the teacher's own order. Numbering skips break dividers;
+  // each break records the teaching minutes that came before it.
+  const ordered = [];
+  { let n=0, seg=0;
+    (d.activities||[]).forEach((a,ai)=>{
+      if(a.brk){ ordered.push({a,ai,num:null,before:seg}); seg=0; }
+      else { n++; ordered.push({a,ai,num:n}); seg+=(a.dur||0); }
+    });
+  }
 
   // Guided activity row: ▲▼ · number · type · name · minutes · IPP · ＋details · ✕
   const actRow = (o, canUp, canDown) => {
     const a=o.a, ai=o.ai;
+    if(a.brk){
+      return `<div class="dl-actwrap dl-break">
+        <span class="ga-move">
+          <button ${canUp?'':'disabled'} onclick="moveAct(${i},${ai},-1)" title="Move up">▲</button>
+          <button ${canDown?'':'disabled'} onclick="moveAct(${i},${ai},1)" title="Move down">▼</button>
+        </span>
+        <span class="dl-break-rule"></span>
+        <span class="dl-break-mid">🍽 <input class="dl-break-in" value="${esc(a.name||'Lunch')}" placeholder="Lunch" onchange="updateActField(${i},${ai},'name',this.value)"></span>
+        <span class="dl-break-sub" id="brksub-${i}-${ai}">${o.before} min before</span>
+        <span class="dl-break-rule"></span>
+        <button class="ga-del" onclick="removeAct(${i},${ai})" title="Remove break">&times;</button>
+      </div>`;
+    }
     const hasDetail = !!strip(a.desc);
     return `<div class="ga-row">
       <div class="ga-main">
@@ -7390,9 +7424,10 @@ function dailyPanelHTML(d, i) {
       ${allActs}
       <div class="dl-acttools">
         <button class="dl-addact" onclick="addAct(${i})">+ Add activity</button>
+        <button class="dl-addact" onclick="addBreak(${i})" title="Insert a lunch / break divider that splits the lesson">🍽 + Break</button>
         <button class="dl-tmpl-btn" onclick="openActTemplates(${i})" title="Fill from a saved template, or save these as a template">⚡ Templates…</button>
         <label class="dl-blocklen" title="Length of this class period">Period <input type="number" min="0" max="240" value="${blockDur}" onchange="updateDay(${i},'blockDuration',+this.value);rerenderDay(${i})"> min</label>
-        <span class="dl-acttotal${usedMins>blockDur?' over':''}" id="acttotal-${i}">Total: ${usedMins} / ${blockDur} min</span>
+        <span class="dl-acttotal${usedMins>blockDur?' over':''}" id="acttotal-${i}">${totalTxt}</span>
       </div>
     </td></tr>
     <tr><td class="dl-lbl">Homework</td><td class="dl-cell">
@@ -7719,6 +7754,22 @@ function addAct(i){
   delete d.activitiesText;                  // structured is now the source of truth
   saveState();rerenderDay(i);
   setTimeout(()=>{ const el=document.getElementById(`ga-name-${i}-${acts.length-1}`); if(el) el.focus(); }, 30);
+}
+// Insert a "break / lunch" divider — splits the lesson's activities into
+// segments; its own time isn't counted as teaching minutes.
+function addBreak(i){
+  const d=getDay(i);
+  const acts=d.activities=d.activities||[];
+  acts.push({id:uid(), brk:true, name:'Lunch'});
+  delete d.activitiesText;
+  saveState(); rerenderDay(i);
+}
+// Teaching-minute segments split by any breaks: {segs:[50,35], total:85, hasBreak}
+function actSegments(acts){
+  const segs=[]; let cur=0, hasBreak=false;
+  (acts||[]).forEach(a=>{ if(a.brk){ segs.push(cur); cur=0; hasBreak=true; } else cur+=(a.dur||0); });
+  segs.push(cur);
+  return { segs, total: segs.reduce((s,x)=>s+x,0), hasBreak };
 }
 // Back-compat: old callers that added into a bucket.
 function addActToBucket(i,bucketName){const ph=bucketName==='ic'?'guided':'focus';const p=PHASE_BY_V[ph];getDay(i).activities.push({id:uid(),name:'',dur:p?p.def:10,grr:ph,ipp:'',desc:''});saveState();rerenderDay(i);}
@@ -8333,14 +8384,18 @@ function updateActDur(di, ai, val) {
   saveState();
   refreshTracker(di);
   refreshAllTimestamps(di);
-  // Update the live "Total: X min" under the activities (and the legacy chip).
+  // Update the live total + break subtotals under the activities.
   const d = getDay(di);
-  const used = (d.activities||[]).reduce((s,a)=>s+(a.dur||0),0);
+  const seg = actSegments(d.activities);
+  const used = seg.total;
   const blockDur = d.blockDuration || 90;
   const chip = document.querySelector('#day-modal-overlay .dl-time, .daily-panel.open .dl-time');
   if (chip) { chip.textContent = `${used} / ${blockDur} min`; chip.classList.toggle('over', used>blockDur); }
   const total = document.getElementById(`acttotal-${di}`);
-  if (total) { total.textContent = `Total: ${used} / ${blockDur} min`; total.classList.toggle('over', used>blockDur); }
+  if (total) { total.textContent = seg.hasBreak ? `${seg.segs.join(' + ')} = ${used} / ${blockDur} min` : `Total: ${used} / ${blockDur} min`; total.classList.toggle('over', used>blockDur); }
+  // refresh each break divider's "N min before"
+  let s=0;
+  (d.activities||[]).forEach((a,ai)=>{ if(a.brk){ const el=document.getElementById(`brksub-${di}-${ai}`); if(el) el.textContent=`${s} min before`; s=0; } else s+=(a.dur||0); });
 }
 
 // Recompute and redraw the start-time + duration-bar-fill for every
@@ -9039,14 +9094,17 @@ function exportPDF() {
 
   const actLines = () => {
     if(hasActsText(d)) return d.activitiesText;   // teacher's typed list
-    const list = (d.activities||[]).filter(a=>strip(a.name)||strip(a.desc));
+    const list = (d.activities||[]).filter(a=>a.brk||strip(a.name)||strip(a.desc));
     if(!list.length) return dash;
-    return list.map((a,n)=>{
+    let n=0;
+    return list.map(a=>{
+      if(a.brk) return `<div style="margin:5px 0;text-align:center;font-size:9pt;font-weight:700;color:#7A4B00;border-top:1px dashed #C9991A;border-bottom:1px dashed #C9991A;padding:2px 0">🍽 ${escPDF(strip(a.name)||'Lunch')}</div>`;
+      n++;
       const body = escPDF(strip(a.name)||strip(a.desc));
       const pre = actType(a) ? escPDF(actType(a))+'- ' : '';
       const letters = actIPPText(a);
       const detail = (strip(a.desc) && strip(a.name)) ? `<div style="font-size:9pt;color:#333;margin:1px 0 0 16px">${a.desc}</div>` : '';
-      return `<div style="margin:0 0 6px;padding-left:16px;text-indent:-16px"><b>${n+1}. ${pre}${body}${a.dur?` [${a.dur} min]`:''}${letters?` ${escPDF(letters)}`:''}</b>${detail}</div>`;
+      return `<div style="margin:0 0 6px;padding-left:16px;text-indent:-16px"><b>${n}. ${pre}${body}${a.dur?` [${a.dur} min]`:''}${letters?` ${escPDF(letters)}`:''}</b>${detail}</div>`;
     }).join('');
   };
 
