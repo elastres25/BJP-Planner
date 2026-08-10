@@ -6034,6 +6034,8 @@ function unitOverviewPageHTML(u, weeks, showPacingGuide = true) {
       </tbody>
     </table>
 
+    ${unitAssignmentsHTML(u.id)}
+
     ${showPacingGuide ? pacingTableBlockHTML(u, weeks) : ''}
   `;
 }
@@ -6120,6 +6122,147 @@ function savePaceAssess(el) {
   const d = getDay(di);
   d.assessment = el.innerHTML;
   saveState();
+}
+
+// ── UNIT ASSIGNMENTS & ASSESSMENTS ────────────────────────────────
+// A per-unit list of HWs, quizzes, discussions and tests, each with an
+// "announce" date (when to tell students) and a "due" date. Shown as a
+// sortable box on the Unit Overview page.
+const ASSIGN_TYPES = [
+  {key:'HW',         label:'HW',         bg:'#E6EBF4', tx:'#1B3A6B', br:'#C5D0E4'},
+  {key:'Quiz',       label:'Quiz',       bg:'#FBEFD0', tx:'#8A6A12', br:'#E6D5A0'},
+  {key:'Discussion', label:'Discussion', bg:'#E1F5EE', tx:'#085041', br:'#A7DEC8'},
+  {key:'Test',       label:'Test',       bg:'#F6E1D8', tx:'#993C1D', br:'#E3BBA9'},
+  {key:'Project',    label:'Project',    bg:'#EEE6F4', tx:'#5B2C82', br:'#D3C0E4'},
+  {key:'Other',      label:'Other',      bg:'#ECECEC', tx:'#555555', br:'#D5D5D5'},
+];
+function assignType(k){ return ASSIGN_TYPES.find(t=>t.key===k) || ASSIGN_TYPES[ASSIGN_TYPES.length-1]; }
+
+function getUnitAssignments(uid){
+  if(!state.unitAssignments) state.unitAssignments = {};
+  if(!state.unitAssignments[uid]) state.unitAssignments[uid] = [];
+  return state.unitAssignments[uid];
+}
+function addUnitAssignment(uid){
+  const list = getUnitAssignments(uid);
+  list.push({id: uid+'-a'+Math.random().toString(36).slice(2,8), type:'HW', title:'', announce:'', due:''});
+  saveState(); renderUnit();
+}
+// Save a single field without re-rendering (used while typing a title, so
+// focus isn't lost). saveState only.
+function updateAssignField(uid, id, field, val){
+  const a = getUnitAssignments(uid).find(x=>x.id===id);
+  if(!a) return;
+  a[field] = val; saveState();
+}
+// Save a field AND re-render (used for type/date changes so chips recolor
+// and the list re-sorts by due date).
+function updateAssignReRender(uid, id, field, val){
+  updateAssignField(uid, id, field, val);
+  renderUnit();
+}
+function deleteUnitAssignment(uid, id){
+  const list = getUnitAssignments(uid);
+  const i = list.findIndex(x=>x.id===id);
+  if(i>=0){ list.splice(i,1); saveState(); renderUnit(); }
+}
+// Whole-day count relative to today; negative = past, 0 = today.
+function assignDaysUntil(iso){
+  if(!iso) return null;
+  const d = new Date(iso+'T00:00:00');
+  const t = new Date(); t.setHours(0,0,0,0);
+  return Math.round((d - t)/86400000);
+}
+// A small human hint like "in 3 days", "today", "5 days ago".
+function assignDayHint(iso){
+  const n = assignDaysUntil(iso);
+  if(n===null) return '';
+  if(n===0)  return 'today';
+  if(n===1)  return 'tomorrow';
+  if(n===-1) return 'yesterday';
+  if(n>1)    return 'in '+n+' days';
+  return Math.abs(n)+' days ago';
+}
+function assignFmtDate(iso){
+  if(!iso) return '';
+  return isoParse(iso).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+}
+
+function unitAssignmentsHTML(uid){
+  const list = getUnitAssignments(uid);
+  list.forEach(a=>{ if(!a.id) a.id = uid+'-a'+Math.random().toString(36).slice(2,8); });
+  // Sort a copy by due date (blanks last) so the soonest is on top.
+  const sorted = [...list].sort((x,y)=>{
+    if(!x.due && !y.due) return 0;
+    if(!x.due) return 1;
+    if(!y.due) return -1;
+    return x.due < y.due ? -1 : x.due > y.due ? 1 : 0;
+  });
+
+  const rows = sorted.map(a => {
+    const t = assignType(a.type);
+    const dueN  = assignDaysUntil(a.due);
+    const overdue = dueN !== null && dueN < 0;
+    const dueSoon = dueN !== null && dueN >= 0 && dueN <= 3;
+    return `<tr>
+      <td style="border:1px solid var(--rule);padding:5px 6px;vertical-align:middle;white-space:nowrap">
+        <select onchange="updateAssignReRender(${uid},'${a.id}','type',this.value)"
+          style="font-family:inherit;font-size:11px;font-weight:700;border:1px solid ${t.br};background:${t.bg};color:${t.tx};border-radius:999px;padding:3px 8px;cursor:pointer;outline:none;-webkit-print-color-adjust:exact;print-color-adjust:exact">
+          ${ASSIGN_TYPES.map(o=>`<option value="${o.key}" ${o.key===a.type?'selected':''}>${o.label}</option>`).join('')}
+        </select>
+      </td>
+      <td style="border:1px solid var(--rule);padding:0;vertical-align:middle">
+        <input type="text" value="${esc(a.title)}" placeholder="Assignment name…"
+          oninput="updateAssignField(${uid},'${a.id}','title',this.value)"
+          style="width:100%;box-sizing:border-box;border:none;background:transparent;font-family:inherit;font-size:12px;color:var(--ink);padding:7px 10px;outline:none">
+      </td>
+      <td style="border:1px solid var(--rule);padding:4px 8px;vertical-align:middle;white-space:nowrap">
+        <input type="date" value="${a.announce||''}"
+          onchange="updateAssignField(${uid},'${a.id}','announce',this.value)"
+          style="font-family:inherit;font-size:11px;color:var(--ink-2);border:1px solid var(--rule);border-radius:5px;padding:3px 5px;outline:none;background:var(--white)">
+        ${a.announce?`<div style="font-size:9px;color:var(--ink-3);margin-top:2px">${assignDayHint(a.announce)}</div>`:''}
+      </td>
+      <td style="border:1px solid var(--rule);padding:4px 8px;vertical-align:middle;white-space:nowrap">
+        <input type="date" value="${a.due||''}"
+          onchange="updateAssignReRender(${uid},'${a.id}','due',this.value)"
+          style="font-family:inherit;font-size:11px;font-weight:600;color:${overdue?'#993C1D':'var(--ink)'};border:1px solid ${overdue?'#E3BBA9':dueSoon?'#E6D5A0':'var(--rule)'};border-radius:5px;padding:3px 5px;outline:none;background:${overdue?'#F6E1D8':dueSoon?'#FBEFD0':'var(--white)'}">
+        ${a.due?`<div style="font-size:9px;color:${overdue?'#993C1D':'var(--ink-3)'};margin-top:2px">${assignDayHint(a.due)}</div>`:''}
+      </td>
+      <td style="border:1px solid var(--rule);padding:4px;vertical-align:middle;text-align:center;width:28px">
+        <button onclick="deleteUnitAssignment(${uid},'${a.id}')" title="Remove"
+          style="border:none;background:none;cursor:pointer;color:var(--ink-3);font-size:15px;line-height:1;padding:2px 4px">&times;</button>
+      </td>
+    </tr>`;
+  }).join('');
+
+  return `<div style="margin-bottom:20px">
+    <div style="background:var(--navy);padding:8px 14px;display:flex;align-items:center;justify-content:space-between;-webkit-print-color-adjust:exact;print-color-adjust:exact">
+      <span style="font-size:12px;font-weight:700;color:white;letter-spacing:.04em">Assignments &amp; Assessments</span>
+      <span style="font-size:10px;color:rgba(255,255,255,.7)">${list.length} item${list.length===1?'':'s'} · sorted by due date</span>
+    </div>
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:12px;background:var(--white)">
+        <thead>
+          <tr>
+            <th style="border:1px solid var(--rule);padding:6px 8px;background:#FAFAF8;font-size:10px;font-weight:700;color:var(--ink-2);text-align:left;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap">Type</th>
+            <th style="border:1px solid var(--rule);padding:6px 10px;background:#FAFAF8;font-size:10px;font-weight:700;color:var(--ink-2);text-align:left;text-transform:uppercase;letter-spacing:.04em">Assignment</th>
+            <th style="border:1px solid var(--rule);padding:6px 8px;background:#FAFAF8;font-size:10px;font-weight:700;color:var(--ink-2);text-align:left;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap">Announce</th>
+            <th style="border:1px solid var(--rule);padding:6px 8px;background:#FAFAF8;font-size:10px;font-weight:700;color:var(--ink-2);text-align:left;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap">Due</th>
+            <th style="border:1px solid var(--rule);padding:6px;background:#FAFAF8;width:28px"></th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows || `<tr><td colspan="5" style="border:1px solid var(--rule);padding:14px;text-align:center;color:var(--ink-3);font-size:12px;font-style:italic">No assignments yet — add HWs, quizzes, discussions and tests below.</td></tr>`}
+        </tbody>
+      </table>
+    </div>
+    <button onclick="addUnitAssignment(${uid})"
+      style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--navy);background:none;border:1px dashed var(--rule-dark);border-radius:6px;padding:6px 14px;cursor:pointer;font-family:inherit;margin-top:8px;font-weight:600"
+      onmouseenter="this.style.background='var(--parchment)';this.style.borderColor='var(--navy)'"
+      onmouseleave="this.style.background='none';this.style.borderColor='var(--rule-dark)'">
+      + Add assignment
+    </button>
+  </div>`;
 }
 
 function setUnitTab(tab, btn) {
