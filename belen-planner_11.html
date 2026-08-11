@@ -1951,7 +1951,7 @@ function out(o) {
 <div id="agenda-overlay" style="display:none;position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.5);overflow-y:auto" onclick="if(event.target===this)closeAgenda()">
   <div style="background:var(--white);max-width:560px;margin:56px auto;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,.3);overflow:hidden">
     <div style="background:var(--navy);padding:12px 16px;display:flex;align-items:center;justify-content:space-between">
-      <span style="color:#fff;font-weight:600;font-size:14px">Daily Agenda — copy into your slideshow</span>
+      <span id="agenda-modal-title" style="color:#fff;font-weight:600;font-size:14px">Daily Agenda — copy into your slideshow</span>
       <button onclick="closeAgenda()" style="background:rgba(255,255,255,.15);border:none;border-radius:6px;color:#fff;font-size:20px;width:32px;height:32px;cursor:pointer;line-height:1">&times;</button>
     </div>
     <div style="padding:16px">
@@ -7536,6 +7536,7 @@ function dailyPanelHTML(d, i) {
           <button onclick="this.closest('details').removeAttribute('open');openMoveLesson(${i})">⇄ Move to another unit</button>
           <button onclick="this.closest('details').removeAttribute('open');openBrainstorm(${i})">💡 Ideas / brainstorm${strip(d.brainstorm)?' •':''}</button>
           <button onclick="this.closest('details').removeAttribute('open');exportDailyAgenda(${i})">📋 Copy student agenda</button>
+          <button onclick="this.closest('details').removeAttribute('open');exportBlackbaudAgenda(${i})">🗂️ Copy for Blackbaud</button>
         </div>
       </details>
     </div>
@@ -7786,6 +7787,48 @@ function exportDailyAgenda(i){
   if(strip(d.homework)){ lines.push(''); lines.push(`Homework: ${strip(d.homework)}`); }
   const ta = document.getElementById('agenda-text');
   ta.value = lines.join('\n');
+  const title = document.getElementById('agenda-modal-title');
+  if(title) title.textContent = 'Daily Agenda — copy into your slideshow';
+  document.getElementById('agenda-overlay').style.display='block';
+}
+
+// Build the daily agenda in the emoji "Blackbaud" format that matches the
+// class-page design — ready to paste straight into a Bulletin Board block.
+function exportBlackbaudAgenda(i){
+  const d = getDay(i);
+  const strip = s => String(s||'').replace(/<[^>]*>/g,' ').replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim();
+  // Date header: "Wednesday, Aug 20 · Day 2 (A)" — degrade gracefully if no date.
+  let head = d.label || 'Class';
+  const iso = d.dateA || d.dateB || '';
+  if(iso){
+    const dt = isoParse(iso);
+    const nice = dt.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
+    const cal = loadCalendar();
+    const ab = (cal && cal.abByDate && cal.abByDate[iso]) ? cal.abByDate[iso] : '';
+    head = `${nice} · ${d.label||'Class'}${ab?` (${ab})`:''}`;
+  }
+  // "I can…" — prefer learning targets, then teacher goals.
+  let ican = strip(targetsHTML(d));
+  ican = ican.replace(/^I can\s*/i,'');           // strip leading "I can" (we re-add the label)
+  if(!ican) ican = strip(goalsHTML(d));
+
+  const lines = [];
+  lines.push(`📅 ${head}`);
+  lines.push('');
+  lines.push(`🙏 Prayer: ${d.prayer ? strip(d.prayer) : 'Class Prayer'}`);
+  lines.push(`🎯 I can…: ${ican || '_______________________'}`);
+  lines.push('📝 What we’ll do:');
+  const acts = actsLines(d);
+  if(acts.length) acts.forEach((t,n)=>lines.push(`   ${n+1}. ${t}`));
+  else lines.push('   1. _______________________');
+  const hw = strip(d.homework);
+  lines.push(`📚 Homework / Due: ${hw || '— none —'}`);
+  lines.push('✝ We close: A.M.D.G.');
+
+  const ta = document.getElementById('agenda-text');
+  ta.value = lines.join('\n');
+  const title = document.getElementById('agenda-modal-title');
+  if(title) title.textContent = 'Daily Agenda — paste into Blackbaud';
   document.getElementById('agenda-overlay').style.display='block';
 }
 function closeAgenda(){ document.getElementById('agenda-overlay').style.display='none'; }
