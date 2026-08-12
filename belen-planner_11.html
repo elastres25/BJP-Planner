@@ -793,12 +793,40 @@ body.simple-mode .dp-adv { display: none !important; }
 .mi-in { width:100%; box-sizing:border-box; border:1px solid var(--rule-dark); border-radius:7px; padding:8px 10px;
   font-family:inherit; font-size:13px; outline:none; }
 
-/* school-map columns inside the planner's own pacing guide */
-.sp-dates { font-size:10.5px; color:var(--ink-2); line-height:1.45; width:104px; max-width:104px; }
+/* ── the pacing guide, now carrying the school semester map ── */
+.sp-dates { font-size:10.5px; color:var(--ink-2); line-height:1.5; width:112px; max-width:112px; }
 .sp-dates .sp-abline { white-space:nowrap; }
+.sp-dates .sp-abline b { color:var(--ink); font-weight:700; }
 .sp-dates .smap-note-pill { white-space:normal; }
-.sp-ab { display:inline-block; min-width:11px; font-size:9px; font-weight:800; color:var(--ink-3); }
+.sp-wk { font-size:10px; font-weight:700; color:var(--ink-3); }
 .sp-today { background:#FDF3D6 !important; }
+.sp-blkwarn { font-size:10px; font-weight:800; color:#993C1D; margin-top:2px; cursor:help; }
+
+/* which A/B block this course meets on */
+.sp-blkgroup { display:inline-flex; border:1px solid var(--rule-dark); border-radius:7px; overflow:hidden; margin-right:2px; }
+.sp-blkchip { background:var(--white); border:none; border-right:1px solid var(--rule); padding:7px 11px;
+  font-family:inherit; font-size:11.5px; font-weight:700; color:var(--ink-3); cursor:pointer; }
+.sp-blkchip:last-child { border-right:none; }
+.sp-blkchip.on { background:var(--navy); color:#fff; }
+.sp-btn-navy { background:var(--navy) !important; color:#fff !important; border-color:var(--navy) !important; }
+.sp-note { font-size:12px; color:var(--ink-2); background:var(--white); border:1px solid var(--rule);
+  border-radius:var(--radius-sm); padding:8px 12px; margin:0 0 10px; }
+
+/* unit banner row */
+.sp-unitrow td { padding:7px 12px; border:1px solid var(--rule); position:relative; }
+.sp-unitrow-bar { position:absolute; left:0; top:0; bottom:0; width:4px; }
+.sp-unitrow-n { font-size:11px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; margin-right:8px; }
+.sp-unitrow-name { font-size:13px; font-weight:700; }
+.sp-unitrow-meta { font-size:10.5px; color:var(--ink-3); margin-left:10px; }
+
+/* school events dropped into the flow on the dates they fall */
+.sp-eventrow td { padding:5px 12px; border:1px solid var(--rule); background:#F7F5EF;
+  -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+.sp-event-dates { font-size:10.5px; font-weight:700; color:var(--ink-3); margin-right:10px; }
+.sp-event-text { font-size:11px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:#8a6d1a; }
+.sp-bannerrow td { padding:4px 12px; border:1px solid var(--rule); background:var(--parchment); text-align:center;
+  font-size:10px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:#8a6d1a;
+  -webkit-print-color-adjust:exact; print-color-adjust:exact; }
 
 /* ── SIMPLE PACING GUIDE ── */
 .sp-wrap { background:#fff; border:1px solid var(--rule); border-radius:12px; overflow:hidden; }
@@ -809,7 +837,7 @@ body.simple-mode .dp-adv { display: none !important; }
 .sp-btn { background:var(--navy); color:#fff; border:none; border-radius:7px; padding:7px 15px;
   font-family:inherit; font-size:12.5px; font-weight:600; cursor:pointer; }
 .sp-scroll { overflow-x:auto; }
-.sp-table { width:100%; border-collapse:collapse; min-width:980px; }
+.sp-table { width:100%; border-collapse:collapse; min-width:900px; }
 .sp-table th { background:var(--navy); color:#fff; font-size:11px; font-weight:700; letter-spacing:.03em;
   text-align:left; padding:8px 10px; white-space:nowrap; }
 .sp-th-hint { font-weight:400; opacity:.7; text-transform:none; letter-spacing:0; }
@@ -823,7 +851,7 @@ body.simple-mode .dp-adv { display: none !important; }
 /* Content / HW cells now wrap so the full text is readable */
 .sp-cell { min-height:34px; line-height:1.5; white-space:normal; overflow-wrap:anywhere; word-break:break-word; }
 .sp-cell:empty:before { content:attr(data-ph); color:var(--ink-3); pointer-events:none; }
-.sp-content { min-width:260px; }
+.sp-content { min-width:220px; }
 .sp-dateinp { font-size:11.5px; }
 .sp-sel { cursor:pointer; }
 .sp-status { font-size:13px; font-weight:800; color:var(--ink-3); margin-right:6px; }
@@ -1438,8 +1466,7 @@ body.simple-mode .dp-adv { display: none !important; }
     <button class="tb-nav" onclick="nav('dashboard')">Dashboard</button>
     <button class="tb-nav" onclick="nav('course')">Units</button>
     <button class="tb-nav" onclick="nav('week')">Week</button>
-    <button class="tb-nav" onclick="gotoPacing()">Pacing</button>
-    <button class="tb-nav" onclick="gotoSemesterMap()">School Map</button>
+    <button class="tb-nav" onclick="gotoPacing()">Pacing &amp; School Map</button>
     <button class="tb-nav tb-nav-go" onclick="gotoNextLesson()">▶ Next lesson</button>
   </div>
 
@@ -1477,8 +1504,7 @@ body.simple-mode .dp-adv { display: none !important; }
       <button onclick="closeMoreMenu();nav('dashboard')">Dashboard</button>
       <button onclick="closeMoreMenu();nav('course')">Units</button>
       <button onclick="closeMoreMenu();nav('week')">Week</button>
-      <button onclick="closeMoreMenu();gotoPacing()">Pacing</button>
-      <button onclick="closeMoreMenu();gotoSemesterMap()">School Map</button>
+      <button onclick="closeMoreMenu();gotoPacing()">Pacing &amp; School Map</button>
       <button onclick="closeMoreMenu();gotoNextLesson()">▶ Next lesson</button>
     </div>
     <div class="mm-sec">Save &amp; Export</div>
@@ -1489,8 +1515,7 @@ body.simple-mode .dp-adv { display: none !important; }
     <button onclick="closeMoreMenu();openDriveSetup()">Google Drive setup…</button>
     <div class="mm-sec">Schedule</div>
     <button onclick="closeMoreMenu();openCalendarImport()">📅 Import school calendar…</button>
-    <button onclick="closeMoreMenu();gotoSemesterMap()">🗓️ School semester map</button>
-    <button onclick="closeMoreMenu();gotoSemesterMap();setTimeout(openMapImport,120)">📥 Paste a semester map…</button>
+    <button onclick="closeMoreMenu();gotoPacing();setTimeout(openMapImport,180)">📥 Paste a semester map…</button>
     <div class="mm-sec">Advanced</div>
     <button onclick="closeMoreMenu();nav('prep')">Prep Board</button>
     <button onclick="closeMoreMenu();resetCourseData()">Reset course data</button>
@@ -1908,11 +1933,6 @@ body.simple-mode .dp-adv { display: none !important; }
     <!-- LIVE PACING GUIDE (embedded Google Doc) -->
     <div style="margin-top:24px" id="pacing-doc-wrap"></div>
   </div>
-</div>
-
-<!-- SCHOOL SEMESTER MAP -->
-<div class="view" id="view-map">
-  <div class="wrap" id="map-wrap"></div>
 </div>
 
 <!-- SEMESTER MAP → PLANNER SYNC -->
@@ -3131,15 +3151,6 @@ function nav(target, unitId) {
     ]);
     renderPrep();
     window.scrollTo(0,0);
-  } else if (target === 'map') {
-    document.getElementById('view-map').classList.add('active');
-    currentUnit = null; currentWeek = 0; openDayIdx = null; openWeekIdx = null;
-    setBreadcrumb([
-      {label:'Dashboard', home:true, onclick:"nav('dashboard')"},
-      {label:'School Map', active:true},
-    ]);
-    renderSemesterMap();
-    window.scrollTo(0,0);
   } else if (target === 'course') {
     document.getElementById('view-course').classList.add('active');
     currentUnit = null; currentWeek = 0; openDayIdx = null; openWeekIdx = null;
@@ -3784,7 +3795,7 @@ function mapBarHTML(d){
     if(!anySchoolMap(activeCourse)) return '';
     return `<div class="dl-mapbar" style="background:var(--parchment);border-color:var(--rule)">
       <span style="color:var(--ink-3)">Not linked to the school semester map yet.</span>
-      <button class="dl-maplink" onclick="gotoSemesterMap()">Open the map →</button>
+      <button class="dl-maplink" onclick="gotoPacing()">Open the pacing guide →</button>
     </div>`;
   }
   const L = dayMapLesson(d);
@@ -3796,7 +3807,7 @@ function mapBarHTML(d){
     <b>School map:</b> <span>${esc(focus)}</span>
     ${dates?`<span style="color:var(--ink-3)">· ${esc(dates)}</span>`:''}
     ${notes.length?`<span style="display:inline-flex;gap:3px;flex-wrap:wrap">${notes.map(n=>`<span class="smap-note-pill${/no school|early release|exam|psat|break/i.test(n)?' warn':''}">${esc(n)}</span>`).join('')}</span>`:''}
-    <button class="dl-maplink" onclick="gotoSemesterMap(${ref.sem})">View in map →</button>
+    <button class="dl-maplink" onclick="gotoPacing()">See it in the pacing guide →</button>
   </div>`;
 }
 
@@ -3833,176 +3844,147 @@ function unitMapBlocks(u){
 
 // The little "school map" chip that sits in the pacing guide's header and
 // keeps the two guides visibly tied together.
-function mapStripHTML(){
-  if(!anySchoolMap(activeCourse)) return '';
-  let total = 0, linked = 0;
-  schoolMapSems(activeCourse).forEach(s => {
-    const m = getSchoolMap(activeCourse, s); if(m) total += smapLessons(m).length;
+// ── WHICH A/B BLOCK THIS COURSE MEETS ON ──────────────────────────
+// The school map lists every school day with its A/B designation, and each
+// lesson focus appears on both an A row and a B row. A given course only
+// meets on one of them (Theology 7 on B days, Theology 6 on A days), so
+// only that row is a real class day — and only its calendar notes matter.
+function courseBlock(courseId){
+  const c = courseId || activeCourse;
+  const v = state && state.courseBlock && state.courseBlock[c];
+  if(v === 'A' || v === 'B' || v === 'both') return v;
+  return c === 7 ? 'B' : 'A';
+}
+function setCourseBlock(v){
+  if(!state.courseBlock) state.courseBlock = {};
+  state.courseBlock[activeCourse] = v;
+  saveState();
+  renderUnit();
+  toast(v === 'both'
+    ? 'Showing both A and B blocks'
+    : `${getCourse().name} meets on ${v} days — showing ${v} days`);
+}
+// The map row this course actually teaches a lesson on.
+function lessonBlockRow(L, blk){
+  if(blk === 'both') return null;
+  return L.rows.find(r => r.blk === blk) || null;
+}
+// The class date a lesson lands on for this course's block. Falls back to
+// the lesson's other row when the map skipped this course's block.
+function lessonDateFor(L, blk){
+  if(blk === 'both') return L.dateA || L.dateB || '';
+  const r = lessonBlockRow(L, blk) || L.rows[0];
+  return r ? r.date : '';
+}
+function dayBlockLetter(d){ return (d && d.mapBlock) || ''; }
+
+// A day's school week number, straight off the map row it came from.
+function dayMapWeek(d){
+  const L = dayMapLesson(d);
+  return L ? L.week : null;
+}
+
+// Every no-school day and school-wide event for this course, as bands ready
+// to drop into the pacing guide. Runs of identical no-class days (a whole
+// Thanksgiving week) collapse into one band.
+function mapEventBands(courseId){
+  const out = [];
+  schoolMapSems(courseId || activeCourse).forEach(sem => {
+    const m = getSchoolMap(courseId || activeCourse, sem); if(!m) return;
+    const rows = m._rows || smapExpand(m);
+    const seenWeeks = new Set();
+    let cur = null;
+    rows.forEach(r => {
+      if(m.weekBanners && m.weekBanners[r.week] && !seenWeeks.has(r.week)){
+        seenWeeks.add(r.week);
+        out.push({ kind:'banner', start:r.date, end:r.date, text:m.weekBanners[r.week] });
+      }
+      if(!r.noClass){ cur = null; return; }
+      const text = r.notes.join(' · ');
+      if(!text){ cur = null; return; }   // a blank no-class day is not an event
+      if(cur && cur.text === text){ cur.end = r.date; return; }
+      cur = { kind:'event', start:r.date, end:r.date, text, week:r.week };
+      out.push(cur);
+    });
   });
-  orderedUnits().forEach(u => (state.units[u.id]||[]).forEach(w => (w.days||[]).forEach(d => { if(d.mapRef) linked++; })));
-  return `<button class="sp-btn" style="background:var(--navy);color:#fff;border-color:var(--navy)" onclick="gotoSemesterMap()"
-    title="The official school semester map">🗓️ School map · ${linked}/${total}</button>`;
+  return out.sort((a,b) => a.start.localeCompare(b.start) || (a.kind==='banner'?-1:1));
 }
 // Shown above the pacing table when the school map has not been synced yet.
-function mapNoteBannerHTML(){
-  if(!anySchoolMap(activeCourse)) return '';
-  const anyLinked = orderedUnits().some(u => (state.units[u.id]||[]).some(w => (w.days||[]).some(d => d.mapRef)));
-  if(anyLinked) return '';
-  return `<div class="smap-warn" style="margin:0 0 10px">Your school's semester map is loaded but hasn't been synced into these lessons yet — the Class dates column stays empty until you do.
-    <button class="smap-btn primary" style="padding:4px 11px;font-size:11.5px;margin-left:6px" onclick="gotoSemesterMap()">Open the map →</button></div>`;
-}
+
 
 // ══ SEMESTER MAP VIEW ═════════════════════════════════════════════
 let smapSem = 1;
 
-function gotoSemesterMap(sem){
-  if(sem) smapSem = sem;
+
+function setSmapSem(sem){ smapSem = +sem; renderUnit(); }
+
+// ── SCHOOL-MAP TOOLBAR & STATUS (lives in the pacing guide header) ──
+function mapToolbarHTML(){
   const sems = schoolMapSems(activeCourse);
-  if(sems.length && !sems.includes(smapSem)) smapSem = sems[0];
-  nav('map');
-}
-function setSmapSem(sem){ smapSem = +sem; renderSemesterMap(); }
-
-function renderSemesterMap(){
-  const el = document.getElementById('map-wrap'); if(!el) return;
-  const co = getCourse();
-  const sems = schoolMapSems(activeCourse);
-  const m = getSchoolMap(activeCourse, smapSem);
-
-  const header = `
-    <div class="smap-hero">
-      <div class="smap-hero-eyebrow">School Semester Map · ${esc(co.name)}</div>
-      <div class="smap-hero-title">${m ? esc(m.title) : 'No semester map loaded yet'}</div>
-      <div class="smap-hero-sub">The official pacing guide your school provides. It sets the dates, the A/B blocks, the
-        calendar notes and the numbered lesson focus — then syncs straight into your lesson plans.</div>
-    </div>`;
-
-  if(!m){
-    el.innerHTML = header + `
-      <div class="smap-empty">
-        <div style="font-size:34px;margin-bottom:8px">🗓️</div>
-        <div style="font-weight:700;color:var(--navy);margin-bottom:6px">No map for ${esc(co.name)} yet</div>
-        <div style="font-size:13px;color:var(--ink-2);max-width:520px;margin:0 auto 16px;line-height:1.55">
-          Open the semester map Google Doc your school gave you, select the whole schedule table, copy it,
-          and paste it here. The planner reads the Week / BLK / Day / Date / Calendar Note / Lesson Focus
-          columns and turns them into dated lessons.
-        </div>
-        <button class="smap-btn primary" onclick="openMapImport()">Paste the semester map…</button>
-      </div>`;
-    return;
+  const blk = courseBlock();
+  const chip = (v, label, title) =>
+    `<button class="sp-blkchip${blk===v?' on':''}" title="${esc(title)}" onclick="setCourseBlock('${v}')">${esc(label)}</button>`;
+  const blocks = `<span class="sp-blkgroup" title="Which block this course meets on">
+      ${chip('A','A days','This course meets on A days')}${chip('B','B days','This course meets on B days')}${chip('both','Both','This course meets on both A and B days')}
+    </span>`;
+  if(!sems.length){
+    return `${blocks}<button class="sp-btn" onclick="openMapImport()">📥 Add school map…</button>
+      <button class="sp-btn" onclick="exportPacingGuidePDF()">Export</button>`;
   }
+  const syncBtns = sems.map(s =>
+    `<button class="sp-btn sp-btn-navy" onclick="openMapSync(${s})">↻ Sync${sems.length>1?` S${s}`:''} to school map</button>`).join('');
+  const m = getSchoolMap(activeCourse, sems[0]);
+  return `${blocks}${syncBtns}
+    <button class="sp-btn" onclick="openMapImport()">📥 Map…</button>
+    ${m && m.docUrl ? `<a class="sp-btn" href="${esc(m.docUrl)}" target="_blank" rel="noopener">Doc ↗</a>` : ''}
+    <button class="sp-btn" onclick="exportPacingGuidePDF()">Export</button>`;
+}
 
-  const rows = m._rows;
-  const lessons = smapLessons(m);
-  const rowLesson = new Map();
-  lessons.forEach(L => L.rows.forEach(r => rowLesson.set(r, L)));
-
-  // Which planner lessons are already tied to this map, and where they drifted.
-  const linked = new Map();   // key → {uid, wi, di, d}
-  const drift = [];
-  orderedUnits().forEach(u => (state.units[u.id]||[]).forEach((w, wi) => (w.days||[]).forEach((d, di) => {
-    const ref = d.mapRef;
-    if(ref && ref.sem === m.sem){
-      linked.set(ref.key, {uid:u.id, wi, di, d});
-      const L = lessons.find(x => x.key === ref.key);
-      if(L && ((L.dateA && d.dateA !== L.dateA) || (L.dateB && d.dateB !== L.dateB))) drift.push({L, d, u});
-    }
+// Everything the guide wants to warn about: not synced yet, dates that have
+// drifted off the map, and lessons the map never gave this block a day for.
+function mapStatusHTML(){
+  const sems = schoolMapSems(activeCourse);
+  if(!sems.length){
+    return `<div class="sp-note">No school semester map loaded for ${esc(getCourse().name)} yet — dates below are whatever you set by hand.
+      <button class="smap-btn primary" style="padding:3px 10px;font-size:11.5px;margin-left:6px" onclick="openMapImport()">Paste your school's map →</button></div>`;
+  }
+  const blk = courseBlock();
+  let total = 0, missingBlock = [];
+  sems.forEach(s => {
+    const m = getSchoolMap(activeCourse, s); if(!m) return;
+    smapLessons(m).forEach(L => {
+      total++;
+      if(blk !== 'both' && !lessonBlockRow(L, blk)) missingBlock.push(L);
+    });
+  });
+  let linked = 0; const drift = [];
+  orderedUnits().forEach(u => (state.units[u.id]||[]).forEach(w => (w.days||[]).forEach(d => {
+    if(!d.mapRef) return;
+    linked++;
+    const L = dayMapLesson(d);
+    if(L && lessonDateFor(L, blk) && d.dateA !== lessonDateFor(L, blk)) drift.push(d);
   })));
-
-  const matched = lessons.filter(L => linked.has(L.key)).length;
-  const pct = lessons.length ? Math.round(matched/lessons.length*100) : 0;
-  const today = isoToday();
-
-  const status = `
-    <div class="smap-status">
-      <div class="smap-stat"><div class="smap-stat-n">${lessons.length}</div><div class="smap-stat-l">Lessons in the map</div></div>
-      <div class="smap-stat"><div class="smap-stat-n">${matched}</div><div class="smap-stat-l">Linked to a lesson plan</div></div>
-      <div class="smap-stat"><div class="smap-stat-n">${rows.filter(r=>r.noClass).length}</div><div class="smap-stat-l">Non-class days</div></div>
-      <div class="smap-stat"><div class="smap-stat-n">${rows.filter(r=>r.notes.length).length}</div><div class="smap-stat-l">Days with calendar notes</div></div>
-      <div class="smap-progress"><div class="smap-progress-bar"><span style="width:${pct}%"></span></div><div class="smap-progress-l">${pct}% of the map is in the planner</div></div>
-    </div>`;
-
-  const halfDay = lessons.filter(L => !L.dateA || !L.dateB);
-  const halfNote = halfDay.length ? `
-    <div class="smap-warn">ℹ The map gives ${halfDay.length} lesson${halfDay.length===1?'':'s'} only one class day
-      (${halfDay.slice(0,4).map(L=>esc(L.n!=null?'L'+L.n:L.title)).join(', ')}${halfDay.length>4?'…':''}) — worth checking against the Doc.</div>` : '';
-
-  const driftNote = drift.length ? `
-    <div class="smap-warn">⚠ ${drift.length} lesson${drift.length===1?'':'s'} in the planner ${drift.length===1?'has':'have'} a different date than the map
-      (${drift.slice(0,3).map(x=>esc(x.d.label)).join(', ')}${drift.length>3?'…':''}). Re-sync to bring them back in line.</div>` : '';
-
-  const semTabs = sems.length > 1
-    ? `<div class="smap-semtabs">${sems.map(s=>`<button class="smap-semtab${s===smapSem?' on':''}" onclick="setSmapSem(${s})">Semester ${s}</button>`).join('')}</div>`
-    : '';
-
-  const toolbar = `
-    <div class="smap-toolbar">
-      ${semTabs}
-      <div class="smap-tools">
-        <button class="smap-btn primary" onclick="openMapSync()">↻ Sync my lesson plans to this map</button>
-        <button class="smap-btn" onclick="openMapImport()">${schoolMapIsCustom(activeCourse, smapSem)?'Replace this map…':'Paste a different map…'}</button>
-        ${m.docUrl?`<a class="smap-btn" href="${esc(m.docUrl)}" target="_blank" rel="noopener">Open the Doc ↗</a>`:''}
-        ${schoolMapIsCustom(activeCourse, smapSem)?`<button class="smap-btn danger" onclick="resetSchoolMap(${smapSem})">Revert to built-in</button>`:''}
-      </div>
-    </div>`;
-
-  const projected = m.projected && Object.values(m.projected).some(v=>String(v||'').trim())
-    ? `<div class="smap-projected"><span class="smap-projected-l">Projected assignments this semester</span>
-        ${Object.entries(m.projected).filter(([,v])=>String(v||'').trim()).map(([k,v])=>`<span class="smap-projected-chip"><b>${esc(String(v))}</b> ${esc(k)}</span>`).join('')}</div>`
-    : '';
-
-  let lastWeek = null;
-  const body = rows.map(r => {
-    const L = rowLesson.get(r);
-    const link = L && linked.get(L.key);
-    const isToday = r.date === today;
-    const weekCell = r.week !== lastWeek ? `<td class="smap-wk" rowspan="1">${r.week||''}</td>` : `<td class="smap-wk dim"></td>`;
-    const banner = (r.week !== lastWeek && m.weekBanners && m.weekBanners[r.week])
-      ? `<tr class="smap-banner-row"><td colspan="8">${esc(m.weekBanners[r.week])}</td></tr>` : '';
-    lastWeek = r.week;
-    const unitNo = L ? L.unitNo : null;
-    const uid2 = smapUnitId(unitNo);
-    const uc = uid2 ? getUC(uid2) : null;
-    return banner + `<tr class="smap-row${r.noClass?' noclass':''}${isToday?' today':''}">
-      ${weekCell}
-      <td class="smap-blk">${r.blk?`<span class="smap-blk-pill blk-${r.blk}">${r.blk}</span>`:'<span class="smap-dash">—</span>'}</td>
-      <td class="smap-dow">${esc(SMAP_DOW[r.dow]||r.dow)}</td>
-      <td class="smap-date">${esc(r.md)}${isToday?'<span class="smap-today-tag">today</span>':''}</td>
-      <td class="smap-note">${r.notes.map(n=>`<span class="smap-note-pill${/no school|early release|exam|psat|break/i.test(n)?' warn':''}">${esc(n)}</span>`).join(' ')}</td>
-      <td class="smap-unit">${uid2?`<span class="smap-unit-pill" style="background:${uc.bg};color:${uc.tx}">U${unitNo}</span>`:''}</td>
-      <td class="smap-focus">${L?`${L.n!=null?`<span class="smap-lesson-pill">L${L.n}</span> `:''}${esc(L.title)}${L.assessType?` <span class="smap-assess" style="background:${ASSESS_COLORS[L.assessType]?.bg};color:${ASSESS_COLORS[L.assessType]?.tx}">${L.assessType}</span>`:''}`:'<span class="smap-dash">—</span>'}</td>
-      <td class="smap-go">${link
-        ? `<button class="smap-open" onclick="openMapLesson(${link.uid},${link.wi},${link.di})" title="Open this lesson plan">open ↗</button>`
-        : (L ? `<span class="smap-unlinked" title="Not in the planner yet — run a sync">not synced</span>` : '')}</td>
-    </tr>`;
-  }).join('');
-
-  el.innerHTML = header + status + driftNote + halfNote + toolbar + projected + `
-    <div class="smap-tablewrap">
-      <table class="smap-table">
-        <thead><tr>
-          <th style="width:44px">Week</th><th style="width:46px">BLK</th><th style="width:52px">Day</th>
-          <th style="width:62px">Date</th><th style="width:20%">Calendar Note</th><th style="width:52px">Unit</th>
-          <th>Lesson Focus</th><th style="width:74px"></th>
-        </tr></thead>
-        <tbody>${body}</tbody>
-      </table>
-    </div>
-    <div class="smap-foot">Source: ${esc(m.source||'school semester map')}${schoolMapIsCustom(activeCourse, smapSem)?' · imported by you':' · built in'}</div>`;
+  const out = [];
+  if(!linked){
+    out.push(`<div class="smap-warn" style="margin:0 0 10px">Your school's semester map is loaded but hasn't been synced into these lessons yet — the dates below stay blank until you do.</div>`);
+  } else {
+    const m0 = getSchoolMap(activeCourse, sems[0]);
+    out.push(`<div class="sp-note">📅 Dated from <b>${esc((m0&&m0.title)||'the school semester map')}</b> · ${linked} of ${total} lessons linked ·
+      ${esc(getCourse().name)} meets on <b>${blk==='both'?'A and B':blk} days</b></div>`);
+  }
+  if(drift.length) out.push(`<div class="smap-warn" style="margin:0 0 10px">⚠ ${drift.length} lesson${drift.length===1?'':'s'} sit on a different date than the map (${drift.slice(0,3).map(d=>esc(d.label)).join(', ')}${drift.length>3?'…':''}) — re-sync to line them up.</div>`);
+  if(missingBlock.length) out.push(`<div class="smap-warn" style="margin:0 0 10px">ℹ The map never gives ${missingBlock.length} lesson${missingBlock.length===1?'':'s'} a ${blk} day (${missingBlock.slice(0,4).map(L=>esc(L.n!=null?'L'+L.n:L.title)).join(', ')}${missingBlock.length>4?'…':''}) — they're dated from the other block. Worth checking the Doc.</div>`);
+  return out.join('');
 }
 
-function openMapLesson(uid, wi, di){
-  nav('unit', uid);
-  currentWeek = wi; openWeekIdx = wi; openDayIdx = di;
-  renderUnit();
-  setTimeout(()=>document.getElementById('daily-panel-'+wi)?.scrollIntoView({behavior:'smooth',block:'start'}), 80);
-}
+
 
 // ══ SYNC: map → lesson plans ══════════════════════════════════════
 // Builds the plan of changes first so the teacher can see exactly what will
 // happen before anything is written.
 function planMapSync(sem, opts){
   const m = getSchoolMap(activeCourse, sem); if(!m) return null;
+  const blk = courseBlock();
   const lessons = smapLessons(m);
   const byUnit = new Map();
   lessons.forEach(L => {
@@ -4011,15 +3993,17 @@ function planMapSync(sem, opts){
     if(!byUnit.has(uid2)) byUnit.set(uid2, []);
     byUnit.get(uid2).push(L);
   });
-  const plan = { sem, units: [], skipped: lessons.filter(L => !smapUnitId(L.unitNo)).length, opts };
+  const plan = { sem, blk, units: [], skipped: lessons.filter(L => !smapUnitId(L.unitNo)).length,
+                 noBlockRow: lessons.filter(L => blk !== 'both' && !lessonBlockRow(L, blk)).length, opts };
   byUnit.forEach((ls, uid2) => {
     const u = UNIT_META.find(x => x.id === uid2);
     const existing = [];
     (state.units[uid2]||[]).forEach(w => (w.days||[]).forEach(d => existing.push(d)));
     const used = new Set();
     const pick = L => {
+      const want = lessonDateFor(L, blk);
       let d = existing.find(x => !used.has(x) && x.mapRef && x.mapRef.sem === sem && x.mapRef.key === L.key);
-      if(!d) d = existing.find(x => !used.has(x) && x.dateA && x.dateA === L.dateA);
+      if(!d && want) d = existing.find(x => !used.has(x) && (x.dateA === want || x.dateB === want));
       if(!d) d = existing.find(x => !used.has(x) && !x.mapRef);
       if(d) used.add(d);
       return d || null;
@@ -4038,9 +4022,10 @@ function planMapSync(sem, opts){
   return plan;
 }
 
+
 function applyMapSync(plan){
-  const m = getSchoolMap(activeCourse, plan.sem);
   const o = plan.opts || {};
+  const blk = plan.blk || courseBlock();
   let touched = 0, dated = 0;
   plan.units.forEach(pu => {
     const weeks = [];
@@ -4049,10 +4034,23 @@ function applyMapSync(plan){
       const day = d || makeDay('', '', '');
       day.mapRef = { sem: plan.sem, n: L.n, key: L.key };
       day.mapFocus = L.focus;
-      if(L.dateA) day.dateA = L.dateA;
-      if(L.dateB) day.dateB = L.dateB; else if(!L.dateB && L.dateA) day.dateB = '';
-      if(L.dateA || L.dateB) dated++;
-      day.calNotes = L.notes.slice();
+      if(blk === 'both'){
+        day.dateA = L.dateA || '';
+        day.dateB = L.dateB || '';
+        day.mapBlock = '';
+        day.calNotes = L.notes.slice();
+      } else {
+        // Only the row for this course's block is a real class day, so its
+        // date is THE class date and only its notes apply.
+        const row = lessonBlockRow(L, blk);
+        const use = row || L.rows[0];
+        day.dateA = use ? use.date : '';
+        day.dateB = '';
+        day.mapBlock = row ? blk : ((use && use.blk) || '');
+        day.mapBlockMissing = !row;
+        day.calNotes = use ? use.notes.slice() : [];
+      }
+      if(day.dateA || day.dateB) dated++;
       if(o.titles && (!String(day.topic||'').trim() || o.overwrite)) day.topic = L.title;
       if(o.targets && L.target && (!(day.targets||[]).length || o.overwrite)){
         day.targets = [L.target];
@@ -4067,7 +4065,7 @@ function applyMapSync(plan){
       cur.days.push(day);
     });
     if(pu.leftover.length){
-      pu.leftover.forEach(d => { d.mapRef = null; d.mapFocus = ''; d.calNotes = []; });
+      pu.leftover.forEach(d => { d.mapRef = null; d.mapFocus = ''; d.calNotes = []; d.mapBlock = ''; delete d.mapBlockMissing; });
       weeks.push({ weekLabel: 'Not in the school map', days: pu.leftover.slice() });
     }
     weeks.forEach(w => delete w._week);
@@ -4082,7 +4080,8 @@ function applyMapSync(plan){
 }
 
 let _mapSyncPlan = null;
-function openMapSync(){
+function openMapSync(sem){
+  if(sem) smapSem = +sem;
   const opts = { titles:true, targets:true, assess:true, overwrite:false };
   _mapSyncPlan = planMapSync(smapSem, opts);
   if(!_mapSyncPlan){ toast('No map to sync'); return; }
@@ -4130,7 +4129,7 @@ function confirmMapSync(){
   const p = _mapSyncPlan; if(!p) return;
   const res = applyMapSync(p);
   closeMapSync();
-  renderSemesterMap();
+  renderUnit();
   toast(`Synced ${res.touched} lesson${res.touched===1?'':'s'} to the school map ✓`);
 }
 
@@ -4226,14 +4225,14 @@ function saveMapImport(){
   saveState();
   smapSem = sem;
   closeMapImport();
-  renderSemesterMap();
+  renderUnit();
   toast(`Semester ${sem} map imported ✓ — now run a sync`);
 }
 function resetSchoolMap(sem){
   if(!confirm('Remove the map you imported and go back to the built-in one?\n\nYour lesson plans are not touched.')) return;
   if(state.schoolMaps && state.schoolMaps[activeCourse]) delete state.schoolMaps[activeCourse][sem];
   saveState();
-  renderSemesterMap();
+  renderUnit();
   toast('Reverted to the built-in map');
 }
 
@@ -7494,74 +7493,129 @@ function paceAddDayU(uid){
 // Whole-course pacing map: every unit is a colored band on the left with
 // its class days listed. General themes only — edit Content or HW here and
 // it saves straight to that lesson; "open" jumps to the full plan.
+// ── THE PACING GUIDE = THE SCHOOL SEMESTER MAP ────────────────────
+// One guide. The planner's spine — unit bands, 1.5-style unit·lesson
+// numbering, editable Content and HW that write straight to the lesson,
+// planned/not-planned status, "open →" into the day plan — carrying the
+// school map's real class dates, A/B block, school week and the events
+// that interrupt it (no-school days, breaks, exams, Homecoming Week)
+// dropped in on the dates they actually fall.
 function simplePacingHTML(){
-  const blocks = orderedUnits().map(u => {
-    const weeks = state.units[u.id] || [];
-    const days = [];
-    weeks.forEach((w, wi) => (w.days||[]).forEach((d, di) => days.push({d, wi, di})));
-    return { u, days };
-  }).filter(b => b.days.length);
-
   const co = getCourse();
+  const blk = courseBlock();
+  const today = isoToday();
+
   const inp = (val, uid, wi, di, field, ph) =>
     `<div class="sp-inp sp-cell" contenteditable="true" data-ph="${esc(ph||'')}"
        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.blur();}"
        onblur="savePaceCellU(${uid},${wi},${di},'${field}',this.textContent)">${esc(String(val||'').replace(/<[^>]*>/g,' ').trim())}</div>`;
 
-  const today = isoToday();
-  let globalDay = 0;
-  const body = blocks.map(b => {
-    const c = getUC(b.u.id);
+  // The planner's own lesson order is the spine; school events slot in by date.
+  const lessons = [];
+  orderedUnits().forEach(u => {
     let lessonNo = 0;
-    return b.days.map((row, idx) => {
-      globalDay++; lessonNo++;
-      const d = row.d, planned = dayIsPlanned(d);
-      const isToday = (d.dateA && d.dateA === today) || (d.dateB && d.dateB === today);
-      const dates = [d.dateA?`<div class="sp-abline"><span class="sp-ab">A</span> ${fmtMD(d.dateA)}</div>`:'', d.dateB?`<div class="sp-abline"><span class="sp-ab">B</span> ${fmtMD(d.dateB)}</div>`:'']
-        .filter(Boolean).join('') || '<span style="color:var(--rule-dark)">—</span>';
-      const notes = dayCalNotes(d);
-      const band = idx === 0
-        ? `<td class="sp-band" rowspan="${b.days.length}" style="background:${c.br}">
-             <div class="sp-band-inner">Unit ${unitNo(b.u.id)}<span>${esc(b.u.name)}</span>
-               <button class="sp-band-add" onclick="paceAddDayU(${b.u.id})">+ day</button></div>
-           </td>` : '';
-      return `<tr${isToday?' class="sp-today"':''}>
-        ${band}
-        <td class="sp-td sp-mid">${globalDay}</td>
-        <td class="sp-td sp-mid sp-num">${unitNo(b.u.id)}.${lessonNo}${mapBadgeHTML(d)?`<div style="margin-top:3px">${mapBadgeHTML(d)}</div>`:''}</td>
-        <td class="sp-td sp-dates">${dates}${isToday?'<div><span class="smap-today-tag">today</span></div>':''}${notes.length?`<div style="margin-top:3px">${notes.map(n=>`<span class="smap-note-pill${/no school|early release|exam|psat|break/i.test(n)?' warn':''}">${esc(n)}</span>`).join(' ')}</div>`:''}</td>
-        <td class="sp-td sp-content">${inp(d.topic, b.u.id, row.wi, row.di, 'topic', 'General theme for the day…')}</td>
-        <td class="sp-td">${inp(d.homework, b.u.id, row.wi, row.di, 'homework', 'Homework…')}</td>
-        <td class="sp-td sp-mid">
-          <span class="sp-status ${planned?'ok':''}" title="${planned?'Fully planned':'Not fully planned yet'}">${planned?'✓':'○'}</span>
-          <button class="sp-open" onclick="openGridDay(${b.u.id},${row.wi},${row.di})">open →</button>
-        </td>
-      </tr>`;
-    }).join('');
-  }).join('');
+    (state.units[u.id]||[]).forEach((w, wi) => (w.days||[]).forEach((d, di) => {
+      lessonNo++;
+      lessons.push({ u, d, wi, di, lessonNo, weekLabel: w.weekLabel, date: d.dateA || d.dateB || '' });
+    }));
+  });
 
+  const bands = mapEventBands(activeCourse);
+  let bi = 0, globalDay = 0, lastUnit = null;
+  const rows = [];
+
+  const eventRow = b => {
+    const range = b.start === b.end
+      ? isoParse(b.start).toLocaleDateString('en-US',{weekday:'short', month:'short', day:'numeric'})
+      : `${fmtNice(b.start)} – ${fmtNice(b.end)}`;
+    if(b.kind === 'banner')
+      return `<tr class="sp-bannerrow"><td colspan="8">${esc(b.text)}</td></tr>`;
+    return `<tr class="sp-eventrow"><td colspan="8">
+      <span class="sp-event-dates">${esc(range)}</span>
+      <span class="sp-event-text">${esc(b.text)}</span></td></tr>`;
+  };
+  const flushBands = before => {
+    while(bi < bands.length && (!before || bands[bi].start <= before)){
+      if(!before && bi >= bands.length) break;
+      rows.push(eventRow(bands[bi])); bi++;
+    }
+  };
+
+  const unitRow = u => {
+    const c = getUC(u.id);
+    const days = (state.units[u.id]||[]).reduce((s,w)=>s+(w.days||[]).length,0);
+    const dated = lessons.filter(x => x.u.id === u.id && x.date).map(x => x.date).sort();
+    const range = dated.length ? `${fmtMD(dated[0])} – ${fmtMD(dated[dated.length-1])}` : 'no dates yet';
+    return `<tr class="sp-unitrow" style="background:${c.bg}"><td colspan="8">
+      <span class="sp-unitrow-bar" style="background:${c.br}"></span>
+      <span class="sp-unitrow-n" style="color:${c.tx}">Unit ${unitNo(u.id)}</span>
+      <span class="sp-unitrow-name" style="color:${c.tx}">${esc(u.name)}</span>
+      <span class="sp-unitrow-meta">${days} block${days===1?'':'s'} · ${esc(range)}</span>
+      <button class="sp-band-add" onclick="paceAddDayU(${u.id})">+ day</button>
+    </td></tr>`;
+  };
+
+  let lastWeek = null;
+  lessons.forEach(x => {
+    if(x.date) flushBands(x.date);
+    if(lastUnit !== x.u.id){ rows.push(unitRow(x.u)); lastUnit = x.u.id; lastWeek = null; }
+    globalDay++;
+    const d = x.d, c = getUC(x.u.id);
+    const planned = dayIsPlanned(d);
+    const isToday = (d.dateA && d.dateA === today) || (d.dateB && d.dateB === today);
+    const wk = dayMapWeek(d);
+    const wkCell = (wk != null && wk !== lastWeek) ? String(wk) : '';
+    if(wk != null) lastWeek = wk;
+    const letter = dayBlockLetter(d);
+    const blkCell = letter
+      ? `<span class="smap-blk-pill blk-${letter}">${letter}</span>${d.mapBlockMissing?'<div class="sp-blkwarn" title="The map never gives this lesson a '+blk+' day">≠</div>':''}`
+      : (d.dateA||d.dateB ? '<span class="smap-dash">—</span>' : '');
+    const dateCell = d.dateA || d.dateB
+      ? [d.dateA, d.dateB].filter(Boolean).map(iso =>
+          `<div class="sp-abline">${isoParse(iso).toLocaleDateString('en-US',{weekday:'short'})} <b>${fmtMD(iso)}</b></div>`).join('')
+      : '<span class="smap-dash">—</span>';
+    const notes = dayCalNotes(d);
+    rows.push(`<tr class="sp-lrow${isToday?' sp-today':''}" style="box-shadow:inset 4px 0 0 ${c.br}">
+      <td class="sp-td sp-mid sp-wk">${wkCell}</td>
+      <td class="sp-td sp-mid">${globalDay}</td>
+      <td class="sp-td sp-mid sp-num">${unitNo(x.u.id)}.${x.lessonNo}${mapBadgeHTML(d)?`<div style="margin-top:3px">${mapBadgeHTML(d)}</div>`:''}</td>
+      <td class="sp-td sp-mid">${blkCell}</td>
+      <td class="sp-td sp-dates">${dateCell}${isToday?'<div><span class="smap-today-tag">today</span></div>':''}
+        ${notes.length?`<div style="margin-top:3px">${notes.map(n=>`<span class="smap-note-pill${/no school|early release|exam|psat|break/i.test(n)?' warn':''}">${esc(n)}</span>`).join(' ')}</div>`:''}</td>
+      <td class="sp-td sp-content">${inp(d.topic, x.u.id, x.wi, x.di, 'topic', 'General theme for the day…')}</td>
+      <td class="sp-td">${inp(d.homework, x.u.id, x.wi, x.di, 'homework', 'Homework…')}</td>
+      <td class="sp-td sp-mid">
+        <span class="sp-status ${planned?'ok':''}" title="${planned?'Fully planned':'Not fully planned yet'}">${planned?'✓':'○'}</span>
+        <button class="sp-open" onclick="openGridDay(${x.u.id},${x.wi},${x.di})">open →</button>
+      </td>
+    </tr>`);
+  });
+  flushBands(null);
+
+  const body = rows.join('');
   return `
   <div class="sp-wrap">
     <div class="sp-head">
       <div>
         <h2 class="sp-title">Pacing Guide — ${esc(co.name)}</h2>
-        <div class="sp-sub">The big-picture map across every unit: general themes only. Edit Content or HW here and it saves straight to that lesson.</div>
+        <div class="sp-sub">Your school's semester map and your lesson plans in one place: real class dates and school events from the map, themes and homework you edit right here.</div>
       </div>
-      <div class="sp-actions">${mapStripHTML()}<button class="sp-btn" onclick="exportPacingGuidePDF()">Export</button></div>
+      <div class="sp-actions">${mapToolbarHTML()}</div>
     </div>
-    ${mapNoteBannerHTML()}
+    ${mapStatusHTML()}
     <div class="sp-scroll">
       <table class="sp-table">
         <thead><tr>
-          <th style="width:120px">Unit</th>
-          <th style="width:54px">Day</th>
-          <th style="width:60px">#</th>
-          <th style="width:104px">Class dates <span class="sp-th-hint">— school map</span></th>
+          <th style="width:30px" title="School week">Wk</th>
+          <th style="width:38px">Day</th>
+          <th style="width:52px">#</th>
+          <th style="width:34px" title="A/B block">Blk</th>
+          <th style="width:112px">Class date</th>
           <th>Content <span class="sp-th-hint">— general theme</span></th>
-          <th style="width:240px">HW</th>
-          <th style="width:104px">Plan</th>
+          <th style="width:150px">HW</th>
+          <th style="width:92px">Plan</th>
         </tr></thead>
-        <tbody>${body || `<tr><td class="sp-td" colspan="7" style="text-align:center;color:var(--ink-3);font-style:italic">No class days yet.</td></tr>`}</tbody>
+        <tbody>${body || `<tr><td class="sp-td" colspan="8" style="text-align:center;color:var(--ink-3);font-style:italic">No class days yet.</td></tr>`}</tbody>
       </table>
     </div>
   </div>`;
