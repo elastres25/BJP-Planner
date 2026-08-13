@@ -2160,6 +2160,28 @@ function out(o) {
   </div>
 </div>
 
+<!-- BLACKBAUD STYLED-HTML AGENDA MODAL -->
+<div id="bbhtml-overlay" style="display:none;position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.5);overflow-y:auto" onclick="if(event.target===this)closeBBHtml()">
+  <div style="background:var(--white);max-width:620px;margin:44px auto;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,.3);overflow:hidden">
+    <div style="background:var(--navy);padding:12px 16px;display:flex;align-items:center;justify-content:space-between">
+      <span style="color:#fff;font-weight:600;font-size:14px">Daily Agenda — styled for Blackbaud</span>
+      <button onclick="closeBBHtml()" style="background:rgba(255,255,255,.15);border:none;border-radius:6px;color:#fff;font-size:20px;width:32px;height:32px;cursor:pointer;line-height:1">&times;</button>
+    </div>
+    <div style="padding:16px">
+      <div style="font-size:12px;color:var(--ink-2);margin-bottom:8px">Preview — how it will look inside a Bulletin Board <b>Content</b> block:</div>
+      <div id="bbhtml-preview" style="background:#fff;border:1px solid var(--rule-dark);border-radius:8px;padding:14px;overflow-x:auto"></div>
+      <div style="background:#F4F8FD;border:1px solid #D5E1F7;border-radius:8px;padding:10px 12px;margin-top:12px;font-size:12px;color:#33415A;line-height:1.55">
+        <b>How to paste:</b> in Blackbaud, <b>Enter Edit Mode</b> → add a <b>Content</b> block, click into it, and paste with <b>📋 Copy formatted</b>. If the colors don’t come through, open the block’s <b>&lt;/&gt;</b> source/HTML view and paste with <b>Copy HTML code</b> instead.
+      </div>
+      <div style="display:flex;gap:8px;margin-top:14px;justify-content:flex-end;flex-wrap:wrap">
+        <button onclick="closeBBHtml()" style="background:none;border:1px solid var(--rule-dark);border-radius:7px;padding:8px 16px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;font-family:inherit">Close</button>
+        <button onclick="bbCopyHTMLsrc(this)" style="background:#fff;border:1px solid var(--navy);border-radius:7px;padding:8px 16px;font-size:13px;font-weight:700;color:var(--navy);cursor:pointer;font-family:inherit">&lt;/&gt; Copy HTML code</button>
+        <button onclick="bbCopyFormatted(this)" style="background:var(--navy);color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">📋 Copy formatted</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ADD UNIT MODAL -->
 <div id="addunit-overlay" style="display:none;position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.5);overflow-y:auto" onclick="if(event.target===this)closeAddUnit()">
   <div style="background:var(--white);max-width:440px;margin:70px auto;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,.3);overflow:hidden">
@@ -8770,44 +8792,102 @@ function exportDailyAgenda(i){
   document.getElementById('agenda-overlay').style.display='block';
 }
 
-// Build the daily agenda in the emoji "Blackbaud" format that matches the
-// class-page design — ready to paste straight into a Bulletin Board block.
-function exportBlackbaudAgenda(i){
-  const d = getDay(i);
+// Build the daily agenda as a styled, self-contained HTML card that pastes
+// straight into a Blackbaud Bulletin Board "Content" block. Blackbaud's editor
+// strips <style> blocks and CSS classes, so every rule here is INLINE on the
+// element, and the layout is table-based — the structure most likely to survive
+// the editor's paste sanitizer with its colors intact.
+function bbAgendaHTML(d){
   const strip = s => String(s||'').replace(/<[^>]*>/g,' ').replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim();
-  // Date header: "Wednesday, Aug 20 · Day 2 (A)" — degrade gracefully if no date.
-  let head = d.label || 'Class';
+  // Date eyebrow: "Wednesday, Aug 20 · Day 2 (B)" — degrade gracefully if undated.
+  let eyebrow = d.label || 'Class';
   const iso = d.dateA || d.dateB || '';
   if(iso){
     const dt = isoParse(iso);
     const nice = dt.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
     const cal = loadCalendar();
     const ab = (cal && cal.abByDate && cal.abByDate[iso]) ? cal.abByDate[iso] : '';
-    head = `${nice} · ${d.label||'Class'}${ab?` (${ab})`:''}`;
+    eyebrow = `${nice} · ${d.label||'Class'}${ab?` (${ab})`:''}`;
   }
   // "I can…" — prefer learning targets, then teacher goals.
-  let ican = strip(targetsHTML(d));
-  ican = ican.replace(/^I can\s*/i,'');           // strip leading "I can" (we re-add the label)
+  let ican = strip(targetsHTML(d)).replace(/^I can\s*/i,'');
   if(!ican) ican = strip(goalsHTML(d));
-
-  const lines = [];
-  lines.push(`📅 ${head}`);
-  lines.push('');
-  lines.push(`🙏 Prayer: ${d.prayer ? strip(d.prayer) : 'Class Prayer'}`);
-  lines.push(`🎯 I can…: ${ican || '_______________________'}`);
-  lines.push('📝 What we’ll do:');
+  const prayer = d.prayer ? strip(d.prayer) : 'Class Prayer';
   const acts = actsLines(d);
-  if(acts.length) acts.forEach((t,n)=>lines.push(`   ${n+1}. ${t}`));
-  else lines.push('   1. _______________________');
   const hw = strip(d.homework);
-  lines.push(`📚 Homework / Due: ${hw || '— none —'}`);
-  lines.push('✝ We close: A.M.D.G.');
 
-  const ta = document.getElementById('agenda-text');
-  ta.value = lines.join('\n');
-  const title = document.getElementById('agenda-modal-title');
-  if(title) title.textContent = 'Daily Agenda — paste into Blackbaud';
-  document.getElementById('agenda-overlay').style.display='block';
+  // Palette tuned to the Belen/Blackbaud onCampus look: navy header bar + a
+  // medium link-blue accent that matches the site's active tab & links.
+  const C = { navy:'#1B2A4A', blue:'#1D6FBF', eyebrow:'#C2D6F0', accent:'#1B6EC2',
+              ink:'#2A2E33', mut:'#6B7075', div:'#EDEFF2', bd:'#DDE1E7',
+              dueBg:'#FBE9E7', due:'#C0392B' };
+  const mut = t => `<span style="color:${C.mut}">${t}</span>`;
+
+  // rows: [label, valueHTML]
+  const rows = [
+    ['🙏 Prayer', esc(prayer)],
+    ['🎯 I can…', ican ? esc(ican) : mut('_____________________')],
+    ['📝 We’ll do', acts.length
+        ? `<ol style="margin:0;padding-left:20px">${acts.map(t=>`<li style="margin:2px 0">${esc(t)}</li>`).join('')}</ol>`
+        : mut('—')],
+    ['📚 Due next', hw
+        ? esc(hw)
+        : mut('— none —')],
+    ['✝ We close', `A.M.D.G. ${mut('— For the greater glory of God')}`]
+  ];
+  const rowHTML = rows.map(([l,v],n)=>{
+    const last = n===rows.length-1;
+    const bb = last ? '' : `border-bottom:1px solid ${C.div};`;
+    const lab = `padding:11px 14px;${bb}vertical-align:top;width:116px;font-size:11px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:${C.accent};white-space:nowrap`;
+    const val = `padding:11px 14px;${bb}vertical-align:top;font-size:14px;color:${C.ink};line-height:1.5`;
+    return `<tr><td style="${lab}">${l}</td><td style="${val}">${v}</td></tr>`;
+  }).join('');
+
+  const html =
+`<div style="font-family:'Helvetica Neue',Arial,sans-serif;max-width:640px;border:1px solid ${C.bd};border-radius:10px;overflow:hidden">`
++`<div style="background:${C.navy};background:linear-gradient(100deg,${C.navy},${C.blue});padding:14px 16px">`
++`<div style="font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:${C.eyebrow}">📅 ${esc(eyebrow)}</div>`
++`<div style="font-size:20px;font-weight:700;color:#ffffff;margin-top:2px">Today’s Agenda</div>`
++`</div>`
++`<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse">${rowHTML}</table>`
++`</div>`;
+
+  // Plain-text fallback for the clipboard (and non-rich paste targets).
+  const pl = [`📅 ${eyebrow}`,'',`🙏 Prayer: ${prayer}`,`🎯 I can…: ${ican||'_____'}`,'📝 What we’ll do:'];
+  if(acts.length) acts.forEach((t,n)=>pl.push(`   ${n+1}. ${t}`)); else pl.push('   1. _____');
+  pl.push(`📚 Due next: ${hw||'— none —'}`,'✝ We close: A.M.D.G.');
+  return { html, plain: pl.join('\n') };
+}
+
+let _bbAgenda = { html:'', plain:'' };
+function exportBlackbaudAgenda(i){
+  _bbAgenda = bbAgendaHTML(getDay(i));
+  document.getElementById('bbhtml-preview').innerHTML = _bbAgenda.html;
+  document.getElementById('bbhtml-overlay').style.display='block';
+}
+function closeBBHtml(){ document.getElementById('bbhtml-overlay').style.display='none'; }
+// Copy as rich content (text/html) so it pastes styled into the rich-text editor.
+function bbCopyFormatted(btn){
+  const done=()=>{ const o=btn.innerHTML; btn.innerHTML='✓ Copied!'; setTimeout(()=>btn.innerHTML=o,1500); };
+  const fallback=()=>{ // select the rendered preview and let the browser copy rich text
+    const el=document.getElementById('bbhtml-preview');
+    const r=document.createRange(); r.selectNodeContents(el);
+    const sel=window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+    try{ document.execCommand('copy'); }catch(e){}
+    sel.removeAllRanges(); done();
+  };
+  if(window.ClipboardItem && navigator.clipboard && navigator.clipboard.write){
+    navigator.clipboard.write([new ClipboardItem({
+      'text/html': new Blob([_bbAgenda.html],{type:'text/html'}),
+      'text/plain': new Blob([_bbAgenda.plain],{type:'text/plain'})
+    })]).then(done, fallback);
+  } else fallback();
+}
+// Copy the raw HTML source, for pasting into a block's </> source/HTML view.
+function bbCopyHTMLsrc(btn){
+  const done=()=>{ const o=btn.innerHTML; btn.innerHTML='✓ Copied!'; setTimeout(()=>btn.innerHTML=o,1500); };
+  if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(_bbAgenda.html).then(done,done); }
+  else { const t=document.createElement('textarea'); t.value=_bbAgenda.html; document.body.appendChild(t); t.select(); try{document.execCommand('copy')}catch(e){} document.body.removeChild(t); done(); }
 }
 function closeAgenda(){ document.getElementById('agenda-overlay').style.display='none'; }
 function copyAgenda(btn){
