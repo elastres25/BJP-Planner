@@ -793,40 +793,61 @@ body.simple-mode .dp-adv { display: none !important; }
 .mi-in { width:100%; box-sizing:border-box; border:1px solid var(--rule-dark); border-radius:7px; padding:8px 10px;
   font-family:inherit; font-size:13px; outline:none; }
 
-/* ── the pacing guide, now carrying the school semester map ── */
-.sp-dates { font-size:10.5px; color:var(--ink-2); line-height:1.5; width:112px; max-width:112px; }
-.sp-dates .sp-abline { white-space:nowrap; }
-.sp-dates .sp-abline b { color:var(--ink); font-weight:700; }
-.sp-dates .smap-note-pill { white-space:normal; }
-.sp-wk { font-size:10px; font-weight:700; color:var(--ink-3); }
-.sp-today { background:#FDF3D6 !important; }
-.sp-blkwarn { font-size:10px; font-weight:800; color:#993C1D; margin-top:2px; cursor:help; }
-
-/* which A/B block this course meets on */
-.sp-blkgroup { display:inline-flex; border:1px solid var(--rule-dark); border-radius:7px; overflow:hidden; margin-right:2px; }
-.sp-blkchip { background:var(--white); border:none; border-right:1px solid var(--rule); padding:7px 11px;
-  font-family:inherit; font-size:11.5px; font-weight:700; color:var(--ink-3); cursor:pointer; }
-.sp-blkchip:last-child { border-right:none; }
-.sp-blkchip.on { background:var(--navy); color:#fff; }
-.sp-btn-navy { background:var(--navy) !important; color:#fff !important; border-color:var(--navy) !important; }
+/* ── the pacing guide = a mirror of the school's semester map Doc ── */
+.sp-semhead { font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--ink-3); margin:14px 0 6px; }
 .sp-note { font-size:12px; color:var(--ink-2); background:var(--white); border:1px solid var(--rule);
   border-radius:var(--radius-sm); padding:8px 12px; margin:0 0 10px; }
-
-/* unit banner row */
-.sp-unitrow td { padding:7px 12px; border:1px solid var(--rule); position:relative; }
-.sp-unitrow-bar { position:absolute; left:0; top:0; bottom:0; width:4px; }
-.sp-unitrow-n { font-size:11px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; margin-right:8px; }
-.sp-unitrow-name { font-size:13px; font-weight:700; }
-.sp-unitrow-meta { font-size:10.5px; color:var(--ink-3); margin-left:10px; }
-
-/* school events dropped into the flow on the dates they fall */
-.sp-eventrow td { padding:5px 12px; border:1px solid var(--rule); background:#F7F5EF;
+.sp-btn-navy { background:var(--navy) !important; color:#fff !important; border-color:var(--navy) !important; }
+.sp-wk { font-size:11px; color:var(--ink-2); }
+.sp-dow { font-size:11px; font-weight:600; color:var(--ink-3); }
+.sp-mdate { font-size:11.5px; font-weight:700; color:var(--ink-2); white-space:nowrap; }
+.sp-note-cell, .sp-td.sp-note { line-height:1.5; }
+.sp-focus { font-size:12px; line-height:1.45; color:var(--ink); }
+.sp-unitcell { display:inline-block; font-size:10px; font-weight:700; border-radius:4px; padding:2px 7px;
+  background:#EEF1F6; color:#3A4856; line-height:1.35;
   -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-.sp-event-dates { font-size:10.5px; font-weight:700; color:var(--ink-3); margin-right:10px; }
-.sp-event-text { font-size:11px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:#8a6d1a; }
+.sp-unitcell.sp-guess { opacity:.75; font-style:italic; cursor:help; }
+.sp-maprow:hover { background:#F7F9FC; }
+.sp-maprow.noclass { background:#FAFAF8; color:var(--ink-3); }
+.sp-maprow.noclass:hover { background:#F4F4F1; }
+.sp-today { background:#FDF3D6 !important; }
 .sp-bannerrow td { padding:4px 12px; border:1px solid var(--rule); background:var(--parchment); text-align:center;
   font-size:10px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:#8a6d1a;
   -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+.sp-attach { background:none; border:1px dashed var(--rule-dark); border-radius:5px; padding:2px 8px;
+  font-family:inherit; font-size:10.5px; font-weight:700; color:var(--ink-3); cursor:pointer; white-space:nowrap; }
+.sp-attach:hover { border-style:solid; border-color:var(--navy); color:var(--navy); }
+
+/* the Doc itself, embedded above its mirror */
+.sp-docpane { border:1px solid var(--rule); border-radius:var(--radius); overflow:hidden; margin-bottom:12px; background:#fff; }
+.sp-docpane-head { display:flex; align-items:center; gap:8px; padding:8px 12px; border-bottom:1px solid var(--rule);
+  font-size:12.5px; font-weight:700; color:var(--navy); }
+.sp-docpane iframe { width:100%; height:520px; border:none; display:block; }
+.sp-docpane-foot { font-size:11px; color:var(--ink-3); padding:6px 12px; border-top:1px solid var(--rule); }
+
+/* assessments tab */
+.as-table td { border:1px solid var(--rule); padding:6px 9px; vertical-align:top; font-size:12px; }
+.as-row.past { opacity:.5; }
+.as-row.today { background:#FDF3D6; }
+.as-date { white-space:nowrap; font-size:11.5px; color:var(--ink-2); }
+.as-dow { font-size:9.5px; font-weight:600; color:var(--ink-3); text-transform:uppercase; }
+.as-type { display:inline-block; font-size:10px; font-weight:700; border-radius:999px; padding:2px 9px;
+  -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+.as-title { line-height:1.4; }
+.as-clash { font-size:10.5px; font-weight:700; color:#993C1D; margin-top:3px; }
+.as-unit { font-size:10.5px; font-weight:700; color:var(--ink-3); }
+.as-src { font-size:10.5px; color:var(--ink-3); font-style:italic; }
+.as-tally { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; }
+
+/* "+ plan" picker */
+.al-row { display:flex; align-items:center; gap:9px; width:100%; text-align:left; background:none;
+  border:1px solid var(--rule); border-radius:7px; padding:7px 10px; margin-bottom:5px; cursor:pointer; font-family:inherit; }
+.al-row:hover { border-color:var(--navy); background:#F7F9FC; }
+.al-u { font-size:9.5px; font-weight:800; border-radius:4px; padding:1px 6px; flex:0 0 auto; }
+.al-lbl { font-size:11.5px; font-weight:700; color:var(--navy); flex:0 0 58px; }
+.al-topic { font-size:12px; color:var(--ink-2); flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.al-date { font-size:10.5px; color:var(--ink-3); flex:0 0 auto; }
 
 /* ── SIMPLE PACING GUIDE ── */
 .sp-wrap { background:#fff; border:1px solid var(--rule); border-radius:12px; overflow:hidden; }
@@ -1932,21 +1953,6 @@ body.simple-mode .dp-adv { display: none !important; }
 
     <!-- LIVE PACING GUIDE (embedded Google Doc) -->
     <div style="margin-top:24px" id="pacing-doc-wrap"></div>
-  </div>
-</div>
-
-<!-- SEMESTER MAP → PLANNER SYNC -->
-<div id="mapsync-overlay" style="display:none;position:fixed;inset:0;z-index:860;background:rgba(0,0,0,.45);overflow-y:auto" onclick="if(event.target===this)closeMapSync()">
-  <div style="background:var(--white);max-width:720px;margin:40px auto;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,.25);overflow:hidden">
-    <div style="background:var(--navy);padding:12px 18px;display:flex;align-items:center;justify-content:space-between">
-      <div style="color:#fff;font-size:14px;font-weight:700">Sync my lesson plans to the school map</div>
-      <button onclick="closeMapSync()" style="background:none;border:none;color:rgba(255,255,255,.7);font-size:20px;line-height:1;cursor:pointer">&times;</button>
-    </div>
-    <div id="mapsync-body" style="padding:18px 20px"></div>
-    <div style="display:flex;gap:8px;justify-content:flex-end;padding:12px 20px;border-top:1px solid var(--rule);background:var(--parchment)">
-      <button class="smap-btn" onclick="closeMapSync()">Cancel</button>
-      <button class="smap-btn primary" onclick="confirmMapSync()">Sync it</button>
-    </div>
   </div>
 </div>
 
@@ -3557,7 +3563,7 @@ function collectClasses(){
 // that is already there.
 //
 // Row format (compact, to keep the file small):
-//   week | BLK | day-of-week | M.D | calendar note(s) | lesson focus
+//   week | BLK | day-of-week | M.D | calendar note(s) | unit of study | lesson focus
 //   BLK is A, B, or "-" for a day with no class. Notes are separated by " · ".
 
 const SCHOOL_MAP_SEEDS = {
@@ -3570,95 +3576,95 @@ const SCHOOL_MAP_SEEDS = {
       projected: { 'Quizzes/Reflections':'', 'Tests':'3', 'Projects':'', 'Essays':'', 'Homeworks':'', 'Classworks':'', 'Seminars/Discussion':'' },
       weekBanners: { 8: 'HOMECOMING WEEK' },
       rows: [
-        '1|-|M|8.17||',
-        '1||T|8.18|HS SYLLABUS DAY|Introduction Day',
-        '1||W|8.19|MS SYLLABUS DAY|Introduction Day',
-        '1|A|R|8.20||Procedures / Introduction #1',
-        '1|B|F|8.21|HS MASS - HOLY SPIRIT (11/12)|Procedures / Introduction #1',
-        '2|A|M|8.24|MS MASS - HOLY SPIRIT|Procedures / Introduction #2',
-        '2|B|T|8.25|HS MASS - HOLY SPIRIT (9/10) · MS BACK TO SCHOOL|Procedures / Introduction #2',
-        '2|A|W|8.26||Procedures / Introduction #3',
-        '2|B|R|8.27|HS BACK TO SCHOOL|Procedures / Introduction #3',
-        '2|A|F|8.28||1: Students will explain that morality is about reaching our final end: union with God.',
-        '3|B|M|8.31||1: Students will explain that morality is about reaching our final end: union with God.',
-        '3|A|T|9.1||2: Students will distinguish virtue, vice, mortal sin, and venial sin.',
-        '3|B|W|9.2|EARLY RELEASE|2: Students will distinguish virtue, vice, mortal sin, and venial sin.',
-        '3|A|R|9.3||3: Students will analyze human actions using object, intention, and circumstances.',
-        '3|B|F|9.4||3: Students will analyze human actions using object, intention, and circumstances.',
-        '4|-|M|9.7|NO SCHOOL - LABOR DAY|',
-        '4|A|T|9.8|MS MASS|4: Students will explain what Scripture is, what the canon is, and why Catholics read Scripture within the Church.',
-        '4|B|W|9.9||4: Students will explain what Scripture is, what the canon is, and why Catholics read Scripture within the Church.',
-        '4|A|R|9.10||5: Students will identify the literal and spiritual senses of Scripture and place the major Bible timeline periods in order.',
-        '4|B|F|9.11||5: Students will identify the literal and spiritual senses of Scripture and place the major Bible timeline periods in order.',
-        '5|A|M|9.14||6: Unit 1 Quiz: Morality and Scripture',
-        '5|B|T|9.15|HS ACADEMIC AWARDS|6: Unit 1 Quiz: Morality and Scripture',
-        '5|A|W|9.16|MS ACADEMIC AWARDS|7: Genesis 1',
-        '5|B|R|9.17|FRESHMAN RETREAT|7: Genesis 1',
-        '5|A|F|9.18|6TH GRADE LOCK-IN|8: Genesis 2',
-        '6|B|M|9.21|PICTURE DAY|8: Genesis 2',
-        '6|A|T|9.22||9: Genesis 3',
-        '6|B|W|9.23|JUNIOR ENCOUNTER (1)|9: Genesis 3',
-        '6|A|R|9.24|JUNIOR ENCOUNTER (1)|10: Genesis 3:15',
-        '6|B|F|9.25|JUNIOR ENCOUNTER (1) · VOLUNTEER FAIR|10: Genesis 3:15',
-        '7|A|M|9.28||11: Genesis 4, 5 (Cain and Abel)',
-        '7|B|T|9.29||11: Genesis 4, 5 (Cain and Abel)',
-        '7|A|W|9.30|EARLY RELEASE · JUNIOR ENCOUNTER (2)|12: Genesis 6–9',
-        '7|B|R|10.1|EARLY RELEASE · JUNIOR ENCOUNTER (2)|12: Genesis 6–9',
-        '7|A|F|10.2|EARLY RELEASE · JUNIOR ENCOUNTER (2)|13: Genesis 11',
-        '8|B|M|10.5||13: Genesis 11',
-        '8|A|T|10.6|SENIOR RING MASS|14: Unit 2 Test: Genesis 1–11',
-        '8|-|W|10.7|HS PSAT & MIDDLE SCHOOL FIELD DAY|',
-        '8|B|R|10.8||14: Unit 2 Test: Genesis 1–11',
-        '8|A|F|10.9||15: Genesis 12-17',
-        '9|B|M|10.12|INTERIM REPORT RELEASED|15: Genesis 12-17',
-        '9|A|T|10.13||16: Genesis 18-21',
-        '9|B|W|10.14||16: Genesis 18-21',
-        '9|A|R|10.15||17: Genesis 22-24',
-        '9|-|F|10.16|NO SCHOOL|',
-        '10|B|M|10.19||17: Genesis 22-24',
-        '10|A|T|10.20||18: Genesis 25-27',
-        '10|B|W|10.21||18: Genesis 25-27',
-        '10|A|R|10.22|SOPHOMORE RETREAT|19: Genesis 28-32',
-        '10|B|F|10.23||19: Genesis 28-32',
-        '11|A|M|10.26||20: Genesis 33-38',
-        '11|B|T|10.27||21: Genesis 39–41',
-        '11|A|W|10.28|EARLY RELEASE|21: Genesis 39–41',
-        '11|B|R|10.29|TRUNK OR TREAT · FLIP FLEX SCHEDULE|22: Genesis 42–50',
-        '11|A|F|10.30||22: Genesis 42–50',
-        '12|B|M|11.2||23: Unit 3 Test: Genesis: The Patriarchs',
-        '12|A|T|11.3||23: Unit 3 Test: Genesis: The Patriarchs',
-        '12|B|W|11.4|JUNIOR ENCOUNTER (3)|24: Exodus 1–2',
-        '12|A|R|11.5||25: Exodus 3-6',
-        '12|B|F|11.6||25: Exodus 3-6',
-        '13|A|M|11.9||26: Exodus 7–12',
-        '13|B|T|11.10||26: Exodus 7–12',
-        '13|-|W|11.11|NO SCHOOL - VETERAN’S DAY|',
-        '13|A|R|11.12||27: Exodus 12',
-        '13|B|F|11.13||27: Exodus 12',
-        '14|A|M|11.16||28: Exodus 14',
-        '14|B|T|11.17|FOUNDING OF A NATION|28: Exodus 14',
-        '14|A|W|11.18||29: Exodus 16-18',
-        '14|B|R|11.19||29: Exodus 16-18',
-        '14|A|F|11.20||30: Exodus 19–20',
-        '|-|M|11.23|THANKSGIVING BREAK|',
-        '|-|T|11.24|THANKSGIVING BREAK|',
-        '|-|W|11.25|THANKSGIVING BREAK|',
-        '|-|R|11.26|THANKSGIVING BREAK|',
-        '|-|F|11.27|THANKSGIVING BREAK|',
-        '15|B|M|11.30||30: Exodus 19–20',
-        '15|A|T|12.1||31: Exodus 32',
-        '15|B|W|12.2|EARLY RELEASE|31: Exodus 32',
-        '15|A|R|12.3|SOPHOMORE RETREAT|32: Unit 4 Test: Exodus',
-        '15|B|F|12.4||32: Unit 4 Test: Exodus',
-        '16|A|M|12.7||Movie Day 1',
-        '16|B|T|12.8||Movie Day 1',
-        '16|A|W|12.9||Movie Day 2',
-        '16|B|R|12.10|CHRISTMAS VILLAGE · FLIP FLEX SCHEDULE|Movie Day 2',
-        '16|A|F|12.11||Buffer',
-        '17|B|M|12.14||Buffer',
-        '17|-|T|12.15|SEMESTER EXAMS|',
-        '17|-|W|12.16|SEMESTER EXAMS|',
-        '17|-|R|12.17|SEMESTER EXAMS|',
+        '1|-|M|8.17|||',
+        '1||T|8.18|HS SYLLABUS DAY||Introduction Day',
+        '1||W|8.19|MS SYLLABUS DAY||Introduction Day',
+        '1|A|R|8.20|||Procedures / Introduction #1',
+        '1|B|F|8.21|HS MASS - HOLY SPIRIT (11/12)||Procedures / Introduction #1',
+        '2|A|M|8.24|MS MASS - HOLY SPIRIT||Procedures / Introduction #2',
+        '2|B|T|8.25|HS MASS - HOLY SPIRIT (9/10) · MS BACK TO SCHOOL||Procedures / Introduction #2',
+        '2|A|W|8.26|||Procedures / Introduction #3',
+        '2|B|R|8.27|HS BACK TO SCHOOL||Procedures / Introduction #3',
+        '2|A|F|8.28|||1: Students will explain that morality is about reaching our final end: union with God.',
+        '3|B|M|8.31|||1: Students will explain that morality is about reaching our final end: union with God.',
+        '3|A|T|9.1|||2: Students will distinguish virtue, vice, mortal sin, and venial sin.',
+        '3|B|W|9.2|EARLY RELEASE||2: Students will distinguish virtue, vice, mortal sin, and venial sin.',
+        '3|A|R|9.3|||3: Students will analyze human actions using object, intention, and circumstances.',
+        '3|B|F|9.4|||3: Students will analyze human actions using object, intention, and circumstances.',
+        '4|-|M|9.7|NO SCHOOL - LABOR DAY||',
+        '4|A|T|9.8|MS MASS||4: Students will explain what Scripture is, what the canon is, and why Catholics read Scripture within the Church.',
+        '4|B|W|9.9|||4: Students will explain what Scripture is, what the canon is, and why Catholics read Scripture within the Church.',
+        '4|A|R|9.10|||5: Students will identify the literal and spiritual senses of Scripture and place the major Bible timeline periods in order.',
+        '4|B|F|9.11|||5: Students will identify the literal and spiritual senses of Scripture and place the major Bible timeline periods in order.',
+        '5|A|M|9.14|||6: Unit 1 Quiz: Morality and Scripture',
+        '5|B|T|9.15|HS ACADEMIC AWARDS||6: Unit 1 Quiz: Morality and Scripture',
+        '5|A|W|9.16|MS ACADEMIC AWARDS||7: Genesis 1',
+        '5|B|R|9.17|FRESHMAN RETREAT||7: Genesis 1',
+        '5|A|F|9.18|6TH GRADE LOCK-IN||8: Genesis 2',
+        '6|B|M|9.21|PICTURE DAY||8: Genesis 2',
+        '6|A|T|9.22|||9: Genesis 3',
+        '6|B|W|9.23|JUNIOR ENCOUNTER (1)||9: Genesis 3',
+        '6|A|R|9.24|JUNIOR ENCOUNTER (1)||10: Genesis 3:15',
+        '6|B|F|9.25|JUNIOR ENCOUNTER (1) · VOLUNTEER FAIR||10: Genesis 3:15',
+        '7|A|M|9.28|||11: Genesis 4, 5 (Cain and Abel)',
+        '7|B|T|9.29|||11: Genesis 4, 5 (Cain and Abel)',
+        '7|A|W|9.30|EARLY RELEASE · JUNIOR ENCOUNTER (2)||12: Genesis 6–9',
+        '7|B|R|10.1|EARLY RELEASE · JUNIOR ENCOUNTER (2)||12: Genesis 6–9',
+        '7|A|F|10.2|EARLY RELEASE · JUNIOR ENCOUNTER (2)||13: Genesis 11',
+        '8|B|M|10.5|||13: Genesis 11',
+        '8|A|T|10.6|SENIOR RING MASS||14: Unit 2 Test: Genesis 1–11',
+        '8|-|W|10.7|HS PSAT & MIDDLE SCHOOL FIELD DAY||',
+        '8|B|R|10.8|||14: Unit 2 Test: Genesis 1–11',
+        '8|A|F|10.9|||15: Genesis 12-17',
+        '9|B|M|10.12|INTERIM REPORT RELEASED||15: Genesis 12-17',
+        '9|A|T|10.13|||16: Genesis 18-21',
+        '9|B|W|10.14|||16: Genesis 18-21',
+        '9|A|R|10.15|||17: Genesis 22-24',
+        '9|-|F|10.16|NO SCHOOL||',
+        '10|B|M|10.19|||17: Genesis 22-24',
+        '10|A|T|10.20|||18: Genesis 25-27',
+        '10|B|W|10.21|||18: Genesis 25-27',
+        '10|A|R|10.22|SOPHOMORE RETREAT||19: Genesis 28-32',
+        '10|B|F|10.23|||19: Genesis 28-32',
+        '11|A|M|10.26|||20: Genesis 33-38',
+        '11|B|T|10.27|||21: Genesis 39–41',
+        '11|A|W|10.28|EARLY RELEASE||21: Genesis 39–41',
+        '11|B|R|10.29|TRUNK OR TREAT · FLIP FLEX SCHEDULE||22: Genesis 42–50',
+        '11|A|F|10.30|||22: Genesis 42–50',
+        '12|B|M|11.2|||23: Unit 3 Test: Genesis: The Patriarchs',
+        '12|A|T|11.3|||23: Unit 3 Test: Genesis: The Patriarchs',
+        '12|B|W|11.4|JUNIOR ENCOUNTER (3)||24: Exodus 1–2',
+        '12|A|R|11.5|||25: Exodus 3-6',
+        '12|B|F|11.6|||25: Exodus 3-6',
+        '13|A|M|11.9|||26: Exodus 7–12',
+        '13|B|T|11.10|||26: Exodus 7–12',
+        '13|-|W|11.11|NO SCHOOL - VETERAN’S DAY||',
+        '13|A|R|11.12|||27: Exodus 12',
+        '13|B|F|11.13|||27: Exodus 12',
+        '14|A|M|11.16|||28: Exodus 14',
+        '14|B|T|11.17|FOUNDING OF A NATION||28: Exodus 14',
+        '14|A|W|11.18|||29: Exodus 16-18',
+        '14|B|R|11.19|||29: Exodus 16-18',
+        '14|A|F|11.20|||30: Exodus 19–20',
+        '|-|M|11.23|THANKSGIVING BREAK||',
+        '|-|T|11.24|THANKSGIVING BREAK||',
+        '|-|W|11.25|THANKSGIVING BREAK||',
+        '|-|R|11.26|THANKSGIVING BREAK||',
+        '|-|F|11.27|THANKSGIVING BREAK||',
+        '15|B|M|11.30|||30: Exodus 19–20',
+        '15|A|T|12.1|||31: Exodus 32',
+        '15|B|W|12.2|EARLY RELEASE||31: Exodus 32',
+        '15|A|R|12.3|SOPHOMORE RETREAT||32: Unit 4 Test: Exodus',
+        '15|B|F|12.4|||32: Unit 4 Test: Exodus',
+        '16|A|M|12.7|||Movie Day 1',
+        '16|B|T|12.8|||Movie Day 1',
+        '16|A|W|12.9|||Movie Day 2',
+        '16|B|R|12.10|CHRISTMAS VILLAGE · FLIP FLEX SCHEDULE||Movie Day 2',
+        '16|A|F|12.11|||Buffer',
+        '17|B|M|12.14|||Buffer',
+        '17|-|T|12.15|SEMESTER EXAMS||',
+        '17|-|W|12.16|SEMESTER EXAMS||',
+        '17|-|R|12.17|SEMESTER EXAMS||',
       ],
     },
   },
@@ -3704,7 +3710,8 @@ function smapExpand(m){
     const week = p[0] !== '' ? +p[0] : lastWeek;
     if(p[0] !== '') lastWeek = +p[0];
     const blk = (p[1]||'').trim();
-    const focus = (p[5]||'').trim();
+    const unit = (p[5]||'').trim();
+    const focus = (p[6]||'').trim();
     return {
       week,
       blk: (blk === '-' ? '' : blk),
@@ -3713,6 +3720,7 @@ function smapExpand(m){
       md: (p[3]||'').trim(),
       date: smapISO((p[3]||'').trim(), m.year),
       notes: (p[4]||'').split('·').map(s=>s.trim()).filter(Boolean),
+      unit,
       focus,
     };
   });
@@ -3755,8 +3763,21 @@ function smapLessons(m){
       ? sw[1].replace(/\s*\.\s*$/,'').replace(/^./, c=>c.toUpperCase())
       : L.objective;
   });
-  // Units come from the map's own "Unit N Test / Quiz" markers: every
-  // numbered lesson up to and including a marker belongs to that unit.
+  // Units come from the Doc's own Unit of Study column whenever it is filled
+  // in — that is the school's answer, not ours.
+  lessons.forEach(L => {
+    const txt = (L.rows.find(r => r.unit) || {}).unit || '';
+    L.unitText = txt;
+    const um = txt.match(/(\d+)/);
+    if(txt) L.unitNo = um ? +um[1] : null;
+  });
+  m._unitsFromDoc = lessons.some(L => L.unitText);
+  if(m._unitsFromDoc){ m._lessons = lessons; return lessons; }
+
+  // Only when that column is blank do we fall back to reading the map's own
+  // "Unit N Test / Quiz" rows: every numbered lesson up to and including a
+  // marker belongs to that unit. Surfaced in the UI as a guess.
+  m._unitsInferred = true;
   let pending = [], lastUnit = 0;
   lessons.forEach(L => {
     if(L.n == null) return;
@@ -3788,16 +3809,61 @@ function smapUnitId(unitNo){
   return ord[unitNo-1] ? ord[unitNo-1].id : null;
 }
 
+// ── LIVE DATE LOOKUPS ─────────────────────────────────────────────
+// Nothing from the map is copied onto a lesson. The Doc is the record; a
+// lesson and a map row belong together when they fall on the same date.
+// That means no sync to run, nothing to drift, and no assumptions stored.
+let _mapDateIdx = null, _mapDateIdxKey = '';
+function mapDateIndex(){
+  const key = activeCourse + ':' + schoolMapSems(activeCourse).map(s => {
+    const m = getSchoolMap(activeCourse, s); return s + '/' + ((m && m.importedAt) || 'seed');
+  }).join(',');
+  if(_mapDateIdx && _mapDateIdxKey === key) return _mapDateIdx;
+  const idx = new Map();
+  schoolMapSems(activeCourse).forEach(sem => {
+    const m = getSchoolMap(activeCourse, sem); if(!m) return;
+    const lessons = smapLessons(m);
+    const byRow = new Map();
+    lessons.forEach(L => L.rows.forEach(r => byRow.set(r, L)));
+    (m._rows || []).forEach(r => { if(r.date) idx.set(r.date, { row:r, lesson:byRow.get(r)||null, sem, map:m }); });
+  });
+  _mapDateIdx = idx; _mapDateIdxKey = key;
+  return idx;
+}
+function mapHitForDate(iso){ return iso ? (mapDateIndex().get(iso) || null) : null; }
+function invalidateMapIndex(){ _mapDateIdx = null; _mapDateIdxKey = ''; }
+
+// Every planner lesson that sits on a given date, for the guide's Plan column.
+function plannerDaysByDate(){
+  const idx = new Map();
+  orderedUnits().forEach(u => (state.units[u.id]||[]).forEach((w, wi) => (w.days||[]).forEach((d, di) => {
+    [d.dateA, d.dateB].filter(Boolean).forEach(iso => { if(!idx.has(iso)) idx.set(iso, {u, d, wi, di}); });
+  })));
+  return idx;
+}
+
 // ── Map ⇄ lesson lookups used by the rest of the planner ──────────
-function dayMapRef(d){ return (d && d.mapRef && d.mapRef.n != null) ? d.mapRef : null; }
+function dayMapRef(d){
+  const hit = mapHitForDate(d && d.dateA);
+  if(hit && hit.lesson && hit.lesson.n != null) return { n: hit.lesson.n, sem: hit.sem };
+  return (d && d.mapRef && d.mapRef.n != null) ? d.mapRef : null;   // pre-lookup data
+}
 function dayMapLesson(d){
+  const hit = mapHitForDate(d && d.dateA);
+  if(hit) return hit.lesson;
   const ref = d && d.mapRef; if(!ref) return null;
   const m = getSchoolMap(activeCourse, ref.sem); if(!m) return null;
   return smapLessons(m).find(L => L.key === ref.key) || null;
 }
 // Calendar notes that apply to a lesson: stored on the day at sync time so
 // they survive even if the map is later replaced.
-function dayCalNotes(d){ return (d && Array.isArray(d.calNotes)) ? d.calNotes : []; }
+function dayCalNotes(d){
+  const hit = mapHitForDate(d && d.dateA);
+  if(hit) return hit.row.notes;
+  return (d && Array.isArray(d.calNotes)) ? d.calNotes : [];
+}
+function dayMapBlockLive(d){ const hit = mapHitForDate(d && d.dateA); return hit ? hit.row.blk : ((d && d.mapBlock) || ''); }
+function dayMapUnitText(d){ const hit = mapHitForDate(d && d.dateA); return hit ? hit.row.unit : ''; }
 function calNoteBadgeHTML(d, small){
   const notes = dayCalNotes(d); if(!notes.length) return '';
   const txt = notes.join(' · ');
@@ -3836,33 +3902,9 @@ function mapBarHTML(d){
 // A day the map has no room for is only worth parking if there is real work
 // in it. Every fresh lesson ships with the five template activities, so an
 // untouched lesson looks "started" to dayIsStarted() — this looks past that.
-function mapDayHasWork(d){
-  if(!d) return false;
-  const t = s => String(s||'').replace(/<[^>]*>/g,' ').replace(/&nbsp;/g,' ').trim();
-  if(t(d.topic)||t(d.eq)||t(d.qod)||t(d.topicDesc)||t(d.journalPrompt)||t(d.homework)||t(d.assessment)) return true;
-  if(t(d.goalsText)||t(d.targetsText)||t(d.activitiesText)||t(d.brainstorm)||t(d.postNotes)||t(d.ignatianReflection)) return true;
-  if((d.targets||[]).length||(d.teacherGoals||[]).length||(d.materials||[]).length||(d.links||[]).length) return true;
-  if((d.vocab||[]).length||(d.lessonObjs||[]).length||(d.skillsCovered||[]).length||(d.knowledgeIntroduced||[]).length) return true;
-  const defaults = new Set(Object.values(ACTIVITY_DEFAULTS));
-  return (d.activities||[]).some(a => {
-    if(!a) return false;
-    if(a.brk) return true;
-    const named = t(a.name);
-    if(named && !defaults.has(named)) return true;
-    return !!(t(a.desc)||t(a.content)||t(a.studentActivity)||t(a.boardNotes)||t(a.notes));
-  });
-}
 
 // How many class blocks a unit actually holds. Once the school map has been
 // synced in, its real count replaces the curriculum guide's estimate.
-function unitMapBlocks(u){
-  const weeks = state.units[u.id] || [];
-  const days = weeks.reduce((s, w) => s + (w.days||[]).length, 0);
-  const synced = weeks.some(w => (w.days||[]).some(d => d.mapRef));
-  if(!synced || !days) return u.blocks;
-  const wks = weeks.filter(w => (w.days||[]).length).length;
-  return `${days} block${days===1?'':'s'} · ${wks} wk${wks===1?'':'s'}`;
-}
 
 // The little "school map" chip that sits in the pacing guide's header and
 // keeps the two guides visibly tied together.
@@ -3871,37 +3913,15 @@ function unitMapBlocks(u){
 // lesson focus appears on both an A row and a B row. A given course only
 // meets on one of them (Theology 7 on B days, Theology 6 on A days), so
 // only that row is a real class day — and only its calendar notes matter.
-function courseBlock(courseId){
-  const c = courseId || activeCourse;
-  const v = state && state.courseBlock && state.courseBlock[c];
-  if(v === 'A' || v === 'B' || v === 'both') return v;
-  return c === 7 ? 'B' : 'A';
-}
-function setCourseBlock(v){
-  if(!state.courseBlock) state.courseBlock = {};
-  state.courseBlock[activeCourse] = v;
-  saveState();
-  renderUnit();
-  toast(v === 'both'
-    ? 'Showing both A and B blocks'
-    : `${getCourse().name} meets on ${v} days — showing ${v} days`);
-}
 // The map row this course actually teaches a lesson on.
-function lessonBlockRow(L, blk){
-  if(blk === 'both') return null;
-  return L.rows.find(r => r.blk === blk) || null;
-}
 // The class date a lesson lands on for this course's block. Falls back to
 // the lesson's other row when the map skipped this course's block.
-function lessonDateFor(L, blk){
-  if(blk === 'both') return L.dateA || L.dateB || '';
-  const r = lessonBlockRow(L, blk) || L.rows[0];
-  return r ? r.date : '';
-}
-function dayBlockLetter(d){ return (d && d.mapBlock) || ''; }
+function dayBlockLetter(d){ return dayMapBlockLive(d); }
 
 // A day's school week number, straight off the map row it came from.
 function dayMapWeek(d){
+  const hit = mapHitForDate(d && d.dateA);
+  if(hit) return hit.row.week;
   const L = dayMapLesson(d);
   return L ? L.week : null;
 }
@@ -3909,28 +3929,6 @@ function dayMapWeek(d){
 // Every no-school day and school-wide event for this course, as bands ready
 // to drop into the pacing guide. Runs of identical no-class days (a whole
 // Thanksgiving week) collapse into one band.
-function mapEventBands(courseId){
-  const out = [];
-  schoolMapSems(courseId || activeCourse).forEach(sem => {
-    const m = getSchoolMap(courseId || activeCourse, sem); if(!m) return;
-    const rows = m._rows || smapExpand(m);
-    const seenWeeks = new Set();
-    let cur = null;
-    rows.forEach(r => {
-      if(m.weekBanners && m.weekBanners[r.week] && !seenWeeks.has(r.week)){
-        seenWeeks.add(r.week);
-        out.push({ kind:'banner', start:r.date, end:r.date, text:m.weekBanners[r.week] });
-      }
-      if(!r.noClass){ cur = null; return; }
-      const text = r.notes.join(' · ');
-      if(!text){ cur = null; return; }   // a blank no-class day is not an event
-      if(cur && cur.text === text){ cur.end = r.date; return; }
-      cur = { kind:'event', start:r.date, end:r.date, text, week:r.week };
-      out.push(cur);
-    });
-  });
-  return out.sort((a,b) => a.start.localeCompare(b.start) || (a.kind==='banner'?-1:1));
-}
 // Shown above the pacing table when the school map has not been synced yet.
 
 
@@ -3941,219 +3939,18 @@ let smapSem = 1;
 function setSmapSem(sem){ smapSem = +sem; renderUnit(); }
 
 // ── SCHOOL-MAP TOOLBAR & STATUS (lives in the pacing guide header) ──
-function mapToolbarHTML(){
-  const sems = schoolMapSems(activeCourse);
-  const blk = courseBlock();
-  const chip = (v, label, title) =>
-    `<button class="sp-blkchip${blk===v?' on':''}" title="${esc(title)}" onclick="setCourseBlock('${v}')">${esc(label)}</button>`;
-  const blocks = `<span class="sp-blkgroup" title="Which block this course meets on">
-      ${chip('A','A days','This course meets on A days')}${chip('B','B days','This course meets on B days')}${chip('both','Both','This course meets on both A and B days')}
-    </span>`;
-  if(!sems.length){
-    return `${blocks}<button class="sp-btn" onclick="openMapImport()">📥 Add school map…</button>
-      <button class="sp-btn" onclick="exportPacingGuidePDF()">Export</button>`;
-  }
-  const syncBtns = sems.map(s =>
-    `<button class="sp-btn sp-btn-navy" onclick="openMapSync(${s})">↻ Sync${sems.length>1?` S${s}`:''} to school map</button>`).join('');
-  const m = getSchoolMap(activeCourse, sems[0]);
-  return `${blocks}${syncBtns}
-    <button class="sp-btn" onclick="openMapImport()">📥 Map…</button>
-    ${m && m.docUrl ? `<a class="sp-btn" href="${esc(m.docUrl)}" target="_blank" rel="noopener">Doc ↗</a>` : ''}
-    <button class="sp-btn" onclick="exportPacingGuidePDF()">Export</button>`;
-}
 
 // Everything the guide wants to warn about: not synced yet, dates that have
 // drifted off the map, and lessons the map never gave this block a day for.
-function mapStatusHTML(){
-  const sems = schoolMapSems(activeCourse);
-  if(!sems.length){
-    return `<div class="sp-note">No school semester map loaded for ${esc(getCourse().name)} yet — dates below are whatever you set by hand.
-      <button class="smap-btn primary" style="padding:3px 10px;font-size:11.5px;margin-left:6px" onclick="openMapImport()">Paste your school's map →</button></div>`;
-  }
-  const blk = courseBlock();
-  let total = 0, missingBlock = [];
-  sems.forEach(s => {
-    const m = getSchoolMap(activeCourse, s); if(!m) return;
-    smapLessons(m).forEach(L => {
-      total++;
-      if(blk !== 'both' && !lessonBlockRow(L, blk)) missingBlock.push(L);
-    });
-  });
-  let linked = 0; const drift = [];
-  orderedUnits().forEach(u => (state.units[u.id]||[]).forEach(w => (w.days||[]).forEach(d => {
-    if(!d.mapRef) return;
-    linked++;
-    const L = dayMapLesson(d);
-    if(L && lessonDateFor(L, blk) && d.dateA !== lessonDateFor(L, blk)) drift.push(d);
-  })));
-  const out = [];
-  if(!linked){
-    out.push(`<div class="smap-warn" style="margin:0 0 10px">Your school's semester map is loaded but hasn't been synced into these lessons yet — the dates below stay blank until you do.</div>`);
-  } else {
-    const m0 = getSchoolMap(activeCourse, sems[0]);
-    out.push(`<div class="sp-note">📅 Dated from <b>${esc((m0&&m0.title)||'the school semester map')}</b> · ${linked} of ${total} lessons linked ·
-      ${esc(getCourse().name)} meets on <b>${blk==='both'?'A and B':blk} days</b></div>`);
-  }
-  if(drift.length) out.push(`<div class="smap-warn" style="margin:0 0 10px">⚠ ${drift.length} lesson${drift.length===1?'':'s'} sit on a different date than the map (${drift.slice(0,3).map(d=>esc(d.label)).join(', ')}${drift.length>3?'…':''}) — re-sync to line them up.</div>`);
-  if(missingBlock.length) out.push(`<div class="smap-warn" style="margin:0 0 10px">ℹ The map never gives ${missingBlock.length} lesson${missingBlock.length===1?'':'s'} a ${blk} day (${missingBlock.slice(0,4).map(L=>esc(L.n!=null?'L'+L.n:L.title)).join(', ')}${missingBlock.length>4?'…':''}) — they're dated from the other block. Worth checking the Doc.</div>`);
-  return out.join('');
-}
 
 
 
 // ══ SYNC: map → lesson plans ══════════════════════════════════════
 // Builds the plan of changes first so the teacher can see exactly what will
 // happen before anything is written.
-function planMapSync(sem, opts){
-  const m = getSchoolMap(activeCourse, sem); if(!m) return null;
-  const blk = courseBlock();
-  const lessons = smapLessons(m);
-  const byUnit = new Map();
-  lessons.forEach(L => {
-    const uid2 = smapUnitId(L.unitNo);
-    if(!uid2) return;
-    if(!byUnit.has(uid2)) byUnit.set(uid2, []);
-    byUnit.get(uid2).push(L);
-  });
-  const plan = { sem, blk, units: [], skipped: lessons.filter(L => !smapUnitId(L.unitNo)).length,
-                 noBlockRow: lessons.filter(L => blk !== 'both' && !lessonBlockRow(L, blk)).length, opts };
-  byUnit.forEach((ls, uid2) => {
-    const u = UNIT_META.find(x => x.id === uid2);
-    const existing = [];
-    (state.units[uid2]||[]).forEach(w => (w.days||[]).forEach(d => existing.push(d)));
-    const used = new Set();
-    const pick = L => {
-      const want = lessonDateFor(L, blk);
-      let d = existing.find(x => !used.has(x) && x.mapRef && x.mapRef.sem === sem && x.mapRef.key === L.key);
-      if(!d && want) d = existing.find(x => !used.has(x) && (x.dateA === want || x.dateB === want));
-      if(!d) d = existing.find(x => !used.has(x) && !x.mapRef);
-      if(d) used.add(d);
-      return d || null;
-    };
-    const pairs = ls.map(L => ({ L, d: pick(L) }));
-    const leftover = existing.filter(x => !used.has(x) && mapDayHasWork(x));
-    plan.units.push({
-      uid: uid2, name: u ? u.name : `Unit ${uid2}`, unitNo: ls[0].unitNo,
-      pairs, leftover,
-      added: pairs.filter(p => !p.d).length,
-      reused: pairs.filter(p => p.d).length,
-      before: existing.length, after: pairs.length + leftover.length,
-    });
-  });
-  plan.units.sort((a,b)=>(a.unitNo||0)-(b.unitNo||0));
-  return plan;
-}
 
 
-function applyMapSync(plan){
-  const o = plan.opts || {};
-  const blk = plan.blk || courseBlock();
-  let touched = 0, dated = 0;
-  plan.units.forEach(pu => {
-    const weeks = [];
-    let cur = null;
-    pu.pairs.forEach(({L, d}) => {
-      const day = d || makeDay('', '', '');
-      day.mapRef = { sem: plan.sem, n: L.n, key: L.key };
-      day.mapFocus = L.focus;
-      if(blk === 'both'){
-        day.dateA = L.dateA || '';
-        day.dateB = L.dateB || '';
-        day.mapBlock = '';
-        day.calNotes = L.notes.slice();
-      } else {
-        // Only the row for this course's block is a real class day, so its
-        // date is THE class date and only its notes apply.
-        const row = lessonBlockRow(L, blk);
-        const use = row || L.rows[0];
-        day.dateA = use ? use.date : '';
-        day.dateB = '';
-        day.mapBlock = row ? blk : ((use && use.blk) || '');
-        day.mapBlockMissing = !row;
-        day.calNotes = use ? use.notes.slice() : [];
-      }
-      if(day.dateA || day.dateB) dated++;
-      if(o.titles && (!String(day.topic||'').trim() || o.overwrite)) day.topic = L.title;
-      if(o.targets && L.target && (!(day.targets||[]).length || o.overwrite)){
-        day.targets = [L.target];
-        delete day.targetsText;
-      }
-      if(o.assess && L.assessType && (!day.assessType || o.overwrite)) day.assessType = L.assessType;
-      touched++;
-      if(!cur || cur._week !== L.week){
-        cur = { weekLabel: `School Week ${L.week||weeks.length+1}`, _week: L.week, days: [] };
-        weeks.push(cur);
-      }
-      cur.days.push(day);
-    });
-    if(pu.leftover.length){
-      pu.leftover.forEach(d => { d.mapRef = null; d.mapFocus = ''; d.calNotes = []; d.mapBlock = ''; delete d.mapBlockMissing; });
-      weeks.push({ weekLabel: 'Not in the school map', days: pu.leftover.slice() });
-    }
-    weeks.forEach(w => delete w._week);
-    state.units[pu.uid] = weeks;
-    // Keep the planner's own Day 1…N labels; the map lesson number rides
-    // along in mapRef and shows as its own badge everywhere.
-    let n = 1;
-    weeks.forEach(w => w.days.forEach(d => { d.label = `Day ${n}`; n++; }));
-  });
-  saveState();
-  return { touched, dated };
-}
 
-let _mapSyncPlan = null;
-function openMapSync(sem){
-  if(sem) smapSem = +sem;
-  const opts = { titles:true, targets:true, assess:true, overwrite:false };
-  _mapSyncPlan = planMapSync(smapSem, opts);
-  if(!_mapSyncPlan){ toast('No map to sync'); return; }
-  document.getElementById('mapsync-overlay').style.display = 'block';
-  renderMapSync();
-}
-function closeMapSync(){ document.getElementById('mapsync-overlay').style.display='none'; _mapSyncPlan=null; }
-function setMapSyncOpt(k, v){ if(_mapSyncPlan){ _mapSyncPlan.opts[k]=v; renderMapSync(); } }
-function renderMapSync(){
-  const p = _mapSyncPlan; if(!p) return;
-  const el = document.getElementById('mapsync-body'); if(!el) return;
-  const o = p.opts;
-  const totalAdd = p.units.reduce((s,u)=>s+u.added,0);
-  const totalKeep = p.units.reduce((s,u)=>s+u.reused,0);
-  const totalLeft = p.units.reduce((s,u)=>s+u.leftover.length,0);
-  el.innerHTML = `
-    <div class="ms-lead">This rewrites the <b>shape</b> of your units to match the school map — the right number of
-      lessons, in the right weeks, with the right A/B class dates. Lessons you have already planned are matched up and
-      kept intact; only empty fields get filled in.</div>
-    <div class="ms-sum">
-      <div><b>${totalKeep}</b> existing lesson${totalKeep===1?'':'s'} re-dated &amp; kept</div>
-      <div><b>${totalAdd}</b> new lesson slot${totalAdd===1?'':'s'} created</div>
-      ${totalLeft?`<div><b>${totalLeft}</b> planned lesson${totalLeft===1?'':'s'} not in the map — moved to a "Not in the school map" week, never deleted</div>`:''}
-      ${p.skipped?`<div style="color:var(--ink-3)">${p.skipped} map lesson${p.skipped===1?'':'s'} have no matching planner unit and will be skipped</div>`:''}
-    </div>
-    <table class="ms-table">
-      <thead><tr><th>Unit</th><th>Now</th><th>After sync</th><th>Change</th></tr></thead>
-      <tbody>${p.units.map(u=>`<tr>
-        <td><b>U${u.unitNo}</b> ${esc(u.name)}</td>
-        <td>${u.before} lesson${u.before===1?'':'s'}</td>
-        <td>${u.after} lesson${u.after===1?'':'s'}</td>
-        <td>${u.added?`<span class="ms-add">+${u.added} new</span> `:''}${u.reused?`<span class="ms-keep">${u.reused} kept</span> `:''}${u.leftover.length?`<span class="ms-left">${u.leftover.length} parked</span>`:''}</td>
-      </tr>`).join('')}</tbody>
-    </table>
-    <div class="ms-opts">
-      <label><input type="checkbox" ${o.titles?'checked':''} onchange="setMapSyncOpt('titles',this.checked)"> Fill in lesson titles from the map's Lesson Focus</label>
-      <label><input type="checkbox" ${o.targets?'checked':''} onchange="setMapSyncOpt('targets',this.checked)"> Turn "Students will…" focuses into learning targets</label>
-      <label><input type="checkbox" ${o.assess?'checked':''} onchange="setMapSyncOpt('assess',this.checked)"> Mark the map's test / quiz days</label>
-      <label class="ms-danger"><input type="checkbox" ${o.overwrite?'checked':''} onchange="setMapSyncOpt('overwrite',this.checked)"> <b>Overwrite</b> titles and targets I have already written</label>
-    </div>
-    <div class="ms-note">Class dates, calendar notes and lesson numbers are always updated — that is what the map is for.
-      Activities, goals, resources, homework and everything else you have planned are never touched.</div>`;
-}
-function confirmMapSync(){
-  const p = _mapSyncPlan; if(!p) return;
-  const res = applyMapSync(p);
-  closeMapSync();
-  renderUnit();
-  toast(`Synced ${res.touched} lesson${res.touched===1?'':'s'} to the school map ✓`);
-}
 
 // ══ IMPORT: paste the map straight out of the Google Doc ══════════
 // Tolerant of how Google Docs tables come across: markdown pipe tables,
@@ -4196,13 +3993,19 @@ function parseSemesterMapText(text, year){
     if(week == null && di >= 2 && /^\d+$/.test(cells[di-2])) week = +cells[di-2];
     if(week == null && di >= 1 && /^\d+$/.test(cells[di-1])) week = +cells[di-1];
     if(week != null) lastWeek = week; else week = lastWeek;
-    const rest = cells.slice(di+2).filter(Boolean);
-    let focus = '', notes = rest;
-    if(rest.length && !(blk === '-' && looksLikeNote(rest[rest.length-1])) && !(!blk && looksLikeNote(rest[rest.length-1]))){
-      focus = rest[rest.length-1];
-      notes = rest.slice(0, -1);
-    }
-    rows.push(`${week==null?'':week}|${blk}|${dow}|${md}|${notes.join(' · ')}|${focus}`);
+    // After Date the Doc has exactly three columns: Calendar Note, Unit of
+    // Study, Lesson Focus. Read them BY POSITION — dropping blank cells is
+    // what used to lose the Unit of Study column and force unit guessing.
+    const rest = cells.slice(di+2);
+    let note = rest[0] || '', unit = rest[1] || '', focus = rest[2] || '';
+    // Merged Week cells shift some rows one column left, so a value can land
+    // one column early. Pull it right — but never mistake an ALL-CAPS
+    // calendar note for a lesson focus.
+    if(!focus && unit && !looksLikeNote(unit)){ focus = unit; unit = ''; }
+    else if(!focus && unit && looksLikeNote(unit)){ note = [note, unit].filter(Boolean).join(' · '); unit = ''; }
+    if(!focus && !unit && note && !looksLikeNote(note) && blk && blk !== '-'){ focus = note; note = ''; }
+    const notes = [note, ...rest.slice(3).filter(Boolean)].filter(Boolean);
+    rows.push(`${week==null?'':week}|${blk}|${dow}|${md}|${notes.join(' · ')}|${unit}|${focus}`);
   });
   if(!rows.length) return null;
   return { rows, weekBanners, year };
@@ -4245,6 +4048,7 @@ function saveMapImport(){
     projected: {}, weekBanners: probe.weekBanners, rows: probe.rows,
   };
   saveState();
+  invalidateMapIndex();
   smapSem = sem;
   closeMapImport();
   renderUnit();
@@ -4254,6 +4058,7 @@ function resetSchoolMap(sem){
   if(!confirm('Remove the map you imported and go back to the built-in one?\n\nYour lesson plans are not touched.')) return;
   if(state.schoolMaps && state.schoolMaps[activeCourse]) delete state.schoolMaps[activeCourse][sem];
   saveState();
+  invalidateMapIndex();
   renderUnit();
   toast('Reverted to the built-in map');
 }
@@ -5973,7 +5778,7 @@ function unitCardHTML(u, semIdx, semCount) {
       <span class="uc-num tag" style="background:${c.bg};color:${c.tx};border:1px solid ${c.br}40">U${unitNo(u.id)}</span>
       <span class="uc-name">${u.name}</span>
     </div>
-    <div class="uc-meta">${unitMapBlocks(u)}</div>
+    <div class="uc-meta">${u.blocks}</div>
     ${desc ? `<div style="font-size:11px;color:var(--ink-3);line-height:1.4;margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(desc)}</div>` : ''}
     <div class="uc-bar-wrap"><div class="uc-bar" style="width:${pct}%;background:${c.br}"></div></div>
     <div class="uc-bottom">
@@ -7200,7 +7005,7 @@ function unitAssignmentsHTML(uid){
 
 function setUnitTab(tab, btn) {
   currentUnitTab = tab; // remember so re-renders (chip adds, etc.) stay on this tab
-  ['overview','plan','pacing','resources'].forEach(t => {
+  ['overview','plan','pacing','assess','resources'].forEach(t => {
     const content = document.getElementById('utab-content-'+t);
     const tabBtn  = document.getElementById('utab-'+t);
     if (content) content.style.display = t===tab ? 'block' : 'none';
@@ -7209,6 +7014,85 @@ function setUnitTab(tab, btn) {
       tabBtn.style.borderBottomColor = t===tab ? 'var(--navy)' : 'transparent';
     }
   });
+}
+
+// ── ASSESSMENTS TAB ───────────────────────────────────────────────
+// Every assessment across the course on one calendar, in date order: the
+// Test/Quiz days the school map schedules, the lessons you have tagged as an
+// assessment, and everything in the units' Assignments boxes.
+function assessmentCalendarHTML(){
+  const items = [];
+  const seen = new Set();
+
+  // 1. from the school map's Lesson Focus ("14: Unit 2 Test: Genesis 1–11")
+  schoolMapSems(activeCourse).forEach(sem => {
+    const m = getSchoolMap(activeCourse, sem); if(!m) return;
+    smapLessons(m).forEach(L => {
+      if(!L.assessType) return;
+      L.rows.forEach(r => {
+        if(!r.date || seen.has(r.date + L.focus)) return;
+        seen.add(r.date + L.focus);
+        items.push({ date:r.date, type:L.assessType, title:L.objective, unitNo:L.unitNo,
+                     src:'map', blk:r.blk, notes:r.notes });
+      });
+    });
+  });
+
+  // 2. lessons you have tagged with an assessment type
+  orderedUnits().forEach(u => (state.units[u.id]||[]).forEach((w, wi) => (w.days||[]).forEach((d, di) => {
+    if(!d.assessType || !(d.dateA || d.dateB)) return;
+    const date = d.dateA || d.dateB;
+    items.push({ date, type:d.assessType, title:String(d.topic||d.label).replace(/<[^>]*>/g,' ').trim(),
+                 unitNo:unitNo(u.id), src:'lesson', uid:u.id, wi, di,
+                 notes:dayCalNotes(d) });
+  })));
+
+  // 3. the units' Assignments & Assessments boxes
+  orderedUnits().forEach(u => (getUnitAssignments(u.id)||[]).forEach(a => {
+    if(!a.due && !a.announce) return;
+    items.push({ date:a.due || a.announce, type:a.type||'Other', title:a.title||'(untitled)',
+                 unitNo:unitNo(u.id), src:'assign', announce:a.announce, due:a.due, notes:[] });
+  }));
+
+  items.sort((a,b)=> String(a.date).localeCompare(String(b.date)));
+
+  const today = isoToday();
+  const srcLabel = { map:'school map', lesson:'lesson plan', assign:'assignments box' };
+  const body = items.map(it => {
+    const past = it.date < today;
+    const clash = (it.notes||[]).filter(n=>/retreat|early release|no school|mass|exam|psat|break|field day/i.test(n));
+    const ac = ASSESS_COLORS[it.type] || {bg:'#ECECEC', tx:'#555'};
+    return `<tr class="as-row${past?' past':''}${it.date===today?' today':''}">
+      <td class="as-date">${it.date?`<b>${fmtMD(it.date)}</b><div class="as-dow">${isoParse(it.date).toLocaleDateString('en-US',{weekday:'short'})}</div>`:'—'}</td>
+      <td><span class="as-type" style="background:${ac.bg};color:${ac.tx}">${esc(it.type)}</span></td>
+      <td class="as-title">${esc(it.title)}
+        ${clash.length?`<div class="as-clash">⚠ falls on ${clash.map(esc).join(' · ')}</div>`:''}</td>
+      <td class="as-unit">${it.unitNo?`U${it.unitNo}`:''}</td>
+      <td class="as-src">${esc(srcLabel[it.src]||it.src)}</td>
+      <td class="as-go">${it.src==='lesson'?`<button class="sp-open" onclick="openGridDay(${it.uid},${it.wi},${it.di})">open →</button>`:''}</td>
+    </tr>`;
+  }).join('');
+
+  const counts = {};
+  items.forEach(it => { counts[it.type] = (counts[it.type]||0) + 1; });
+  const tally = Object.keys(counts).length
+    ? `<div class="as-tally">${Object.entries(counts).map(([k,v])=>{
+        const ac = ASSESS_COLORS[k]||{bg:'#ECECEC',tx:'#555'};
+        return `<span class="as-type" style="background:${ac.bg};color:${ac.tx}">${esc(k)} · ${v}</span>`;
+      }).join('')}</div>` : '';
+
+  return `<div class="sp-wrap">
+    <div class="sp-head"><div>
+      <h2 class="sp-title">Assessments — ${esc(getCourse().name)}</h2>
+      <div class="sp-sub">Every assessment across the course in date order — from the school map, from lessons you've tagged, and from each unit's Assignments box.</div>
+    </div></div>
+    ${tally}
+    <div class="sp-scroll"><table class="sp-table as-table">
+      <thead><tr><th style="width:72px">Date</th><th style="width:90px">Type</th><th>What</th>
+        <th style="width:48px">Unit</th><th style="width:110px">From</th><th style="width:84px"></th></tr></thead>
+      <tbody>${body || `<tr><td class="sp-td" colspan="6" style="text-align:center;color:var(--ink-3);font-style:italic">Nothing scheduled yet. Tag a lesson with an assessment type, or paste your school map.</td></tr>`}</tbody>
+    </table></div>
+  </div>`;
 }
 
 // ── UNIT RESOURCES TAB ────────────────────────────────────────────
@@ -7522,125 +7406,247 @@ function paceAddDayU(uid){
 // school map's real class dates, A/B block, school week and the events
 // that interrupt it (no-school days, breaks, exams, Homecoming Week)
 // dropped in on the dates they actually fall.
+// ── THE PACING GUIDE = YOUR SCHOOL'S SEMESTER MAP ─────────────────
+// You author in the Google Doc and paste it here; this renders it in the
+// Doc's own format, row for row: Week · BLK · Day · Date · Calendar Note ·
+// Unit of Study · Lesson Focus. Nothing is inferred and nothing is written
+// back onto your lessons. The only column the planner adds is Plan, which
+// finds the lesson plan sitting on that date — so it fills itself in as you
+// date lessons, with nothing to sync.
 function simplePacingHTML(){
   const co = getCourse();
-  const blk = courseBlock();
+  const sems = schoolMapSems(activeCourse);
+  if(!sems.length) return pacingNoMapHTML();
+
   const today = isoToday();
+  const byDate = plannerDaysByDate();
+  let linked = 0, focusRows = 0;
 
-  const inp = (val, uid, wi, di, field, ph) =>
-    `<div class="sp-inp sp-cell" contenteditable="true" data-ph="${esc(ph||'')}"
-       onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.blur();}"
-       onblur="savePaceCellU(${uid},${wi},${di},'${field}',this.textContent)">${esc(String(val||'').replace(/<[^>]*>/g,' ').trim())}</div>`;
+  const sections = sems.map(sem => {
+    const m = getSchoolMap(activeCourse, sem);
+    if(!m) return '';
+    const rows = m._rows || smapExpand(m);
+    const lessons = smapLessons(m);
+    const byRow = new Map();
+    lessons.forEach(L => L.rows.forEach(r => byRow.set(r, L)));
 
-  // The planner's own lesson order is the spine; school events slot in by date.
-  const lessons = [];
-  orderedUnits().forEach(u => {
-    let lessonNo = 0;
-    (state.units[u.id]||[]).forEach((w, wi) => (w.days||[]).forEach((d, di) => {
-      lessonNo++;
-      lessons.push({ u, d, wi, di, lessonNo, weekLabel: w.weekLabel, date: d.dateA || d.dateB || '' });
-    }));
-  });
+    let lastWeek = null;
+    const seenBanner = new Set();
+    const body = rows.map(r => {
+      const L = byRow.get(r) || null;
+      const hit = r.date ? byDate.get(r.date) : null;
+      if(r.focus) focusRows++;
+      if(hit) linked++;
+      const isToday = r.date === today;
+      let banner = '';
+      if(r.week !== lastWeek && m.weekBanners && m.weekBanners[r.week] && !seenBanner.has(r.week)){
+        seenBanner.add(r.week);
+        banner = `<tr class="sp-bannerrow"><td colspan="8">${esc(m.weekBanners[r.week])}</td></tr>`;
+      }
+      const weekCell = r.week !== lastWeek ? `<b>${r.week||''}</b>` : '';
+      lastWeek = r.week;
 
-  const bands = mapEventBands(activeCourse);
-  let bi = 0, globalDay = 0, lastUnit = null;
-  const rows = [];
+      // Unit of Study — the Doc's own words. Tinted when it names a unit the
+      // planner knows, so the colour coding still reads at a glance.
+      let unitCell = '';
+      if(r.unit){
+        const uid2 = smapUnitId(L ? L.unitNo : null);
+        const c = uid2 ? getUC(uid2) : null;
+        unitCell = c
+          ? `<span class="sp-unitcell" style="background:${c.bg};color:${c.tx}">${esc(r.unit)}</span>`
+          : `<span class="sp-unitcell">${esc(r.unit)}</span>`;
+      } else if(L && L.unitNo && m._unitsInferred){
+        const uid2 = smapUnitId(L.unitNo);
+        const c = uid2 ? getUC(uid2) : null;
+        unitCell = `<span class="sp-unitcell sp-guess" title="Guessed from the Unit ${L.unitNo} Test/Quiz row — the Doc's Unit of Study column is blank"${c?` style="background:${c.bg};color:${c.tx}"`:''}>U${L.unitNo}?</span>`;
+      }
 
-  const eventRow = b => {
-    const range = b.start === b.end
-      ? isoParse(b.start).toLocaleDateString('en-US',{weekday:'short', month:'short', day:'numeric'})
-      : `${fmtNice(b.start)} – ${fmtNice(b.end)}`;
-    if(b.kind === 'banner')
-      return `<tr class="sp-bannerrow"><td colspan="8">${esc(b.text)}</td></tr>`;
-    return `<tr class="sp-eventrow"><td colspan="8">
-      <span class="sp-event-dates">${esc(range)}</span>
-      <span class="sp-event-text">${esc(b.text)}</span></td></tr>`;
-  };
-  const flushBands = before => {
-    while(bi < bands.length && (!before || bands[bi].start <= before)){
-      if(!before && bi >= bands.length) break;
-      rows.push(eventRow(bands[bi])); bi++;
-    }
-  };
+      const plan = hit
+        ? `<span class="sp-status ${dayIsPlanned(hit.d)?'ok':''}" title="${dayIsPlanned(hit.d)?'Fully planned':'Not fully planned yet'}">${dayIsPlanned(hit.d)?'✓':'○'}</span>
+           <button class="sp-open" onclick="openGridDay(${hit.u.id},${hit.wi},${hit.di})" title="${esc(hit.d.label)} · Unit ${unitNo(hit.u.id)}">open →</button>`
+        : (r.focus ? `<button class="sp-attach" onclick="openAttachLesson('${r.date}')" title="Put one of your lesson plans on this date">+ plan</button>` : '');
 
-  const unitRow = u => {
-    const c = getUC(u.id);
-    const days = (state.units[u.id]||[]).reduce((s,w)=>s+(w.days||[]).length,0);
-    const dated = lessons.filter(x => x.u.id === u.id && x.date).map(x => x.date).sort();
-    const range = dated.length ? `${fmtMD(dated[0])} – ${fmtMD(dated[dated.length-1])}` : 'no dates yet';
-    return `<tr class="sp-unitrow" style="background:${c.bg}"><td colspan="8">
-      <span class="sp-unitrow-bar" style="background:${c.br}"></span>
-      <span class="sp-unitrow-n" style="color:${c.tx}">Unit ${unitNo(u.id)}</span>
-      <span class="sp-unitrow-name" style="color:${c.tx}">${esc(u.name)}</span>
-      <span class="sp-unitrow-meta">${days} block${days===1?'':'s'} · ${esc(range)}</span>
-      <button class="sp-band-add" onclick="paceAddDayU(${u.id})">+ day</button>
-    </td></tr>`;
-  };
+      return banner + `<tr class="sp-maprow${r.noClass?' noclass':''}${isToday?' sp-today':''}">
+        <td class="sp-td sp-mid sp-wk">${weekCell}</td>
+        <td class="sp-td sp-mid">${r.blk?`<span class="smap-blk-pill blk-${r.blk}">${r.blk}</span>`:'<span class="smap-dash">—</span>'}</td>
+        <td class="sp-td sp-mid sp-dow">${esc(SMAP_DOW[r.dow]||r.dow)}</td>
+        <td class="sp-td sp-mid sp-mdate">${esc(r.md)}${isToday?'<div><span class="smap-today-tag">today</span></div>':''}</td>
+        <td class="sp-td sp-note">${r.notes.map(n=>`<span class="smap-note-pill${/no school|early release|exam|psat|break/i.test(n)?' warn':''}">${esc(n)}</span>`).join(' ')}</td>
+        <td class="sp-td sp-unit">${unitCell}</td>
+        <td class="sp-td sp-focus">${r.focus?esc(r.focus):'<span class="smap-dash">—</span>'}</td>
+        <td class="sp-td sp-mid">${plan}</td>
+      </tr>`;
+    }).join('');
 
-  let lastWeek = null;
-  lessons.forEach(x => {
-    if(x.date) flushBands(x.date);
-    if(lastUnit !== x.u.id){ rows.push(unitRow(x.u)); lastUnit = x.u.id; lastWeek = null; }
-    globalDay++;
-    const d = x.d, c = getUC(x.u.id);
-    const planned = dayIsPlanned(d);
-    const isToday = (d.dateA && d.dateA === today) || (d.dateB && d.dateB === today);
-    const wk = dayMapWeek(d);
-    const wkCell = (wk != null && wk !== lastWeek) ? String(wk) : '';
-    if(wk != null) lastWeek = wk;
-    const letter = dayBlockLetter(d);
-    const blkCell = letter
-      ? `<span class="smap-blk-pill blk-${letter}">${letter}</span>${d.mapBlockMissing?'<div class="sp-blkwarn" title="The map never gives this lesson a '+blk+' day">≠</div>':''}`
-      : (d.dateA||d.dateB ? '<span class="smap-dash">—</span>' : '');
-    const dateCell = d.dateA || d.dateB
-      ? [d.dateA, d.dateB].filter(Boolean).map(iso =>
-          `<div class="sp-abline">${isoParse(iso).toLocaleDateString('en-US',{weekday:'short'})} <b>${fmtMD(iso)}</b></div>`).join('')
-      : '<span class="smap-dash">—</span>';
-    const notes = dayCalNotes(d);
-    rows.push(`<tr class="sp-lrow${isToday?' sp-today':''}" style="box-shadow:inset 4px 0 0 ${c.br}">
-      <td class="sp-td sp-mid sp-wk">${wkCell}</td>
-      <td class="sp-td sp-mid">${globalDay}</td>
-      <td class="sp-td sp-mid sp-num">${unitNo(x.u.id)}.${x.lessonNo}${mapBadgeHTML(d)?`<div style="margin-top:3px">${mapBadgeHTML(d)}</div>`:''}</td>
-      <td class="sp-td sp-mid">${blkCell}</td>
-      <td class="sp-td sp-dates">${dateCell}${isToday?'<div><span class="smap-today-tag">today</span></div>':''}
-        ${notes.length?`<div style="margin-top:3px">${notes.map(n=>`<span class="smap-note-pill${/no school|early release|exam|psat|break/i.test(n)?' warn':''}">${esc(n)}</span>`).join(' ')}</div>`:''}</td>
-      <td class="sp-td sp-content">${inp(d.topic, x.u.id, x.wi, x.di, 'topic', 'General theme for the day…')}</td>
-      <td class="sp-td">${inp(d.homework, x.u.id, x.wi, x.di, 'homework', 'Homework…')}</td>
-      <td class="sp-td sp-mid">
-        <span class="sp-status ${planned?'ok':''}" title="${planned?'Fully planned':'Not fully planned yet'}">${planned?'✓':'○'}</span>
-        <button class="sp-open" onclick="openGridDay(${x.u.id},${x.wi},${x.di})">open →</button>
-      </td>
-    </tr>`);
-  });
-  flushBands(null);
+    return `${sems.length>1?`<div class="sp-semhead">Semester ${sem} — ${esc(m.title||'')}</div>`:''}
+      <div class="sp-scroll">
+        <table class="sp-table">
+          <thead><tr>
+            <th style="width:38px">Week</th><th style="width:40px">BLK</th><th style="width:46px">Day</th>
+            <th style="width:52px">Date</th><th style="width:16%">Calendar Note</th>
+            <th style="width:13%">Unit of Study</th><th>Lesson Focus</th><th style="width:84px">Plan</th>
+          </tr></thead>
+          <tbody>${body}</tbody>
+        </table>
+      </div>`;
+  }).join('');
 
-  const body = rows.join('');
+  const m0 = getSchoolMap(activeCourse, sems[0]);
+  const warn = [];
+  if(m0 && m0._unitsInferred) warn.push(`<div class="smap-warn">The <b>Unit of Study</b> column is blank in your Doc, so the units marked <b>U?</b> are guessed from the &ldquo;Unit&nbsp;N Test/Quiz&rdquo; rows. Fill that column in on the Doc and re-paste, and they'll come straight from you.</div>`);
+  warn.push(pacingUnitGapHTML());
+
   return `
   <div class="sp-wrap">
     <div class="sp-head">
       <div>
         <h2 class="sp-title">Pacing Guide — ${esc(co.name)}</h2>
-        <div class="sp-sub">Your school's semester map and your lesson plans in one place: real class dates and school events from the map, themes and homework you edit right here.</div>
+        <div class="sp-sub">Your school's semester map, exactly as the Doc lays it out. Author in the Doc, paste it here — the <b>Plan</b> column finds the lesson plan on each date on its own.</div>
       </div>
-      <div class="sp-actions">${mapToolbarHTML()}</div>
+      <div class="sp-actions">
+        <button class="sp-btn" onclick="togglePacingDocPane()">📄 ${state.pacingDocOpen?'Hide':'Show'} the Doc</button>
+        <button class="sp-btn sp-btn-navy" onclick="openMapImport()">📥 Paste the Doc…</button>
+        ${m0 && m0.docUrl ? `<a class="sp-btn" href="${esc(m0.docUrl)}" target="_blank" rel="noopener">Doc ↗</a>` : ''}
+        <button class="sp-btn" onclick="exportPacingGuidePDF()">Export</button>
+      </div>
     </div>
-    ${mapStatusHTML()}
-    <div class="sp-scroll">
-      <table class="sp-table">
-        <thead><tr>
-          <th style="width:30px" title="School week">Wk</th>
-          <th style="width:38px">Day</th>
-          <th style="width:52px">#</th>
-          <th style="width:34px" title="A/B block">Blk</th>
-          <th style="width:112px">Class date</th>
-          <th>Content <span class="sp-th-hint">— general theme</span></th>
-          <th style="width:150px">HW</th>
-          <th style="width:92px">Plan</th>
-        </tr></thead>
-        <tbody>${body || `<tr><td class="sp-td" colspan="8" style="text-align:center;color:var(--ink-3);font-style:italic">No class days yet.</td></tr>`}</tbody>
-      </table>
-    </div>
+    <div class="sp-note">Mirroring <b>${esc((m0&&m0.title)||'your semester map')}</b> · ${focusRows} school day${focusRows===1?'':'s'} with a lesson · ${linked} matched to a lesson plan</div>
+    ${warn.join('')}
+    <div id="pacing-doc-pane">${state.pacingDocOpen?pacingDocPaneHTML():''}</div>
+    ${sections}
   </div>`;
+}
+
+// No map yet — keep the plain lesson list the planner had before, and ask
+// for the Doc.
+function pacingNoMapHTML(){
+  const co = getCourse();
+  const inp = (val, uid, wi, di, field, ph) =>
+    `<div class="sp-inp sp-cell" contenteditable="true" data-ph="${esc(ph||'')}"
+       onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.blur();}"
+       onblur="savePaceCellU(${uid},${wi},${di},'${field}',this.textContent)">${esc(String(val||'').replace(/<[^>]*>/g,' ').trim())}</div>`;
+  let globalDay = 0;
+  const body = orderedUnits().map(u => {
+    const days = [];
+    (state.units[u.id]||[]).forEach((w, wi) => (w.days||[]).forEach((d, di) => days.push({d, wi, di})));
+    if(!days.length) return '';
+    const c = getUC(u.id);
+    let lessonNo = 0;
+    return days.map((row, idx) => {
+      globalDay++; lessonNo++;
+      const d = row.d, planned = dayIsPlanned(d);
+      const band = idx === 0
+        ? `<td class="sp-band" rowspan="${days.length}" style="background:${c.br}">
+             <div class="sp-band-inner">Unit ${unitNo(u.id)}<span>${esc(u.name)}</span>
+               <button class="sp-band-add" onclick="paceAddDayU(${u.id})">+ day</button></div></td>` : '';
+      return `<tr>${band}
+        <td class="sp-td sp-mid">${globalDay}</td>
+        <td class="sp-td sp-mid sp-num">${unitNo(u.id)}.${lessonNo}</td>
+        <td class="sp-td sp-mid sp-mdate">${d.dateA?fmtMD(d.dateA):'<span class="smap-dash">—</span>'}</td>
+        <td class="sp-td sp-content">${inp(d.topic, u.id, row.wi, row.di, 'topic', 'General theme for the day…')}</td>
+        <td class="sp-td">${inp(d.homework, u.id, row.wi, row.di, 'homework', 'Homework…')}</td>
+        <td class="sp-td sp-mid">
+          <span class="sp-status ${planned?'ok':''}">${planned?'✓':'○'}</span>
+          <button class="sp-open" onclick="openGridDay(${u.id},${row.wi},${row.di})">open →</button>
+        </td></tr>`;
+    }).join('');
+  }).join('');
+  return `
+  <div class="sp-wrap">
+    <div class="sp-head">
+      <div><h2 class="sp-title">Pacing Guide — ${esc(co.name)}</h2>
+        <div class="sp-sub">Paste your school's semester map from the Google Doc and this becomes a mirror of it — same columns, same rows, real dates.</div></div>
+      <div class="sp-actions">
+        <button class="sp-btn sp-btn-navy" onclick="openMapImport()">📥 Paste the Doc…</button>
+        <button class="sp-btn" onclick="exportPacingGuidePDF()">Export</button>
+      </div>
+    </div>
+    <div class="smap-warn">No semester map for ${esc(co.name)} yet — showing your lesson list instead.</div>
+    <div class="sp-scroll"><table class="sp-table">
+      <thead><tr><th style="width:120px">Unit</th><th style="width:44px">Day</th><th style="width:54px">#</th>
+        <th style="width:78px">Date</th><th>Content <span class="sp-th-hint">— general theme</span></th>
+        <th style="width:190px">HW</th><th style="width:96px">Plan</th></tr></thead>
+      <tbody>${body || `<tr><td class="sp-td" colspan="7" style="text-align:center;color:var(--ink-3);font-style:italic">No class days yet.</td></tr>`}</tbody>
+    </table></div>
+  </div>`;
+}
+
+// Where your unit sizes and the Doc's disagree — reported, never corrected.
+function pacingUnitGapHTML(){
+  const counts = new Map();
+  schoolMapSems(activeCourse).forEach(sem => {
+    const m = getSchoolMap(activeCourse, sem); if(!m) return;
+    smapLessons(m).forEach(L => { if(L.unitNo) counts.set(L.unitNo, (counts.get(L.unitNo)||0) + 1); });
+  });
+  if(!counts.size) return '';
+  const gaps = [];
+  [...counts.keys()].sort((a,b)=>a-b).forEach(un => {
+    const uid2 = smapUnitId(un); if(!uid2) return;
+    const mine = (state.units[uid2]||[]).reduce((s,w)=>s+(w.days||[]).length,0);
+    const theirs = counts.get(un);
+    if(mine !== theirs){
+      const u = UNIT_META.find(x=>x.id===uid2);
+      gaps.push(`<div>Unit ${un}${u?` · ${esc(u.name)}`:''} — the map schedules <b>${theirs}</b> lesson${theirs===1?'':'s'}, you have <b>${mine}</b>.</div>`);
+    }
+  });
+  return gaps.length ? `<div class="smap-warn">${gaps.join('')}</div>` : '';
+}
+
+// The Doc itself, embedded on the page, so the source of truth is one click
+// away from the mirror of it.
+function pacingDocPaneHTML(){
+  const url = pacingDocUrlRaw() || (getSchoolMap(activeCourse, schoolMapSems(activeCourse)[0])||{}).docUrl || '';
+  if(!url) return `<div class="sp-note">No Doc link saved yet. Paste one when you import the map, or
+    <input id="pacing-doc-in" placeholder="https://docs.google.com/document/d/…" style="border:1px solid var(--rule-dark);border-radius:6px;padding:5px 8px;font-family:inherit;font-size:12px;min-width:240px">
+    <button class="sp-btn" onclick="setPacingDoc()">Embed it</button></div>`;
+  return `<div class="sp-docpane">
+    <div class="sp-docpane-head"><span>📄 The Doc — live</span>
+      <span style="margin-left:auto;display:flex;gap:6px">
+        <button class="sp-btn" onclick="refreshPacingDoc()">↻ Refresh</button>
+        <a class="sp-btn" href="${esc(url)}" target="_blank" rel="noopener">Open ↗</a>
+      </span></div>
+    <iframe id="pacing-doc-frame" src="${esc(pacingDocEmbed(url))}" loading="lazy"></iframe>
+    <div class="sp-docpane-foot">Blank? The Doc isn't shared publicly — set <b>Anyone with the link</b>, or use <b>File → Publish to web</b>.</div>
+  </div>`;
+}
+function togglePacingDocPane(){
+  state.pacingDocOpen = !state.pacingDocOpen;
+  saveState(); renderUnit();
+}
+
+// "+ plan" — put one of your existing lesson plans on this date. A picker,
+// because which lesson belongs on a day is your call, not the planner's.
+function openAttachLesson(iso){
+  const list = [];
+  orderedUnits().forEach(u => (state.units[u.id]||[]).forEach((w, wi) => (w.days||[]).forEach((d, di) =>
+    list.push({u, d, wi, di}))));
+  const rowsHTML = list.map((x, i) =>
+    `<button class="al-row" onclick="attachLessonTo('${iso}',${i})">
+       <span class="al-u" style="background:${getUC(x.u.id).bg};color:${getUC(x.u.id).tx}">U${unitNo(x.u.id)}</span>
+       <span class="al-lbl">${esc(x.d.label)}</span>
+       <span class="al-topic">${esc(String(x.d.topic||'').replace(/<[^>]*>/g,' ').trim()) || '<untitled>'}</span>
+       <span class="al-date">${x.d.dateA?fmtMD(x.d.dateA):'no date'}</span>
+     </button>`).join('');
+  _attachList = list;
+  const ov = document.createElement('div');
+  ov.id = 'attach-overlay';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:870;background:rgba(0,0,0,.45);overflow-y:auto';
+  ov.onclick = e => { if(e.target === ov) closeAttachLesson(); };
+  ov.innerHTML = `<div style="background:var(--white);max-width:620px;margin:40px auto;border-radius:12px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.25)">
+    <div style="background:var(--navy);padding:12px 18px;color:#fff;font-size:14px;font-weight:700">Put a lesson plan on ${esc(fmtNice(iso))}</div>
+    <div style="padding:12px 16px;max-height:60vh;overflow-y:auto">${rowsHTML || '<div style="color:var(--ink-3)">No lessons yet.</div>'}</div>
+    <div style="padding:11px 16px;border-top:1px solid var(--rule);background:var(--parchment);text-align:right">
+      <button class="sp-btn" onclick="closeAttachLesson()">Cancel</button></div>
+  </div>`;
+  document.body.appendChild(ov);
+}
+let _attachList = null;
+function closeAttachLesson(){ const o=document.getElementById('attach-overlay'); if(o) o.remove(); _attachList=null; }
+function attachLessonTo(iso, i){
+  const x = _attachList && _attachList[i]; if(!x) return;
+  x.d.dateA = iso;
+  saveState(); closeAttachLesson(); renderUnit();
+  toast(`${x.d.label} is now on ${fmtNice(iso)} ✓`);
 }
 
 // ── UNIT SUMMATIVE ASSESSMENT (backwards design, stage 2) ─────────
@@ -8188,7 +8194,7 @@ function renderUnit() {
   const tabsBodyHTML = `
     ${unitOverviewPanelHTML(u.id)}
     <div style="display:flex;gap:0;border-bottom:2px solid var(--rule);margin-bottom:14px;align-items:center">
-      ${[['overview','Unit Overview'],['plan','Weekly Plan'],['pacing','Pacing Guide'],['resources','Resources']].map(([t,label]) => {
+      ${[['overview','Unit Overview'],['plan','Weekly Plan'],['pacing','Pacing Guide'],['assess','Assessments'],['resources','Resources']].map(([t,label]) => {
         const active = currentUnitTab === t;
         return `<button onclick="setUnitTab('${t}',this)" id="utab-${t}"
           style="padding:8px 18px;border:none;background:none;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;color:${active?'var(--navy)':'var(--ink-3)'};border-bottom:2px solid ${active?'var(--navy)':'transparent'};margin-bottom:-2px;transition:all .12s">
@@ -8208,6 +8214,9 @@ function renderUnit() {
     <div id="utab-content-pacing" style="display:${currentUnitTab==='pacing'?'block':'none'}">
       ${pacingGuideHTML(u, weeks)}
     </div>
+    <div id="utab-content-assess" style="display:${currentUnitTab==='assess'?'block':'none'}">
+      ${assessmentCalendarHTML()}
+    </div>
     <div id="utab-content-resources" style="display:${currentUnitTab==='resources'?'block':'none'}">
       ${unitResourcesHTML(u.id)}
     </div>`;
@@ -8223,7 +8232,7 @@ function renderUnit() {
         </div>
       </div>
       <div class="unit-tags">
-        <span class="tag" style="background:${c.bg};color:${c.tx}">${unitMapBlocks(u)}</span>
+        <span class="tag" style="background:${c.bg};color:${c.tx}">${u.blocks}</span>
         <span class="tag" style="background:var(--rule);color:var(--ink-2)">${weeks.length} week${weeks.length===1?'':'s'}</span>
         <span class="tag" style="background:var(--rule);color:var(--ink-2)">${totalDays} block${totalDays===1?'':'s'} total</span>
         <!-- UNIT OPTIONS (⋯) — color + intro tucked away -->
