@@ -683,108 +683,12 @@ body.simple-mode .dp-adv { display: none !important; }
 .phase-flow-step.off { opacity:.32; }
 @media print { .act-tpl-apply { display:none; } }
 
-/* ── SCHOOL SEMESTER MAP (official pacing guide) ── */
-.smap-hero { background:linear-gradient(135deg,var(--navy) 0%,var(--navy-dark) 100%); color:#fff;
-  border-radius:var(--radius); padding:20px 24px; margin-bottom:14px; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-.smap-hero-eyebrow { font-size:10px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--gold-light); margin-bottom:6px; }
-.smap-hero-title { font-family:'Crimson Pro',Georgia,serif; font-size:26px; font-weight:600; line-height:1.15; margin-bottom:7px; }
-.smap-hero-sub { font-size:12.5px; color:rgba(255,255,255,.72); line-height:1.55; max-width:640px; }
-
-.smap-status { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:8px; margin-bottom:12px; }
-.smap-stat { background:var(--white); border:1px solid var(--rule); border-radius:var(--radius-sm); padding:10px 12px; }
-.smap-stat-n { font-size:21px; font-weight:700; color:var(--navy); line-height:1.1; }
-.smap-stat-l { font-size:10px; font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-3); margin-top:3px; }
-.smap-progress { grid-column:1/-1; background:var(--white); border:1px solid var(--rule); border-radius:var(--radius-sm); padding:10px 12px; }
-.smap-progress-bar { height:7px; border-radius:999px; background:var(--rule); overflow:hidden; }
-.smap-progress-bar span { display:block; height:100%; background:var(--gold); border-radius:999px; transition:width .3s; }
-.smap-progress-l { font-size:11px; color:var(--ink-3); margin-top:5px; }
-
-.smap-warn { background:#FDF3D6; border:1px solid #EBD9A8; border-radius:var(--radius-sm); padding:9px 12px;
-  font-size:12.5px; color:#7A5200; margin-bottom:12px; }
-
-.smap-toolbar { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
-.smap-semtabs { display:flex; gap:5px; }
-.smap-semtab { background:var(--white); border:1px solid var(--rule-dark); border-radius:999px; padding:6px 15px;
-  font-family:inherit; font-size:12px; font-weight:700; color:var(--ink-2); cursor:pointer; }
-.smap-semtab.on { background:var(--navy); border-color:var(--navy); color:#fff; }
-.smap-tools { display:flex; gap:7px; flex-wrap:wrap; margin-left:auto; }
-.smap-btn { display:inline-flex; align-items:center; gap:6px; background:var(--white); border:1px solid var(--rule-dark);
-  border-radius:7px; padding:8px 14px; font-family:inherit; font-size:12.5px; font-weight:700; color:var(--ink);
-  cursor:pointer; text-decoration:none; }
-.smap-btn:hover { border-color:var(--navy); color:var(--navy); }
-.smap-btn.primary { background:var(--gold); border-color:var(--gold); color:var(--navy-dark); }
-.smap-btn.primary:hover { opacity:.88; color:var(--navy-dark); }
-.smap-btn.danger { color:#A8283F; }
-
-.smap-projected { display:flex; align-items:center; gap:7px; flex-wrap:wrap; background:var(--white); border:1px solid var(--rule);
-  border-radius:var(--radius-sm); padding:9px 12px; margin-bottom:12px; }
-.smap-projected-l { font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3); }
-.smap-projected-chip { font-size:12px; color:var(--ink-2); background:var(--parchment); border:1px solid var(--rule);
-  border-radius:999px; padding:2px 10px; }
-
-.smap-tablewrap { background:var(--white); border:1px solid var(--rule); border-radius:var(--radius); overflow:auto; }
-.smap-table { width:100%; border-collapse:collapse; font-size:12px; }
-.smap-table th { position:sticky; top:0; z-index:2; background:var(--navy); color:#fff; font-size:9.5px; font-weight:700;
-  letter-spacing:.08em; text-transform:uppercase; text-align:left; padding:8px 9px; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-.smap-table td { padding:6px 9px; border-bottom:1px solid var(--rule); vertical-align:top; }
-.smap-row:hover { background:#F7F9FC; }
-.smap-row.noclass { background:#FAFAF8; color:var(--ink-3); }
-.smap-row.noclass:hover { background:#F4F4F1; }
-.smap-row.today { background:#FDF3D6; }
-.smap-row.today:hover { background:#FAEBC4; }
-.smap-banner-row td { background:var(--parchment); font-size:10px; font-weight:700; letter-spacing:.1em;
-  text-transform:uppercase; color:#8a6d1a; text-align:center; padding:5px; }
-.smap-wk { font-weight:700; color:var(--ink-2); }
-.smap-wk.dim { color:transparent; }
-.smap-blk-pill { display:inline-block; min-width:17px; text-align:center; font-size:10px; font-weight:800;
-  border-radius:4px; padding:1px 5px; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-.smap-blk-pill.blk-A { background:#E6F1FB; color:#0C447C; }
-.smap-blk-pill.blk-B { background:#E1F5EE; color:#085041; }
-.smap-dow { color:var(--ink-3); font-weight:600; }
-.smap-date { font-weight:700; color:var(--ink-2); white-space:nowrap; }
-.smap-today-tag { display:inline-block; margin-left:5px; font-size:8px; font-weight:800; letter-spacing:.05em;
-  text-transform:uppercase; background:var(--gold); color:var(--navy-dark); border-radius:999px; padding:1px 5px; }
 .smap-note-pill { display:inline-block; font-size:9.5px; font-weight:700; letter-spacing:.02em; background:#EEF1F6;
   color:#3A4856; border-radius:4px; padding:1px 6px; margin:1px 2px 1px 0; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
 .smap-note-pill.warn { background:#FAECE7; color:#712B13; }
-.smap-unit-pill { display:inline-block; font-size:9.5px; font-weight:800; border-radius:4px; padding:1px 6px;
-  -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-.smap-lesson-pill { display:inline-block; font-size:9.5px; font-weight:800; background:var(--navy); color:#fff;
-  border-radius:4px; padding:1px 6px; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-.smap-assess { display:inline-block; font-size:9px; font-weight:700; border-radius:999px; padding:1px 7px;
-  -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-.smap-focus { line-height:1.4; color:var(--ink); }
 .smap-dash { color:var(--rule-dark); }
-.smap-open { background:none; border:1px solid var(--rule-dark); border-radius:5px; padding:2px 8px; font-family:inherit;
-  font-size:10.5px; font-weight:700; color:var(--navy); cursor:pointer; white-space:nowrap; }
-.smap-open:hover { background:var(--navy); color:#fff; border-color:var(--navy); }
-.smap-unlinked { font-size:10px; color:var(--ink-3); font-style:italic; white-space:nowrap; }
-.smap-foot { font-size:11px; color:var(--ink-3); margin-top:8px; }
-.smap-empty { background:var(--white); border:1px dashed var(--rule-dark); border-radius:var(--radius);
-  padding:36px 24px; text-align:center; }
-
-/* map info inside the lesson planner */
-.dl-mapbar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; background:#F0F4FA; border:1px solid #CBD9EC;
-  border-radius:7px; padding:7px 11px; margin:0 0 9px; font-size:12px; color:var(--ink-2); }
-.dl-mapbar b { color:var(--navy); }
-.dl-mapbar .dl-maplink { margin-left:auto; font-size:11px; font-weight:700; color:var(--navy); background:none;
-  border:1px solid var(--rule-dark); border-radius:5px; padding:2px 9px; cursor:pointer; font-family:inherit; }
-
-/* sync + import dialogs */
-.ms-lead { font-size:13px; color:var(--ink-2); line-height:1.6; margin-bottom:12px; }
-.ms-sum { display:flex; flex-direction:column; gap:4px; background:#F0F7F2; border:1px solid #BFE3CE; border-radius:7px;
-  padding:10px 12px; font-size:12.5px; color:#0F6E56; margin-bottom:12px; }
-.ms-table { width:100%; border-collapse:collapse; font-size:12px; margin-bottom:14px; }
-.ms-table th { background:var(--parchment); text-align:left; font-size:9.5px; font-weight:700; letter-spacing:.07em;
-  text-transform:uppercase; color:var(--ink-3); padding:6px 9px; border-bottom:1px solid var(--rule); }
-.ms-table td { padding:6px 9px; border-bottom:1px solid var(--rule); }
-.ms-add { color:#0F6E56; font-weight:700; }
-.ms-keep { color:var(--ink-3); }
-.ms-left { color:#993C1D; font-weight:700; }
-.ms-opts { display:flex; flex-direction:column; gap:7px; margin-bottom:12px; }
-.ms-opts label { display:flex; align-items:flex-start; gap:8px; font-size:12.5px; color:var(--ink); cursor:pointer; }
-.ms-opts label.ms-danger { color:#7B1A2E; }
-.ms-note { font-size:11.5px; color:var(--ink-3); line-height:1.55; }
+.smap-today-tag { display:inline-block; margin-left:5px; font-size:8px; font-weight:800; letter-spacing:.05em;
+  text-transform:uppercase; background:var(--gold); color:var(--navy-dark); border-radius:999px; padding:1px 5px; }
 .mi-good { background:#F0F7F2; border:1px solid #BFE3CE; border-radius:7px; padding:9px 11px; font-size:12.5px; color:#0F6E56; }
 .mi-bad { background:#FAECE7; border:1px solid #E8C4B4; border-radius:7px; padding:9px 11px; font-size:12.5px; color:#712B13; }
 .mi-peek { margin-top:8px; font-size:12px; color:var(--ink-2); display:flex; flex-direction:column; gap:3px; }
@@ -792,39 +696,16 @@ body.simple-mode .dp-adv { display: none !important; }
   color:var(--ink-3); margin:0 0 4px; }
 .mi-in { width:100%; box-sizing:border-box; border:1px solid var(--rule-dark); border-radius:7px; padding:8px 10px;
   font-family:inherit; font-size:13px; outline:none; }
-
-/* ── the pacing guide = a mirror of the school's semester map Doc ── */
-.sp-semhead { font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase;
-  color:var(--ink-3); margin:14px 0 6px; }
+/* the pacing guide's one added column: the date, from the school map */
+.sp-date2 { font-size:11px; color:var(--ink-2); line-height:1.5; }
+.sp-dline { white-space:nowrap; }
+.sp-dline b { color:var(--ink); font-weight:700; font-size:11.5px; }
+.sp-notes { margin-top:3px; display:flex; flex-wrap:wrap; gap:2px; }
+.sp-today { background:#FDF3D6 !important; }
 .sp-note { font-size:12px; color:var(--ink-2); background:var(--white); border:1px solid var(--rule);
   border-radius:var(--radius-sm); padding:8px 12px; margin:0 0 10px; }
-.sp-btn-navy { background:var(--navy) !important; color:#fff !important; border-color:var(--navy) !important; }
-.sp-wk { font-size:11px; color:var(--ink-2); }
-.sp-dow { font-size:11px; font-weight:600; color:var(--ink-3); }
-.sp-mdate { font-size:11.5px; font-weight:700; color:var(--ink-2); white-space:nowrap; }
-.sp-note-cell, .sp-td.sp-note { line-height:1.5; }
-.sp-focus { font-size:12px; line-height:1.45; color:var(--ink); }
-.sp-unitcell { display:inline-block; font-size:10px; font-weight:700; border-radius:4px; padding:2px 7px;
-  background:#EEF1F6; color:#3A4856; line-height:1.35;
-  -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-.sp-unitcell.sp-guess { opacity:.75; font-style:italic; cursor:help; }
-.sp-maprow:hover { background:#F7F9FC; }
-.sp-maprow.noclass { background:#FAFAF8; color:var(--ink-3); }
-.sp-maprow.noclass:hover { background:#F4F4F1; }
-.sp-today { background:#FDF3D6 !important; }
-.sp-bannerrow td { padding:4px 12px; border:1px solid var(--rule); background:var(--parchment); text-align:center;
-  font-size:10px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:#8a6d1a;
-  -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-.sp-attach { background:none; border:1px dashed var(--rule-dark); border-radius:5px; padding:2px 8px;
-  font-family:inherit; font-size:10.5px; font-weight:700; color:var(--ink-3); cursor:pointer; white-space:nowrap; }
-.sp-attach:hover { border-style:solid; border-color:var(--navy); color:var(--navy); }
-
-/* the Doc itself, embedded above its mirror */
-.sp-docpane { border:1px solid var(--rule); border-radius:var(--radius); overflow:hidden; margin-bottom:12px; background:#fff; }
-.sp-docpane-head { display:flex; align-items:center; gap:8px; padding:8px 12px; border-bottom:1px solid var(--rule);
-  font-size:12.5px; font-weight:700; color:var(--navy); }
-.sp-docpane iframe { width:100%; height:520px; border:none; display:block; }
-.sp-docpane-foot { font-size:11px; color:var(--ink-3); padding:6px 12px; border-top:1px solid var(--rule); }
+.sp-linkbtn { background:none; border:none; padding:0; font-family:inherit; font-size:12px; font-weight:700;
+  color:var(--navy); text-decoration:underline; cursor:pointer; }
 
 /* assessments tab */
 .as-table td { border:1px solid var(--rule); padding:6px 9px; vertical-align:top; font-size:12px; }
@@ -840,15 +721,6 @@ body.simple-mode .dp-adv { display: none !important; }
 .as-src { font-size:10.5px; color:var(--ink-3); font-style:italic; }
 .as-tally { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; }
 
-/* "+ plan" picker */
-.al-row { display:flex; align-items:center; gap:9px; width:100%; text-align:left; background:none;
-  border:1px solid var(--rule); border-radius:7px; padding:7px 10px; margin-bottom:5px; cursor:pointer; font-family:inherit; }
-.al-row:hover { border-color:var(--navy); background:#F7F9FC; }
-.al-u { font-size:9.5px; font-weight:800; border-radius:4px; padding:1px 6px; flex:0 0 auto; }
-.al-lbl { font-size:11.5px; font-weight:700; color:var(--navy); flex:0 0 58px; }
-.al-topic { font-size:12px; color:var(--ink-2); flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.al-date { font-size:10.5px; color:var(--ink-3); flex:0 0 auto; }
-
 /* ── SIMPLE PACING GUIDE ── */
 .sp-wrap { background:#fff; border:1px solid var(--rule); border-radius:12px; overflow:hidden; }
 .sp-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
@@ -858,7 +730,7 @@ body.simple-mode .dp-adv { display: none !important; }
 .sp-btn { background:var(--navy); color:#fff; border:none; border-radius:7px; padding:7px 15px;
   font-family:inherit; font-size:12.5px; font-weight:600; cursor:pointer; }
 .sp-scroll { overflow-x:auto; }
-.sp-table { width:100%; border-collapse:collapse; min-width:900px; }
+.sp-table { width:100%; border-collapse:collapse; min-width:940px; }
 .sp-table th { background:var(--navy); color:#fff; font-size:11px; font-weight:700; letter-spacing:.03em;
   text-align:left; padding:8px 10px; white-space:nowrap; }
 .sp-th-hint { font-weight:400; opacity:.7; text-transform:none; letter-spacing:0; }
@@ -872,7 +744,7 @@ body.simple-mode .dp-adv { display: none !important; }
 /* Content / HW cells now wrap so the full text is readable */
 .sp-cell { min-height:34px; line-height:1.5; white-space:normal; overflow-wrap:anywhere; word-break:break-word; }
 .sp-cell:empty:before { content:attr(data-ph); color:var(--ink-3); pointer-events:none; }
-.sp-content { min-width:220px; }
+.sp-content { min-width:260px; }
 .sp-dateinp { font-size:11.5px; }
 .sp-sel { cursor:pointer; }
 .sp-status { font-size:13px; font-weight:800; color:var(--ink-3); margin-right:6px; }
@@ -1487,7 +1359,8 @@ body.simple-mode .dp-adv { display: none !important; }
     <button class="tb-nav" onclick="nav('dashboard')">Dashboard</button>
     <button class="tb-nav" onclick="nav('course')">Units</button>
     <button class="tb-nav" onclick="nav('week')">Week</button>
-    <button class="tb-nav" onclick="gotoPacing()">Pacing &amp; School Map</button>
+    <button class="tb-nav" onclick="gotoPacing()">Pacing</button>
+    <button class="tb-nav" onclick="gotoAssessments()">Assessments</button>
     <button class="tb-nav tb-nav-go" onclick="gotoNextLesson()">▶ Next lesson</button>
   </div>
 
@@ -1525,7 +1398,8 @@ body.simple-mode .dp-adv { display: none !important; }
       <button onclick="closeMoreMenu();nav('dashboard')">Dashboard</button>
       <button onclick="closeMoreMenu();nav('course')">Units</button>
       <button onclick="closeMoreMenu();nav('week')">Week</button>
-      <button onclick="closeMoreMenu();gotoPacing()">Pacing &amp; School Map</button>
+      <button onclick="closeMoreMenu();gotoPacing()">Pacing</button>
+      <button onclick="closeMoreMenu();gotoAssessments()">Assessments</button>
       <button onclick="closeMoreMenu();gotoNextLesson()">▶ Next lesson</button>
     </div>
     <div class="mm-sec">Save &amp; Export</div>
@@ -1536,7 +1410,7 @@ body.simple-mode .dp-adv { display: none !important; }
     <button onclick="closeMoreMenu();openDriveSetup()">Google Drive setup…</button>
     <div class="mm-sec">Schedule</div>
     <button onclick="closeMoreMenu();openCalendarImport()">📅 Import school calendar…</button>
-    <button onclick="closeMoreMenu();gotoPacing();setTimeout(openMapImport,180)">📥 Paste a semester map…</button>
+    <button onclick="closeMoreMenu();openMapImport()">📥 Paste school semester map…</button>
     <div class="mm-sec">Advanced</div>
     <button onclick="closeMoreMenu();nav('prep')">Prep Board</button>
     <button onclick="closeMoreMenu();resetCourseData()">Reset course data</button>
@@ -1989,6 +1863,16 @@ body.simple-mode .dp-adv { display: none !important; }
       <button class="smap-btn primary" onclick="saveMapImport()">Save this map</button>
     </div>
   </div>
+</div>
+
+<!-- PACING GUIDE (top level) -->
+<div class="view" id="view-pacing">
+  <div class="wrap" id="pacing-wrap"></div>
+</div>
+
+<!-- ASSESSMENTS (top level) -->
+<div class="view" id="view-assess">
+  <div class="wrap" id="assess-wrap"></div>
 </div>
 
 <!-- PREP BOARD -->
@@ -3015,7 +2899,7 @@ function applyLessonTemplate(di){
 }
 
 function makeDay(label, date, eq) {
-  return { label, date:'', dateA:'', dateB:'', block:'A & B Block', blockDuration:90, mapRef:null, mapFocus:'', calNotes:[], topic:'', eq, qod:'', topicDesc:'', brainstorm:'', journalPrompt:'', journalDur:3, journalGrr:'closer', targets:[], teacherGoals:[], vocab:[], lessonObjs:[], knowledgeIntroduced:[], skillsCovered:[], lessonScripture:[], lessonCatechism:[], lessonSaints:[], activities:templateActivities(), materials:[], techTools:[], links:[], assessType:'', assessment:'', homework:'', ignatianReflection:'', postNotes:'' };
+  return { label, date:'', dateA:'', dateB:'', block:'A & B Block', blockDuration:90, topic:'', eq, qod:'', topicDesc:'', brainstorm:'', journalPrompt:'', journalDur:3, journalGrr:'closer', targets:[], teacherGoals:[], vocab:[], lessonObjs:[], knowledgeIntroduced:[], skillsCovered:[], lessonScripture:[], lessonCatechism:[], lessonSaints:[], activities:templateActivities(), materials:[], techTools:[], links:[], assessType:'', assessment:'', homework:'', ignatianReflection:'', postNotes:'' };
 }
 
 function demoWeek() {
@@ -3179,6 +3063,18 @@ function nav(target, unitId) {
     ]);
     renderPrep();
     window.scrollTo(0,0);
+  } else if (target === 'pacing') {
+    document.getElementById('view-pacing').classList.add('active');
+    currentUnit = null; currentWeek = 0; openDayIdx = null; openWeekIdx = null;
+    setBreadcrumb([{label:'Dashboard', home:true, onclick:"nav('dashboard')"},{label:'Pacing Guide', active:true}]);
+    document.getElementById('pacing-wrap').innerHTML = simplePacingHTML();
+    window.scrollTo(0,0);
+  } else if (target === 'assess') {
+    document.getElementById('view-assess').classList.add('active');
+    currentUnit = null; currentWeek = 0; openDayIdx = null; openWeekIdx = null;
+    setBreadcrumb([{label:'Dashboard', home:true, onclick:"nav('dashboard')"},{label:'Assessments', active:true}]);
+    document.getElementById('assess-wrap').innerHTML = assessmentCalendarHTML();
+    window.scrollTo(0,0);
   } else if (target === 'course') {
     document.getElementById('view-course').classList.add('active');
     currentUnit = null; currentWeek = 0; openDayIdx = null; openWeekIdx = null;
@@ -3242,13 +3138,10 @@ function gotoNextLesson(){
 
 // Open the pacing guide for the most relevant unit (the one with the next
 // class, else the first unit).
-function gotoPacing(){
-  const today = isoToday();
-  const up = collectClasses().filter(c=>c.date>=today);
-  const uid = up.length ? up[0].uid : (UNIT_META[0] ? UNIT_META[0].id : null);
-  if(uid==null){ toast('Add a unit first'); return; }
-  navUnitTab(uid, 'pacing');
-}
+// The pacing guide is a whole-course view, so it gets its own page rather
+// than living inside one unit's tabs.
+function gotoPacing(){ nav('pacing'); }
+function gotoAssessments(){ nav('assess'); }
 
 function toggleMoreMenu(e){
   if(e) e.stopPropagation();
@@ -3551,21 +3444,6 @@ function collectClasses(){
   return out;
 }
 
-// ══ SCHOOL SEMESTER MAP (the official, school-provided pacing guide) ══
-// The school hands out a "Semester Course Map" Google Doc: one row per
-// school day with the A/B block, the calendar notes (masses, retreats,
-// early release, no-school days) and the numbered lesson focus.
-//
-// The map is the authority on WHEN things happen. The planner stays the
-// authority on HOW each lesson is taught. Sync pushes the map's dates,
-// lesson numbers, titles, learning targets, assessment days and calendar
-// notes into the planner's lessons — and never overwrites planning work
-// that is already there.
-//
-// Row format (compact, to keep the file small):
-//   week | BLK | day-of-week | M.D | calendar note(s) | unit of study | lesson focus
-//   BLK is A, B, or "-" for a day with no class. Notes are separated by " · ".
-
 const SCHOOL_MAP_SEEDS = {
   7: {
     1: {
@@ -3842,19 +3720,6 @@ function plannerDaysByDate(){
   return idx;
 }
 
-// ── Map ⇄ lesson lookups used by the rest of the planner ──────────
-function dayMapRef(d){
-  const hit = mapHitForDate(d && d.dateA);
-  if(hit && hit.lesson && hit.lesson.n != null) return { n: hit.lesson.n, sem: hit.sem };
-  return (d && d.mapRef && d.mapRef.n != null) ? d.mapRef : null;   // pre-lookup data
-}
-function dayMapLesson(d){
-  const hit = mapHitForDate(d && d.dateA);
-  if(hit) return hit.lesson;
-  const ref = d && d.mapRef; if(!ref) return null;
-  const m = getSchoolMap(activeCourse, ref.sem); if(!m) return null;
-  return smapLessons(m).find(L => L.key === ref.key) || null;
-}
 // Calendar notes that apply to a lesson: stored on the day at sync time so
 // they survive even if the map is later replaced.
 function dayCalNotes(d){
@@ -3862,95 +3727,13 @@ function dayCalNotes(d){
   if(hit) return hit.row.notes;
   return (d && Array.isArray(d.calNotes)) ? d.calNotes : [];
 }
-function dayMapBlockLive(d){ const hit = mapHitForDate(d && d.dateA); return hit ? hit.row.blk : ((d && d.mapBlock) || ''); }
-function dayMapUnitText(d){ const hit = mapHitForDate(d && d.dateA); return hit ? hit.row.unit : ''; }
+
 function calNoteBadgeHTML(d, small){
   const notes = dayCalNotes(d); if(!notes.length) return '';
   const txt = notes.join(' · ');
   const warn = /no school|early release|exam|psat|break/i.test(txt);
   return `<span class="smap-note-pill${warn?' warn':''}"${small?' style="font-size:9px"':''} title="From the school semester map">${esc(txt)}</span>`;
 }
-function mapBadgeHTML(d){
-  const ref = dayMapRef(d); if(!ref) return '';
-  return `<span class="smap-lesson-pill" title="School semester map — lesson ${ref.n}">L${ref.n}</span>`;
-}
-// The strip inside a lesson plan that shows what the school map asks of this
-// day: its lesson number, the official focus, both class dates and any
-// calendar notes (mass, retreat, early release) that land on it.
-function mapBarHTML(d){
-  const ref = d && d.mapRef;
-  if(!ref){
-    if(!anySchoolMap(activeCourse)) return '';
-    return `<div class="dl-mapbar" style="background:var(--parchment);border-color:var(--rule)">
-      <span style="color:var(--ink-3)">Not linked to the school semester map yet.</span>
-      <button class="dl-maplink" onclick="gotoPacing()">Open the pacing guide →</button>
-    </div>`;
-  }
-  const L = dayMapLesson(d);
-  const focus = (L && L.objective) || String(d.mapFocus||'').replace(/^\d+\s*[:.]\s*/,'');
-  const dates = [d.dateA?`A ${fmtMD(d.dateA)}`:'', d.dateB?`B ${fmtMD(d.dateB)}`:''].filter(Boolean).join(' · ');
-  const notes = dayCalNotes(d);
-  return `<div class="dl-mapbar">
-    <span class="smap-lesson-pill">L${ref.n != null ? ref.n : '–'}</span>
-    <b>School map:</b> <span>${esc(focus)}</span>
-    ${dates?`<span style="color:var(--ink-3)">· ${esc(dates)}</span>`:''}
-    ${notes.length?`<span style="display:inline-flex;gap:3px;flex-wrap:wrap">${notes.map(n=>`<span class="smap-note-pill${/no school|early release|exam|psat|break/i.test(n)?' warn':''}">${esc(n)}</span>`).join('')}</span>`:''}
-    <button class="dl-maplink" onclick="gotoPacing()">See it in the pacing guide →</button>
-  </div>`;
-}
-
-// A day the map has no room for is only worth parking if there is real work
-// in it. Every fresh lesson ships with the five template activities, so an
-// untouched lesson looks "started" to dayIsStarted() — this looks past that.
-
-// How many class blocks a unit actually holds. Once the school map has been
-// synced in, its real count replaces the curriculum guide's estimate.
-
-// The little "school map" chip that sits in the pacing guide's header and
-// keeps the two guides visibly tied together.
-// ── WHICH A/B BLOCK THIS COURSE MEETS ON ──────────────────────────
-// The school map lists every school day with its A/B designation, and each
-// lesson focus appears on both an A row and a B row. A given course only
-// meets on one of them (Theology 7 on B days, Theology 6 on A days), so
-// only that row is a real class day — and only its calendar notes matter.
-// The map row this course actually teaches a lesson on.
-// The class date a lesson lands on for this course's block. Falls back to
-// the lesson's other row when the map skipped this course's block.
-function dayBlockLetter(d){ return dayMapBlockLive(d); }
-
-// A day's school week number, straight off the map row it came from.
-function dayMapWeek(d){
-  const hit = mapHitForDate(d && d.dateA);
-  if(hit) return hit.row.week;
-  const L = dayMapLesson(d);
-  return L ? L.week : null;
-}
-
-// Every no-school day and school-wide event for this course, as bands ready
-// to drop into the pacing guide. Runs of identical no-class days (a whole
-// Thanksgiving week) collapse into one band.
-// Shown above the pacing table when the school map has not been synced yet.
-
-
-// ══ SEMESTER MAP VIEW ═════════════════════════════════════════════
-let smapSem = 1;
-
-
-function setSmapSem(sem){ smapSem = +sem; renderUnit(); }
-
-// ── SCHOOL-MAP TOOLBAR & STATUS (lives in the pacing guide header) ──
-
-// Everything the guide wants to warn about: not synced yet, dates that have
-// drifted off the map, and lessons the map never gave this block a day for.
-
-
-
-// ══ SYNC: map → lesson plans ══════════════════════════════════════
-// Builds the plan of changes first so the teacher can see exactly what will
-// happen before anything is written.
-
-
-
 
 // ══ IMPORT: paste the map straight out of the Google Doc ══════════
 // Tolerant of how Google Docs tables come across: markdown pipe tables,
@@ -4018,7 +3801,9 @@ function openMapImport(){
   const t = document.getElementById('mi-text'); if(t){ t.value=''; setTimeout(()=>t.focus(), 60); }
   document.getElementById('mi-preview').innerHTML = '';
 }
+
 function closeMapImport(){ document.getElementById('mapimport-overlay').style.display='none'; }
+
 function previewMapImport(){
   const text = (document.getElementById('mi-text')||{}).value||'';
   const year = +((document.getElementById('mi-year')||{}).value||0) || new Date().getFullYear();
@@ -4035,6 +3820,7 @@ function previewMapImport(){
     <div class="mi-peek">${ls.slice(0,6).map(l=>`<div>${l.n!=null?`<b>L${l.n}</b> `:''}${esc(l.title)} <span style="color:var(--ink-3)">· ${l.dateA?fmtMD(l.dateA):'—'}${l.dateB?' / '+fmtMD(l.dateB):''}${l.unitNo?` · U${l.unitNo}`:''}</span></div>`).join('')}${ls.length>6?`<div style="color:var(--ink-3)">…and ${ls.length-6} more</div>`:''}</div>`;
   return probe;
 }
+
 function saveMapImport(){
   const probe = previewMapImport(); if(!probe) return;
   const sem = probe.sem;
@@ -4054,6 +3840,7 @@ function saveMapImport(){
   renderUnit();
   toast(`Semester ${sem} map imported ✓ — now run a sync`);
 }
+
 function resetSchoolMap(sem){
   if(!confirm('Remove the map you imported and go back to the built-in one?\n\nYour lesson plans are not touched.')) return;
   if(state.schoolMaps && state.schoolMaps[activeCourse]) delete state.schoolMaps[activeCourse][sem];
@@ -4061,6 +3848,85 @@ function resetSchoolMap(sem){
   invalidateMapIndex();
   renderUnit();
   toast('Reverted to the built-in map');
+}
+
+// ── ASSESSMENTS TAB ───────────────────────────────────────────────
+// Every assessment across the course on one calendar, in date order: the
+// Test/Quiz days the school map schedules, the lessons you have tagged as an
+// assessment, and everything in the units' Assignments boxes.
+function assessmentCalendarHTML(){
+  const items = [];
+  const seen = new Set();
+
+  // 1. from the school map's Lesson Focus ("14: Unit 2 Test: Genesis 1–11")
+  schoolMapSems(activeCourse).forEach(sem => {
+    const m = getSchoolMap(activeCourse, sem); if(!m) return;
+    smapLessons(m).forEach(L => {
+      if(!L.assessType) return;
+      L.rows.forEach(r => {
+        if(!r.date || seen.has(r.date + L.focus)) return;
+        seen.add(r.date + L.focus);
+        items.push({ date:r.date, type:L.assessType, title:L.objective, unitNo:L.unitNo,
+                     src:'map', blk:r.blk, notes:r.notes });
+      });
+    });
+  });
+
+  // 2. lessons you have tagged with an assessment type
+  orderedUnits().forEach(u => (state.units[u.id]||[]).forEach((w, wi) => (w.days||[]).forEach((d, di) => {
+    if(!d.assessType || !(d.dateA || d.dateB)) return;
+    const date = d.dateA || d.dateB;
+    items.push({ date, type:d.assessType, title:String(d.topic||d.label).replace(/<[^>]*>/g,' ').trim(),
+                 unitNo:unitNo(u.id), src:'lesson', uid:u.id, wi, di,
+                 notes:dayCalNotes(d) });
+  })));
+
+  // 3. the units' Assignments & Assessments boxes
+  orderedUnits().forEach(u => (getUnitAssignments(u.id)||[]).forEach(a => {
+    if(!a.due && !a.announce) return;
+    items.push({ date:a.due || a.announce, type:a.type||'Other', title:a.title||'(untitled)',
+                 unitNo:unitNo(u.id), src:'assign', announce:a.announce, due:a.due, notes:[] });
+  }));
+
+  items.sort((a,b)=> String(a.date).localeCompare(String(b.date)));
+
+  const today = isoToday();
+  const srcLabel = { map:'school map', lesson:'lesson plan', assign:'assignments box' };
+  const body = items.map(it => {
+    const past = it.date < today;
+    const clash = (it.notes||[]).filter(n=>/retreat|early release|no school|mass|exam|psat|break|field day/i.test(n));
+    const ac = ASSESS_COLORS[it.type] || {bg:'#ECECEC', tx:'#555'};
+    return `<tr class="as-row${past?' past':''}${it.date===today?' today':''}">
+      <td class="as-date">${it.date?`<b>${fmtMD(it.date)}</b><div class="as-dow">${isoParse(it.date).toLocaleDateString('en-US',{weekday:'short'})}</div>`:'—'}</td>
+      <td><span class="as-type" style="background:${ac.bg};color:${ac.tx}">${esc(it.type)}</span></td>
+      <td class="as-title">${esc(it.title)}
+        ${clash.length?`<div class="as-clash">⚠ falls on ${clash.map(esc).join(' · ')}</div>`:''}</td>
+      <td class="as-unit">${it.unitNo?`U${it.unitNo}`:''}</td>
+      <td class="as-src">${esc(srcLabel[it.src]||it.src)}</td>
+      <td class="as-go">${it.src==='lesson'?`<button class="sp-open" onclick="openGridDay(${it.uid},${it.wi},${it.di})">open →</button>`:''}</td>
+    </tr>`;
+  }).join('');
+
+  const counts = {};
+  items.forEach(it => { counts[it.type] = (counts[it.type]||0) + 1; });
+  const tally = Object.keys(counts).length
+    ? `<div class="as-tally">${Object.entries(counts).map(([k,v])=>{
+        const ac = ASSESS_COLORS[k]||{bg:'#ECECEC',tx:'#555'};
+        return `<span class="as-type" style="background:${ac.bg};color:${ac.tx}">${esc(k)} · ${v}</span>`;
+      }).join('')}</div>` : '';
+
+  return `<div class="sp-wrap">
+    <div class="sp-head"><div>
+      <h2 class="sp-title">Assessments — ${esc(getCourse().name)}</h2>
+      <div class="sp-sub">Every assessment across the course in date order — from the school map, from lessons you've tagged, and from each unit's Assignments box.</div>
+    </div></div>
+    ${tally}
+    <div class="sp-scroll"><table class="sp-table as-table">
+      <thead><tr><th style="width:72px">Date</th><th style="width:90px">Type</th><th>What</th>
+        <th style="width:48px">Unit</th><th style="width:110px">From</th><th style="width:84px"></th></tr></thead>
+      <tbody>${body || `<tr><td class="sp-td" colspan="6" style="text-align:center;color:var(--ink-3);font-style:italic">Nothing scheduled yet. Tag a lesson with an assessment type, or paste your school map.</td></tr>`}</tbody>
+    </table></div>
+  </div>`;
 }
 
 // ── Manual to-do CRUD (auto to-dos are derived each render) ──
@@ -5405,7 +5271,6 @@ function renderWeekPlan() {
       <div class="wk-dh-unit" style="color:${L.col.br}">Unit ${unitNo(L.uid)} · ${esc(L.u.name)}</div>
       ${topic?`<div class="wk-dh-topic">${esc(topic)}</div>`:`<div class="wk-dh-topic wk-dh-none">Untitled lesson</div>`}
       ${dstr?`<div class="wk-dh-dates">${esc(dstr)}</div>`:''}
-      ${dayCalNotes(d).length?`<div style="margin-top:3px">${calNoteBadgeHTML(d, true)}</div>`:''}
     </th>`;
   };
 
@@ -5665,7 +5530,6 @@ function renderSemesterGrid() {
         <div style="display:flex;align-items:center;gap:5px;margin-bottom:4px">
           <span style="font-size:9px;font-weight:700;color:${c.tx};background:${c.bg};padding:1px 6px;border-radius:4px;-webkit-print-color-adjust:exact">U${uid}</span>
           <span style="font-size:10px;font-weight:600;color:var(--navy)">${esc(d.label)}</span>
-          ${mapBadgeHTML(d)}
         </div>
         ${d.topic
           ? `<div style="font-size:11px;font-weight:600;color:#7B1A2E;line-height:1.3;margin-bottom:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(d.topic)}</div>`
@@ -7005,7 +6869,7 @@ function unitAssignmentsHTML(uid){
 
 function setUnitTab(tab, btn) {
   currentUnitTab = tab; // remember so re-renders (chip adds, etc.) stay on this tab
-  ['overview','plan','pacing','assess','resources'].forEach(t => {
+  ['overview','plan','pacing','resources'].forEach(t => {
     const content = document.getElementById('utab-content-'+t);
     const tabBtn  = document.getElementById('utab-'+t);
     if (content) content.style.display = t===tab ? 'block' : 'none';
@@ -7014,85 +6878,6 @@ function setUnitTab(tab, btn) {
       tabBtn.style.borderBottomColor = t===tab ? 'var(--navy)' : 'transparent';
     }
   });
-}
-
-// ── ASSESSMENTS TAB ───────────────────────────────────────────────
-// Every assessment across the course on one calendar, in date order: the
-// Test/Quiz days the school map schedules, the lessons you have tagged as an
-// assessment, and everything in the units' Assignments boxes.
-function assessmentCalendarHTML(){
-  const items = [];
-  const seen = new Set();
-
-  // 1. from the school map's Lesson Focus ("14: Unit 2 Test: Genesis 1–11")
-  schoolMapSems(activeCourse).forEach(sem => {
-    const m = getSchoolMap(activeCourse, sem); if(!m) return;
-    smapLessons(m).forEach(L => {
-      if(!L.assessType) return;
-      L.rows.forEach(r => {
-        if(!r.date || seen.has(r.date + L.focus)) return;
-        seen.add(r.date + L.focus);
-        items.push({ date:r.date, type:L.assessType, title:L.objective, unitNo:L.unitNo,
-                     src:'map', blk:r.blk, notes:r.notes });
-      });
-    });
-  });
-
-  // 2. lessons you have tagged with an assessment type
-  orderedUnits().forEach(u => (state.units[u.id]||[]).forEach((w, wi) => (w.days||[]).forEach((d, di) => {
-    if(!d.assessType || !(d.dateA || d.dateB)) return;
-    const date = d.dateA || d.dateB;
-    items.push({ date, type:d.assessType, title:String(d.topic||d.label).replace(/<[^>]*>/g,' ').trim(),
-                 unitNo:unitNo(u.id), src:'lesson', uid:u.id, wi, di,
-                 notes:dayCalNotes(d) });
-  })));
-
-  // 3. the units' Assignments & Assessments boxes
-  orderedUnits().forEach(u => (getUnitAssignments(u.id)||[]).forEach(a => {
-    if(!a.due && !a.announce) return;
-    items.push({ date:a.due || a.announce, type:a.type||'Other', title:a.title||'(untitled)',
-                 unitNo:unitNo(u.id), src:'assign', announce:a.announce, due:a.due, notes:[] });
-  }));
-
-  items.sort((a,b)=> String(a.date).localeCompare(String(b.date)));
-
-  const today = isoToday();
-  const srcLabel = { map:'school map', lesson:'lesson plan', assign:'assignments box' };
-  const body = items.map(it => {
-    const past = it.date < today;
-    const clash = (it.notes||[]).filter(n=>/retreat|early release|no school|mass|exam|psat|break|field day/i.test(n));
-    const ac = ASSESS_COLORS[it.type] || {bg:'#ECECEC', tx:'#555'};
-    return `<tr class="as-row${past?' past':''}${it.date===today?' today':''}">
-      <td class="as-date">${it.date?`<b>${fmtMD(it.date)}</b><div class="as-dow">${isoParse(it.date).toLocaleDateString('en-US',{weekday:'short'})}</div>`:'—'}</td>
-      <td><span class="as-type" style="background:${ac.bg};color:${ac.tx}">${esc(it.type)}</span></td>
-      <td class="as-title">${esc(it.title)}
-        ${clash.length?`<div class="as-clash">⚠ falls on ${clash.map(esc).join(' · ')}</div>`:''}</td>
-      <td class="as-unit">${it.unitNo?`U${it.unitNo}`:''}</td>
-      <td class="as-src">${esc(srcLabel[it.src]||it.src)}</td>
-      <td class="as-go">${it.src==='lesson'?`<button class="sp-open" onclick="openGridDay(${it.uid},${it.wi},${it.di})">open →</button>`:''}</td>
-    </tr>`;
-  }).join('');
-
-  const counts = {};
-  items.forEach(it => { counts[it.type] = (counts[it.type]||0) + 1; });
-  const tally = Object.keys(counts).length
-    ? `<div class="as-tally">${Object.entries(counts).map(([k,v])=>{
-        const ac = ASSESS_COLORS[k]||{bg:'#ECECEC',tx:'#555'};
-        return `<span class="as-type" style="background:${ac.bg};color:${ac.tx}">${esc(k)} · ${v}</span>`;
-      }).join('')}</div>` : '';
-
-  return `<div class="sp-wrap">
-    <div class="sp-head"><div>
-      <h2 class="sp-title">Assessments — ${esc(getCourse().name)}</h2>
-      <div class="sp-sub">Every assessment across the course in date order — from the school map, from lessons you've tagged, and from each unit's Assignments box.</div>
-    </div></div>
-    ${tally}
-    <div class="sp-scroll"><table class="sp-table as-table">
-      <thead><tr><th style="width:72px">Date</th><th style="width:90px">Type</th><th>What</th>
-        <th style="width:48px">Unit</th><th style="width:110px">From</th><th style="width:84px"></th></tr></thead>
-      <tbody>${body || `<tr><td class="sp-td" colspan="6" style="text-align:center;color:var(--ink-3);font-style:italic">Nothing scheduled yet. Tag a lesson with an assessment type, or paste your school map.</td></tr>`}</tbody>
-    </table></div>
-  </div>`;
 }
 
 // ── UNIT RESOURCES TAB ────────────────────────────────────────────
@@ -7384,6 +7169,15 @@ function pacingGuideHTML(u, weeks) {
 // general theme only (no learning targets or detailed planning). Every
 // row is live — editing Content/HW here writes straight to that lesson,
 // and "open" jumps to the full lesson plan.
+// Re-render whichever surface the pacing guide is currently on.
+function rerenderPacing(){
+  const p = document.getElementById('pacing-wrap');
+  if(p && document.getElementById('view-pacing').classList.contains('active')){ p.innerHTML = simplePacingHTML(); return; }
+  const a = document.getElementById('assess-wrap');
+  if(a && document.getElementById('view-assess').classList.contains('active')){ a.innerHTML = assessmentCalendarHTML(); return; }
+  renderUnit();
+}
+
 function savePaceCellU(uid, wi, di, field, val){
   const d = state.units[uid][wi].days[di];
   d[field] = (val||'').trim();
@@ -7399,254 +7193,97 @@ function paceAddDayU(uid){
 // Whole-course pacing map: every unit is a colored band on the left with
 // its class days listed. General themes only — edit Content or HW here and
 // it saves straight to that lesson; "open" jumps to the full plan.
-// ── THE PACING GUIDE = THE SCHOOL SEMESTER MAP ────────────────────
-// One guide. The planner's spine — unit bands, 1.5-style unit·lesson
-// numbering, editable Content and HW that write straight to the lesson,
-// planned/not-planned status, "open →" into the day plan — carrying the
-// school map's real class dates, A/B block, school week and the events
-// that interrupt it (no-school days, breaks, exams, Homecoming Week)
-// dropped in on the dates they actually fall.
-// ── THE PACING GUIDE = YOUR SCHOOL'S SEMESTER MAP ─────────────────
-// You author in the Google Doc and paste it here; this renders it in the
-// Doc's own format, row for row: Week · BLK · Day · Date · Calendar Note ·
-// Unit of Study · Lesson Focus. Nothing is inferred and nothing is written
-// back onto your lessons. The only column the planner adds is Plan, which
-// finds the lesson plan sitting on that date — so it fills itself in as you
-// date lessons, with nothing to sync.
+// One line telling you where the dates come from, and nothing more.
+function pacingDateNoteHTML(){
+  if(!schoolMapSems(activeCourse).length){
+    return `<div class="sp-note">Dates are whatever you set on each lesson.
+      <button class="sp-linkbtn" onclick="openMapImport()">Paste your school's semester map</button> to fill them in and pick up school events.</div>`;
+  }
+  let dated = 0, withNotes = 0;
+  orderedUnits().forEach(u => (state.units[u.id]||[]).forEach(w => (w.days||[]).forEach(d => {
+    if(!d.dateA) return;
+    if(mapHitForDate(d.dateA)){ dated++; if(dayCalNotes(d).length) withNotes++; }
+  })));
+  const m = getSchoolMap(activeCourse, schoolMapSems(activeCourse)[0]);
+  return `<div class="sp-note">📅 ${dated} lesson${dated===1?'':'s'} matched to <b>${esc((m&&m.title)||'your school map')}</b>${withNotes?` · ${withNotes} with school events`:''}
+    <button class="sp-linkbtn" onclick="openMapImport()">re-paste</button></div>`;
+}
+
 function simplePacingHTML(){
+  const blocks = orderedUnits().map(u => {
+    const weeks = state.units[u.id] || [];
+    const days = [];
+    weeks.forEach((w, wi) => (w.days||[]).forEach((d, di) => days.push({d, wi, di})));
+    return { u, days };
+  }).filter(b => b.days.length);
+
   const co = getCourse();
-  const sems = schoolMapSems(activeCourse);
-  if(!sems.length) return pacingNoMapHTML();
+  const inp = (val, uid, wi, di, field, ph) =>
+    `<div class="sp-inp sp-cell" contenteditable="true" data-ph="${esc(ph||'')}"
+       onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.blur();}"
+       onblur="savePaceCellU(${uid},${wi},${di},'${field}',this.textContent)">${esc(String(val||'').replace(/<[^>]*>/g,' ').trim())}</div>`;
 
   const today = isoToday();
-  const byDate = plannerDaysByDate();
-  let linked = 0, focusRows = 0;
-
-  const sections = sems.map(sem => {
-    const m = getSchoolMap(activeCourse, sem);
-    if(!m) return '';
-    const rows = m._rows || smapExpand(m);
-    const lessons = smapLessons(m);
-    const byRow = new Map();
-    lessons.forEach(L => L.rows.forEach(r => byRow.set(r, L)));
-
-    let lastWeek = null;
-    const seenBanner = new Set();
-    const body = rows.map(r => {
-      const L = byRow.get(r) || null;
-      const hit = r.date ? byDate.get(r.date) : null;
-      if(r.focus) focusRows++;
-      if(hit) linked++;
-      const isToday = r.date === today;
-      let banner = '';
-      if(r.week !== lastWeek && m.weekBanners && m.weekBanners[r.week] && !seenBanner.has(r.week)){
-        seenBanner.add(r.week);
-        banner = `<tr class="sp-bannerrow"><td colspan="8">${esc(m.weekBanners[r.week])}</td></tr>`;
-      }
-      const weekCell = r.week !== lastWeek ? `<b>${r.week||''}</b>` : '';
-      lastWeek = r.week;
-
-      // Unit of Study — the Doc's own words. Tinted when it names a unit the
-      // planner knows, so the colour coding still reads at a glance.
-      let unitCell = '';
-      if(r.unit){
-        const uid2 = smapUnitId(L ? L.unitNo : null);
-        const c = uid2 ? getUC(uid2) : null;
-        unitCell = c
-          ? `<span class="sp-unitcell" style="background:${c.bg};color:${c.tx}">${esc(r.unit)}</span>`
-          : `<span class="sp-unitcell">${esc(r.unit)}</span>`;
-      } else if(L && L.unitNo && m._unitsInferred){
-        const uid2 = smapUnitId(L.unitNo);
-        const c = uid2 ? getUC(uid2) : null;
-        unitCell = `<span class="sp-unitcell sp-guess" title="Guessed from the Unit ${L.unitNo} Test/Quiz row — the Doc's Unit of Study column is blank"${c?` style="background:${c.bg};color:${c.tx}"`:''}>U${L.unitNo}?</span>`;
-      }
-
-      const plan = hit
-        ? `<span class="sp-status ${dayIsPlanned(hit.d)?'ok':''}" title="${dayIsPlanned(hit.d)?'Fully planned':'Not fully planned yet'}">${dayIsPlanned(hit.d)?'✓':'○'}</span>
-           <button class="sp-open" onclick="openGridDay(${hit.u.id},${hit.wi},${hit.di})" title="${esc(hit.d.label)} · Unit ${unitNo(hit.u.id)}">open →</button>`
-        : (r.focus ? `<button class="sp-attach" onclick="openAttachLesson('${r.date}')" title="Put one of your lesson plans on this date">+ plan</button>` : '');
-
-      return banner + `<tr class="sp-maprow${r.noClass?' noclass':''}${isToday?' sp-today':''}">
-        <td class="sp-td sp-mid sp-wk">${weekCell}</td>
-        <td class="sp-td sp-mid">${r.blk?`<span class="smap-blk-pill blk-${r.blk}">${r.blk}</span>`:'<span class="smap-dash">—</span>'}</td>
-        <td class="sp-td sp-mid sp-dow">${esc(SMAP_DOW[r.dow]||r.dow)}</td>
-        <td class="sp-td sp-mid sp-mdate">${esc(r.md)}${isToday?'<div><span class="smap-today-tag">today</span></div>':''}</td>
-        <td class="sp-td sp-note">${r.notes.map(n=>`<span class="smap-note-pill${/no school|early release|exam|psat|break/i.test(n)?' warn':''}">${esc(n)}</span>`).join(' ')}</td>
-        <td class="sp-td sp-unit">${unitCell}</td>
-        <td class="sp-td sp-focus">${r.focus?esc(r.focus):'<span class="smap-dash">—</span>'}</td>
-        <td class="sp-td sp-mid">${plan}</td>
+  let globalDay = 0;
+  const body = blocks.map(b => {
+    const c = getUC(b.u.id);
+    let lessonNo = 0;
+    return b.days.map((row, idx) => {
+      globalDay++; lessonNo++;
+      const d = row.d, planned = dayIsPlanned(d);
+      const notes = dayCalNotes(d);
+      const isToday = d.dateA && d.dateA === today;
+      const dateCell = d.dateA
+        ? `<div class="sp-dline">${isoParse(d.dateA).toLocaleDateString('en-US',{weekday:'short'})} <b>${fmtMD(d.dateA)}</b></div>`
+        : '<span class="smap-dash">—</span>';
+      const band = idx === 0
+        ? `<td class="sp-band" rowspan="${b.days.length}" style="background:${c.br}">
+             <div class="sp-band-inner">Unit ${unitNo(b.u.id)}<span>${esc(b.u.name)}</span>
+               <button class="sp-band-add" onclick="paceAddDayU(${b.u.id})">+ day</button></div>
+           </td>` : '';
+      return `<tr${isToday?' class="sp-today"':''}>
+        ${band}
+        <td class="sp-td sp-mid">${globalDay}</td>
+        <td class="sp-td sp-mid sp-num">${unitNo(b.u.id)}.${lessonNo}</td>
+        <td class="sp-td sp-date2">${dateCell}${isToday?'<div><span class="smap-today-tag">today</span></div>':''}${notes.length?`<div class="sp-notes">${notes.map(n=>`<span class="smap-note-pill${/no school|early release|exam|psat|break/i.test(n)?' warn':''}">${esc(n)}</span>`).join(' ')}</div>`:''}</td>
+        <td class="sp-td sp-content">${inp(d.topic, b.u.id, row.wi, row.di, 'topic', 'General theme for the day…')}</td>
+        <td class="sp-td">${inp(d.homework, b.u.id, row.wi, row.di, 'homework', 'Homework…')}</td>
+        <td class="sp-td sp-mid">
+          <span class="sp-status ${planned?'ok':''}" title="${planned?'Fully planned':'Not fully planned yet'}">${planned?'✓':'○'}</span>
+          <button class="sp-open" onclick="openGridDay(${b.u.id},${row.wi},${row.di})">open →</button>
+        </td>
       </tr>`;
     }).join('');
-
-    return `${sems.length>1?`<div class="sp-semhead">Semester ${sem} — ${esc(m.title||'')}</div>`:''}
-      <div class="sp-scroll">
-        <table class="sp-table">
-          <thead><tr>
-            <th style="width:38px">Week</th><th style="width:40px">BLK</th><th style="width:46px">Day</th>
-            <th style="width:52px">Date</th><th style="width:16%">Calendar Note</th>
-            <th style="width:13%">Unit of Study</th><th>Lesson Focus</th><th style="width:84px">Plan</th>
-          </tr></thead>
-          <tbody>${body}</tbody>
-        </table>
-      </div>`;
   }).join('');
-
-  const m0 = getSchoolMap(activeCourse, sems[0]);
-  const warn = [];
-  if(m0 && m0._unitsInferred) warn.push(`<div class="smap-warn">The <b>Unit of Study</b> column is blank in your Doc, so the units marked <b>U?</b> are guessed from the &ldquo;Unit&nbsp;N Test/Quiz&rdquo; rows. Fill that column in on the Doc and re-paste, and they'll come straight from you.</div>`);
-  warn.push(pacingUnitGapHTML());
 
   return `
   <div class="sp-wrap">
     <div class="sp-head">
       <div>
         <h2 class="sp-title">Pacing Guide — ${esc(co.name)}</h2>
-        <div class="sp-sub">Your school's semester map, exactly as the Doc lays it out. Author in the Doc, paste it here — the <b>Plan</b> column finds the lesson plan on each date on its own.</div>
+        <div class="sp-sub">The big-picture map across every unit: general themes only. Edit Content or HW here and it saves straight to that lesson.</div>
       </div>
       <div class="sp-actions">
-        <button class="sp-btn" onclick="togglePacingDocPane()">📄 ${state.pacingDocOpen?'Hide':'Show'} the Doc</button>
-        <button class="sp-btn sp-btn-navy" onclick="openMapImport()">📥 Paste the Doc…</button>
-        ${m0 && m0.docUrl ? `<a class="sp-btn" href="${esc(m0.docUrl)}" target="_blank" rel="noopener">Doc ↗</a>` : ''}
+        <button class="sp-btn" onclick="openMapImport()" title="Paste your school's semester map to fill in the Date column">📥 School map…</button>
         <button class="sp-btn" onclick="exportPacingGuidePDF()">Export</button>
       </div>
     </div>
-    <div class="sp-note">Mirroring <b>${esc((m0&&m0.title)||'your semester map')}</b> · ${focusRows} school day${focusRows===1?'':'s'} with a lesson · ${linked} matched to a lesson plan</div>
-    ${warn.join('')}
-    <div id="pacing-doc-pane">${state.pacingDocOpen?pacingDocPaneHTML():''}</div>
-    ${sections}
-  </div>`;
-}
-
-// No map yet — keep the plain lesson list the planner had before, and ask
-// for the Doc.
-function pacingNoMapHTML(){
-  const co = getCourse();
-  const inp = (val, uid, wi, di, field, ph) =>
-    `<div class="sp-inp sp-cell" contenteditable="true" data-ph="${esc(ph||'')}"
-       onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.blur();}"
-       onblur="savePaceCellU(${uid},${wi},${di},'${field}',this.textContent)">${esc(String(val||'').replace(/<[^>]*>/g,' ').trim())}</div>`;
-  let globalDay = 0;
-  const body = orderedUnits().map(u => {
-    const days = [];
-    (state.units[u.id]||[]).forEach((w, wi) => (w.days||[]).forEach((d, di) => days.push({d, wi, di})));
-    if(!days.length) return '';
-    const c = getUC(u.id);
-    let lessonNo = 0;
-    return days.map((row, idx) => {
-      globalDay++; lessonNo++;
-      const d = row.d, planned = dayIsPlanned(d);
-      const band = idx === 0
-        ? `<td class="sp-band" rowspan="${days.length}" style="background:${c.br}">
-             <div class="sp-band-inner">Unit ${unitNo(u.id)}<span>${esc(u.name)}</span>
-               <button class="sp-band-add" onclick="paceAddDayU(${u.id})">+ day</button></div></td>` : '';
-      return `<tr>${band}
-        <td class="sp-td sp-mid">${globalDay}</td>
-        <td class="sp-td sp-mid sp-num">${unitNo(u.id)}.${lessonNo}</td>
-        <td class="sp-td sp-mid sp-mdate">${d.dateA?fmtMD(d.dateA):'<span class="smap-dash">—</span>'}</td>
-        <td class="sp-td sp-content">${inp(d.topic, u.id, row.wi, row.di, 'topic', 'General theme for the day…')}</td>
-        <td class="sp-td">${inp(d.homework, u.id, row.wi, row.di, 'homework', 'Homework…')}</td>
-        <td class="sp-td sp-mid">
-          <span class="sp-status ${planned?'ok':''}">${planned?'✓':'○'}</span>
-          <button class="sp-open" onclick="openGridDay(${u.id},${row.wi},${row.di})">open →</button>
-        </td></tr>`;
-    }).join('');
-  }).join('');
-  return `
-  <div class="sp-wrap">
-    <div class="sp-head">
-      <div><h2 class="sp-title">Pacing Guide — ${esc(co.name)}</h2>
-        <div class="sp-sub">Paste your school's semester map from the Google Doc and this becomes a mirror of it — same columns, same rows, real dates.</div></div>
-      <div class="sp-actions">
-        <button class="sp-btn sp-btn-navy" onclick="openMapImport()">📥 Paste the Doc…</button>
-        <button class="sp-btn" onclick="exportPacingGuidePDF()">Export</button>
-      </div>
+    ${pacingDateNoteHTML()}
+    <div class="sp-scroll">
+      <table class="sp-table">
+        <thead><tr>
+          <th style="width:120px">Unit</th>
+          <th style="width:54px">Day</th>
+          <th style="width:60px">#</th>
+          <th style="width:118px">Date <span class="sp-th-hint">— school map</span></th>
+          <th>Content <span class="sp-th-hint">— general theme</span></th>
+          <th style="width:240px">HW</th>
+          <th style="width:104px">Plan</th>
+        </tr></thead>
+        <tbody>${body || `<tr><td class="sp-td" colspan="7" style="text-align:center;color:var(--ink-3);font-style:italic">No class days yet.</td></tr>`}</tbody>
+      </table>
     </div>
-    <div class="smap-warn">No semester map for ${esc(co.name)} yet — showing your lesson list instead.</div>
-    <div class="sp-scroll"><table class="sp-table">
-      <thead><tr><th style="width:120px">Unit</th><th style="width:44px">Day</th><th style="width:54px">#</th>
-        <th style="width:78px">Date</th><th>Content <span class="sp-th-hint">— general theme</span></th>
-        <th style="width:190px">HW</th><th style="width:96px">Plan</th></tr></thead>
-      <tbody>${body || `<tr><td class="sp-td" colspan="7" style="text-align:center;color:var(--ink-3);font-style:italic">No class days yet.</td></tr>`}</tbody>
-    </table></div>
   </div>`;
-}
-
-// Where your unit sizes and the Doc's disagree — reported, never corrected.
-function pacingUnitGapHTML(){
-  const counts = new Map();
-  schoolMapSems(activeCourse).forEach(sem => {
-    const m = getSchoolMap(activeCourse, sem); if(!m) return;
-    smapLessons(m).forEach(L => { if(L.unitNo) counts.set(L.unitNo, (counts.get(L.unitNo)||0) + 1); });
-  });
-  if(!counts.size) return '';
-  const gaps = [];
-  [...counts.keys()].sort((a,b)=>a-b).forEach(un => {
-    const uid2 = smapUnitId(un); if(!uid2) return;
-    const mine = (state.units[uid2]||[]).reduce((s,w)=>s+(w.days||[]).length,0);
-    const theirs = counts.get(un);
-    if(mine !== theirs){
-      const u = UNIT_META.find(x=>x.id===uid2);
-      gaps.push(`<div>Unit ${un}${u?` · ${esc(u.name)}`:''} — the map schedules <b>${theirs}</b> lesson${theirs===1?'':'s'}, you have <b>${mine}</b>.</div>`);
-    }
-  });
-  return gaps.length ? `<div class="smap-warn">${gaps.join('')}</div>` : '';
-}
-
-// The Doc itself, embedded on the page, so the source of truth is one click
-// away from the mirror of it.
-function pacingDocPaneHTML(){
-  const url = pacingDocUrlRaw() || (getSchoolMap(activeCourse, schoolMapSems(activeCourse)[0])||{}).docUrl || '';
-  if(!url) return `<div class="sp-note">No Doc link saved yet. Paste one when you import the map, or
-    <input id="pacing-doc-in" placeholder="https://docs.google.com/document/d/…" style="border:1px solid var(--rule-dark);border-radius:6px;padding:5px 8px;font-family:inherit;font-size:12px;min-width:240px">
-    <button class="sp-btn" onclick="setPacingDoc()">Embed it</button></div>`;
-  return `<div class="sp-docpane">
-    <div class="sp-docpane-head"><span>📄 The Doc — live</span>
-      <span style="margin-left:auto;display:flex;gap:6px">
-        <button class="sp-btn" onclick="refreshPacingDoc()">↻ Refresh</button>
-        <a class="sp-btn" href="${esc(url)}" target="_blank" rel="noopener">Open ↗</a>
-      </span></div>
-    <iframe id="pacing-doc-frame" src="${esc(pacingDocEmbed(url))}" loading="lazy"></iframe>
-    <div class="sp-docpane-foot">Blank? The Doc isn't shared publicly — set <b>Anyone with the link</b>, or use <b>File → Publish to web</b>.</div>
-  </div>`;
-}
-function togglePacingDocPane(){
-  state.pacingDocOpen = !state.pacingDocOpen;
-  saveState(); renderUnit();
-}
-
-// "+ plan" — put one of your existing lesson plans on this date. A picker,
-// because which lesson belongs on a day is your call, not the planner's.
-function openAttachLesson(iso){
-  const list = [];
-  orderedUnits().forEach(u => (state.units[u.id]||[]).forEach((w, wi) => (w.days||[]).forEach((d, di) =>
-    list.push({u, d, wi, di}))));
-  const rowsHTML = list.map((x, i) =>
-    `<button class="al-row" onclick="attachLessonTo('${iso}',${i})">
-       <span class="al-u" style="background:${getUC(x.u.id).bg};color:${getUC(x.u.id).tx}">U${unitNo(x.u.id)}</span>
-       <span class="al-lbl">${esc(x.d.label)}</span>
-       <span class="al-topic">${esc(String(x.d.topic||'').replace(/<[^>]*>/g,' ').trim()) || '<untitled>'}</span>
-       <span class="al-date">${x.d.dateA?fmtMD(x.d.dateA):'no date'}</span>
-     </button>`).join('');
-  _attachList = list;
-  const ov = document.createElement('div');
-  ov.id = 'attach-overlay';
-  ov.style.cssText = 'position:fixed;inset:0;z-index:870;background:rgba(0,0,0,.45);overflow-y:auto';
-  ov.onclick = e => { if(e.target === ov) closeAttachLesson(); };
-  ov.innerHTML = `<div style="background:var(--white);max-width:620px;margin:40px auto;border-radius:12px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.25)">
-    <div style="background:var(--navy);padding:12px 18px;color:#fff;font-size:14px;font-weight:700">Put a lesson plan on ${esc(fmtNice(iso))}</div>
-    <div style="padding:12px 16px;max-height:60vh;overflow-y:auto">${rowsHTML || '<div style="color:var(--ink-3)">No lessons yet.</div>'}</div>
-    <div style="padding:11px 16px;border-top:1px solid var(--rule);background:var(--parchment);text-align:right">
-      <button class="sp-btn" onclick="closeAttachLesson()">Cancel</button></div>
-  </div>`;
-  document.body.appendChild(ov);
-}
-let _attachList = null;
-function closeAttachLesson(){ const o=document.getElementById('attach-overlay'); if(o) o.remove(); _attachList=null; }
-function attachLessonTo(iso, i){
-  const x = _attachList && _attachList[i]; if(!x) return;
-  x.d.dateA = iso;
-  saveState(); closeAttachLesson(); renderUnit();
-  toast(`${x.d.label} is now on ${fmtNice(iso)} ✓`);
 }
 
 // ── UNIT SUMMATIVE ASSESSMENT (backwards design, stage 2) ─────────
@@ -7946,11 +7583,9 @@ function pacingTableBlockHTML(u, weeks) {
                       style="font-size:11px;font-weight:700;color:var(--navy);background:none;border:none;cursor:pointer;font-family:inherit;padding:0;letter-spacing:.03em;white-space:nowrap">
                       ${esc(d.label)}
                     </button>
-                    ${mapBadgeHTML(d)}
                     ${assessBadge}
                   </div>
                   <div class="pace-date">${d.dateA||d.dateB ? (d.dateA||'')+(d.dateB&&d.dateA?' / ':' ')+(d.dateB||'') : '—'}</div>
-                  ${dayCalNotes(d).length ? `<div style="margin-top:3px">${calNoteBadgeHTML(d, true)}</div>` : ''}
                 </div>
               </div>
               <div contenteditable="true"
@@ -8194,7 +7829,7 @@ function renderUnit() {
   const tabsBodyHTML = `
     ${unitOverviewPanelHTML(u.id)}
     <div style="display:flex;gap:0;border-bottom:2px solid var(--rule);margin-bottom:14px;align-items:center">
-      ${[['overview','Unit Overview'],['plan','Weekly Plan'],['pacing','Pacing Guide'],['assess','Assessments'],['resources','Resources']].map(([t,label]) => {
+      ${[['overview','Unit Overview'],['plan','Weekly Plan'],['pacing','Pacing Guide'],['resources','Resources']].map(([t,label]) => {
         const active = currentUnitTab === t;
         return `<button onclick="setUnitTab('${t}',this)" id="utab-${t}"
           style="padding:8px 18px;border:none;background:none;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;color:${active?'var(--navy)':'var(--ink-3)'};border-bottom:2px solid ${active?'var(--navy)':'transparent'};margin-bottom:-2px;transition:all .12s">
@@ -8213,9 +7848,6 @@ function renderUnit() {
     </div>
     <div id="utab-content-pacing" style="display:${currentUnitTab==='pacing'?'block':'none'}">
       ${pacingGuideHTML(u, weeks)}
-    </div>
-    <div id="utab-content-assess" style="display:${currentUnitTab==='assess'?'block':'none'}">
-      ${assessmentCalendarHTML()}
     </div>
     <div id="utab-content-resources" style="display:${currentUnitTab==='resources'?'block':'none'}">
       ${unitResourcesHTML(u.id)}
@@ -8284,10 +7916,9 @@ function dayCardHTML(d, wi, di, c) {
       style="position:absolute;top:7px;left:5px;color:var(--ink-3);cursor:grab;opacity:.5;font-size:11px;line-height:1">⠿⠿</div>
     <button class="day-del-btn" onclick="event.stopPropagation();deleteDay(${wi},${di})" title="Delete this block"
       style="position:absolute;top:6px;right:5px;border:none;background:#fee2e2;color:#c0392b;font-size:13px;font-weight:600;cursor:pointer;line-height:1;padding:2px 6px;border-radius:4px;display:none;box-shadow:0 1px 3px rgba(0,0,0,.12)">×</button>
-    <div class="dc-num" style="padding-left:16px">${esc(d.label)} ${mapBadgeHTML(d)}</div>
+    <div class="dc-num" style="padding-left:16px">${esc(d.label)}</div>
     ${d.topic ? `<div style="font-size:11.5px;font-weight:600;color:var(--ink);margin-bottom:2px;padding-left:16px">${esc(d.topic)}</div>` : `<div style="font-size:11px;font-style:italic;color:var(--ink-3);margin-bottom:2px;padding-left:16px">Untitled — click to plan</div>`}
     <div style="font-size:10px;color:var(--ink-3);margin-bottom:4px;padding-left:16px">${dateStr}</div>
-    ${dayCalNotes(d).length ? `<div style="padding-left:16px;margin-bottom:4px">${calNoteBadgeHTML(d, true)}</div>` : ''}
     ${d.eq ? `<div class="dc-question">${esc(d.eq)}</div>` : ''}
     <div class="dc-pills">
       ${status}
@@ -8555,7 +8186,6 @@ function dailyPanelHTML(d, i) {
         ? `<button class="dl-calbtn" onclick="fillDatesFromHere(${i})" title="Give this lesson its class date, then flow every later lesson onto the next class days (leaves earlier days alone)">↓ Fill dates from here</button>`
         : `<button class="dl-calbtn" onclick="openCalendarImport()" title="Import your school calendar to auto-fill class dates">📅 Import calendar</button>`}
     </div>
-    ${mapBarHTML(d)}
     <input class="dl-topic" value="${esc(strip(d.topic))}" placeholder="Lesson topic / title…" onchange="updateDay(${i},'topic',this.value);updateDayCard(${i})">
     <input class="dl-eq" value="${esc(strip(d.eq))}" placeholder="Essential question (optional)…" onchange="updateDay(${i},'eq',this.value)">
   </div>
