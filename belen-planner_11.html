@@ -3026,12 +3026,45 @@ function saveState() {
 
 let _lastPushMsg = '';   // jsonbin's own explanation of the most recent failure
 let _binWentPublic = false;  // set when we fell back to a public bin on the free tier
+
+// jsonbin's FREE tier caps a record at 100KB. Lesson-plan JSON compresses ~5–10x,
+// so we gzip it with the browser's native CompressionStream (no dependency) and
+// send a small wrapper {_bjpGz:"<base64>"} that fits under the cap. Pulls detect
+// the wrapper and decompress; uncompressed cloud copies still load (back-compat).
+function _u8ToB64(u8){ let s=''; const CH=0x8000; for(let i=0;i<u8.length;i+=CH){ s+=String.fromCharCode.apply(null,u8.subarray(i,i+CH)); } return btoa(s); }
+function _b64ToU8(b64){ const bin=atob(b64); const u8=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) u8[i]=bin.charCodeAt(i); return u8; }
+async function gzipB64(str){
+  const cs=new CompressionStream('gzip');
+  const buf=await new Response(new Blob([new TextEncoder().encode(str)]).stream().pipeThrough(cs)).arrayBuffer();
+  return _u8ToB64(new Uint8Array(buf));
+}
+async function gunzipB64(b64){
+  const ds=new DecompressionStream('gzip');
+  const buf=await new Response(new Blob([_b64ToU8(b64)]).stream().pipeThrough(ds)).arrayBuffer();
+  return new TextDecoder().decode(buf);
+}
+// The exact body to send to jsonbin — gzip-wrapped when the browser supports it.
+async function buildSyncBody(){
+  const raw = JSON.stringify(state);
+  if (typeof CompressionStream === 'function') {
+    try { return JSON.stringify({ _bjpGz: await gzipB64(raw) }); } catch(e){ /* fall back to raw */ }
+  }
+  return raw;
+}
+// Unwrap a fetched cloud record (decompress if it's a gzip wrapper).
+async function unwrapSyncRecord(record){
+  if (record && typeof record._bjpGz === 'string') {
+    try { return JSON.parse(await gunzipB64(record._bjpGz)); } catch(e){ return null; }
+  }
+  return record;
+}
 async function pushToSheets() {
   const key = getSyncKey();
   if (!key) { setSyncStatus('local'); return false; }   // not connected to cloud yet
   const co = getCourse();
   setSyncStatus('syncing');
   try {
+    const payload = await buildSyncBody();   // gzip-compressed to fit the free 100KB cap
     let binId = getBinId(co.id);
     let res;
     if (!binId) {
@@ -3045,7 +3078,7 @@ async function pushToSheets() {
           { 'Content-Type':'application/json', 'X-Master-Key':key, 'X-Bin-Name':`Belen ${co.name} planner` },
           priv ? { 'X-Bin-Private':'true' } : {}
         ),
-        body: JSON.stringify(state),
+        body: payload,
       });
       res = await makeBin(true);
       if (!res.ok && (res.status === 401 || res.status === 403)) {
@@ -3066,7 +3099,7 @@ async function pushToSheets() {
           'X-Master-Key': key,
           'X-Bin-Versioning': 'false',
         },
-        body: JSON.stringify(state),
+        body: payload,
       });
     }
     if (res.ok) {
@@ -3115,7 +3148,7 @@ async function pullFromSheets() {
     });
     if (res.ok) {
       const data = await res.json();
-      const record = data.record || data;
+      const record = await unwrapSyncRecord(data.record || data);
       if (record && record._v === 2 && record.units && Object.keys(record.units).length > 0) {
         // Only adopt the cloud copy if it's actually newer than local, so an
         // older cloud save never wipes out more recent local work.
