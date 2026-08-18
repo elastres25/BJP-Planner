@@ -3056,7 +3056,15 @@ async function pullFromSheets() {
       return false;
     }
   } catch(e) {
+    // A THROWN fetch (not a clean HTTP status) means the request never got a
+    // usable answer: network down, DNS/host blocked, jsonbin down, or an error
+    // response with no CORS headers (e.g. a rejected key). Don't disguise this
+    // as "Local only" — that's reserved for a course with no bin configured.
     console.error('JSONBin pull error:', e);
+    setSyncStatus('error');
+    const label = document.getElementById('sync-label');
+    if (label) label.textContent = 'Sync failed (blocked/offline)';
+    return false;
   }
   setSyncStatus('local');
   return false;
