@@ -3794,6 +3794,7 @@ function parseSemesterMapText(text, year){
   return { rows, weekBanners, year };
 }
 
+let smapSem = 1;   // semester the paste dialog defaults to
 function openMapImport(){
   document.getElementById('mapimport-overlay').style.display='block';
   const y = document.getElementById('mi-year'); if(y && !y.value) y.value = String(new Date().getMonth() >= 6 ? new Date().getFullYear() : new Date().getFullYear()-1);
@@ -3837,8 +3838,8 @@ function saveMapImport(){
   invalidateMapIndex();
   smapSem = sem;
   closeMapImport();
-  renderUnit();
-  toast(`Semester ${sem} map imported ✓ — now run a sync`);
+  rerenderPacing();
+  toast(`Semester ${sem} map imported ✓`);
 }
 
 function resetSchoolMap(sem){
@@ -3846,7 +3847,7 @@ function resetSchoolMap(sem){
   if(state.schoolMaps && state.schoolMaps[activeCourse]) delete state.schoolMaps[activeCourse][sem];
   saveState();
   invalidateMapIndex();
-  renderUnit();
+  rerenderPacing();
   toast('Reverted to the built-in map');
 }
 
@@ -7782,6 +7783,7 @@ function renderUnit() {
   const focusId = (document.activeElement && document.activeElement.id && document.activeElement.id.startsWith('chipin-'))
     ? document.activeElement.id : null;
   const u = UNIT_META.find(m=>m.id===currentUnit);
+  if(!u) return;   // called from a top-level page — nothing to redraw
   const c = getUC(u.id);
   const weeks = state.units[u.id];
   const objs  = (state.objs && state.objs[u.id]) || [];
