@@ -2971,6 +2971,11 @@ function saveState() {
 }
 
 async function pushToSheets() {
+  const co = getCourse();
+  // A course whose bin was never configured can't sync — report it honestly as
+  // "Local only" instead of attempting a PUT to a placeholder bin (which 404s
+  // and looks like a real sync failure).
+  if (co.jsonbinId === 'YOUR_THEO7_BIN_ID') { setSyncStatus('local'); return false; }
   setSyncStatus('syncing');
   try {
     const res = await fetch(getJsonbinUrl(), {
@@ -2986,14 +2991,23 @@ async function pushToSheets() {
       setSyncStatus('synced');
       const last = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
       document.getElementById('sync-label').textContent = `Synced ${last}`;
+      return true;
     } else {
       const txt = await res.text();
       console.error('JSONBin PUT failed:', res.status, txt);
       setSyncStatus('error');
+      // Show the HTTP status right in the label so the cause is visible without
+      // opening DevTools (413/400 = payload too big, 401/403 = key, 404 = bin, 429 = quota).
+      const label = document.getElementById('sync-label');
+      if (label) label.textContent = `Sync failed (${res.status})`;
+      return false;
     }
   } catch(e) {
     console.error('JSONBin push error:', e);
     setSyncStatus('error');
+    const label = document.getElementById('sync-label');
+    if (label) label.textContent = 'Sync failed (offline?)';
+    return false;
   }
 }
 
@@ -3036,6 +3050,10 @@ async function pullFromSheets() {
       }
     } else {
       console.error('JSONBin GET failed:', res.status);
+      setSyncStatus('error');
+      const label = document.getElementById('sync-label');
+      if (label) label.textContent = `Sync failed (${res.status})`;
+      return false;
     }
   } catch(e) {
     console.error('JSONBin pull error:', e);
@@ -9896,9 +9914,16 @@ function addWeek() {
 // ── SAVE / EXPORT ─────────────────────────────────────────────────
 async function saveAll() {
   saveState();
-  await pushToSheets();
+  const ok = await pushToSheets();
   renderCourse();
-  toast('Saved & synced — ' + getCourse().name + ' ✓');
+  // Tell the truth: only claim "synced" when the cloud push actually succeeded.
+  if (ok) {
+    toast('Saved & synced — ' + getCourse().name + ' ✓');
+  } else if (getCourse().jsonbinId === 'YOUR_THEO7_BIN_ID') {
+    toast('Saved on this device (this course has no cloud sync set up yet).');
+  } else {
+    toast('⚠️ Saved on this device, but cloud sync failed — see the status dot at the top.');
+  }
 }
 
 // Download everything currently in this course as a JSON file. This is
