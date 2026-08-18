@@ -2098,6 +2098,7 @@ function out(o) {
         <div style="display:flex;gap:8px;margin-top:10px;justify-content:flex-end">
           <button onclick="connectSync()" style="background:var(--navy);color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">Connect</button>
         </div>
+        <div id="syncsetup-msg" style="display:none;margin-top:12px;background:#FDECEA;border:1px solid #F5C6C0;border-radius:8px;padding:10px 12px;font-size:12.5px;color:#7a271a;line-height:1.5"></div>
         <p style="font-size:11.5px;color:var(--ink-3,#8A96A2);margin:10px 0 0;line-height:1.5">🔒 Your key is stored only in this browser (localStorage) — never uploaded to the app’s code or shared. That’s why it won’t get revoked like the old one.</p>
       </div>
 
@@ -3156,7 +3157,11 @@ function renderSyncSetup(){
 }
 async function connectSync(){
   const inp = document.getElementById('sync-key-input');
-  const raw = (inp.value||'').trim();
+  // Strip stray whitespace and wrapping quotes — a common paste mistake that
+  // itself causes a 403.
+  const raw = (inp.value||'').trim().replace(/^["']+|["']+$/g,'').trim();
+  const msg = document.getElementById('syncsetup-msg');
+  if(msg) msg.style.display = 'none';
   if(!raw){ toast('Paste your jsonbin Master Key first'); return; }
   // A "sync code" from another device is base64 of {k:key, b:bins}.
   let applied = false;
@@ -3168,9 +3173,30 @@ async function connectSync(){
   inp.value = '';
   toast('Testing connection…');
   const ok = await pushToSheets();   // creates this course's bin if needed
+  if(ok){ renderSyncSetup(); toast('✓ Connected — this course is now syncing'); return; }
+  // Failed — read the status the push recorded and give tailored guidance.
+  const label = (document.getElementById('sync-label')||{}).textContent || '';
+  const codeM = label.match(/\((\d+)\)/);
+  let help;
+  if(/40[13]/.test(label)){
+    help = `<b>jsonbin rejected this key (HTTP ${codeM?codeM[1]:'403'}).</b> The key reached jsonbin but wasn’t accepted. On <a href="https://jsonbin.io" target="_blank" rel="noopener">jsonbin.io</a>, check all three:
+      <ul style="margin:6px 0 0;padding-left:18px;line-height:1.5">
+        <li>Copy the <b>Master Key</b> from <b>Account → API Keys</b> — <u>not</u> an “Access Key”.</li>
+        <li>Use a <b>newly generated</b> key (the leaked one is permanently dead).</li>
+        <li>Make sure your account <b>email is verified</b> — unverified accounts can’t save.</li>
+      </ul>`;
+    setSyncKey('');   // don't leave a known-bad key lingering
+  } else if(/429/.test(label)){
+    help = `<b>Free-plan request limit hit (HTTP 429).</b> Wait a few minutes and try again, or raise your jsonbin plan.`;
+    setSyncKey('');
+  } else if(/blocked|offline/i.test(label)){
+    help = `<b>The request never reached jsonbin.</b> A browser ad-blocker/extension or your school network may be blocking <code>api.jsonbin.io</code>. Try pausing extensions or a different network (e.g. phone hotspot).`;
+    setSyncKey('');
+  } else {
+    help = `<b>Couldn’t connect.</b> Status: “${label||'unknown'}”.`;
+  }
   renderSyncSetup();
-  if(ok) toast('✓ Connected — this course is now syncing');
-  else toast('Could not connect — check the reason in the status bar up top');
+  if(msg){ msg.innerHTML = help; msg.style.display = 'block'; }
 }
 function disconnectSync(){
   setSyncKey('');
