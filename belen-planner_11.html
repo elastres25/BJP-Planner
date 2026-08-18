@@ -3024,6 +3024,8 @@ function saveState() {
   }
 }
 
+let _lastPushMsg = '';   // jsonbin's own explanation of the most recent failure
+let _binWentPublic = false;  // set when we fell back to a public bin on the free tier
 async function pushToSheets() {
   const key = getSyncKey();
   if (!key) { setSyncStatus('local'); return false; }   // not connected to cloud yet
@@ -3033,18 +3035,24 @@ async function pushToSheets() {
     let binId = getBinId(co.id);
     let res;
     if (!binId) {
-      // First cloud save for this course on this account — create a fresh
-      // private bin and remember its id for next time.
-      res = await fetch('https://api.jsonbin.io/v3/b', {
+      // First cloud save for this course — create a bin and remember its id.
+      // Try a PRIVATE bin first; jsonbin's free tier may not allow private bins,
+      // so if it's refused, fall back to a PUBLIC bin (its URL is a random,
+      // effectively unguessable id) so free accounts can still sync.
+      const makeBin = (priv) => fetch('https://api.jsonbin.io/v3/b', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Master-Key': key,
-          'X-Bin-Private': 'true',
-          'X-Bin-Name': `Belen ${co.name} planner`,
-        },
+        headers: Object.assign(
+          { 'Content-Type':'application/json', 'X-Master-Key':key, 'X-Bin-Name':`Belen ${co.name} planner` },
+          priv ? { 'X-Bin-Private':'true' } : {}
+        ),
         body: JSON.stringify(state),
       });
+      res = await makeBin(true);
+      if (!res.ok && (res.status === 401 || res.status === 403)) {
+        const pub = await makeBin(false);
+        if (pub.ok) _binWentPublic = true;
+        res = pub;   // surface the public attempt's result either way
+      }
       if (res.ok) {
         const d = await res.json();
         binId = d && d.metadata && d.metadata.id;
@@ -3062,6 +3070,7 @@ async function pushToSheets() {
       });
     }
     if (res.ok) {
+      _lastPushMsg = '';
       setSyncStatus('synced');
       const last = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
       const label = document.getElementById('sync-label');
@@ -3070,6 +3079,9 @@ async function pushToSheets() {
     } else {
       const txt = await res.text().catch(()=> '');
       console.error('JSONBin push failed:', res.status, txt);
+      // jsonbin returns a JSON body like {"message":"..."} explaining the refusal.
+      try { _lastPushMsg = (JSON.parse(txt) || {}).message || ''; }
+      catch(e){ _lastPushMsg = String(txt||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().slice(0,180); }
       setSyncStatus('error');
       // Show the HTTP status so the cause is visible without DevTools
       // (401/403 = bad key, 404 = missing bin, 413/400 = too big, 429 = quota).
@@ -3079,6 +3091,7 @@ async function pushToSheets() {
     }
   } catch(e) {
     console.error('JSONBin push error:', e);
+    _lastPushMsg = 'The request never reached jsonbin — a browser extension/ad-blocker or your network is likely blocking api.jsonbin.io.';
     setSyncStatus('error');
     const label = document.getElementById('sync-label');
     if (label) label.textContent = 'Sync failed (blocked/offline)';
@@ -3173,7 +3186,13 @@ async function connectSync(){
   inp.value = '';
   toast('Testing connection…');
   const ok = await pushToSheets();   // creates this course's bin if needed
-  if(ok){ renderSyncSetup(); toast('✓ Connected — this course is now syncing'); return; }
+  if(ok){
+    renderSyncSetup();
+    toast(_binWentPublic
+      ? '✓ Connected — syncing (free-tier bin; its URL is random & unguessable)'
+      : '✓ Connected — this course is now syncing');
+    return;
+  }
   // Failed — read the status the push recorded and give tailored guidance.
   const label = (document.getElementById('sync-label')||{}).textContent || '';
   const codeM = label.match(/\((\d+)\)/);
@@ -3194,6 +3213,10 @@ async function connectSync(){
     setSyncKey('');
   } else {
     help = `<b>Couldn’t connect.</b> Status: “${label||'unknown'}”.`;
+  }
+  // Show jsonbin's own words — the definitive reason.
+  if(_lastPushMsg){
+    help += `<div style="margin-top:8px;padding-top:8px;border-top:1px solid #F5C6C0"><b>jsonbin’s exact message:</b><br>“${(typeof esc==='function'?esc(_lastPushMsg):_lastPushMsg)}”</div>`;
   }
   renderSyncSetup();
   if(msg){ msg.innerHTML = help; msg.style.display = 'block'; }
