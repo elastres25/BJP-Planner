@@ -1377,7 +1377,7 @@ body.simple-mode .dp-adv { display: none !important; }
         onfocus="if(this.value.trim().length>=2)runGlobalSearch(this.value)">
       <div id="search-results" class="search-results" style="display:none"></div>
     </div>
-    <span id="sync-status" title="Sync status">
+    <span id="sync-status" title="Cloud sync — click to set up or check" onclick="openSyncSetup()" style="cursor:pointer">
       <span id="sync-dot" style="width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.3);flex-shrink:0"></span>
       <span id="sync-label">Not synced</span>
     </span>
@@ -2072,6 +2072,50 @@ function out(o) {
   </div>
 </div>
 
+<!-- CONNECT CLOUD SYNC MODAL -->
+<div id="syncsetup-overlay" style="display:none;position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.5);overflow-y:auto" onclick="if(event.target===this)closeSyncSetup()">
+  <div style="background:var(--white);max-width:520px;margin:52px auto;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,.3);overflow:hidden">
+    <div style="background:var(--navy);padding:12px 16px;display:flex;align-items:center;justify-content:space-between">
+      <span style="color:#fff;font-weight:600;font-size:14px">☁️ Cloud Sync</span>
+      <button onclick="closeSyncSetup()" style="background:rgba(255,255,255,.15);border:none;border-radius:6px;color:#fff;font-size:20px;width:32px;height:32px;cursor:pointer;line-height:1">&times;</button>
+    </div>
+    <div style="padding:16px">
+      <div id="syncsetup-status" style="font-size:13px;color:var(--ink);background:var(--rule-light,#f5f5f7);border:1px solid var(--rule-dark);border-radius:8px;padding:10px 12px;margin-bottom:14px"></div>
+
+      <!-- Not-connected: paste a key -->
+      <div id="syncsetup-input-box">
+        <div style="font-size:13px;color:var(--ink-2);line-height:1.55;margin-bottom:10px">
+          Sync keeps this planner backed up in the cloud and matched across your devices. Set it up once per device:
+          <ol style="margin:8px 0 0;padding-left:20px">
+            <li>Make a free account at <b>jsonbin.io</b> (<a href="https://jsonbin.io" target="_blank" rel="noopener">jsonbin.io</a>).</li>
+            <li>Open <b>Account → API Keys</b> and copy your <b>Master Key</b>.</li>
+            <li>Paste it below and click <b>Connect</b>. The app creates a private bin for each course automatically.</li>
+          </ol>
+        </div>
+        <input id="sync-key-input" type="text" placeholder="Paste Master Key (or a sync code from another device)" autocomplete="off" spellcheck="false"
+          style="width:100%;box-sizing:border-box;border:1px solid var(--rule-dark);border-radius:7px;padding:9px 11px;font-family:inherit;font-size:13px;color:var(--ink);outline:none">
+        <div style="display:flex;gap:8px;margin-top:10px;justify-content:flex-end">
+          <button onclick="connectSync()" style="background:var(--navy);color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">Connect</button>
+        </div>
+        <p style="font-size:11.5px;color:var(--ink-3,#8A96A2);margin:10px 0 0;line-height:1.5">🔒 Your key is stored only in this browser (localStorage) — never uploaded to the app’s code or shared. That’s why it won’t get revoked like the old one.</p>
+      </div>
+
+      <!-- Connected: manage -->
+      <div id="syncsetup-connected" style="display:none">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+          <button onclick="copySyncCode()" style="flex:1;min-width:180px;background:#fff;color:var(--navy);border:1px solid var(--navy);border-radius:7px;padding:9px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">📋 Copy sync code for another device</button>
+          <button onclick="disconnectSync()" style="background:#fff;color:#b42318;border:1px solid #e6b7b3;border-radius:7px;padding:9px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Disconnect</button>
+        </div>
+        <p style="font-size:11.5px;color:var(--ink-3,#8A96A2);margin:2px 0 0;line-height:1.5">On another device, open Cloud Sync there and paste this code to link it to the same bins. Each course syncs the first time you <b>Save</b> it while connected.</p>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;margin-top:14px">
+        <button onclick="closeSyncSetup()" style="background:none;border:1px solid var(--rule-dark);border-radius:7px;padding:8px 16px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;font-family:inherit">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ADD UNIT MODAL -->
 <div id="addunit-overlay" style="display:none;position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.5);overflow-y:auto" onclick="if(event.target===this)closeAddUnit()">
   <div style="background:var(--white);max-width:440px;margin:70px auto;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,.3);overflow:hidden">
@@ -2110,8 +2154,8 @@ const COURSES = {
     code: 'THE 8100',
     fullName: 'Introduction to Catholicism & Ignatian Spirituality',
     storageKey: 'belen-theo6',
-    jsonbinId:  '6a3dd673da38895dfe006d8e',
-    jsonbinKey: '$2a$10$Ez6k5zzjJBiZDbN8petn6eBp3iN6YClb5DvX1gr21O8F03lilSH2i',
+    // Cloud-sync credentials live in localStorage now (set via "Connect sync"),
+    // never in this public file — see the JSONBIN SYNC section.
     color: '#534AB7',
     unitMeta: [
       {id:1, sem:1, name:'Introduction to Faith Life at Belen',          blocks:'5-6 blocks · 2-3 wks', color:'purple', weeks:2, totalBlocks:6,  blocksPerWeek:[3,3],       desc:'Students are introduced to Belen Jesuit as a Catholic Jesuit school within the larger Catholic community, learning the structure of the Church, the Ignatian Core Values, and how to participate in the liturgical and sacramental life of the school.'},
@@ -2133,8 +2177,7 @@ const COURSES = {
     code: 'THE 7100',
     fullName: 'Foundations of Morality in Scripture',
     storageKey: 'belen-theo7',
-    jsonbinId:  'YOUR_THEO7_BIN_ID',
-    jsonbinKey: '$2a$10$Ez6k5zzjJBiZDbN8petn6eBp3iN6YClb5DvX1gr21O8F03lilSH2i',
+    // Cloud-sync credentials live in localStorage now (set via "Connect sync").
     color: '#0F6E56',
     unitMeta: [
       {id:1, sem:1, name:'Introduction to Morality and Scripture',         blocks:'3 blocks · 1.5 wks',  color:'purple', weeks:1, totalBlocks:3,  blocksPerWeek:[3],             desc:'Students are introduced to the foundational concepts of the course — what morality is, why Scripture and morality are studied together, and the distinction between virtue and vice — establishing the framework for the entire year.'},
@@ -2935,11 +2978,19 @@ function demoWeek() {
 }
 
 // ── JSONBIN SYNC ─────────────────────────────────────────────────
-function getJsonbinUrl() {
-  const co = getCourse();
-  return `https://api.jsonbin.io/v3/b/${co.jsonbinId}`;
-}
-function getJsonbinKey() { return getCourse().jsonbinKey; }
+// Credentials live per-device in localStorage (set via the "Connect sync"
+// dialog), never in this public file — a public key gets scraped and revoked.
+// One master key; each course gets its own private bin, created on first sync
+// and remembered here.
+const SYNC_KEY_LS  = 'bjp-sync-key';
+const SYNC_BINS_LS = 'bjp-sync-bins';
+function getSyncKey(){ try{ return localStorage.getItem(SYNC_KEY_LS) || ''; }catch(e){ return ''; } }
+function setSyncKey(k){ try{ k ? localStorage.setItem(SYNC_KEY_LS,k) : localStorage.removeItem(SYNC_KEY_LS); }catch(e){} }
+function getSyncBins(){ try{ return JSON.parse(localStorage.getItem(SYNC_BINS_LS)||'{}')||{}; }catch(e){ return {}; } }
+function getBinId(cid){ return getSyncBins()[cid] || ''; }
+function setBinId(cid,id){ const m=getSyncBins(); m[cid]=id; try{ localStorage.setItem(SYNC_BINS_LS,JSON.stringify(m)); }catch(e){} }
+function syncConnected(){ return !!getSyncKey(); }
+function getJsonbinKey(){ return getSyncKey(); }
 
 function setSyncStatus(status) {
   const dot   = document.getElementById('sync-dot');
@@ -2949,6 +3000,7 @@ function setSyncStatus(status) {
     synced:  { color:'#4ade80', text:'Synced' },
     syncing: { color:'#fbbf24', text:'Syncing…' },
     error:   { color:'#f87171', text:'Sync failed — saved locally' },
+    ready:   { color:'#38bdf8', text:'Connected — Save to sync' },
     local:   { color:'rgba(255,255,255,.3)', text:'Local only' },
   };
   const s = map[status] || map.local;
@@ -2971,33 +3023,54 @@ function saveState() {
 }
 
 async function pushToSheets() {
+  const key = getSyncKey();
+  if (!key) { setSyncStatus('local'); return false; }   // not connected to cloud yet
   const co = getCourse();
-  // A course whose bin was never configured can't sync — report it honestly as
-  // "Local only" instead of attempting a PUT to a placeholder bin (which 404s
-  // and looks like a real sync failure).
-  if (co.jsonbinId === 'YOUR_THEO7_BIN_ID') { setSyncStatus('local'); return false; }
   setSyncStatus('syncing');
   try {
-    const res = await fetch(getJsonbinUrl(), {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Master-Key': getJsonbinKey(),
-        'X-Bin-Versioning': 'false',
-      },
-      body: JSON.stringify(state),
-    });
+    let binId = getBinId(co.id);
+    let res;
+    if (!binId) {
+      // First cloud save for this course on this account — create a fresh
+      // private bin and remember its id for next time.
+      res = await fetch('https://api.jsonbin.io/v3/b', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Master-Key': key,
+          'X-Bin-Private': 'true',
+          'X-Bin-Name': `Belen ${co.name} planner`,
+        },
+        body: JSON.stringify(state),
+      });
+      if (res.ok) {
+        const d = await res.json();
+        binId = d && d.metadata && d.metadata.id;
+        if (binId) setBinId(co.id, binId);
+      }
+    } else {
+      res = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Master-Key': key,
+          'X-Bin-Versioning': 'false',
+        },
+        body: JSON.stringify(state),
+      });
+    }
     if (res.ok) {
       setSyncStatus('synced');
       const last = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-      document.getElementById('sync-label').textContent = `Synced ${last}`;
+      const label = document.getElementById('sync-label');
+      if (label) label.textContent = `Synced ${last}`;
       return true;
     } else {
-      const txt = await res.text();
-      console.error('JSONBin PUT failed:', res.status, txt);
+      const txt = await res.text().catch(()=> '');
+      console.error('JSONBin push failed:', res.status, txt);
       setSyncStatus('error');
-      // Show the HTTP status right in the label so the cause is visible without
-      // opening DevTools (413/400 = payload too big, 401/403 = key, 404 = bin, 429 = quota).
+      // Show the HTTP status so the cause is visible without DevTools
+      // (401/403 = bad key, 404 = missing bin, 413/400 = too big, 429 = quota).
       const label = document.getElementById('sync-label');
       if (label) label.textContent = `Sync failed (${res.status})`;
       return false;
@@ -3006,34 +3079,31 @@ async function pushToSheets() {
     console.error('JSONBin push error:', e);
     setSyncStatus('error');
     const label = document.getElementById('sync-label');
-    if (label) label.textContent = 'Sync failed (offline?)';
+    if (label) label.textContent = 'Sync failed (blocked/offline)';
     return false;
   }
 }
 
 async function pullFromSheets() {
-  setSyncStatus('syncing');
+  const key = getSyncKey();
   const co = getCourse();
-  if (co.jsonbinId === 'YOUR_THEO7_BIN_ID') {
-    setSyncStatus('local');
-    return false;
-  }
+  const binId = getBinId(co.id);
+  // Not connected → "Local only". Connected but no bin for this course yet
+  // (the first Save creates it) → "Connected — Save to sync".
+  if (!key)   { setSyncStatus('local'); return false; }
+  if (!binId) { setSyncStatus('ready'); return false; }
+  setSyncStatus('syncing');
   try {
-    const res = await fetch(getJsonbinUrl() + '/latest', {
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
       method: 'GET',
-      headers: {
-        'X-Master-Key': getJsonbinKey(),
-        'X-Bin-Meta': 'false',
-      },
+      headers: { 'X-Master-Key': key, 'X-Bin-Meta': 'false' },
     });
     if (res.ok) {
       const data = await res.json();
       const record = data.record || data;
       if (record && record._v === 2 && record.units && Object.keys(record.units).length > 0) {
-        // Don't blindly overwrite — only adopt the cloud copy if it's
-        // actually newer than what's already saved locally. Older cloud
-        // saves (e.g. from before a feature was added) should never wipe
-        // out more recent local work.
+        // Only adopt the cloud copy if it's actually newer than local, so an
+        // older cloud save never wipes out more recent local work.
         const cloudTime = record.lastModified || 0;
         const localTime = state?.lastModified || 0;
         if (cloudTime > localTime) {
@@ -3041,13 +3111,12 @@ async function pullFromSheets() {
           saveState();
           setSyncStatus('synced');
           return true;
-        } else {
-          // Local copy is newer or equal — keep it, but report as synced
-          // since the data already matches or supersedes the cloud copy
-          setSyncStatus('synced');
-          return false;
         }
+        setSyncStatus('synced');
+        return false;
       }
+      setSyncStatus('synced');
+      return false;
     } else {
       console.error('JSONBin GET failed:', res.status);
       setSyncStatus('error');
@@ -3057,17 +3126,61 @@ async function pullFromSheets() {
     }
   } catch(e) {
     // A THROWN fetch (not a clean HTTP status) means the request never got a
-    // usable answer: network down, DNS/host blocked, jsonbin down, or an error
-    // response with no CORS headers (e.g. a rejected key). Don't disguise this
-    // as "Local only" — that's reserved for a course with no bin configured.
+    // usable answer: network down, host blocked, jsonbin down, or an error
+    // response with no CORS headers (e.g. a rejected key).
     console.error('JSONBin pull error:', e);
     setSyncStatus('error');
     const label = document.getElementById('sync-label');
     if (label) label.textContent = 'Sync failed (blocked/offline)';
     return false;
   }
+}
+
+// ── CONNECT-SYNC UI ───────────────────────────────────────────────
+function openSyncSetup(){ renderSyncSetup(); document.getElementById('syncsetup-overlay').style.display='block'; }
+function closeSyncSetup(){ document.getElementById('syncsetup-overlay').style.display='none'; }
+function renderSyncSetup(){
+  const connected = syncConnected();
+  const bins = getSyncBins();
+  const statusEl = document.getElementById('syncsetup-status');
+  const connectedBox = document.getElementById('syncsetup-connected');
+  const inputBox = document.getElementById('syncsetup-input-box');
+  if(statusEl){
+    statusEl.innerHTML = connected
+      ? `<b style="color:#0a7d3c">● Connected</b> on this device. Courses synced: ${Object.keys(bins).length ? Object.keys(bins).map(id=>COURSES[id]?COURSES[id].name:id).join(', ') : '— none yet (open each course and Save once)'}.`
+      : `<b style="color:#b45309">● Not connected</b> — this device saves locally only.`;
+  }
+  if(connectedBox) connectedBox.style.display = connected ? 'block' : 'none';
+  if(inputBox) inputBox.style.display = connected ? 'none' : 'block';
+}
+async function connectSync(){
+  const inp = document.getElementById('sync-key-input');
+  const raw = (inp.value||'').trim();
+  if(!raw){ toast('Paste your jsonbin Master Key first'); return; }
+  // A "sync code" from another device is base64 of {k:key, b:bins}.
+  let applied = false;
+  try {
+    const dec = JSON.parse(atob(raw));
+    if(dec && dec.k){ setSyncKey(dec.k); if(dec.b) localStorage.setItem(SYNC_BINS_LS, JSON.stringify(dec.b)); applied = true; }
+  } catch(e){ /* not a sync code — treat as a raw key */ }
+  if(!applied) setSyncKey(raw);
+  inp.value = '';
+  toast('Testing connection…');
+  const ok = await pushToSheets();   // creates this course's bin if needed
+  renderSyncSetup();
+  if(ok) toast('✓ Connected — this course is now syncing');
+  else toast('Could not connect — check the reason in the status bar up top');
+}
+function disconnectSync(){
+  setSyncKey('');
   setSyncStatus('local');
-  return false;
+  renderSyncSetup();
+  toast('Disconnected — your work stays saved on this device');
+}
+function copySyncCode(){
+  const code = btoa(JSON.stringify({ k:getSyncKey(), b:getSyncBins() }));
+  const done = ()=>toast('Sync code copied — paste it into “Connect sync” on your other device');
+  if(navigator.clipboard) navigator.clipboard.writeText(code).then(done, done); else done();
 }
 
 // ── NAVIGATION ────────────────────────────────────────────────────
@@ -9927,10 +10040,10 @@ async function saveAll() {
   // Tell the truth: only claim "synced" when the cloud push actually succeeded.
   if (ok) {
     toast('Saved & synced — ' + getCourse().name + ' ✓');
-  } else if (getCourse().jsonbinId === 'YOUR_THEO7_BIN_ID') {
-    toast('Saved on this device (this course has no cloud sync set up yet).');
+  } else if (!syncConnected()) {
+    toast('Saved on this device. Click the sync status up top to connect cloud sync.');
   } else {
-    toast('⚠️ Saved on this device, but cloud sync failed — see the status dot at the top.');
+    toast('⚠️ Saved on this device, but cloud sync failed — see the status up top.');
   }
 }
 
