@@ -321,7 +321,8 @@ button, input, textarea, select { font-family: inherit; }
   font-size: 10px; font-weight: 700; color: var(--navy);
   letter-spacing: .04em; margin-bottom: 2px;
 }
-.pace-date { font-size: 10px; color: var(--ink-3); }
+.pace-date { font-size: 10px; color: var(--ink-3); display:flex; gap:4px; flex-wrap:wrap; align-items:center; }
+.pace-notes { display:flex; flex-wrap:wrap; gap:3px; margin-top:3px; }
 .pace-cell { padding: 8px 12px; }
 .pace-rte {
   min-height: 48px; outline: none; font-size: 12px;
@@ -451,7 +452,6 @@ button, input, textarea, select { font-family: inherit; }
   border:6px solid transparent; border-top:7px solid var(--navy); z-index:2;
 }
 .dc-num { font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 4px; }
-.day-card:hover .day-del-btn { display: block !important; }
 .unit-card:hover .uc-controls { display: flex !important; }
 /* Claude panel */
 #claude-panel { position:fixed;right:0;top:0;bottom:0;width:380px;background:var(--white);border-left:1px solid var(--rule);box-shadow:-4px 0 24px rgba(0,0,0,.1);z-index:200;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s ease; }
@@ -758,6 +758,36 @@ body.simple-mode .dp-adv { display: none !important; }
   font-family:inherit; font-size:12px; font-weight:600; color:var(--navy); cursor:pointer; }
 .sp-add:hover { border-color:var(--navy); background:#fff; }
 .sp-band { color:#fff; vertical-align:top; padding:0; width:120px; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+/* editable dates + your own events on the pacing guide */
+.sp-note-sub { margin-top:5px; font-size:11.5px; color:var(--ink-3); }
+.sp-btn-ghost { background:#fff; color:var(--navy); border:1px solid var(--rule-dark); }
+.sp-btn-ghost:hover { background:var(--parchment); }
+.sp-actions { display:flex; gap:8px; flex-wrap:wrap; }
+.sp-handlecell { width:62px; white-space:nowrap; }
+.sp-gday { font-size:12px; color:var(--ink-2); }
+.sp-wklbl { font-size:9px; font-weight:600; letter-spacing:.03em; text-transform:uppercase; color:var(--ink-3); margin-top:2px; }
+.sp-datebox { display:flex; align-items:center; gap:5px; }
+.sp-dateinp { border:1px solid transparent; background:transparent; border-radius:5px; padding:3px 4px;
+  font-family:inherit; font-size:11.5px; color:var(--ink); outline:none; width:118px; }
+.sp-dateinp:hover { border-color:var(--rule-dark); background:#fff; }
+.sp-dateinp:focus { border-color:var(--navy); background:#fff; }
+.sp-dow { font-size:10px; font-weight:700; text-transform:uppercase; color:var(--ink-3); }
+.sp-daterow { display:flex; gap:4px; margin-top:3px; flex-wrap:wrap; }
+.sp-minibtn { background:none; border:1px dashed var(--rule-dark); border-radius:5px; color:var(--ink-3);
+  cursor:pointer; font-family:inherit; font-size:9.5px; font-weight:700; letter-spacing:.02em; padding:2px 6px; }
+.sp-minibtn:hover { border-color:var(--navy); color:var(--navy); background:#fff; }
+.sp-status.done { color:var(--navy); }
+.smap-note-pill.mine { background:#EDE9FB; color:#3C3489; }
+.ev-x { border:none; background:none; cursor:pointer; color:inherit; opacity:.55; font-size:11px;
+  line-height:1; padding:0 0 0 3px; font-family:inherit; }
+.ev-x:hover { opacity:1; }
+.ev-row { border-bottom:1px solid var(--rule); padding:7px 2px; }
+.ev-row:last-child { border-bottom:none; }
+.ev-date { font-size:12px; font-weight:700; color:var(--ink); display:flex; gap:8px; align-items:baseline; flex-wrap:wrap; }
+.ev-lesson { font-size:10.5px; font-weight:600; color:var(--ink-3); }
+.ev-lesson.ev-noclass { font-style:italic; font-weight:400; }
+.ev-pills { display:flex; flex-wrap:wrap; gap:4px; margin-top:4px; }
+.ev-empty { font-size:12px; color:var(--ink-3); font-style:italic; padding:10px 2px; line-height:1.5; }
 .sp-band-inner { padding:10px 12px; font-weight:800; font-size:13px; }
 .sp-band-inner span { display:block; font-weight:600; font-size:11px; opacity:.9; margin-top:3px; line-height:1.3; }
 .sp-band-inner .sp-band-add { margin-top:9px; display:inline-block; background:rgba(255,255,255,.2); border:1px solid rgba(255,255,255,.35); color:#fff; border-radius:6px; padding:3px 9px; font-size:11px; font-weight:600; cursor:pointer; font-family:inherit; }
@@ -1031,6 +1061,25 @@ body.simple-mode .dp-adv { display: none !important; }
 .wk-dh-topic { font-size:12.5px; font-weight:600; color:var(--ink); line-height:1.3; margin-top:1px; }
 .wk-dh-none { color:#7a6a3a; font-style:italic; font-weight:400; }
 .wk-dh-dates { font-size:10px; color:#6a5a2a; margin-top:2px; }
+.wk-donetag { background:#1B3A6B; color:#fff; border-radius:5px; font-size:9.5px; font-weight:800; letter-spacing:.03em; padding:3px 7px; white-space:nowrap; }
+.wk-dh-tag { background:rgba(255,255,255,.65); border:1px solid rgba(0,0,0,.12); border-radius:5px;
+  padding:3px 8px; font-size:12px; font-weight:700; color:var(--navy); display:inline-block; }
+
+/* ── "DONE": the finished lesson, locked to the weekly card ── */
+.dl-donetoggle { display:inline-flex; align-items:center; gap:5px; cursor:pointer; user-select:none;
+  background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.35); border-radius:6px;
+  padding:4px 10px; font-size:11.5px; font-weight:700; color:#fff; white-space:nowrap; }
+.dl-donetoggle:hover { background:rgba(255,255,255,.28); }
+.dl-donetoggle input { accent-color:var(--gold); cursor:pointer; margin:0; }
+.dl-donetoggle.on { background:#E3F5E8; border-color:#9AD3AE; color:#1A5227; }
+.dl-donetoggle.on:hover { background:#D3EEDC; }
+.dl-donebar { display:flex; align-items:center; gap:10px; flex-wrap:wrap; background:#F4F8F5;
+  border:1px solid #C9E4D2; border-radius:9px; padding:9px 12px; margin-bottom:12px; }
+.dl-donenote { font-size:11.5px; color:#2C5B3C; line-height:1.45; flex:1; min-width:180px; }
+.dl-donebtns { display:flex; gap:6px; margin-left:auto; }
+.dl-donebtn { background:#fff; color:#1A5227; border:1px solid #9AD3AE; border-radius:6px; padding:4px 10px;
+  font-family:inherit; font-size:11px; font-weight:600; cursor:pointer; white-space:nowrap; }
+.dl-donebtn:hover { background:#EAF6EE; }
 .wk-lbl { background:var(--gold-bg); color:var(--navy); font-size:12px; font-weight:700; padding:8px 10px; width:150px; text-align:left; line-height:1.25; }
 .wk-lbl small { display:block; font-size:9.5px; font-weight:400; color:var(--ink-3); margin-top:2px; text-transform:none; letter-spacing:0; }
 .wk-lbl-blank { background:var(--gold-bg); width:150px; }
@@ -1063,6 +1112,20 @@ body.simple-mode .dp-adv { display: none !important; }
 .ures-in:focus { border-color:var(--navy); }
 .ures-in-name { font-weight:600; }
 .ures-form-btns { display:flex; gap:6px; justify-content:flex-end; margin-top:1px; }
+/* ── Google Drive: pick a file instead of pasting its link ── */
+.ures-urlrow { display:flex; flex-direction:column; gap:5px; }
+.drive-row { display:inline-flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.drive-pick { display:inline-flex; align-items:center; gap:5px; background:var(--navy); color:#fff;
+  border:none; border-radius:6px; padding:5px 11px; font-family:inherit; font-size:11.5px;
+  font-weight:700; cursor:pointer; white-space:nowrap; }
+.drive-pick:hover { background:var(--navy-light,#254d8e); }
+.drive-pick.ghost { background:#fff; color:var(--navy); border:1px dashed var(--rule-dark); font-weight:600; }
+.drive-pick.ghost:hover { background:var(--parchment); border-color:var(--navy); }
+.drive-tri { color:#F6C447; font-size:10px; line-height:1; }
+.drive-pick.ghost .drive-tri { color:#1DA462; }
+.drive-open { font-size:11px; font-weight:600; color:var(--ink-3); text-decoration:none; white-space:nowrap; }
+.drive-open:hover { color:var(--navy); text-decoration:underline; }
+.ures-item-title .drive-tri { color:#1DA462; }
 .ures-cancel { background:none; border:1px solid var(--rule-dark); border-radius:6px; padding:6px 12px; font-family:inherit; font-size:12px; font-weight:600; color:var(--ink-2); cursor:pointer; }
 .ures-cancel:hover { border-color:var(--ink-3); }
 .ures-save { background:var(--navy); color:#fff; border:none; border-radius:6px; padding:6px 14px; font-family:inherit; font-size:12px; font-weight:700; cursor:pointer; }
@@ -1338,6 +1401,55 @@ body.simple-mode .dp-adv { display: none !important; }
   margin-bottom: 14px;
 }
 .print-meta { font-size: 11px; color: var(--ink-2); display: flex; flex-direction: column; gap: 2px; }
+
+/* ══════════════════════════════════════════════════════════
+   MOVING LESSONS & WEEKS (drag and drop)
+   A blue bar shows exactly where the thing you're dragging
+   will land; a tinted panel means "drop it in this week".
+══════════════════════════════════════════════════════════ */
+.plan-hint { background: var(--parchment); border: 1px solid var(--rule); border-radius: 9px;
+  padding: 8px 12px; margin-bottom: 14px; font-size: 11.5px; color: var(--ink-2); line-height: 1.55; }
+.plan-hint b { color: var(--navy); }
+.week-block { border-radius: 12px; padding: 2px 4px 0; margin-bottom: 22px; transition: background .12s, box-shadow .12s; }
+.week-block.is-dragging { opacity: .45; }
+.week-drag { cursor: grab; color: var(--ink-3); font-size: 12px; line-height: 1; user-select: none;
+  padding: 3px 4px; border-radius: 4px; }
+.week-drag:hover { background: var(--parchment); color: var(--navy); }
+.week-drag:active { cursor: grabbing; }
+.wk-daterange { font-size: 11px; color: var(--ink-3); }
+.wk-movegrp { display: inline-flex; gap: 3px; margin-right: 2px; }
+.wk-move { background: none; border: 1px solid var(--rule); border-radius: 5px; color: var(--ink-2);
+  cursor: pointer; font-family: inherit; font-size: 10px; line-height: 1; padding: 4px 6px; }
+.wk-move:hover:not(:disabled) { background: var(--parchment); color: var(--navy); border-color: var(--navy); }
+.wk-move:disabled { opacity: .28; cursor: default; }
+.week-empty-drop { border: 1px dashed var(--rule-dark); border-radius: var(--radius); padding: 16px;
+  text-align: center; font-size: 11.5px; color: var(--ink-3); font-style: italic; }
+body.dragging-lesson .week-empty-drop { border-color: var(--navy); color: var(--navy); background: rgba(27,58,107,.05); }
+
+/* the little ‹ › nudge + delete cluster on a day card */
+.day-nudge { position: absolute; top: 5px; right: 5px; display: none; gap: 3px; z-index: 3; }
+.day-card:hover .day-nudge, .day-card.open .day-nudge { display: flex; }
+.day-del-btn { border: none; background: #fee2e2; color: #c0392b; font-size: 13px; font-weight: 600;
+  cursor: pointer; line-height: 1; padding: 3px 7px; border-radius: 4px; }
+.day-del-btn:hover { background: #fbc0c0; }
+.day-card.is-done { background: #FBFAF8; }
+
+/* drop indicators */
+.day-card.is-dragging, tr.is-dragging { opacity: .4; }
+.day-card.drop-before { box-shadow: -4px 0 0 0 var(--navy); }
+.day-card.drop-after  { box-shadow:  4px 0 0 0 var(--navy); }
+.week-block.drop-before { box-shadow: 0 -4px 0 0 var(--navy); }
+.week-block.drop-after  { box-shadow: 0  4px 0 0 var(--navy); }
+.week-block.drop-into, .week-empty-drop.drop-into { background: rgba(27,58,107,.07); box-shadow: 0 0 0 2px rgba(27,58,107,.35); }
+tr.drop-before > td { box-shadow: inset 0  3px 0 -1px var(--navy); }
+tr.drop-after  > td { box-shadow: inset 0 -3px 0 -1px var(--navy); }
+td.drop-into, .sp-band.drop-into { box-shadow: inset 0 0 0 2px var(--gold); }
+.row-drag { cursor: grab; color: var(--ink-3); font-size: 12px; user-select: none; line-height: 1;
+  padding: 2px 3px; border-radius: 4px; display: inline-block; }
+.row-drag:hover { background: var(--parchment); color: var(--navy); }
+.row-drag:active { cursor: grabbing; }
+body.dragging-lesson, body.dragging-week { cursor: grabbing; }
+@media print { .day-nudge, .week-drag, .wk-movegrp, .row-drag { display: none !important; } }
 </style>
 </head>
 <body>
@@ -1412,6 +1524,7 @@ body.simple-mode .dp-adv { display: none !important; }
     <div class="mm-sec">Schedule</div>
     <button onclick="closeMoreMenu();openCalendarImport()">📅 Import school calendar…</button>
     <button onclick="closeMoreMenu();openMapImport()">📥 Paste school semester map…</button>
+    <button onclick="closeMoreMenu();openEventModal('')">📌 School events &amp; days of your own…</button>
     <div class="mm-sec">Advanced</div>
     <button onclick="closeMoreMenu();nav('prep')">Prep Board</button>
     <button onclick="closeMoreMenu();resetCourseData()">Reset course data</button>
@@ -1953,6 +2066,30 @@ function out(o) {
       <input id="drive-folder7-in" type="text" placeholder="https://drive.google.com/drive/folders/…" style="width:100%;box-sizing:border-box;border:1px solid var(--rule-dark);border-radius:7px;padding:8px 10px;font-family:inherit;font-size:12.5px;color:var(--ink);outline:none;margin-bottom:6px">
       <input id="drive-label7-in" type="text" placeholder="Name to use in the file (optional)" style="width:100%;box-sizing:border-box;border:1px solid var(--rule);border-radius:7px;padding:7px 10px;font-family:inherit;font-size:12px;color:var(--ink-2);outline:none">
       <div style="font-size:11px;color:var(--ink-3);margin-top:8px;line-height:1.5">Files are named: <b>M.D.YYYY - M.D.YYYY | Course | Year</b><br>e.g. <span style="color:var(--ink-2)">1.5.2026 - 1.9.2026 | Ignatian Leadership in Action LD | 2026</span></div>
+
+      <!-- Second, independent piece: browsing Drive to attach resources -->
+      <div style="border-top:1px solid var(--rule);margin:18px 0 0;padding-top:14px">
+        <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:4px"><span class="drive-tri">▲</span> Pick files from Drive (for resources)</div>
+        <div style="font-size:12px;color:var(--ink-2);line-height:1.55;margin-bottom:10px">
+          Optional, and separate from the folders above. With this filled in, every <b>+ Add resource</b> box gets a <b>Pick from Drive</b> button that opens Google's own file browser — no more copying links by hand. It runs in your browser: the planner only ever receives the file's <i>name and link</i>.
+        </div>
+        <ol style="padding-left:20px;margin:0 0 12px;display:flex;flex-direction:column;gap:7px;font-size:12px;color:var(--ink-2)">
+          <li>Open <a href="https://console.cloud.google.com/projectcreate" target="_blank" rel="noopener" style="color:var(--navy);font-weight:600">console.cloud.google.com</a> and create a project (free).</li>
+          <li><b>APIs &amp; Services → Library</b>: enable <b>Google Picker API</b> and <b>Google Drive API</b>.</li>
+          <li><b>Credentials → Create credentials → API key</b>. Copy it below.</li>
+          <li><b>Create credentials → OAuth client ID → Web application</b>. Under <b>Authorized JavaScript origins</b> add <b id="drive-origin-hint">this site's address</b>. Copy the client ID below.</li>
+          <li>On the <b>OAuth consent screen</b>, add yourself as a <b>Test user</b> (or publish it) so Google lets you sign in.</li>
+        </ol>
+        <label style="display:block;font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:4px">API key</label>
+        <input id="drive-apikey-in" type="text" placeholder="AIza…" style="width:100%;box-sizing:border-box;border:1px solid var(--rule-dark);border-radius:7px;padding:8px 10px;font-family:inherit;font-size:12.5px;color:var(--ink);outline:none;margin-bottom:10px">
+        <label style="display:block;font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:4px">OAuth client ID</label>
+        <input id="drive-clientid-in" type="text" placeholder="1234567890-abcdef.apps.googleusercontent.com" style="width:100%;box-sizing:border-box;border:1px solid var(--rule-dark);border-radius:7px;padding:8px 10px;font-family:inherit;font-size:12.5px;color:var(--ink);outline:none">
+        <div style="display:flex;gap:8px;margin-top:9px;align-items:center;flex-wrap:wrap">
+          <button onclick="testDrivePicker()" style="background:none;border:1px solid var(--navy);border-radius:7px;padding:6px 12px;font-size:12px;font-weight:600;color:var(--navy);cursor:pointer;font-family:inherit">Try the picker</button>
+          <button onclick="driveSignOut()" style="background:none;border:1px solid var(--rule-dark);border-radius:7px;padding:6px 12px;font-size:12px;font-weight:600;color:var(--ink-3);cursor:pointer;font-family:inherit">Sign out of Drive</button>
+          <span style="font-size:11px;color:var(--ink-3);line-height:1.4">Keys are stored on this device only — they are never synced.</span>
+        </div>
+      </div>
       <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end;align-items:center;flex-wrap:wrap">
         <button onclick="driveTest()" style="background:none;border:1px solid var(--navy);border-radius:7px;padding:8px 14px;font-size:12.5px;font-weight:600;color:var(--navy);cursor:pointer;font-family:inherit;margin-right:auto">🔌 Test connection</button>
         <button onclick="closeDriveSetup()" style="background:none;border:1px solid var(--rule-dark);border-radius:7px;padding:8px 16px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;font-family:inherit">Cancel</button>
@@ -1985,8 +2122,11 @@ function out(o) {
       <label style="display:block;font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:4px">Title</label>
       <input id="resource-title" type="text" placeholder="e.g. Marks of the Church handout" onkeydown="if(event.key==='Enter'){event.preventDefault();submitResource()}"
         style="width:100%;box-sizing:border-box;border:1px solid var(--rule-dark);border-radius:7px;padding:9px 11px;font-family:inherit;font-size:14px;color:var(--ink);outline:none;margin-bottom:12px">
-      <label style="display:block;font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:4px">Link <span style="font-weight:400;color:var(--ink-3)">(optional)</span></label>
-      <input id="resource-url" type="url" placeholder="Paste a Google Doc / Drive / website link…" onkeydown="if(event.key==='Enter'){event.preventDefault();submitResource()}"
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:4px;flex-wrap:wrap">
+        <label style="font-size:12px;font-weight:600;color:var(--ink-2)">Link <span style="font-weight:400;color:var(--ink-3)">(optional)</span></label>
+        <span class="drive-row" id="resource-drive-row"></span>
+      </div>
+      <input id="resource-url" type="url" placeholder="Pick from Drive, or paste any link…" onkeydown="if(event.key==='Enter'){event.preventDefault();submitResource()}"
         style="width:100%;box-sizing:border-box;border:1px solid var(--rule-dark);border-radius:7px;padding:9px 11px;font-family:inherit;font-size:13.5px;color:var(--ink);outline:none">
       <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end">
         <button onclick="closeResourceModal()" style="background:none;border:1px solid var(--rule-dark);border-radius:7px;padding:8px 16px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;font-family:inherit">Cancel</button>
@@ -2000,7 +2140,7 @@ function out(o) {
 <div id="movelesson-overlay" style="display:none;position:fixed;inset:0;z-index:905;background:rgba(0,0,0,.5);overflow-y:auto" onclick="if(event.target===this)closeMoveLesson()">
   <div style="background:var(--white);max-width:460px;margin:70px auto;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,.3);overflow:hidden">
     <div style="background:var(--navy);padding:12px 16px;display:flex;align-items:center;justify-content:space-between">
-      <span style="color:#fff;font-weight:600;font-size:14px">Move lesson to another unit</span>
+      <span style="color:#fff;font-weight:600;font-size:14px">Move this lesson</span>
       <button onclick="closeMoveLesson()" style="background:rgba(255,255,255,.15);border:none;border-radius:6px;color:#fff;font-size:20px;width:32px;height:32px;cursor:pointer;line-height:1">&times;</button>
     </div>
     <div style="padding:16px">
@@ -2012,6 +2152,39 @@ function out(o) {
       <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end">
         <button onclick="closeMoveLesson()" style="background:none;border:1px solid var(--rule-dark);border-radius:7px;padding:8px 16px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;font-family:inherit">Cancel</button>
         <button onclick="moveLessonConfirm()" style="background:var(--navy);color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">Move lesson</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCHOOL EVENT MODAL — your own calendar entries, alongside the school map -->
+<div id="event-overlay" style="display:none;position:fixed;inset:0;z-index:906;background:rgba(0,0,0,.5);overflow-y:auto" onclick="if(event.target===this)closeEventModal()">
+  <div style="background:var(--white);max-width:520px;margin:60px auto;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,.3);overflow:hidden">
+    <div style="background:var(--navy);padding:12px 16px;display:flex;align-items:center;justify-content:space-between">
+      <span style="color:#fff;font-weight:600;font-size:14px">📌 School events &amp; days of your own</span>
+      <button onclick="closeEventModal()" style="background:rgba(255,255,255,.15);border:none;border-radius:6px;color:#fff;font-size:20px;width:32px;height:32px;cursor:pointer;line-height:1">&times;</button>
+    </div>
+    <div style="padding:16px">
+      <div style="font-size:12.5px;color:var(--ink-2);line-height:1.55;margin-bottom:14px">
+        The imported semester map stays exactly as the school wrote it. Add anything else here — a retreat, a Mass, a field trip, a day you'll be out — and it shows up on the pacing guide next to the school's own notes.
+      </div>
+      <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap">
+        <div style="flex:0 0 150px">
+          <label style="display:block;font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:4px">Date</label>
+          <input id="event-date" type="date" style="width:100%;box-sizing:border-box;border:1px solid var(--rule-dark);border-radius:7px;padding:8px 10px;font-family:inherit;font-size:13px;color:var(--ink);outline:none">
+        </div>
+        <div style="flex:1;min-width:180px">
+          <label style="display:block;font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:4px">Event</label>
+          <input id="event-text" type="text" placeholder="e.g. Class retreat · All-school Mass · Field trip"
+            onkeydown="if(event.key==='Enter'){event.preventDefault();submitEvent()}"
+            style="width:100%;box-sizing:border-box;border:1px solid var(--rule-dark);border-radius:7px;padding:8px 10px;font-family:inherit;font-size:13px;color:var(--ink);outline:none">
+        </div>
+        <button onclick="submitEvent()" style="background:var(--navy);color:#fff;border:none;border-radius:7px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">Add</button>
+      </div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin:18px 0 6px">Your events</div>
+      <div id="event-list" style="max-height:260px;overflow-y:auto"></div>
+      <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end">
+        <button onclick="closeEventModal()" style="background:none;border:1px solid var(--rule-dark);border-radius:7px;padding:8px 16px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;font-family:inherit">Done</button>
       </div>
     </div>
   </div>
@@ -3944,10 +4117,52 @@ function plannerDaysByDate(){
 
 // Calendar notes that apply to a lesson: stored on the day at sync time so
 // they survive even if the map is later replaced.
-function dayCalNotes(d){
+function schoolMapNotes(d){
   const hit = mapHitForDate(d && d.dateA);
   if(hit) return hit.row.notes;
   return (d && Array.isArray(d.calNotes)) ? d.calNotes : [];
+}
+// Everything worth flagging against a lesson: the school's own map notes,
+// plus any event you added yourself on that date.
+function dayCalNotes(d){
+  return schoolMapNotes(d).concat(customEventsOn(d && d.dateA));
+}
+
+// ── YOUR OWN SCHOOL EVENTS ───────────────────────────────────────
+// The imported semester map is the school's document and stays read-only.
+// Anything you want on the calendar that isn't in it — a retreat, a Mass, a
+// field trip, a day you know you'll be out — lives here, keyed by date, and
+// shows up beside the map's notes everywhere a lesson's date is shown.
+function getCustomEvents(){
+  if(!state.customEvents || typeof state.customEvents !== 'object') state.customEvents = {};
+  return state.customEvents;
+}
+function customEventsOn(iso){
+  if(!iso) return [];
+  const v = getCustomEvents()[iso];
+  return Array.isArray(v) ? v.slice() : [];
+}
+function addCustomEvent(iso, text){
+  text = String(text||'').trim();
+  if(!iso || !text) return false;
+  const all = getCustomEvents();
+  all[iso] = (all[iso]||[]).concat([text]);
+  saveState();
+  return true;
+}
+function removeCustomEvent(iso, idx){
+  const all = getCustomEvents();
+  if(!all[iso]) return;
+  all[iso].splice(idx, 1);
+  if(!all[iso].length) delete all[iso];
+  saveState();
+}
+function allCustomEvents(){
+  const all = getCustomEvents();
+  return Object.keys(all).sort().reduce((out, iso) => {
+    all[iso].forEach((text, idx) => out.push({ iso, text, idx }));
+    return out;
+  }, []);
 }
 
 function calNoteBadgeHTML(d, small){
@@ -4986,6 +5201,159 @@ function driveSendWeek(){
   if(doc.empty){ toast('No dated classes in this week — set A/B dates first'); return; }
   sendToDrive(doc.title, doc.html);
 }
+// ── PICK A FILE STRAIGHT OUT OF GOOGLE DRIVE ─────────────────────
+// Instead of tabbing to Drive, hunting for the file, copying the link and
+// pasting it back, "Pick from Drive" opens Google's own file browser right
+// on top of the planner and fills in the name and link for you.
+//
+// It runs entirely in your browser through Google's Picker: the planner
+// never receives the file, only the title and the link you chose, and the
+// sign-in token is kept in memory (never saved, never synced). One-time
+// setup — an API key + OAuth client ID from a free Google Cloud project —
+// lives in ☁ Drive setup.
+const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.readonly';
+const DRIVE_KINDS = {
+  'application/vnd.google-apps.document':     'Google Doc',
+  'application/vnd.google-apps.spreadsheet':  'Google Sheet',
+  'application/vnd.google-apps.presentation': 'Google Slides',
+  'application/vnd.google-apps.form':         'Google Form',
+  'application/vnd.google-apps.drawing':      'Google Drawing',
+  'application/vnd.google-apps.folder':       'Drive folder',
+  'application/pdf':                          'PDF',
+};
+function driveKindLabel(mime){
+  if(DRIVE_KINDS[mime]) return DRIVE_KINDS[mime];
+  if(/^image\//.test(mime||'')) return 'Image';
+  if(/^video\//.test(mime||'')) return 'Video';
+  return 'Drive file';
+}
+function isDriveUrl(u){ return /^https?:\/\/(docs|drive|sites)\.google\.com\//i.test(String(u||'')); }
+
+function drivePickerCfg(){ const c = driveCfg(); return c.picker || {}; }
+function drivePickerReady(){ const p = drivePickerCfg(); return !!(p.clientId && p.apiKey); }
+
+const _scriptPromises = {};
+function loadScriptOnce(src){
+  if(_scriptPromises[src]) return _scriptPromises[src];
+  _scriptPromises[src] = new Promise((resolve, reject) => {
+    const el = document.createElement('script');
+    el.src = src; el.async = true; el.defer = true;
+    el.onload = () => resolve();
+    el.onerror = () => { delete _scriptPromises[src]; reject(new Error('Could not load ' + src)); };
+    document.head.appendChild(el);
+  });
+  return _scriptPromises[src];
+}
+
+let _pickerApiLoaded = false, _driveToken = '', _driveTokenExp = 0, _driveTokenClient = null;
+async function ensurePickerLoaded(){
+  await loadScriptOnce('https://apis.google.com/js/api.js');
+  await loadScriptOnce('https://accounts.google.com/gsi/client');
+  if(!_pickerApiLoaded){
+    await new Promise((res, rej) => gapi.load('picker', { callback: res, onerror: rej }));
+    _pickerApiLoaded = true;
+  }
+}
+// A short-lived access token, held in memory only.
+function driveAccessToken(){
+  return new Promise((resolve, reject) => {
+    if(_driveToken && Date.now() < _driveTokenExp) return resolve(_driveToken);
+    const p = drivePickerCfg();
+    if(!_driveTokenClient){
+      _driveTokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: p.clientId, scope: DRIVE_SCOPE, callback: () => {},
+      });
+    }
+    _driveTokenClient.callback = resp => {
+      if(!resp || resp.error) return reject(new Error((resp && (resp.error_description || resp.error)) || 'Sign-in cancelled'));
+      _driveToken = resp.access_token;
+      _driveTokenExp = Date.now() + Math.max(60, (+resp.expires_in || 3600) - 60) * 1000;
+      resolve(_driveToken);
+    };
+    _driveTokenClient.requestAccessToken({ prompt: _driveToken ? '' : '' });
+  });
+}
+function driveSignOut(){
+  if(_driveToken && window.google?.accounts?.oauth2) google.accounts.oauth2.revoke(_driveToken, ()=>{});
+  _driveToken = ''; _driveTokenExp = 0;
+  toast('Signed out of Google Drive');
+}
+
+// Open the picker. onPick receives {title, url, mimeType, id}.
+async function openDrivePicker(onPick){
+  if(!drivePickerReady()){
+    toast('Add your Google API key & client ID first — one-time setup');
+    openDriveSetup();
+    setTimeout(()=>document.getElementById('drive-clientid-in')?.focus(), 120);
+    return;
+  }
+  try{
+    await ensurePickerLoaded();
+    const token = await driveAccessToken();
+    const p = drivePickerCfg();
+    const mine = new google.picker.DocsView(google.picker.ViewId.DOCS).setIncludeFolders(true);
+    const recent = new google.picker.DocsView(google.picker.ViewId.DOCS).setMode(google.picker.DocsViewMode.LIST);
+    const picker = new google.picker.PickerBuilder()
+      .setOAuthToken(token)
+      .setDeveloperKey(p.apiKey)
+      .setTitle('Choose a file from your Drive')
+      .enableFeature(google.picker.Feature.SUPPORT_DRIVES)
+      .addView(mine)
+      .addView(recent)
+      .addView(new google.picker.DocsUploadView())
+      .setCallback(data => {
+        if(!data || data.action !== google.picker.Action.PICKED) return;
+        const doc = (data.docs || [])[0];
+        if(!doc) return;
+        onPick({
+          title: doc.name || doc.title || '',
+          url: doc.url || (doc.id ? `https://drive.google.com/open?id=${doc.id}` : ''),
+          mimeType: doc.mimeType || '',
+          id: doc.id || '',
+        });
+      })
+      .build();
+    picker.setVisible(true);
+  }catch(e){
+    console.error('Drive picker failed', e);
+    const msg = String((e && e.message) || e);
+    toast(/popup|cancel/i.test(msg) ? 'Drive sign-in cancelled' : 'Drive picker: ' + msg.slice(0, 90));
+  }
+}
+
+// The button(s) shown wherever a link can be pasted. Before setup it offers
+// the setup dialog and a plain link to Drive so pasting still works.
+function drivePickBtnHTML(handler){
+  if(drivePickerReady())
+    return `<button type="button" class="drive-pick" onclick="${handler}" title="Browse your Google Drive and drop the link straight in">
+      <span class="drive-tri">▲</span> Pick from Drive</button>`;
+  return `<button type="button" class="drive-pick ghost" onclick="openDriveSetup()" title="Connect Google Drive once, then pick files without leaving the planner">
+      <span class="drive-tri">▲</span> Connect Drive…</button>
+    <a class="drive-open" href="https://drive.google.com/drive/my-drive" target="_blank" rel="noopener" title="Open Drive in a new tab and copy the link">open Drive ↗</a>`;
+}
+
+// Fill the lesson-resource popup from a picked Drive file.
+function pickDriveIntoResourceModal(){
+  openDrivePicker(f => {
+    document.getElementById('resource-url').value = f.url;
+    const t = document.getElementById('resource-title');
+    if(!t.value.trim()) t.value = f.title;
+    toast(`${driveKindLabel(f.mimeType)} linked ✓`);
+  });
+}
+// Fill the inline unit-resource form from a picked Drive file.
+function pickDriveIntoResForm(){
+  openDrivePicker(f => {
+    const wrap = document.querySelector('.ures-form'); if(!wrap) return;
+    wrap.querySelector('.ures-in-url').value = f.url;
+    const name = wrap.querySelector('.ures-in-name');
+    if(!name.value.trim()) name.value = f.title;
+    const note = wrap.querySelector('.ures-in-note');
+    if(note && !note.value.trim()) note.value = driveKindLabel(f.mimeType);
+    toast(`${driveKindLabel(f.mimeType)} linked ✓`);
+  });
+}
+
 const DRIVE_APPS_SCRIPT = `function doPost(e) {
   try {
     var d = JSON.parse(e.postData.contents);
@@ -5015,7 +5383,24 @@ function openDriveSetup(){
   document.getElementById('drive-folder7-in').value = c.folders[7] || '';
   document.getElementById('drive-label6-in').value = (c.labels && c.labels[6]) || '';
   document.getElementById('drive-label7-in').value = (c.labels && c.labels[7]) || '';
+  const pk = c.picker || {};
+  document.getElementById('drive-apikey-in').value = pk.apiKey || '';
+  document.getElementById('drive-clientid-in').value = pk.clientId || '';
+  const hint = document.getElementById('drive-origin-hint');
+  if(hint) hint.textContent = location.origin;
   ov.style.display = 'block';
+}
+// Prove the keys work before saving anything into a lesson.
+function testDrivePicker(){
+  const c = driveCfg();
+  c.picker = {
+    apiKey:  (document.getElementById('drive-apikey-in').value||'').trim(),
+    clientId:(document.getElementById('drive-clientid-in').value||'').trim(),
+  };
+  try{ localStorage.setItem(DRIVE_CFG_KEY, JSON.stringify(c)); }catch(e){}
+  _driveTokenClient = null;   // the client ID may have just changed
+  if(!drivePickerReady()){ toast('Fill in both the API key and the client ID first'); return; }
+  openDrivePicker(f => toast(`Picker works — you chose "${f.title}" ✓`));
 }
 function closeDriveSetup(){ document.getElementById('drive-setup-overlay').style.display='none'; }
 function copyDriveScript(btn){
@@ -5026,9 +5411,17 @@ function saveDriveConfig(){
   const url = document.getElementById('drive-url-in').value.trim();
   const f6  = driveFolderIdFromInput(document.getElementById('drive-folder6-in').value);
   const f7  = driveFolderIdFromInput(document.getElementById('drive-folder7-in').value);
-  if(!url || !/^https:\/\/script\.google\.com\//.test(url)){ toast('Paste your Apps Script web-app URL (starts with https://script.google.com/…)'); return; }
-  if(!f6 && !f7){ toast('Add a Drive folder for at least one course'); return; }
+  const apiKey  = (document.getElementById('drive-apikey-in').value||'').trim();
+  const clientId= (document.getElementById('drive-clientid-in').value||'').trim();
+  // The two halves are independent: you may set up only the file picker.
+  const wantsSend = !!(url || f6 || f7);
+  if(wantsSend && (!url || !/^https:\/\/script\.google\.com\//.test(url))){ toast('Paste your Apps Script web-app URL (starts with https://script.google.com/…)'); return; }
+  if(wantsSend && !f6 && !f7){ toast('Add a Drive folder for at least one course'); return; }
+  if(!wantsSend && !(apiKey && clientId)){ toast('Nothing to save yet — add a web-app URL and folder, or the picker keys'); return; }
   const c = driveCfg();
+  c.picker = (apiKey || clientId) ? { apiKey, clientId } : undefined;
+  if(!c.picker) delete c.picker;
+  _driveTokenClient = null;   // the client ID may have just changed
   c.url = url;
   c.folders = c.folders || {};
   c.folders[6] = f6;
@@ -5041,7 +5434,9 @@ function saveDriveConfig(){
   if(state){ delete state.driveScriptUrl; delete state.driveFolderId; saveState(); }
   closeDriveSetup();
   const which = [f6?'Theology 6':'', f7?'Theology 7':''].filter(Boolean).join(' & ');
-  toast(`Google Drive connected for ${which} ✓`);
+  toast(wantsSend
+    ? `Google Drive connected for ${which}${drivePickerReady()?' · file picker on':''} ✓`
+    : 'Drive file picker connected ✓');
   if(document.getElementById('view-week')?.classList.contains('active')) renderWeekPlan();
 }
 
@@ -5444,6 +5839,43 @@ function renderGuide(){
 // ── WEEK VIEW ────────────────────────────────────────────────────
 let weekPlanOffset = 0; // weeks relative to the current Monday
 
+// ── WEEKLY-VIEW CELLS (shared) ───────────────────────────────────
+// The read-only rendering of one lesson. The Week view builds a column out
+// of these, and a lesson marked Done in the daily planner reuses the very
+// same markup — so a finished lesson looks exactly like it will in the grid.
+const WK_EMPTY = '<span class="wk-empty">—</span>';
+function wkStrip(s){ return String(s||'').replace(/<[^>]*>/g,' ').replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim(); }
+function wkBullets(arr, mapfn){
+  return arr.length ? `<ul class="wk-ul">${arr.map(mapfn).join('')}</ul>` : WK_EMPTY;
+}
+function wkGoalsCell(d){ return `<td class="wk-cell wk-rich">${hasHtmlText(goalsHTML(d))?goalsHTML(d):WK_EMPTY}</td>`; }
+function wkQodCell(d){ return `<td class="wk-cell">${wkStrip(d.qod)?`<div class="wk-qod">${d.qod}</div>`:WK_EMPTY}</td>`; }
+function wkTgtCell(d){ return `<td class="wk-cell wk-rich">${hasHtmlText(targetsHTML(d))?targetsHTML(d):WK_EMPTY}</td>`; }
+function wkActCell(d){
+  // Prefer the teacher's typed list; fall back to any structured activities.
+  if(hasActsText(d)) return `<td class="wk-cell wk-rich">${d.activitiesText}</td>`;
+  const acts = (d.activities||[]).filter(a=>a.brk||wkStrip(a.name)||wkStrip(a.desc));
+  if(!acts.length) return `<td class="wk-cell">${WK_EMPTY}</td>`;
+  let n=0;
+  return `<td class="wk-cell">${acts.map(a=>{
+    if(a.brk) return `<div class="wk-break">🍽 ${esc(wkStrip(a.name)||'Lunch')}</div>`;
+    n++;
+    const letters = actIPPText(a);
+    const detail = wkStrip(a.desc);
+    return `<div class="wk-act">
+      <div class="wk-act-h"><b>${n}. ${actType(a)?`<span class="wk-atype">${esc(actType(a))}-</span> `:''}${esc(wkStrip(a.name)||'—')}${a.dur?` [${a.dur} min]`:''}${letters?` <span class="wk-ipp">${esc(letters)}</span>`:''}</b></div>
+      ${detail?`<div class="wk-act-d">${a.desc}</div>`:''}
+    </div>`;
+  }).join('')}</td>`;
+}
+function wkHwCell(d){ return `<td class="wk-cell">${wkStrip(d.homework)?`<span>${esc(wkStrip(d.homework))}</span>`:WK_EMPTY}</td>`; }
+function wkResCell(d){
+  return `<td class="wk-cell">${wkBullets((d.materials||[]).filter(m=>matTitle(m)||matUrl(m)), m=>{
+    const t=matTitle(m)||matUrl(m), url=matUrl(m);
+    return `<li>${url?`<a href="${esc(url)}" target="_blank" rel="noopener" style="color:var(--navy)">${esc(t)}</a>`:esc(t)}</li>`;
+  })}</td>`;
+}
+
 function renderWeekPlan() {
   const el = document.getElementById('week-wrap');
   if (!el) return;
@@ -5472,10 +5904,6 @@ function renderWeekPlan() {
     return (ad||'').localeCompare(bd||'');
   });
 
-  const bullets = (arr, mapfn) => arr.length
-    ? `<ul class="wk-ul">${arr.map(mapfn).join('')}</ul>`
-    : `<span class="wk-empty">—</span>`;
-
   const cell = fn => lessons.map(fn).join('');
 
   const dayHead = L => {
@@ -5489,6 +5917,7 @@ function renderWeekPlan() {
         <input class="wk-blocktag" value="${esc(tag)}" title="Block label (e.g. A/B)"
           onclick="event.stopPropagation()"
           onchange="setLessonField(${L.uid},${L.wi},${L.di},'blockTag',this.value)">
+        ${d.done?'<span class="wk-donetag" title="Marked done">✓ Done</span>':''}
         <button class="wk-openbtn" onclick="openDayModal(${L.uid},${L.wi},${L.di})" title="Open & edit this lesson">Open ✎</button>
       </div>
       <div class="wk-dh-unit" style="color:${L.col.br}">Unit ${unitNo(L.uid)} · ${esc(L.u.name)}</div>
@@ -5497,32 +5926,12 @@ function renderWeekPlan() {
     </th>`;
   };
 
-  const emptyCell = '<span class="wk-empty">—</span>';
-  const goalsCell = L => `<td class="wk-cell wk-rich">${hasHtmlText(goalsHTML(L.d))?goalsHTML(L.d):emptyCell}</td>`;
-  const qodCell = L => `<td class="wk-cell">${strip(L.d.qod)?`<div class="wk-qod">${L.d.qod}</div>`:emptyCell}</td>`;
-  const tgtCell = L => `<td class="wk-cell wk-rich">${hasHtmlText(targetsHTML(L.d))?targetsHTML(L.d):emptyCell}</td>`;
-  const actCell = L => {
-    // Prefer the teacher's typed list; fall back to any structured activities.
-    if(hasActsText(L.d)) return `<td class="wk-cell wk-rich">${L.d.activitiesText}</td>`;
-    const acts = (L.d.activities||[]).filter(a=>a.brk||strip(a.name)||strip(a.desc));
-    if(!acts.length) return `<td class="wk-cell">${emptyCell}</td>`;
-    let n=0;
-    return `<td class="wk-cell">${acts.map(a=>{
-      if(a.brk) return `<div class="wk-break">🍽 ${esc(strip(a.name)||'Lunch')}</div>`;
-      n++;
-      const letters = actIPPText(a);
-      const detail = strip(a.desc);
-      return `<div class="wk-act">
-        <div class="wk-act-h"><b>${n}. ${actType(a)?`<span class="wk-atype">${esc(actType(a))}-</span> `:''}${esc(strip(a.name)||'—')}${a.dur?` [${a.dur} min]`:''}${letters?` <span class="wk-ipp">${esc(letters)}</span>`:''}</b></div>
-        ${detail?`<div class="wk-act-d">${a.desc}</div>`:''}
-      </div>`;
-    }).join('')}</td>`;
-  };
-  const hwCell = L => `<td class="wk-cell">${strip(L.d.homework)?`<span>${esc(strip(L.d.homework))}</span>`:'<span class="wk-empty">—</span>'}</td>`;
-  const resCell = L => `<td class="wk-cell">${bullets((L.d.materials||[]).filter(m=>matTitle(m)||matUrl(m)), m=>{
-    const t=matTitle(m)||matUrl(m), url=matUrl(m);
-    return `<li>${url?`<a href="${esc(url)}" target="_blank" rel="noopener" style="color:var(--navy)">${esc(t)}</a>`:esc(t)}</li>`;
-  })}</td>`;
+  const goalsCell = L => wkGoalsCell(L.d);
+  const qodCell   = L => wkQodCell(L.d);
+  const tgtCell   = L => wkTgtCell(L.d);
+  const actCell   = L => wkActCell(L.d);
+  const hwCell    = L => wkHwCell(L.d);
+  const resCell   = L => wkResCell(L.d);
   const bannerCells = label => lessons.map(()=>`<td class="wk-banner">${label}</td>`).join('');
 
   const legend = keyLegendHTML();
@@ -7126,8 +7535,11 @@ function resForm(uid, cat, r){
   return `<div class="ures-form">
     <input class="ures-in ures-in-name" type="text" placeholder="Name (e.g. Chapter 3 reading)"
       value="${esc(r?.title||'')}" onkeydown="if(event.key==='Enter'){event.preventDefault();${isEdit?`resSaveEdit(${uid},'${r.id}')`:`resSaveNew(${uid},'${cat}')`}}">
-    <input class="ures-in ures-in-url" type="url" placeholder="Paste link (Google Doc, Drive, Slides, website…)"
-      value="${esc(r?.url||'')}">
+    <div class="ures-urlrow">
+      <input class="ures-in ures-in-url" type="url" placeholder="Pick from Drive, or paste any link…"
+        value="${esc(r?.url||'')}">
+      <span class="drive-row">${drivePickBtnHTML('pickDriveIntoResForm()')}</span>
+    </div>
     <input class="ures-in ures-in-note" type="text" placeholder="Short note (optional)"
       value="${esc(r?.note||'')}">
     <div class="ures-form-btns">
@@ -7148,7 +7560,7 @@ function unitResourcesHTML(uid){
       const link = r.url ? `<a href="${esc(r.url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="ures-open" title="Open link">↗ open</a>` : '';
       return `<div class="ures-item" onclick="resStartEdit(${uid},'${r.id}')" title="Click to edit">
         <div class="ures-item-main">
-          <div class="ures-item-title">${esc(r.title||'Untitled')}</div>
+          <div class="ures-item-title">${isDriveUrl(r.url)?'<span class="drive-tri" title="Lives in Google Drive">▲</span> ':''}${esc(r.title||'Untitled')}</div>
           ${r.note?`<div class="ures-item-note">${esc(r.note)}</div>`:''}
           ${r.url?`<div class="ures-item-url">${esc(r.url)}</div>`:''}
         </div>
@@ -7418,9 +7830,15 @@ function paceAddDayU(uid){
 // it saves straight to that lesson; "open" jumps to the full plan.
 // One line telling you where the dates come from, and nothing more.
 function pacingDateNoteHTML(){
+  const events = allCustomEvents().length;
+  const evTxt = events ? ` · <b>${events}</b> of your own event${events===1?'':'s'}` : '';
+  const slotTxt = keepDateSlots()
+    ? `Move a day and it takes the date of the slot it lands on. <button class="sp-linkbtn" onclick="toggleKeepDateSlots()">let dates travel with the lesson instead</button>`
+    : `Dates travel with the lesson when you move it. <button class="sp-linkbtn" onclick="toggleKeepDateSlots()">keep dates with the calendar slot instead</button>`;
   if(!schoolMapSems(activeCourse).length){
-    return `<div class="sp-note">Dates are whatever you set on each lesson.
-      <button class="sp-linkbtn" onclick="openMapImport()">Paste your school's semester map</button> to fill them in and pick up school events.</div>`;
+    return `<div class="sp-note">Dates are whatever you set here or on each lesson${evTxt}.
+      <button class="sp-linkbtn" onclick="openMapImport()">Paste your school's semester map</button> to fill them in and pick up school events.
+      <div class="sp-note-sub">${slotTxt}</div></div>`;
   }
   let dated = 0, withNotes = 0;
   orderedUnits().forEach(u => (state.units[u.id]||[]).forEach(w => (w.days||[]).forEach(d => {
@@ -7428,15 +7846,108 @@ function pacingDateNoteHTML(){
     if(mapHitForDate(d.dateA)){ dated++; if(dayCalNotes(d).length) withNotes++; }
   })));
   const m = getSchoolMap(activeCourse, schoolMapSems(activeCourse)[0]);
-  return `<div class="sp-note">📅 ${dated} lesson${dated===1?'':'s'} matched to <b>${esc((m&&m.title)||'your school map')}</b>${withNotes?` · ${withNotes} with school events`:''}
-    <button class="sp-linkbtn" onclick="openMapImport()">re-paste</button></div>`;
+  return `<div class="sp-note">📅 ${dated} lesson${dated===1?'':'s'} matched to <b>${esc((m&&m.title)||'your school map')}</b>${withNotes?` · ${withNotes} with school events`:''}${evTxt}
+    <button class="sp-linkbtn" onclick="openMapImport()">re-paste</button>
+    <div class="sp-note-sub">${slotTxt}</div></div>`;
+}
+
+// ── EDITING A LESSON'S DATE IN PLACE ─────────────────────────────
+// A plain date box on the pacing guide, so a date can be fixed where you
+// notice it's wrong instead of opening the lesson.
+function lessonDateInputHTML(uid, wi, di, field, val, title){
+  return `<input type="date" class="sp-dateinp" value="${esc(val||'')}" title="${esc(title||'Class date')}"
+    onclick="event.stopPropagation()"
+    onchange="setLessonDate(${uid},${wi},${di},'${field}',this.value)">`;
+}
+// Set one lesson's class date from anywhere. Cal notes are dropped because
+// they belong to the date, not the lesson — they're re-read from the map.
+function setLessonDate(uid, wi, di, field, val){
+  const d = (state.units[uid]||[])[wi]?.days?.[di];
+  if(!d) return;
+  d[field] = val || '';
+  delete d.calNotes;
+  saveState();
+  invalidateMapIndex();
+  refreshAfterMove();
+  if(val) toast(`${d.label} → ${fmtNice(val)} ✓`);
+}
+// Shift this lesson and every later one onto the following class days, so a
+// single corrected date re-flows the rest of the year.
+function cascadeFromLesson(uid, wi, di){
+  const d = (state.units[uid]||[])[wi]?.days?.[di];
+  if(!d || !d.dateA){ toast('Give this lesson a date first'); return; }
+  const cal = loadCalendar();
+  const dates = (cal && cal.courses[activeCourse] && cal.courses[activeCourse].dates) || [];
+  if(!dates.length){ toast('Import your school calendar to re-flow dates'); return; }
+  let ai = dates.findIndex(x => x >= d.dateA);
+  if(ai < 0){ toast('No class days on or after that date'); return; }
+  const flat = flatLessons();
+  const pos = flat.findIndex(x => x.d === d);
+  if(pos < 0) return;
+  let n = 0;
+  for(let k = pos; k < flat.length; k++){
+    const idx = ai + (k - pos);
+    if(idx >= dates.length) break;
+    flat[k].d.dateA = dates[idx]; flat[k].d.dateB = ''; delete flat[k].d.calNotes; n++;
+  }
+  saveState();
+  invalidateMapIndex();
+  refreshAfterMove();
+  toast(`Re-dated ${n} lesson${n===1?'':'s'} from ${fmtNice(dates[ai])} onward ✓`);
+}
+
+// ── SCHOOL EVENT DIALOG ──────────────────────────────────────────
+function openEventModal(iso){
+  document.getElementById('event-date').value = iso || isoToday();
+  document.getElementById('event-text').value = '';
+  renderEventList();
+  document.getElementById('event-overlay').style.display = 'block';
+  setTimeout(()=>document.getElementById('event-text').focus(), 40);
+}
+function closeEventModal(){ document.getElementById('event-overlay').style.display='none'; }
+function submitEvent(){
+  const iso = document.getElementById('event-date').value;
+  const txt = document.getElementById('event-text').value;
+  if(!iso){ toast('Pick a date for the event'); return; }
+  if(!String(txt||'').trim()){ document.getElementById('event-text').focus(); return; }
+  addCustomEvent(iso, txt);
+  document.getElementById('event-text').value = '';
+  renderEventList();
+  refreshAfterMove();
+  toast(`Added to ${fmtNice(iso)} ✓`);
+  setTimeout(()=>document.getElementById('event-text').focus(), 30);
+}
+function deleteEvent(iso, idx){
+  removeCustomEvent(iso, idx);
+  renderEventList();
+  refreshAfterMove();
+}
+function renderEventList(){
+  const box = document.getElementById('event-list');
+  if(!box) return;
+  const all = allCustomEvents();
+  if(!all.length){
+    box.innerHTML = `<div class="ev-empty">No events of your own yet. Anything you add here shows up on the pacing guide next to the school's own notes.</div>`;
+    return;
+  }
+  const byDate = new Map();
+  const days = plannerDaysByDate();
+  all.forEach(e => { if(!byDate.has(e.iso)) byDate.set(e.iso, []); byDate.get(e.iso).push(e); });
+  box.innerHTML = [...byDate.keys()].map(iso => {
+    const hit = days.get(iso);
+    return `<div class="ev-row">
+      <div class="ev-date">${esc(fmtNice(iso))}${hit?`<span class="ev-lesson">${esc(hit.d.label)} · Unit ${unitNo(hit.u.id)}</span>`:'<span class="ev-lesson ev-noclass">no class that day</span>'}</div>
+      <div class="ev-pills">${byDate.get(iso).map(e =>
+        `<span class="smap-note-pill">${esc(e.text)}<button class="ev-x" title="Remove" onclick="deleteEvent('${esc(iso)}',${e.idx})">×</button></span>`).join(' ')}</div>
+    </div>`;
+  }).join('');
 }
 
 function simplePacingHTML(){
   const blocks = orderedUnits().map(u => {
     const weeks = state.units[u.id] || [];
     const days = [];
-    weeks.forEach((w, wi) => (w.days||[]).forEach((d, di) => days.push({d, wi, di})));
+    weeks.forEach((w, wi) => (w.days||[]).forEach((d, di) => days.push({d, wi, di, weekLabel:w.weekLabel})));
     return { u, days };
   }).filter(b => b.days.length);
 
@@ -7454,25 +7965,48 @@ function simplePacingHTML(){
     return b.days.map((row, idx) => {
       globalDay++; lessonNo++;
       const d = row.d, planned = dayIsPlanned(d);
-      const notes = dayCalNotes(d);
+      const schoolNotes = schoolMapNotes(d);
+      const myEvents = customEventsOn(d.dateA);
       const isToday = d.dateA && d.dateA === today;
-      const dateCell = d.dateA
-        ? `<div class="sp-dline">${isoParse(d.dateA).toLocaleDateString('en-US',{weekday:'short'})} <b>${fmtMD(d.dateA)}</b></div>`
-        : '<span class="smap-dash">—</span>';
       const band = idx === 0
-        ? `<td class="sp-band" rowspan="${b.days.length}" style="background:${c.br}">
+        ? `<td class="sp-band" rowspan="${b.days.length}" style="background:${c.br}"
+             ondragover="unitDragOver(event,${b.u.id})" ondrop="unitDrop(event,${b.u.id})"
+             title="Drop a day here to move it into this unit">
              <div class="sp-band-inner">Unit ${unitNo(b.u.id)}<span>${esc(b.u.name)}</span>
                <button class="sp-band-add" onclick="paceAddDayU(${b.u.id})">+ day</button></div>
            </td>` : '';
-      return `<tr${isToday?' class="sp-today"':''}>
+      const notePill = (txt, kind, iso, i) => {
+        const warn = /no school|early release|exam|psat|break|holiday|retreat|mass/i.test(txt);
+        return `<span class="smap-note-pill${warn?' warn':''}${kind==='mine'?' mine':''}" title="${kind==='mine'?'Your own event — click × to remove':'From the school semester map'}">${esc(txt)}${
+          kind==='mine' ? `<button class="ev-x" onclick="event.stopPropagation();deleteEvent('${esc(iso)}',${i})" title="Remove this event">×</button>` : ''}</span>`;
+      };
+      return `<tr${isToday?' class="sp-today"':''}${d.done?' data-done="1"':''}
+        ondragover="lessonDragOver(event,'y')" ondrop="lessonDrop(event,${b.u.id},${row.wi},${row.di},'y')">
         ${band}
-        <td class="sp-td sp-mid">${globalDay}</td>
-        <td class="sp-td sp-mid sp-num">${unitNo(b.u.id)}.${lessonNo}</td>
-        <td class="sp-td sp-date2">${dateCell}${isToday?'<div><span class="smap-today-tag">today</span></div>':''}${notes.length?`<div class="sp-notes">${notes.map(n=>`<span class="smap-note-pill${/no school|early release|exam|psat|break/i.test(n)?' warn':''}">${esc(n)}</span>`).join(' ')}</div>`:''}</td>
+        <td class="sp-td sp-mid sp-handlecell">
+          <span class="row-drag" draggable="true" title="Drag this day to another slot, week or unit"
+            ondragstart="lessonDragStart(event,${b.u.id},${row.wi},${row.di})" ondragend="dragEndAll()">⠿</span>
+          <div class="sp-gday">${globalDay}</div>
+        </td>
+        <td class="sp-td sp-mid sp-num">${unitNo(b.u.id)}.${lessonNo}<div class="sp-wklbl">${esc(row.weekLabel||'')}</div></td>
+        <td class="sp-td sp-date2">
+          <div class="sp-datebox">
+            ${lessonDateInputHTML(b.u.id, row.wi, row.di, 'dateA', d.dateA, 'Class date — edit it right here')}
+            ${d.dateA?`<span class="sp-dow">${isoParse(d.dateA).toLocaleDateString('en-US',{weekday:'short'})}</span>`:''}
+          </div>
+          ${isToday?'<div><span class="smap-today-tag">today</span></div>':''}
+          ${(schoolNotes.length||myEvents.length)?`<div class="sp-notes">${
+            schoolNotes.map(n=>notePill(n,'map')).join(' ')}${
+            myEvents.map((n,i)=>notePill(n,'mine',d.dateA,i)).join(' ')}</div>`:''}
+          <div class="sp-daterow">
+            <button class="sp-minibtn" onclick="openEventModal('${esc(d.dateA||'')}')" title="Add your own event on this date">＋ event</button>
+            ${d.dateA && calImported() ? `<button class="sp-minibtn" onclick="cascadeFromLesson(${b.u.id},${row.wi},${row.di})" title="Re-flow this lesson and every later one onto the next class days">↓ re-flow</button>` : ''}
+          </div>
+        </td>
         <td class="sp-td sp-content">${inp(d.topic, b.u.id, row.wi, row.di, 'topic', 'General theme for the day…')}</td>
         <td class="sp-td">${inp(d.homework, b.u.id, row.wi, row.di, 'homework', 'Homework…')}</td>
         <td class="sp-td sp-mid">
-          <span class="sp-status ${planned?'ok':''}" title="${planned?'Fully planned':'Not fully planned yet'}">${planned?'✓':'○'}</span>
+          <span class="sp-status ${d.done?'done':(planned?'ok':'')}" title="${d.done?'Marked done':(planned?'Fully planned':'Not fully planned yet')}">${d.done?'✓✓':(planned?'✓':'○')}</span>
           <button class="sp-open" onclick="openGridDay(${b.u.id},${row.wi},${row.di})">open →</button>
         </td>
       </tr>`;
@@ -7484,10 +8018,11 @@ function simplePacingHTML(){
     <div class="sp-head">
       <div>
         <h2 class="sp-title">Pacing Guide — ${esc(co.name)}</h2>
-        <div class="sp-sub">The big-picture map across every unit: general themes only. Edit Content or HW here and it saves straight to that lesson.</div>
+        <div class="sp-sub">The big-picture map across every unit: general themes only. Edit the date, Content or HW here and it saves straight to that lesson. Drag a day by its ⠿ handle to move it to another slot, week or unit — drop it on a unit band to send it to the end of that unit.</div>
       </div>
       <div class="sp-actions">
-        <button class="sp-btn" onclick="openMapImport()" title="Paste your school's semester map to fill in the Date column">📥 School map…</button>
+        <button class="sp-btn sp-btn-ghost" onclick="openEventModal('')" title="Add a retreat, Mass, field trip or any day of your own to the calendar">＋ School event</button>
+        <button class="sp-btn sp-btn-ghost" onclick="openMapImport()" title="Paste your school's semester map to fill in the Date column">📥 School map…</button>
         <button class="sp-btn" onclick="exportPacingGuidePDF()">Export</button>
       </div>
     </div>
@@ -7496,11 +8031,11 @@ function simplePacingHTML(){
       <table class="sp-table">
         <thead><tr>
           <th style="width:120px">Unit</th>
-          <th style="width:54px">Day</th>
-          <th style="width:60px">#</th>
-          <th style="width:118px">Date <span class="sp-th-hint">— school map</span></th>
+          <th style="width:62px">Day</th>
+          <th style="width:70px">#</th>
+          <th style="width:168px">Date <span class="sp-th-hint">— editable</span></th>
           <th>Content <span class="sp-th-hint">— general theme</span></th>
-          <th style="width:240px">HW</th>
+          <th style="width:220px">HW</th>
           <th style="width:104px">Plan</th>
         </tr></thead>
         <tbody>${body || `<tr><td class="sp-td" colspan="7" style="text-align:center;color:var(--ink-3);font-style:italic">No class days yet.</td></tr>`}</tbody>
@@ -7508,6 +8043,7 @@ function simplePacingHTML(){
     </div>
   </div>`;
 }
+
 
 // ── UNIT SUMMATIVE ASSESSMENT (backwards design, stage 2) ─────────
 const SUMMATIVE_TYPES = ['Essay','Project','Presentation','Performance Task','Portfolio','Test','Other'];
@@ -7766,7 +8302,7 @@ function pacingTableBlockHTML(u, weeks) {
         Export PDF
       </button>
     </div>
-    <p style="font-size:12px;color:var(--ink-3);margin-bottom:10px;font-style:italic">Click any row to open that day's lesson plan. Edit the Description of Content and Assessment / HW directly in the table — changes sync to the lesson plan.</p>
+    <p style="font-size:12px;color:var(--ink-3);margin-bottom:10px;font-style:italic">Click any row to open that day's lesson plan. Edit the date, Description of Content and Assessment / HW directly in the table — changes sync to the lesson plan. Drag a row by its ⠿ handle to move that day to another slot or week.</p>
     <table class="pace-table">
       <thead>
         <tr>
@@ -7788,18 +8324,16 @@ function pacingTableBlockHTML(u, weeks) {
                 style="border:none;background:none;cursor:pointer;color:rgba(255,255,255,.5);font-size:13px;line-height:1;padding:0;margin-left:2px">×</button>
             </div>`
           ).join('');
-          return `<tr draggable="true" id="pace-row-${wi}-${di}"
+          return `<tr id="pace-row-${wi}-${di}"
             data-wi="${wi}" data-di="${di}"
             style="border-bottom:1px solid var(--rule);transition:opacity .15s"
-            ondragstart="paceDragStart(event,${wi},${di})"
-            ondragend="paceDragEnd(event)"
-            ondragover="paceDragOver(event)"
-            ondrop="paceDrop(event,${wi},${di})"
-            ondragenter="this.style.background='#EEF2FF'"
-            ondragleave="this.style.background=''">
+            ondragover="lessonDragOver(event,'y')"
+            ondrop="lessonDrop(event,${u.id},${wi},${di},'y')">
             <td onclick="event.stopPropagation()" style="padding:0;vertical-align:top;position:relative">
               <div style="padding:6px 12px 4px;border-bottom:1px solid var(--rule);background:#FDF5F0;display:flex;align-items:center;gap:6px">
-                <span title="Drag to reorder" style="cursor:grab;color:var(--ink-3);font-size:12px;flex-shrink:0;user-select:none;padding-right:2px">⠿</span>
+                <span class="row-drag" title="Drag to move this day anywhere in the unit" draggable="true"
+                  ondragstart="lessonDragStart(event,${u.id},${wi},${di})" ondragend="dragEndAll()"
+                  style="flex-shrink:0;padding-right:2px">⠿</span>
                 <div style="flex:1">
                   <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:3px">
                     <button onclick="event.stopPropagation();openPacingDay(${wi},${di})"
@@ -7808,7 +8342,11 @@ function pacingTableBlockHTML(u, weeks) {
                     </button>
                     ${assessBadge}
                   </div>
-                  <div class="pace-date">${d.dateA||d.dateB ? (d.dateA||'')+(d.dateB&&d.dateA?' / ':' ')+(d.dateB||'') : '—'}</div>
+                  <div class="pace-date">
+                    ${lessonDateInputHTML(u.id, wi, di, 'dateA', d.dateA, 'A-block class date')}
+                    ${d.dateB ? lessonDateInputHTML(u.id, wi, di, 'dateB', d.dateB, 'B-block class date') : ''}
+                  </div>
+                  ${dayCalNotes(d).length ? `<div class="pace-notes">${dayCalNotes(d).map(n=>`<span class="smap-note-pill">${esc(n)}</span>`).join(' ')}</div>` : ''}
                 </div>
               </div>
               <div contenteditable="true"
@@ -7867,36 +8405,8 @@ function pacingTableBlockHTML(u, weeks) {
 }
 
 // ── PACING GUIDE DRAG & DROP ──────────────────────────────────────
-let paceDragSrc = null;
-
-function paceDragStart(e, wi, di) {
-  paceDragSrc = {wi, di};
-  e.currentTarget.style.opacity = '.4';
-  e.dataTransfer.effectAllowed = 'move';
-}
-
-function paceDragEnd(e) {
-  e.currentTarget.style.opacity = '';
-  e.currentTarget.style.background = '';
-  paceDragSrc = null;
-  // Clear all row highlights
-  document.querySelectorAll('[id^="pace-row-"]').forEach(r => r.style.background = '');
-}
-
-function paceDragOver(e) {
-  e.preventDefault();
-  e.dataTransfer.dropEffect = 'move';
-}
-
-function paceDrop(e, destWi, destDi) {
-  e.preventDefault();
-  e.currentTarget.style.background = '';
-  if (!paceDragSrc) return;
-  if (paceDragSrc.wi === destWi && paceDragSrc.di === destDi) return;
-  moveDayTo(paceDragSrc.wi, paceDragSrc.di, destWi, destDi);
-  // moveDayTo() already re-renders the unit; currentUnitTab keeps us on the
-  // Pacing Guide tab so the reordered table stays in view.
-}
+// Rows use the shared lesson-move engine (see MOVING LESSONS AND WEEKS):
+// a row really leaves its week and lands where the blue bar shows.
 
 function openPacingDay(wi, di) {
   currentWeek = wi;
@@ -8011,40 +8521,46 @@ function renderUnit() {
   const objs  = (state.objs && state.objs[u.id]) || [];
   const totalDays = weeks.reduce((n,w) => n + w.days.length, 0);
 
-  const weeksHTML = weeks.map((week, wi) => `
-    <div style="margin-bottom:22px">
+  const planHint = `<div class="plan-hint no-print">
+    <b>Moving things around:</b> drag a block by its ⠿ handle to any slot, week or unit — the blue bar shows where it lands. Drag a whole week by the ⠿ beside its name, or nudge with ▲▼ / ‹ ›.
+    ${keepDateSlots()
+      ? `Dates stay with the calendar slot, so whatever lands in a spot takes that spot's date. <button class="sp-linkbtn" onclick="toggleKeepDateSlots()">let dates travel with the lesson instead</button>`
+      : `Dates travel with the lesson when you move it. <button class="sp-linkbtn" onclick="toggleKeepDateSlots()">keep dates with the calendar slot instead</button>`}
+  </div>`;
+
+  const weeksHTML = planHint + weeks.map((week, wi) => `
+    <div class="week-block" data-wi="${wi}"
+      ondragover="weekDragOver(event,${u.id},${wi})" ondrop="weekDrop(event,${u.id},${wi})">
       <div class="week-nav-row">
-        <div style="display:flex;align-items:baseline;gap:8px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="week-drag" draggable="true" title="Drag this whole week — lessons and all — to another spot in the unit"
+            ondragstart="weekDragStart(event,${u.id},${wi})" ondragend="dragEndAll()">⠿</span>
           <span class="wk-label">${esc(week.weekLabel)}</span>
-          ${(() => {
-            if (!state.semesterStart) return '';
-            // Find this week's index across all units up to currentUnit
-            let globalWeekIdx = 0;
-            for (const u2 of UNIT_META) {
-              if (u2.id === currentUnit) { globalWeekIdx += wi; break; }
-              globalWeekIdx += (state.units[u2.id]||[]).length;
-            }
-            const mon = weekMonday(state.semesterStart, globalWeekIdx);
-            const fri = addDays(mon, 4);
-            return `<span style="font-size:11px;color:var(--ink-3)">${fmtShort(mon)} – ${fmtShort(fri)}</span>`;
-          })()}
+          <span class="wk-daterange">${weekDateRangeHTML(week, wi)}</span>
         </div>
-        <div style="display:flex;gap:6px">
+        <div style="display:flex;gap:6px;align-items:center">
+          ${weeks.length>1 ? `<span class="wk-movegrp">
+            <button class="wk-move" onclick="moveWeekBy(${wi},-1)" ${wi===0?'disabled':''} title="Move this week earlier">▲</button>
+            <button class="wk-move" onclick="moveWeekBy(${wi},1)" ${wi===weeks.length-1?'disabled':''} title="Move this week later">▼</button>
+          </span>` : ''}
           <button class="add-week-btn" onclick="addDay(${wi})" title="Add a block to this week">+ Add block</button>
           ${weeks.length>1 ? `<button class="add-week-btn" style="color:#993C1D;border-color:rgba(153,60,29,.3)" onclick="deleteWeek(${wi})" title="Delete this week">Delete week</button>` : ''}
         </div>
       </div>
       <div style="display:flex;align-items:stretch;gap:8px">
-        <div class="days-strip" id="days-strip-${wi}" style="grid-template-columns:repeat(${week.days.length},1fr);flex:1">
-          ${week.days.map((d,di) => dayCardHTML(d, wi, di, c)).join('')}
-        </div>
+        ${week.days.length ? `<div class="days-strip" id="days-strip-${wi}" style="grid-template-columns:repeat(${week.days.length},1fr);flex:1">
+          ${week.days.map((d,di) => dayCardHTML(d, wi, di, c, weeks)).join('')}
+        </div>` : `<div class="week-empty-drop" style="flex:1"
+            ondragover="weekDragOver(event,${u.id},${wi})" ondrop="weekDrop(event,${u.id},${wi})">
+            Empty week — drag a block here, or press ＋
+          </div>`}
         <button onclick="addDay(${wi})" title="Add a block to this week"
           style="flex-shrink:0;width:44px;background:var(--white);border:1px dashed var(--rule-dark);border-radius:var(--radius);cursor:pointer;color:var(--navy);font-size:22px;font-weight:300;display:flex;align-items:center;justify-content:center;transition:all .12s"
           onmouseenter="this.style.background='var(--purple-bg)';this.style.borderColor='var(--navy)'"
           onmouseleave="this.style.background='var(--white)';this.style.borderColor='var(--rule-dark)'">＋</button>
       </div>
       <div class="daily-panel ${openWeekIdx===wi&&openDayIdx!==null?'open':''}" id="daily-panel-${wi}">
-        ${(openWeekIdx===wi && openDayIdx!==null) ? dailyPanelHTML(week.days[openDayIdx], openDayIdx) : ''}
+        ${(openWeekIdx===wi && openDayIdx!==null && week.days[openDayIdx]) ? dailyPanelHTML(week.days[openDayIdx], openDayIdx) : ''}
       </div>
     </div>
   `).join('');
@@ -8117,12 +8633,29 @@ function renderUnit() {
     <!-- BODY: classic tabs OR the numbered stage-page layer -->
     ${bodyHTML}
   `;
-  initDayDrag();
   // Restore focus to the chip input the teacher was typing in
   if (focusId) { const el = document.getElementById(focusId); if (el) el.focus(); }
 }
 
-function dayCardHTML(d, wi, di, c) {
+// The dates a week actually covers: the real class dates of its lessons when
+// they're set, otherwise the Mon–Fri block counted off the semester start.
+function weekDateRangeHTML(week, wi){
+  const ds = (week.days||[]).map(d => d.dateA || d.dateB).filter(Boolean).sort();
+  if(ds.length){
+    const txt = ds[0] === ds[ds.length-1] ? fmtMD(ds[0]) : `${fmtMD(ds[0])} – ${fmtMD(ds[ds.length-1])}`;
+    return `<span title="Class dates in this week">${esc(txt)}</span>`;
+  }
+  if(!state.semesterStart) return '';
+  let globalWeekIdx = 0;
+  for (const u2 of UNIT_META) {
+    if (u2.id === currentUnit) { globalWeekIdx += wi; break; }
+    globalWeekIdx += (state.units[u2.id]||[]).length;
+  }
+  const mon = weekMonday(state.semesterStart, globalWeekIdx);
+  return `${fmtShort(mon)} – ${fmtShort(addDays(mon, 4))}`;
+}
+
+function dayCardHTML(d, wi, di, c, weeks) {
   const used = (d.activities||[]).reduce((s,a)=>s+(a.dur||0),0);
   const blockDur = d.blockDuration || 90;
   const planned = dayIsPlanned(d);
@@ -8130,16 +8663,29 @@ function dayCardHTML(d, wi, di, c) {
     ? `A: ${fmtMD(d.dateA)} · B: ${fmtMD(d.dateB)}`
     : d.dateA ? `A: ${fmtMD(d.dateA)}` : d.dateB ? `B: ${fmtMD(d.dateB)}` : '— dates not set';
   const isOpen = openWeekIdx===wi && openDayIdx===di;
-  const status = planned
-    ? `<span class="dc-pill" style="background:#E3F5E8;color:#1A5227">✓ Planned</span>`
-    : `<span class="dc-pill" style="background:#FDF3D6;color:#7A5200">Needs planning</span>`;
-  return `<div class="day-card ${isOpen?'open':''}" draggable="true"
+  const all = weeks || state.units[currentUnit] || [];
+  const isFirst = wi===0 && di===0;
+  const isLast  = wi===all.length-1 && di===(all[all.length-1]?.days?.length||1)-1;
+  const status = d.done
+    ? `<span class="dc-pill" style="background:#1B3A6B;color:#fff">✓ Done</span>`
+    : planned
+      ? `<span class="dc-pill" style="background:#E3F5E8;color:#1A5227">✓ Planned</span>`
+      : `<span class="dc-pill" style="background:#FDF3D6;color:#7A5200">Needs planning</span>`;
+  return `<div class="day-card ${isOpen?'open':''}${d.done?' is-done':''}"
     data-wi="${wi}" data-di="${di}"
+    ondragover="lessonDragOver(event,'x')" ondrop="lessonDrop(event,${currentUnit},${wi},${di},'x')"
     onclick="toggleDay(${wi},${di})" style="position:relative;border-top:3px solid ${c.br}">
-    <div class="day-drag-handle" title="Drag to reorder"
+    <div class="day-drag-handle" title="Drag to move this block anywhere in the unit" draggable="true"
+      onclick="event.stopPropagation()"
+      ondragstart="lessonDragStart(event,${currentUnit},${wi},${di})" ondragend="dragEndAll()"
       style="position:absolute;top:7px;left:5px;color:var(--ink-3);cursor:grab;opacity:.5;font-size:11px;line-height:1">⠿⠿</div>
-    <button class="day-del-btn" onclick="event.stopPropagation();deleteDay(${wi},${di})" title="Delete this block"
-      style="position:absolute;top:6px;right:5px;border:none;background:#fee2e2;color:#c0392b;font-size:13px;font-weight:600;cursor:pointer;line-height:1;padding:2px 6px;border-radius:4px;display:none;box-shadow:0 1px 3px rgba(0,0,0,.12)">×</button>
+    <div class="day-nudge" onclick="event.stopPropagation()">
+      <button class="wk-move" ${isFirst?'disabled':''} title="Move this block one slot earlier"
+        onclick="event.stopPropagation();nudgeLesson(${currentUnit},${wi},${di},-1)">‹</button>
+      <button class="wk-move" ${isLast?'disabled':''} title="Move this block one slot later"
+        onclick="event.stopPropagation();nudgeLesson(${currentUnit},${wi},${di},1)">›</button>
+      <button class="day-del-btn" onclick="event.stopPropagation();deleteDay(${wi},${di})" title="Delete this block">×</button>
+    </div>
     <div class="dc-num" style="padding-left:16px">${esc(d.label)}</div>
     ${d.topic ? `<div style="font-size:11.5px;font-weight:600;color:var(--ink);margin-bottom:2px;padding-left:16px">${esc(d.topic)}</div>` : `<div style="font-size:11px;font-style:italic;color:var(--ink-3);margin-bottom:2px;padding-left:16px">Untitled — click to plan</div>`}
     <div style="font-size:10px;color:var(--ink-3);margin-bottom:4px;padding-left:16px">${dateStr}</div>
@@ -8153,27 +8699,73 @@ function dayCardHTML(d, wi, di, c) {
   </div>`;
 }
 
-// ── DRAG & DROP REORDERING (with day relabeling) ─────────────────
-let dragSrc = null;
+// ══ MOVING LESSONS AND WEEKS ═════════════════════════════════════
+// One engine behind every way a lesson moves: dragging a day card, dragging
+// a pacing-guide row, or the "Move to another unit" dialog. A lesson really
+// leaves its week and joins the week it is dropped on, so weeks grow and
+// shrink the way you'd expect instead of days shuffling between fixed slots.
 
-function initDayDrag() {
-  document.querySelectorAll('.day-card').forEach(card => {
-    card.addEventListener('dragstart', e => {
-      dragSrc = { wi: +card.dataset.wi, di: +card.dataset.di };
-      card.style.opacity = '.4';
-      e.dataTransfer.effectAllowed = 'move';
-    });
-    card.addEventListener('dragend', () => { card.style.opacity = ''; dragSrc = null; });
-    card.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; });
-    card.addEventListener('drop', e => {
-      e.preventDefault();
-      if (!dragSrc) return;
-      const targetWi = +card.dataset.wi;
-      const targetDi = +card.dataset.di;
-      if (dragSrc.wi === targetWi && dragSrc.di === targetDi) return;
-      moveDayTo(dragSrc.wi, dragSrc.di, targetWi, targetDi);
-    });
+// Every lesson in the course, in the order it is taught.
+function flatLessons(){
+  const out = [];
+  orderedUnits().forEach(u => (state.units[u.id]||[]).forEach((w, wi) =>
+    (w.days||[]).forEach((d, di) => out.push({ d, uid:u.id, wi, di }))));
+  return out;
+}
+
+// Where a lesson object sits right now, or null once it is gone.
+function findLessonPos(day){
+  const hit = flatLessons().find(x => x.d === day);
+  return hit ? { uid:hit.uid, wi:hit.wi, di:hit.di } : null;
+}
+
+// ── DATES BELONG TO THE SLOT, NOT THE LESSON ─────────────────────
+// The class calendar is fixed: the 4th lesson of the year is taught on the
+// 4th class day, whichever lesson that turns out to be. So before a move we
+// snapshot the dates in teaching order and hand them back out in that same
+// order afterwards. The lesson you dragged takes the date of the spot it
+// landed on, and every lesson it pushed along takes its new spot's date.
+// Turn it off (More ▸ dates travel with the lesson) to keep the old behavior.
+function keepDateSlots(){ return !(state && state.keepDateSlots === false); }
+function captureDateSlots(){
+  if(!keepDateSlots()) return null;
+  return flatLessons().map(x => ({
+    dateA: x.d.dateA || '',
+    dateB: x.d.dateB || '',
+    calNotes: Array.isArray(x.d.calNotes) ? x.d.calNotes.slice() : null,
+  }));
+}
+function applyDateSlots(slots){
+  if(!slots) return;
+  flatLessons().forEach((x, k) => {
+    const s = slots[k]; if(!s) return;
+    x.d.dateA = s.dateA; x.d.dateB = s.dateB;
+    if(s.calNotes) x.d.calNotes = s.calNotes; else delete x.d.calNotes;
   });
+}
+function toggleKeepDateSlots(){
+  state.keepDateSlots = keepDateSlots() ? false : true;
+  saveState();
+  toast(keepDateSlots()
+    ? 'Dates stay with the calendar slot — a moved lesson takes its new date ✓'
+    : 'Dates now travel with the lesson when you move it');
+  refreshAfterMove();
+}
+
+// Lesson-linked to-dos are stored as {uid, wi, di}, which goes stale the
+// moment anything moves. Snapshot them against the day object itself, then
+// rewrite the pointers once the move is done.
+function captureTodoLinks(){
+  const out = [];
+  (state.todos||[]).forEach(t => {
+    if(!t.lesson) return;
+    const d = (state.units[t.lesson.uid]||[])[t.lesson.wi]?.days?.[t.lesson.di];
+    if(d) out.push({ t, d });
+  });
+  return out;
+}
+function applyTodoLinks(links){
+  (links||[]).forEach(({t, d}) => { t.lesson = findLessonPos(d); });
 }
 
 // Relabel every day in a unit "Day 1, Day 2, …" in order.
@@ -8181,8 +8773,248 @@ function relabelUnitDays(uid){
   let n = 1;
   (state.units[uid]||[]).forEach(w => (w.days||[]).forEach(d => { d.label = `Day ${n}`; n++; }));
 }
+function relabelUnitWeeks(uid){
+  (state.units[uid]||[]).forEach((w, i) => { w.weekLabel = `Week ${i+1}`; });
+}
 
-// ── MOVE A LESSON TO ANOTHER UNIT ─────────────────────────────────
+// Move one lesson. src/dest are {uid, wi, di}; dest.di may be null to drop it
+// at the end of that week. `after` inserts below/right of the destination
+// lesson. Returns the lesson's new position, or null if nothing moved.
+function moveLesson(src, dest, after){
+  const sWeeks = state.units[src.uid];
+  const sWeek  = sWeeks && sWeeks[src.wi];
+  if(!sWeek || !sWeek.days[src.di]) return null;
+  if(!state.units[dest.uid] || !state.units[dest.uid].length)
+    state.units[dest.uid] = [{ weekLabel:'Week 1', days:[] }];
+  const dWeeks = state.units[dest.uid];
+  const dWeek  = dWeeks[Math.max(0, Math.min(dest.wi|0, dWeeks.length-1))];
+
+  let at = (dest.di === null || dest.di === undefined)
+    ? dWeek.days.length
+    : dest.di + (after ? 1 : 0);
+  if(sWeek === dWeek && (at === src.di || at === src.di + 1)) return null;  // dropped where it already is
+
+  const slots = captureDateSlots();
+  const links = captureTodoLinks();
+  const [day] = sWeek.days.splice(src.di, 1);
+  if(sWeek === dWeek && src.di < at) at--;          // the splice shifted the target left
+  dWeek.days.splice(Math.max(0, Math.min(at, dWeek.days.length)), 0, day);
+
+  relabelUnitDays(src.uid); relabelUnitWeeks(src.uid);
+  if(dest.uid !== src.uid){ relabelUnitDays(dest.uid); relabelUnitWeeks(dest.uid); }
+  applyDateSlots(slots);
+  applyTodoLinks(links);
+  saveState();
+  reflowDatesAuto();
+  invalidateMapIndex();
+  return findLessonPos(day);
+}
+
+// Move a whole week — every lesson in it — to another position in its unit.
+function moveWeekTo(uid, from, to){
+  const weeks = state.units[uid];
+  if(!weeks || from < 0 || from >= weeks.length) return false;
+  to = Math.max(0, Math.min(to, weeks.length-1));
+  if(from === to) return false;
+  const slots = captureDateSlots();
+  const links = captureTodoLinks();
+  const [w] = weeks.splice(from, 1);
+  weeks.splice(to, 0, w);
+  relabelUnitWeeks(uid); relabelUnitDays(uid);
+  applyDateSlots(slots);
+  applyTodoLinks(links);
+  saveState();
+  reflowDatesAuto();
+  invalidateMapIndex();
+  return true;
+}
+
+// Keep whichever lesson is expanded expanded, wherever it ends up.
+function withOpenDayKept(fn){
+  const open = (currentUnit != null && openWeekIdx !== null && openDayIdx !== null)
+    ? (state.units[currentUnit]||[])[openWeekIdx]?.days?.[openDayIdx] : null;
+  const result = fn();
+  if(open){
+    const pos = findLessonPos(open);
+    if(pos && pos.uid === currentUnit){ openWeekIdx = pos.wi; openDayIdx = pos.di; currentWeek = pos.wi; }
+    else { openWeekIdx = null; openDayIdx = null; }
+  }
+  return result;
+}
+
+// Redraw whichever page the teacher is looking at after something moved.
+function refreshAfterMove(){
+  if(dayModalOpen()) closeDayModal();
+  const on = id => document.getElementById(id)?.classList.contains('active');
+  if(on('view-pacing')){ document.getElementById('pacing-wrap').innerHTML = simplePacingHTML(); return; }
+  if(on('view-assess')){ document.getElementById('assess-wrap').innerHTML = assessmentCalendarHTML(); return; }
+  if(on('view-week')){ renderWeekPlan(); return; }
+  if(on('view-course')){ renderCourse(); return; }
+  if(on('view-prep')){ renderPrep(); return; }
+  if(on('view-dashboard')){ renderDashboard(); return; }
+  renderUnit();
+}
+
+// One line telling the teacher what just happened to the dates.
+function moveToastText(src, dest, pos){
+  if(!pos) return '';
+  const where = dest.uid === src.uid
+    ? `${(state.units[pos.uid]||[])[pos.wi]?.weekLabel || 'this week'}`
+    : `Unit ${unitNo(dest.uid)}`;
+  const d = (state.units[pos.uid]||[])[pos.wi]?.days?.[pos.di];
+  const dated = keepDateSlots() && d && d.dateA ? ` · now ${fmtMD(d.dateA)}` : '';
+  return `Moved to ${where}${dated} ✓`;
+}
+
+function finishLessonMove(src, dest, after){
+  let pos = null;
+  withOpenDayKept(() => { pos = moveLesson(src, dest, after); });
+  if(!pos) return;
+  const msg = moveToastText(src, dest, pos);
+  refreshAfterMove();
+  if(msg) toast(msg);
+}
+
+function dropWeekAt(uid, from, wi, after){
+  let to = wi + (after ? 1 : 0);
+  if(from < to) to--;
+  if(to === from) return;
+  let ok = false;
+  withOpenDayKept(() => { ok = moveWeekTo(uid, from, to); });
+  if(!ok) return;
+  refreshAfterMove();
+  toast(`Week moved to position ${to+1}${keepDateSlots()?' — dates re-dated to their new slots':''} ✓`);
+}
+
+function moveWeekBy(wi, delta){
+  const weeks = state.units[currentUnit] || [];
+  const to = wi + delta;
+  if(to < 0 || to >= weeks.length) return;
+  let ok = false;
+  withOpenDayKept(() => { ok = moveWeekTo(currentUnit, wi, to); });
+  if(!ok) return;
+  renderUnit();
+  toast(`Week moved ${delta < 0 ? 'up' : 'down'} ✓`);
+}
+
+// Nudge a single lesson one slot earlier/later — the keyboard-friendly
+// equivalent of dragging it, and it hops week boundaries on its own.
+function nudgeLesson(uid, wi, di, delta){
+  const weeks = state.units[uid] || [];
+  const flat = [];
+  weeks.forEach((w, i) => (w.days||[]).forEach((d, j) => flat.push({wi:i, di:j})));
+  const at = flat.findIndex(p => p.wi === wi && p.di === di);
+  const to = at + delta;
+  if(at < 0 || to < 0 || to >= flat.length) return;
+  finishLessonMove({uid, wi, di}, {uid, wi:flat[to].wi, di:flat[to].di}, delta > 0);
+}
+
+// ── DRAG LAYER ───────────────────────────────────────────────────
+// What is being dragged right now: one lesson, or a whole week.
+let dragItem = null;
+
+function clearDropMarks(){
+  document.querySelectorAll('.drop-before,.drop-after,.drop-into')
+    .forEach(el => el.classList.remove('drop-before','drop-after','drop-into'));
+}
+function dragEndAll(){
+  dragItem = null;
+  clearDropMarks();
+  document.querySelectorAll('.is-dragging').forEach(el => el.classList.remove('is-dragging'));
+  document.body.classList.remove('dragging-lesson','dragging-week');
+}
+// True when the pointer is past the middle of the element — i.e. drop after it.
+function pastMidpoint(ev, el, axis){
+  const r = el.getBoundingClientRect();
+  return axis === 'y' ? (ev.clientY - r.top) > r.height/2 : (ev.clientX - r.left) > r.width/2;
+}
+
+function lessonDragStart(ev, uid, wi, di){
+  ev.stopPropagation();
+  dragItem = { kind:'lesson', uid, wi, di };
+  ev.dataTransfer.effectAllowed = 'move';
+  try{ ev.dataTransfer.setData('text/plain', `lesson:${uid}:${wi}:${di}`); }catch(e){}
+  const box = ev.currentTarget.closest('.day-card, tr') || ev.currentTarget;
+  box.classList.add('is-dragging');
+  document.body.classList.add('dragging-lesson');
+}
+function weekDragStart(ev, uid, wi){
+  ev.stopPropagation();
+  dragItem = { kind:'week', uid, wi };
+  ev.dataTransfer.effectAllowed = 'move';
+  try{ ev.dataTransfer.setData('text/plain', `week:${uid}:${wi}`); }catch(e){}
+  const blk = ev.currentTarget.closest('.week-block');
+  if(blk) blk.classList.add('is-dragging');
+  document.body.classList.add('dragging-week');
+}
+
+// A lesson slot (day card or pacing row) accepting another lesson.
+function lessonDragOver(ev, axis){
+  if(!dragItem || dragItem.kind !== 'lesson') return;
+  ev.preventDefault(); ev.stopPropagation();
+  ev.dataTransfer.dropEffect = 'move';
+  clearDropMarks();
+  ev.currentTarget.classList.add(pastMidpoint(ev, ev.currentTarget, axis) ? 'drop-after' : 'drop-before');
+}
+function lessonDrop(ev, uid, wi, di, axis){
+  if(!dragItem || dragItem.kind !== 'lesson') return;
+  ev.preventDefault(); ev.stopPropagation();
+  const after = pastMidpoint(ev, ev.currentTarget, axis);
+  const src = dragItem;
+  dragEndAll();
+  finishLessonMove(src, { uid, wi, di }, after);
+}
+
+// A week block: reorders weeks, and catches lessons dropped on empty space.
+function weekDragOver(ev, uid, wi){
+  if(!dragItem) return;
+  if(dragItem.kind === 'week' && dragItem.uid !== uid) return;
+  ev.preventDefault();
+  ev.dataTransfer.dropEffect = 'move';
+  clearDropMarks();
+  if(dragItem.kind === 'week'){
+    ev.currentTarget.classList.add(pastMidpoint(ev, ev.currentTarget, 'y') ? 'drop-after' : 'drop-before');
+  } else {
+    ev.currentTarget.classList.add('drop-into');
+  }
+}
+function weekDrop(ev, uid, wi){
+  if(!dragItem) return;
+  ev.preventDefault(); ev.stopPropagation();
+  const item = dragItem;
+  const after = pastMidpoint(ev, ev.currentTarget, 'y');
+  dragEndAll();
+  if(item.kind === 'week'){
+    if(item.uid !== uid) return;
+    dropWeekAt(uid, item.wi, wi, after);
+  } else {
+    finishLessonMove(item, { uid, wi, di:null }, false);   // append to this week
+  }
+}
+// The band down the left of the whole-course pacing guide: drop a lesson on
+// a unit and it joins the end of that unit.
+function unitDragOver(ev, uid){
+  if(!dragItem || dragItem.kind !== 'lesson') return;
+  ev.preventDefault(); ev.stopPropagation();
+  ev.dataTransfer.dropEffect = 'move';
+  clearDropMarks();
+  ev.currentTarget.classList.add('drop-into');
+}
+function unitDrop(ev, uid){
+  if(!dragItem || dragItem.kind !== 'lesson') return;
+  ev.preventDefault(); ev.stopPropagation();
+  const item = dragItem;
+  dragEndAll();
+  const weeks = state.units[uid] || [];
+  finishLessonMove(item, { uid, wi:Math.max(0, weeks.length-1), di:null }, false);
+}
+
+// Legacy entry point kept for anything still calling it by (wi, di).
+function moveDayTo(srcWi, srcDi, destWi, destDi){
+  finishLessonMove({uid:currentUnit, wi:srcWi, di:srcDi}, {uid:currentUnit, wi:destWi, di:destDi}, false);
+}
+
+// ── MOVE A LESSON TO ANOTHER UNIT (dialog) ────────────────────────
 let _moveLesson = null;
 function openMoveLesson(i){
   _moveLesson = { uid: currentUnit, wi: currentWeek, di: i };
@@ -8192,9 +9024,8 @@ function openMoveLesson(i){
   document.getElementById('moveles-what').innerHTML =
     `Moving <b>${esc(d.label)}</b>${strip(d.topic)?` — ${esc(strip(d.topic))}`:''} from <b>Unit ${unitNo(currentUnit)}: ${u?esc(u.name):''}</b>`;
   const sel = document.getElementById('moveles-unit');
-  sel.innerHTML = orderedUnits().filter(x=>x.id!==currentUnit)
-    .map(x=>`<option value="${x.id}">Unit ${unitNo(x.id)} — ${esc(x.name)}</option>`).join('');
-  if(!sel.options.length){ toast('No other unit to move to — add another unit first'); _moveLesson=null; return; }
+  sel.innerHTML = orderedUnits()
+    .map(x=>`<option value="${x.id}"${x.id===currentUnit?' selected':''}>Unit ${unitNo(x.id)} — ${esc(x.name)}${x.id===currentUnit?' (this unit)':''}</option>`).join('');
   moveLessonUnitChanged();
   document.getElementById('movelesson-overlay').style.display='block';
 }
@@ -8204,90 +9035,21 @@ function moveLessonUnitChanged(){
   const wsel = document.getElementById('moveles-week');
   wsel.innerHTML = weeks.map((w,wi)=>`<option value="${wi}">${esc(w.weekLabel)} (${(w.days||[]).length} day${(w.days||[]).length===1?'':'s'})</option>`).join('')
     + `<option value="new">➕ New week at the end</option>`;
-  // default to the last existing week
   if(weeks.length) wsel.value = String(weeks.length-1);
 }
 function closeMoveLesson(){ document.getElementById('movelesson-overlay').style.display='none'; _moveLesson=null; }
 function moveLessonConfirm(){
   if(!_moveLesson) return;
-  const { uid:srcUid, wi:srcWi, di:srcDi } = _moveLesson;
+  const src = _moveLesson;
   const destUid = +document.getElementById('moveles-unit').value;
   const weekVal = document.getElementById('moveles-week').value;
-  const src = state.units[srcUid] && state.units[srcUid][srcWi];
-  if(!src || !src.days[srcDi]){ closeMoveLesson(); return; }
-  // detach any lesson-linked to-dos so they don't point at a stale location
-  (state.todos||[]).forEach(t=>{ if(t.lesson && t.lesson.uid===srcUid && t.lesson.wi===srcWi && t.lesson.di===srcDi) t.lesson=null; });
-  const [day] = src.days.splice(srcDi, 1);
   if(!state.units[destUid]) state.units[destUid] = [];
-  let destWeek;
-  if(weekVal==='new'){
-    destWeek = { weekLabel: `Week ${state.units[destUid].length+1}`, days: [] };
-    state.units[destUid].push(destWeek);
-  } else {
-    destWeek = state.units[destUid][+weekVal] || state.units[destUid][state.units[destUid].length-1];
-    if(!destWeek){ destWeek = { weekLabel:'Week 1', days:[] }; state.units[destUid].push(destWeek); }
+  if(weekVal === 'new'){
+    state.units[destUid].push({ weekLabel:`Week ${state.units[destUid].length+1}`, days:[] });
   }
-  destWeek.days.push(day);
-  relabelUnitDays(srcUid);
-  relabelUnitDays(destUid);
-  // clear open state if the moved day was open
-  if(currentUnit===srcUid && openWeekIdx===srcWi && openDayIdx===srcDi){ openWeekIdx=null; openDayIdx=null; }
-  saveState();
-  reflowDatesAuto();
+  const destWi = weekVal === 'new' ? state.units[destUid].length-1 : +weekVal;
   closeMoveLesson();
-  const du = UNIT_META.find(m=>m.id===destUid);
-  if(dayModalOpen()) closeDayModal();
-  if(currentUnit===srcUid) renderUnit();
-  else if(document.getElementById('view-week')?.classList.contains('active')) renderWeekPlan();
-  toast(`Lesson moved to Unit ${unitNo(destUid)}: ${du?du.name:''} ✓`);
-}
-
-// Move a day from (srcWi, srcDi) to the slot at (destWi, destDi), shifting
-// everything in between, and relabel every day's "Day N" label to match
-// its new continuous position within the unit. Each week keeps its
-// original number of slots (block-per-week pacing is preserved) — only
-// which day occupies which slot changes.
-function moveDayTo(srcWi, srcDi, destWi, destDi) {
-  const weeks = state.units[currentUnit];
-
-  // Record how many slots each week had before the move
-  const counts = weeks.map(w => w.days.length);
-
-  // Flatten all days into one ordered array
-  const flat = [];
-  weeks.forEach(w => w.days.forEach(d => flat.push(d)));
-
-  // Compute flat indices for source and destination
-  const flatIndex = (wi, di) => counts.slice(0, wi).reduce((a,b)=>a+b, 0) + di;
-  const srcFlatIdx  = flatIndex(srcWi, srcDi);
-  const destFlatIdx = flatIndex(destWi, destDi);
-
-  // Remove the moved day, then reinsert it at the destination position
-  const [moved] = flat.splice(srcFlatIdx, 1);
-  flat.splice(destFlatIdx, 0, moved);
-
-  // Refill each week's days array using the original slot counts
-  let ptr = 0;
-  weeks.forEach((w, wi) => {
-    w.days = flat.slice(ptr, ptr + counts[wi]);
-    ptr += counts[wi];
-  });
-
-  // Renumber all days continuously as "Day 1", "Day 2", ... in new order
-  let dayNum = 1;
-  weeks.forEach(w => w.days.forEach(d => { d.label = `Day ${dayNum}`; dayNum++; }));
-
-  // Update open day tracking to follow the moved day to its new location
-  let newWi = null, newDi = null;
-  weeks.forEach((w, wi) => w.days.forEach((d, di) => { if (d === moved) { newWi = wi; newDi = di; } }));
-  if (openWeekIdx === srcWi && openDayIdx === srcDi) {
-    openWeekIdx = newWi; openDayIdx = newDi;
-  }
-
-  saveState();
-  reflowDatesAuto();
-  renderUnit();
-  toast('Day reordered');
+  finishLessonMove(src, { uid:destUid, wi:destWi, di:null }, false);
 }
 
 // Which activity row is currently expanded for editing ("i:ai"), or null.
@@ -8298,6 +9060,78 @@ function editAct(i, ai){
   setTimeout(()=>{ const el=document.getElementById(`actinp-${i}-${ai}`); if(el){ el.focus(); el.select&&el.select(); } }, 30);
 }
 function collapseAct(i){ openActEdit = null; rerenderDay(i); }
+
+// ── "DONE": THE FINISHED LESSON, AS IT LOOKS IN THE WEEK VIEW ────
+// Tick Done and the planner stops being a form and becomes the read-only
+// weekly card — the same table, the same cells, nothing editable. Untick it
+// and the full editor comes straight back; nothing about the lesson changes.
+function toggleLessonDone(i){
+  const d = getDay(i);
+  d.done = !d.done;
+  saveState();
+  rerenderDay(i);
+  toast(d.done ? 'Lesson marked done — shown as it will look in the Week View ✓'
+               : 'Done unticked — the lesson is editable again');
+}
+
+function lessonDoneViewHTML(d, i){
+  const u = UNIT_META.find(m=>m.id===currentUnit);
+  const c = getUC(currentUnit);
+  const tag = wkStrip(d.blockTag) || 'A/B';
+  const topic = wkStrip(d.topic);
+  const dates = [d.dateA?`A: ${fmtMD(d.dateA)}`:'', d.dateB?`B: ${fmtMD(d.dateB)}`:''].filter(Boolean).join(' · ');
+  const notes = dayCalNotes(d);
+  return `
+  <div class="belen-print-header">
+    <svg viewBox="0 0 36 44" fill="none" width="40" height="48"><path d="M18 2L3 8v14c0 10 7 18 15 20 8-2 15-10 15-20V8L18 2z" fill="#C9991A"/><path d="M18 5L5 10.5v11.5c0 8.5 5.5 15 13 17 7.5-2 13-8.5 13-17V10.5L18 5z" fill="#1B3A6B"/><text x="18" y="26" text-anchor="middle" font-family="serif" font-size="13" font-weight="bold" fill="#C9991A">BJ</text></svg>
+    <div><div style="font-size:14px;font-weight:600;color:var(--navy)">Belen Jesuit Preparatory School</div>
+    <div class="print-meta"><span>${esc(state.teacher||'Eric Lastres, SJ')} · ${esc(getCourse().name)}</span><span>Unit ${unitNo(currentUnit)}: ${u?esc(u.name):''} · ${esc(d.label)}</span></div></div>
+  </div>
+
+  <div class="dl-donebar no-print">
+    <label class="dl-donetoggle on" title="Untick to edit this lesson again">
+      <input type="checkbox" checked onchange="toggleLessonDone(${i})">
+      <span>Done</span>
+    </label>
+    <span class="dl-donenote">Finished — shown exactly as it appears in the Weekly View. Untick <b>Done</b> to edit it again.</span>
+    <span class="dl-donebtns">
+      <button class="dl-donebtn" onclick="exportDailyAgenda(${i})">📋 Student agenda</button>
+      <button class="dl-donebtn" onclick="exportBlackbaudAgenda(${i})">🗂️ Blackbaud</button>
+    </span>
+  </div>
+
+  ${keyLegendHTML()}
+
+  <div class="wk-scroll">
+  <table class="wk-table">
+    <thead><tr>
+      <th class="wk-corner">${esc(d.label)}<br><span style="font-weight:400;font-size:10px;color:var(--ink-3)">${dates?esc(dates):'no dates set'}</span></th>
+      <th class="wk-dayhead" style="border-top:4px solid ${c.br}">
+        <div class="wk-dh-row"><span class="wk-dh-tag">${esc(tag)}</span></div>
+        <div class="wk-dh-unit" style="color:${c.br}">Unit ${unitNo(currentUnit)} · ${u?esc(u.name):''}</div>
+        ${topic?`<div class="wk-dh-topic">${esc(topic)}</div>`:`<div class="wk-dh-topic wk-dh-none">Untitled lesson</div>`}
+        ${wkStrip(d.eq)?`<div class="wk-dh-dates">${esc(wkStrip(d.eq))}</div>`:''}
+        ${notes.length?`<div class="wk-dh-dates">${notes.map(n=>`<span class="smap-note-pill">${esc(n)}</span>`).join(' ')}</div>`:''}
+      </th>
+    </tr></thead>
+    <tbody>
+      <tr><td class="wk-lbl">Goals<small>What students should learn</small></td>${wkGoalsCell(d)}</tr>
+      <tr><td class="wk-lbl">Q.O.D.<small>Question of the Day</small></td>${wkQodCell(d)}</tr>
+      <tr><td class="wk-lbl">Learning Targets<small>&ldquo;I can…&rdquo; statements</small></td>${wkTgtCell(d)}</tr>
+      <tr><td class="wk-lbl">Learning Activities / Tasks<small>with IPP stages</small></td>${wkActCell(d)}</tr>
+      <tr><td class="wk-lbl">Homework</td>${wkHwCell(d)}</tr>
+      <tr class="wk-bannerrow"><td class="wk-lbl-blank"></td><td class="wk-banner">Student Resources / Links / Tech Tools</td></tr>
+      <tr><td class="wk-lbl">Resources</td>${wkResCell(d)}</tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="dl-todos no-print">
+    <div class="dl-todos-head">✓ Lesson prep to-dos <span class="dl-todos-note">syncs to your dashboard · not printed</span></div>
+    ${lessonTodosHTML(i)}
+  </div>
+  `;
+}
 
 function dailyPanelHTML(d, i) {
   const u = UNIT_META.find(m=>m.id===currentUnit);
@@ -8314,6 +9148,9 @@ function dailyPanelHTML(d, i) {
     const parsed = parseActText(d.activitiesText);
     if(parsed.length){ d.activities = parsed; delete d.activitiesText; saveState(); }
   }
+
+  // Done means finished: show the read-only weekly card instead of the form.
+  if(d.done) return lessonDoneViewHTML(d, i);
 
   // Activities keep the teacher's own order. Numbering skips break dividers;
   // each break records the teaching minutes that came before it.
@@ -8393,6 +9230,10 @@ function dailyPanelHTML(d, i) {
   <div class="dl-head">
     <div class="dl-head-top">
       <div class="dl-title">${esc(d.label)} · Unit ${unitNo(currentUnit)}${u?` — ${esc(u.name)}`:''}</div>
+      <label class="dl-donetoggle no-print" title="Mark this lesson finished — it locks and shows as it will in the Weekly View">
+        <input type="checkbox" onchange="toggleLessonDone(${i})">
+        <span>Done</span>
+      </label>
       <details class="dl-menu">
         <summary title="More options">⋯</summary>
         <div class="dl-menu-body">
@@ -8456,13 +9297,20 @@ function dailyPanelHTML(d, i) {
     <input id="lestodo-${i}" class="dl-todos-add" placeholder="+ Add a prep task for this lesson, press Enter" onkeydown="if(event.key==='Enter'){event.preventDefault();addLessonTodo(${i},this.value)}">
   </div>
 
-  <!-- Bloom's taxonomy quick reference -->
+  <!-- Quick references: Bloom's verbs, and the IPP at a glance -->
   <div class="dl-blooms">
     <button class="dl-blooms-head" onclick="toggleBloomsRef('blooms-body-${i}')">
       <span id="blooms-chev-${i}" style="display:inline-block;transition:transform .15s">▸</span>
       🌸 Bloom's Taxonomy — verbs &amp; teaching strategies (reference)
     </button>
     <div id="blooms-body-${i}" class="dl-blooms-body" style="display:none">${bloomsReferenceHTML()}</div>
+  </div>
+  <div class="dl-blooms">
+    <button class="dl-blooms-head" onclick="toggleRefCard('ipp-body-${i}','ipp-chev-${i}')">
+      <span id="ipp-chev-${i}" style="display:inline-block;transition:transform .15s">▸</span>
+      ✝️ Quick IPP at a glance — activities &amp; the questions behind each stage
+    </button>
+    <div id="ipp-body-${i}" class="dl-blooms-body" style="display:none">${ippReferenceHTML()}</div>
   </div>
   `;
 }
@@ -8834,6 +9682,7 @@ function openAddResource(i, ri){
   document.getElementById('resource-save-btn').textContent = editing ? 'Save changes' : 'Add resource';
   document.getElementById('resource-title').value = m ? matTitle(m) : '';
   document.getElementById('resource-url').value = m ? matUrl(m) : '';
+  document.getElementById('resource-drive-row').innerHTML = drivePickBtnHTML('pickDriveIntoResourceModal()');
   document.getElementById('resource-overlay').style.display = 'block';
   setTimeout(()=>document.getElementById('resource-title').focus(), 40);
 }
@@ -9107,14 +9956,96 @@ function bloomsReferenceHTML() {
   </div>`;
 }
 
-function toggleBloomsRef(bodyId) {
+// ── QUICK IPP AT A GLANCE ────────────────────────────────────────
+// The Ignatian Pedagogical Paradigm laid out the same way as the Bloom's
+// card above it: each stage with the two or three questions that define it
+// and the classroom activities that actually live there. Companion to the
+// IPP letters (C · E · R · A · V) tagged on each activity row.
+function ippReferenceHTML() {
+  const stages = [
+    { letter:'C', stage:'Context', color:'#1B3A6B', bg:'#E6EBF4',
+      gist:'Know the students you actually have before deciding what to teach.',
+      questions:[
+        'Who are these students — what world, family and faith do they walk in with today?',
+        'What do they already know, believe or misunderstand about this material?',
+        'What has to be true of this room for them to risk anything real here?',
+      ],
+      activities:'entrance survey · KWL chart · diagnostic pre-assessment · interest inventory · do-now tied to their own lives · anticipation guide · current-event hook · community-building circle · opening prayer &amp; class norms · quick poll · "where are you from" mapping' },
+    { letter:'E', stage:'Experience', color:'#185FA5', bg:'#E6F1FB',
+      gist:'Give them something to grapple with — head and heart, not head alone.',
+      questions:[
+        'What will students actually do, see, read or feel — not just hear about?',
+        'Where does the material touch imagination and affect, not only intellect?',
+        'Is the experience concrete enough that every student has something to reflect on?',
+      ],
+      activities:'primary-source reading · direct instruction with guided notes · Socratic seminar · simulation or role play · imaginative contemplation / lectio divina · guided film viewing · gallery walk · jigsaw · think-pair-share · case study · guest speaker · lab or hands-on task · debate' },
+    { letter:'R', stage:'Reflection', color:'#0F6E56', bg:'#E1F5EE',
+      gist:'The heart of the paradigm: what does this mean, and what does it mean for me?',
+      questions:[
+        'So what? What is the meaning underneath what we just did?',
+        'What moved in me — what consoled, unsettled or surprised me, and why?',
+        'How does this change what I understand about God, others or myself?',
+      ],
+      activities:'journal prompt · the Examen · one-minute paper · exit ticket · silent reflection with music · turn &amp; talk on a single question · quote response · sketch or visual metaphor · letter to yourself · dyad interview · reflective discussion protocol · gratitude round' },
+    { letter:'A', stage:'Action', color:'#854F0B', bg:'#FAEEDA',
+      gist:'Reflection that stops at feeling is not Ignatian — it has to move outward.',
+      questions:[
+        'Now what? What will I do differently because of this — this week, concretely?',
+        'Where does this call me beyond myself, toward others?',
+        'What interior choice (a new attitude, a habit) does this ask of me?',
+      ],
+      activities:'commitment card ("this week I will…") · service project or site visit · advocacy letter · family or parish interview · teach it to a peer · PSA / campaign · class covenant · prayer intentions written for others · apply the skill to a new case · plan of action with a deadline' },
+    { letter:'V', stage:'Evaluation', color:'#993C1D', bg:'#FAECE7',
+      gist:'Assess the whole student: what they know, and who they are becoming.',
+      questions:[
+        'How do we know growth happened — in understanding and in character?',
+        'What evidence do students have of their own progress, in their own hands?',
+        'Are they growing as men and women for and with others, not just as test-takers?',
+      ],
+      activities:'rubric self-assessment · peer feedback protocol · quiz, test or performance task · portfolio review · one-on-one conference · goal check-in · revised second draft · standards checklist · reflective self-grade with evidence · end-of-unit survey' },
+  ];
+  return `
+  <!-- The paradigm is a cycle: each turn re-reads the context it started from -->
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+    <span style="font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)">A cycle, not a checklist</span>
+    <div style="flex:1;min-width:120px;height:3px;border-radius:2px;background:linear-gradient(90deg,#1B3A6B,#185FA5,#0F6E56,#854F0B,#993C1D);-webkit-print-color-adjust:exact;print-color-adjust:exact"></div>
+    <span style="font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)">↻ back into context</span>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+    ${stages.map(s => `
+      <div style="border-radius:6px;overflow:hidden;border:1px solid ${s.color}30;display:flex;flex-direction:column">
+        <div style="background:${s.color};color:white;padding:5px 10px;display:flex;align-items:baseline;gap:6px;-webkit-print-color-adjust:exact;print-color-adjust:exact">
+          <span style="font-size:12px;font-weight:800;letter-spacing:.04em;opacity:.85">${s.letter}</span>
+          <span style="font-size:11px;font-weight:700;letter-spacing:.04em">${s.stage}</span>
+        </div>
+        <div style="padding:6px 10px;background:${s.bg};-webkit-print-color-adjust:exact;print-color-adjust:exact">
+          <div style="font-size:9.5px;font-style:italic;color:${s.color};opacity:.85;line-height:1.45;margin-bottom:4px">${s.gist}</div>
+          <ul style="margin:0;padding-left:13px;list-style:disc">
+            ${s.questions.map(q=>`<li style="font-size:10px;color:${s.color};line-height:1.45;margin-bottom:2px">${q}</li>`).join('')}
+          </ul>
+        </div>
+        <div style="padding:5px 10px;background:${s.bg};border-top:1px dashed ${s.color}40;flex:1;-webkit-print-color-adjust:exact;print-color-adjust:exact">
+          <div style="font-size:8px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${s.color};opacity:.75;margin-bottom:2px">Activities</div>
+          <div style="font-size:10px;color:${s.color};line-height:1.45">${s.activities}</div>
+        </div>
+      </div>`).join('')}
+  </div>
+  <div style="font-size:9px;color:var(--ink-3);margin-top:8px;line-height:1.5;font-style:italic">
+    Ignatian Pedagogy: A Practical Approach (ICAJE, 1993) and the Characteristics of Jesuit Education (1986). Tag each activity above with its stage using the IPP box on the activity row — C · E · R · A · V.
+  </div>`;
+}
+
+// Collapse/expand either reference card (Bloom's or the IPP).
+function toggleRefCard(bodyId, chevId) {
   const body = document.getElementById(bodyId);
-  const idx = bodyId.split('-').pop();
-  const chev = document.getElementById('blooms-chev-'+idx);
   if (!body) return;
   const open = body.style.display === 'none' || body.style.display === '';
   body.style.display = open ? 'block' : 'none';
+  const chev = chevId && document.getElementById(chevId);
   if (chev) chev.style.transform = open ? 'rotate(90deg)' : '';
+}
+function toggleBloomsRef(bodyId) {
+  toggleRefCard(bodyId, 'blooms-chev-' + bodyId.split('-').pop());
 }
 
 // ── TEACHER GOALS ─────────────────────────────────────────────────
@@ -10215,6 +11146,8 @@ function exportPacingGuidePDF() {
         ${band}
         <td style="border:1px solid ${RULE};padding:5px 7px;font-size:9pt;text-align:center">${globalDay}</td>
         <td style="border:1px solid ${RULE};padding:5px 7px;font-size:9pt;text-align:center;font-weight:600">${unitNo(b.u.id)}.${lessonNo}</td>
+        <td style="border:1px solid ${RULE};padding:5px 7px;font-size:8.5pt;white-space:nowrap">${d.dateA?escPDF(isoParse(d.dateA).toLocaleDateString('en-US',{weekday:'short',month:'numeric',day:'numeric'})):'—'}${
+          dayCalNotes(d).length?`<div style="font-size:7.5pt;color:#57534E;margin-top:2px;white-space:normal">${escPDF(dayCalNotes(d).join(' · '))}</div>`:''}</td>
         <td style="border:1px solid ${RULE};padding:5px 8px;font-size:9.5pt">${escPDF(String(d.topic||'').replace(/<[^>]*>/g,' ').trim())}</td>
         <td style="border:1px solid ${RULE};padding:5px 8px;font-size:9pt">${escPDF(String(d.homework||'').replace(/<[^>]*>/g,' ').trim())}</td>
       </tr>`;
@@ -10229,8 +11162,8 @@ function exportPacingGuidePDF() {
       <div style="font-size:15pt;font-weight:700;color:${NAVY}">Pacing Guide — ${escPDF(co.name)}</div>
       <div style="font-size:9.5pt;color:#57534E;margin-top:3px">${escPDF(co.code)} · ${escPDF(state.teacher||'')} · ${new Date().toLocaleDateString()}</div>
     </div>
-    <table><thead><tr>${th('Unit','110px')}${th('Day','44px')}${th('#','54px')}${th('Content')}${th('HW','190px')}</tr></thead>
-    <tbody>${rowsHTML || '<tr><td colspan="5" style="border:1px solid '+RULE+';padding:10px;text-align:center;color:#78716C">No class days yet.</td></tr>'}</tbody></table>
+    <table><thead><tr>${th('Unit','110px')}${th('Day','44px')}${th('#','54px')}${th('Date','96px')}${th('Content')}${th('HW','170px')}</tr></thead>
+    <tbody>${rowsHTML || '<tr><td colspan="6" style="border:1px solid '+RULE+';padding:10px;text-align:center;color:#78716C">No class days yet.</td></tr>'}</tbody></table>
   </body></html>`;
 
   const w = window.open('', '_blank');
