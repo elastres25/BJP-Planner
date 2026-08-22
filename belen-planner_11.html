@@ -759,7 +759,6 @@ body.simple-mode .dp-adv { display: none !important; }
 .sp-add:hover { border-color:var(--navy); background:#fff; }
 .sp-band { color:#fff; vertical-align:top; padding:0; width:120px; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
 /* editable dates + your own events on the pacing guide */
-.sp-note-sub { margin-top:5px; font-size:11.5px; color:var(--ink-3); }
 .sp-btn-ghost { background:#fff; color:var(--navy); border:1px solid var(--rule-dark); }
 .sp-btn-ghost:hover { background:var(--parchment); }
 .sp-actions { display:flex; gap:8px; flex-wrap:wrap; }
@@ -1407,9 +1406,6 @@ body.simple-mode .dp-adv { display: none !important; }
    A blue bar shows exactly where the thing you're dragging
    will land; a tinted panel means "drop it in this week".
 ══════════════════════════════════════════════════════════ */
-.plan-hint { background: var(--parchment); border: 1px solid var(--rule); border-radius: 9px;
-  padding: 8px 12px; margin-bottom: 14px; font-size: 11.5px; color: var(--ink-2); line-height: 1.55; }
-.plan-hint b { color: var(--navy); }
 .week-block { border-radius: 12px; padding: 2px 4px 0; margin-bottom: 22px; transition: background .12s, box-shadow .12s; }
 .week-block.is-dragging { opacity: .45; }
 .week-drag { cursor: grab; color: var(--ink-3); font-size: 12px; line-height: 1; user-select: none;
@@ -1525,6 +1521,7 @@ body.dragging-lesson, body.dragging-week { cursor: grabbing; }
     <button onclick="closeMoreMenu();openCalendarImport()">📅 Import school calendar…</button>
     <button onclick="closeMoreMenu();openMapImport()">📥 Paste school semester map…</button>
     <button onclick="closeMoreMenu();openEventModal('')">📌 School events &amp; days of your own…</button>
+    <button onclick="closeMoreMenu();toggleKeepDateSlots()" id="mm-dateslots">🗓 Dates when moving a lesson…</button>
     <div class="mm-sec">Advanced</div>
     <button onclick="closeMoreMenu();nav('prep')">Prep Board</button>
     <button onclick="closeMoreMenu();resetCourseData()">Reset course data</button>
@@ -1722,6 +1719,16 @@ body.dragging-lesson, body.dragging-week { cursor: grabbing; }
 .d-t-text:focus{background:rgba(27,58,107,.1);box-shadow:0 0 0 1px var(--navy) inset;}
 .d-t-textlink.link{cursor:pointer;}
 .d-t-textlink.link:hover{color:var(--navy);text-decoration:underline;}
+/* every assignment carries a task: tick box on the row, chip on the task */
+.assign-cb{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;
+  border:1.5px solid var(--rule-dark);border-radius:5px;cursor:pointer;color:transparent;
+  background:#fff;transition:all .12s;vertical-align:middle;}
+.assign-cb:hover{border-color:var(--navy);}
+.assign-cb.on{background:var(--navy);border-color:var(--navy);color:#fff;}
+.assign-cb svg{stroke:currentColor;}
+tr.assign-done{opacity:.55;}
+tr.assign-done input[type=text]{text-decoration:line-through;}
+.d-t-chip.assign{background:#EDE9FB;color:#3C3489;border-color:#D3C0E4;}
 .d-t-sub{display:flex;align-items:center;gap:7px;margin-top:5px;flex-wrap:wrap;}
 .d-t-tag{font-size:9.5px;font-weight:600;padding:1px 7px;border-radius:999px;background:var(--parchment);border:1px solid var(--rule);color:var(--ink-2);}
 .d-t-tag.auto{background:rgba(35,74,135,.08);border-color:rgba(35,74,135,.2);color:var(--navy-light);}
@@ -1811,6 +1818,21 @@ body.dragging-lesson, body.dragging-week { cursor: grabbing; }
 .prep-fchip{background:#fff;border:1px solid var(--rule);border-radius:999px;padding:5px 14px;font-size:12px;font-weight:600;color:var(--ink-2);cursor:pointer;font-family:inherit;transition:all .12s;}
 .prep-fchip:hover{border-color:var(--navy);color:var(--navy);}
 .prep-fchip.on{background:var(--navy);border-color:var(--navy);color:#fff;}
+/* filter chips shared by the Pacing Guide and the unit's Weekly Plan */
+.lf-bar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:9px 14px;
+  border-bottom:1px solid var(--rule);background:#FBFAF8;}
+.lf-label{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--ink-3);margin-right:2px;}
+.lf-bar .prep-fchip{padding:4px 11px;font-size:11.5px;display:inline-flex;align-items:center;gap:6px;}
+.lf-n{font-size:10px;font-weight:700;opacity:.6;}
+.prep-fchip.on .lf-n{opacity:.85;}
+.lf-note{font-size:11px;color:var(--ink-3);margin-left:2px;}
+/* in the unit view the bar floats above the weeks rather than inside a card */
+#utab-content-plan .lf-bar{border:1px solid var(--rule);border-radius:9px;margin-bottom:14px;}
+/* a filtered-out day stays in place (so the week keeps its shape and you can
+   still drop onto it) but fades back */
+.day-card.is-filtered{opacity:.32;filter:saturate(.4);}
+.day-card.is-filtered:hover{opacity:.75;filter:none;}
 .prep-filter-note{font-size:11px;color:var(--ink-3);margin-left:2px;}
 .prep-guided-cta{margin-top:9px;font-size:11px;font-weight:700;color:var(--navy);letter-spacing:.02em;opacity:.85;}
 .prep-stage:hover .prep-guided-cta{opacity:1;}
@@ -3538,6 +3560,13 @@ function gotoNextLesson(){
 function gotoPacing(){ nav('pacing'); }
 function gotoAssessments(){ nav('assess'); }
 
+// Label the date-behavior entry with whatever it's currently set to.
+function refreshMoreMenuLabels(){
+  const el = document.getElementById('mm-dateslots');
+  if(el) el.textContent = keepDateSlots()
+    ? '🗓 Moving a lesson: keeps the slot\u2019s date'
+    : '🗓 Moving a lesson: date travels with it';
+}
 function toggleMoreMenu(e){
   if(e) e.stopPropagation();
   const m = document.getElementById('more-menu');
@@ -3545,6 +3574,7 @@ function toggleMoreMenu(e){
   const willOpen = !m.classList.contains('open');
   m.classList.toggle('open', willOpen);
   if(willOpen){
+    refreshMoreMenuLabels();
     setTimeout(()=>document.addEventListener('click', _moreMenuOutside), 0);
   }
 }
@@ -4409,6 +4439,26 @@ function updateTodoLink(id, val){
   const t = (state.todos||[]).find(x=>x.id===id);
   if(t){ const link=parseTodoLink(val); t.lesson=link.lesson; t.unit=link.unit; saveState(); renderDashboard(); }
 }
+// ── To-do filter (open / done / where it came from) ──────────────
+const TODO_FILTERS = [
+  { k:'all',    label:'All',         hint:'Everything on the list' },
+  { k:'open',   label:'Open',        hint:'Not ticked off yet' },
+  { k:'done',   label:'Done',        hint:'Already ticked off' },
+  { k:'assign', label:'Assignments', hint:'Tasks that come from a unit assignment' },
+  { k:'mine',   label:'My tasks',    hint:'Tasks you typed yourself' },
+];
+function todoFilter(){
+  const f = state && state.todoFilter;
+  return TODO_FILTERS.some(x=>x.k===f) ? f : 'all';
+}
+function setTodoFilter(k){ state.todoFilter = k; saveState(); renderDashboard(); }
+function todoFilterCount(items, k){
+  return items.filter(it =>
+    k === 'open'   ? !it.done :
+    k === 'done'   ? it.done :
+    k === 'assign' ? !!it.assign :
+    k === 'mine'   ? (it.manual && !it.assign) : true).length;
+}
 function toggleDashTodo(id){
   const t = (state.todos||[]).find(x=>x.id===id);
   if(t){ t.done=!t.done; saveState(); renderDashboard(); }
@@ -4539,6 +4589,19 @@ function addTaskFromDay(i){
   state.todos.push({ id: uid(), text: `${t} — ${label}`, due, done:false });
   saveState();
   toast('Added to your dashboard To-Do ✓');
+}
+// Deleting an assignment's task deletes the assignment — there is only one
+// of each, so leaving a stray row behind in the unit would be a lie.
+function deleteAssignmentFromDash(uid, id){
+  const a = getUnitAssignments(uid).find(x=>x.id===id);
+  const name = a ? assignTodoText(a) : 'this assignment';
+  if(!confirm(`Delete "${name}"? It's removed from Unit ${unitNo(uid)} as well.`)) return;
+  const list = getUnitAssignments(uid);
+  const i = list.findIndex(x=>x.id===id);
+  if(i>=0) list.splice(i,1);
+  saveState();
+  syncAssignmentTodos();
+  renderDashboard();
 }
 function deleteDashTodo(id){
   state.todos = (state.todos||[]).filter(x=>x.id!==id);
@@ -4712,10 +4775,11 @@ function renderDashboard(){
     autos.push({ key:'horizon', text:`Extend your plan through ${fmtNice(target)} to stay 2 weeks ahead`, due:plannedThrough||today, tag:'planning horizon' });
   }
 
+  syncAssignmentTodos();   // every assignment carries a task on this list
   const items = [
     ...autos.map(a=>({ id:a.key, auto:true, text:a.text, due:a.due, tag:a.tag, unit:a.unit, open:a.open, done:!!(state.autoDone&&state.autoDone[a.key]) })),
     ...(state.todos||[]).map(t=>{
-      const m={ id:t.id, manual:true, text:t.text, due:t.due||'', done:!!t.done, cat:t.cat||'', subtasks:t.subtasks||[], lesson:t.lesson||null, unit:t.unit||null };
+      const m={ id:t.id, manual:true, text:t.text, due:t.due||'', done:!!t.done, cat:t.cat||'', subtasks:t.subtasks||[], lesson:t.lesson||null, unit:t.unit||null, assign:t.assign||null };
       if(t.lesson) m.open=[t.lesson.uid, t.lesson.wi, t.lesson.di];
       return m;
     }),
@@ -4723,7 +4787,13 @@ function renderDashboard(){
 
   const bucketOf = it => (it.due && it.due<today) ? 'over' : (it.due && it.due<=isoAddDays(today,7)) ? 'week' : 'later';
   const groups = {over:[], week:[], later:[]};
-  items.forEach(it=>groups[bucketOf(it)].push(it));
+  const tf = todoFilter();
+  const shown = items.filter(it =>
+    tf === 'open'    ? !it.done :
+    tf === 'done'    ? it.done :
+    tf === 'assign'  ? !!it.assign :
+    tf === 'mine'    ? (it.manual && !it.assign) : true);
+  shown.forEach(it=>groups[bucketOf(it)].push(it));
   const sortFn = (a,b)=> (a.done-b.done) || (!a.due-!b.due) || (a.due||'').localeCompare(b.due||'');
   Object.values(groups).forEach(g=>g.sort(sortFn));
 
@@ -4735,7 +4805,9 @@ function renderDashboard(){
       else if(it.due<=isoAddDays(today,7)){ pri='p-warn'; dueCls=' warn'; dueTxt=`Due ${fmtNice(it.due)}`; }
       else { dueTxt=`Due ${fmtNice(it.due)}`; }
     }
-    const toggle = it.auto ? `toggleAutoDone('${it.id}')` : `toggleDashTodo('${it.id}')`;
+    const toggle = it.auto ? `toggleAutoDone('${it.id}')`
+      : it.assign ? `toggleAssignmentDone(${it.assign.uid},'${it.assign.id}')`
+      : `toggleDashTodo('${it.id}')`;
     const mainClick = it.open ? ` onclick="openGridDay(${it.open[0]},${it.open[1]},${it.open[2]})"` : '';
     const cat = it.manual ? todoCat(it.cat) : null;
     const cats = getTodoCats();
@@ -4757,7 +4829,14 @@ function renderDashboard(){
       } else {
         linkChip = `<button class="d-t-linkbtn" title="Link this task to a lesson or unit" onclick="event.stopPropagation();openTodoLinkPicker('${it.id}')">🔗 Link lesson</button>`;
       }
-      sub = `<input type="date" class="d-t-dateedit" value="${esc(it.due||'')}" title="Due date" onchange="updateTodoDate('${it.id}',this.value)">
+      if(it.assign){
+        const uu = UNIT_META.find(m=>m.id===it.assign.uid);
+        linkChip = `<span class="d-t-chip assign" title="Open this unit's assignments" onclick="event.stopPropagation();navUnitTab(${it.assign.uid},'overview')">📝 Assignment${uu?` · Unit ${unitNo(uu.id)}`:''}</span>`;
+      }
+      const dateChange = it.assign
+        ? `updateAssignField(${it.assign.uid},'${it.assign.id}','due',this.value);renderDashboard()`
+        : `updateTodoDate('${it.id}',this.value)`;
+      sub = `<input type="date" class="d-t-dateedit" value="${esc(it.due||'')}" title="Due date" onchange="${dateChange}">
         ${catSel}${linkChip}
         <span class="d-t-due${dueCls}">${it.due?dueTxt:'No date'}</span>`;
     } else {
@@ -4770,7 +4849,7 @@ function renderDashboard(){
     const catBar = cat ? `border-left:3px solid ${cat.color}` : '';
     // Subtasks (manual tasks only)
     let subsHTML = '';
-    if(it.manual){
+    if(it.manual && !it.assign){
       const subs = it.subtasks||[];
       const doneN = subs.filter(s=>s.done).length;
       const rows = subs.map(s=>`<div class="d-sub${s.done?' done':''}">
@@ -4787,13 +4866,17 @@ function renderDashboard(){
     return `<div class="d-todo ${pri}${it.done?' done':''}"${catBar?` style="${catBar}"`:''}>
       <div class="d-cb" onclick="${toggle}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg></div>
       <div class="d-t-body">
-        <div class="d-t-main">${cat?`<span class="d-t-catdot" style="background:${cat.color}"></span>`:''}${it.manual
+        <div class="d-t-main">${cat?`<span class="d-t-catdot" style="background:${cat.color}"></span>`:''}${it.assign
+          ? `<span class="d-t-textlink link" title="Edit this assignment in its unit" onclick="navUnitTab(${it.assign.uid},'overview')">${esc(it.text)}</span>`
+          : it.manual
           ? `<span class="d-t-textwrap"><span class="d-t-text" contenteditable="true" title="Click to edit · select text then 🔗 to add a link" onclick="todoTextClick(event)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}" onblur="updateTodoText('${it.id}',this.innerHTML)">${it.text}</span><button class="d-t-linktext" title="Add a link to the selected text" onmousedown="event.preventDefault()" onclick="linkTodoText('${it.id}',this)">🔗</button></span>`
-          : `<span class="d-t-textlink${it.open?' link':''}"${mainClick}>${esc(it.text)}</span>`}${it.manual?(subCount||''):''}</div>
+          : `<span class="d-t-textlink${it.open?' link':''}"${mainClick}>${esc(it.text)}</span>`}${it.manual&&!it.assign?(subCount||''):''}</div>
         <div class="d-t-sub">${sub}</div>
         ${subsHTML}
       </div>
-      ${it.manual?`<button class="d-t-del" title="Delete" onclick="deleteDashTodo('${it.id}')">&times;</button>`:''}
+      ${it.assign
+        ? `<button class="d-t-del" title="Delete this assignment (removes it from its unit too)" onclick="deleteAssignmentFromDash(${it.assign.uid},'${it.assign.id}')">&times;</button>`
+        : it.manual?`<button class="d-t-del" title="Delete" onclick="deleteDashTodo('${it.id}')">&times;</button>`:''}
     </div>`;
   };
 
@@ -4814,6 +4897,11 @@ function renderDashboard(){
   const todoCard = `
     <div class="d-card">
       <div class="d-card-h"><h2>Teacher To-Do</h2><span class="d-meta">${items.filter(i=>!i.done).length} open</span></div>
+      <div class="lf-bar" style="border:none;background:none;padding:0 0 8px">
+        <span class="lf-label">Show</span>
+        ${TODO_FILTERS.map(x=>`<button class="prep-fchip${tf===x.k?' on':''}" title="${esc(x.hint)}"
+          onclick="setTodoFilter('${x.k}')">${x.label}<span class="lf-n">${todoFilterCount(items,x.k)}</span></button>`).join('')}
+      </div>
       <div class="d-add-row">
         <input id="d-todo-text" placeholder="Add your own task…" onkeydown="if(event.key==='Enter')addDashTodo()">
         <input id="d-todo-due" type="date" title="Optional due date">
@@ -4835,8 +4923,9 @@ function renderDashboard(){
              </span>`
           : `<button class="d-cat-new" onclick="toggleTodoCatForm()">+ New category</button>`}
       </div>
-      ${anyTodo ? (groupHTML('Overdue','var(--crit)',groups.over)+groupHTML('This Week','#8a6d1a',groups.week)+groupHTML('Next Two Weeks','var(--navy)',groups.later))
-                : `<div class="d-empty-note">You're all caught up — no tasks due. Auto-tasks appear here as classes and assessments approach.</div>`}
+      ${shown.length ? (groupHTML('Overdue','var(--crit)',groups.over)+groupHTML('This Week','#8a6d1a',groups.week)+groupHTML('Next Two Weeks','var(--navy)',groups.later))
+        : anyTodo ? `<div class="d-empty-note">Nothing under <b>${esc(TODO_FILTERS.find(x=>x.k===tf).label)}</b> — <button class="sp-linkbtn" onclick="setTodoFilter('all')">show all ${items.length}</button></div>`
+        : `<div class="d-empty-note">You're all caught up — no tasks due. Auto-tasks appear here as classes and assessments approach.</div>`}
     </div>`;
 
   // ============ MINI CALENDAR ============
@@ -7379,15 +7468,17 @@ function getUnitAssignments(uid){
 }
 function addUnitAssignment(uid){
   const list = getUnitAssignments(uid);
-  list.push({id: uid+'-a'+Math.random().toString(36).slice(2,8), type:'HW', title:'', announce:'', due:''});
-  saveState(); renderUnit();
+  list.push({id: uid+'-a'+Math.random().toString(36).slice(2,8), type:'HW', title:'', announce:'', due:'', done:false});
+  saveState(); syncAssignmentTodos(); renderUnit();
 }
 // Save a single field without re-rendering (used while typing a title, so
 // focus isn't lost). saveState only.
 function updateAssignField(uid, id, field, val){
   const a = getUnitAssignments(uid).find(x=>x.id===id);
   if(!a) return;
-  a[field] = val; saveState();
+  a[field] = val;
+  syncAssignmentTodos(true);      // its task follows the wording and the date
+  saveState();
 }
 // Save a field AND re-render (used for type/date changes so chips recolor
 // and the list re-sorts by due date).
@@ -7398,7 +7489,7 @@ function updateAssignReRender(uid, id, field, val){
 function deleteUnitAssignment(uid, id){
   const list = getUnitAssignments(uid);
   const i = list.findIndex(x=>x.id===id);
-  if(i>=0){ list.splice(i,1); saveState(); renderUnit(); }
+  if(i>=0){ list.splice(i,1); saveState(); syncAssignmentTodos(); renderUnit(); }
 }
 // Whole-day count relative to today; negative = past, 0 = today.
 function assignDaysUntil(iso){
@@ -7422,9 +7513,71 @@ function assignFmtDate(iso){
   return isoParse(iso).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
 }
 
+// ── EVERY ASSIGNMENT IS A TO-DO ──────────────────────────────────
+// An assignment you've written down is work you still have to do, so each
+// one carries a matching task on the dashboard To-Do list. The assignment
+// row is the source of truth for its wording and due date; ticking it off
+// in either place ticks it off in both. Deleting the assignment takes its
+// task with it.
+function assignTodoText(a){
+  const t = assignType(a.type);
+  const title = String(a.title||'').trim() || 'Untitled assignment';
+  return `${t.label}: ${title}`;
+}
+function findAssignTodo(uid, id){
+  return (state.todos||[]).find(t => t.assign && t.assign.uid === uid && t.assign.id === id) || null;
+}
+// Rebuild the assignment-backed tasks so they match the assignments exactly.
+// Safe to call as often as you like; it only writes when something differs.
+function syncAssignmentTodos(quiet){
+  if(!state.todos) state.todos = [];
+  let changed = false;
+  const live = new Set();
+  Object.keys(state.unitAssignments || {}).forEach(uidKey => {
+    const uid = +uidKey;
+    (state.unitAssignments[uidKey] || []).forEach(a => {
+      // A blank row is a row you haven't written yet — no task until it's named.
+      if(!a.id || !String(a.title||'').trim()) return;
+      live.add(uid + '|' + a.id);
+      const text = assignTodoText(a);
+      let t = findAssignTodo(uid, a.id);
+      if(!t){
+        // Derived id, so a re-sync can never produce a duplicate task.
+        t = { id:'at-'+a.id, assign:{uid, id:a.id}, text, due:a.due||'', done:!!a.done,
+              cat:'', subtasks:[], lesson:null, unit:uid };
+        state.todos.push(t);
+        changed = true;
+      }
+      if(t.text !== text){ t.text = text; changed = true; }
+      if((t.due||'') !== (a.due||'')){ t.due = a.due||''; changed = true; }
+      if(!!t.done !== !!a.done){ t.done = !!a.done; changed = true; }
+      if(t.unit !== uid){ t.unit = uid; changed = true; }
+    });
+  });
+  // Drop tasks whose assignment is gone.
+  const before = state.todos.length;
+  state.todos = state.todos.filter(t => !t.assign || live.has(t.assign.uid + '|' + t.assign.id));
+  if(state.todos.length !== before) changed = true;
+  if(changed && !quiet) saveState();
+  return changed;
+}
+// Tick an assignment off (from its row, or from its task on the dashboard).
+function toggleAssignmentDone(uid, id){
+  const a = getUnitAssignments(uid).find(x => x.id === id);
+  if(!a) return;
+  a.done = !a.done;
+  const t = findAssignTodo(uid, id);
+  if(t) t.done = a.done;
+  saveState();
+  if(document.getElementById('view-dashboard')?.classList.contains('active')) renderDashboard();
+  else renderUnit();
+}
+
 function unitAssignmentsHTML(uid){
   const list = getUnitAssignments(uid);
   list.forEach(a=>{ if(!a.id) a.id = uid+'-a'+Math.random().toString(36).slice(2,8); });
+  syncAssignmentTodos();
+  const done = list.filter(a=>a.done).length;
   // Sort a copy by due date (blanks last) so the soonest is on top.
   const sorted = [...list].sort((x,y)=>{
     if(!x.due && !y.due) return 0;
@@ -7438,7 +7591,13 @@ function unitAssignmentsHTML(uid){
     const dueN  = assignDaysUntil(a.due);
     const overdue = dueN !== null && dueN < 0;
     const dueSoon = dueN !== null && dueN >= 0 && dueN <= 3;
-    return `<tr>
+    return `<tr${a.done?' class="assign-done"':''}>
+      <td style="border:1px solid var(--rule);padding:5px;vertical-align:middle;text-align:center;width:30px">
+        <span class="assign-cb${a.done?' on':''}" title="${a.done?'Done — click to reopen':'Mark done (also ticks it off on your dashboard)'}"
+          onclick="toggleAssignmentDone(${uid},'${a.id}')">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke-width="4"><polyline points="20 6 9 17 4 12"/></svg>
+        </span>
+      </td>
       <td style="border:1px solid var(--rule);padding:5px 6px;vertical-align:middle;white-space:nowrap">
         <select onchange="updateAssignReRender(${uid},'${a.id}','type',this.value)"
           style="font-family:inherit;font-size:11px;font-weight:700;border:1px solid ${t.br};background:${t.bg};color:${t.tx};border-radius:999px;padding:3px 8px;cursor:pointer;outline:none;-webkit-print-color-adjust:exact;print-color-adjust:exact">
@@ -7472,12 +7631,13 @@ function unitAssignmentsHTML(uid){
   return `<div style="margin-bottom:20px">
     <div style="background:var(--navy);padding:8px 14px;display:flex;align-items:center;justify-content:space-between;-webkit-print-color-adjust:exact;print-color-adjust:exact">
       <span style="font-size:12px;font-weight:700;color:white;letter-spacing:.04em">Assignments &amp; Assessments</span>
-      <span style="font-size:10px;color:rgba(255,255,255,.7)">${list.length} item${list.length===1?'':'s'} · sorted by due date</span>
+      <span style="font-size:10px;color:rgba(255,255,255,.7)">${list.length} item${list.length===1?'':'s'}${done?` · ${done} done`:''} · on your dashboard to-do list</span>
     </div>
     <div style="overflow-x:auto">
       <table style="width:100%;border-collapse:collapse;font-size:12px;background:var(--white)">
         <thead>
           <tr>
+            <th style="border:1px solid var(--rule);padding:6px;background:#FAFAF8;width:30px"></th>
             <th style="border:1px solid var(--rule);padding:6px 8px;background:#FAFAF8;font-size:10px;font-weight:700;color:var(--ink-2);text-align:left;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap">Type</th>
             <th style="border:1px solid var(--rule);padding:6px 10px;background:#FAFAF8;font-size:10px;font-weight:700;color:var(--ink-2);text-align:left;text-transform:uppercase;letter-spacing:.04em">Assignment</th>
             <th style="border:1px solid var(--rule);padding:6px 8px;background:#FAFAF8;font-size:10px;font-weight:700;color:var(--ink-2);text-align:left;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap">Announce</th>
@@ -7486,7 +7646,7 @@ function unitAssignmentsHTML(uid){
           </tr>
         </thead>
         <tbody>
-          ${rows || `<tr><td colspan="5" style="border:1px solid var(--rule);padding:14px;text-align:center;color:var(--ink-3);font-size:12px;font-style:italic">No assignments yet — add HWs, quizzes, discussions and tests below.</td></tr>`}
+          ${rows || `<tr><td colspan="6" style="border:1px solid var(--rule);padding:14px;text-align:center;color:var(--ink-3);font-size:12px;font-style:italic">No assignments yet — add HWs, quizzes, discussions and tests below.</td></tr>`}
         </tbody>
       </table>
     </div>
@@ -7829,16 +7989,66 @@ function paceAddDayU(uid){
 // its class days listed. General themes only — edit Content or HW here and
 // it saves straight to that lesson; "open" jumps to the full plan.
 // One line telling you where the dates come from, and nothing more.
+// ── FILTERS: SHOW ME ONLY WHAT I STILL HAVE TO DO ────────────────
+// One filter shared by the Pacing Guide and the unit's Weekly Plan, so
+// switching between them doesn't lose your place. Kept in state, so it
+// survives a reload and follows you across devices.
+const LESSON_FILTERS = [
+  { k:'all',        label:'All',            hint:'Every class day' },
+  { k:'unfinished', label:'Unfinished',     hint:'Everything not yet ticked Done' },
+  { k:'finished',   label:'Finished',       hint:'Lessons ticked Done' },
+  { k:'needs',      label:'Needs planning', hint:'Not enough activities to fill the block yet' },
+  { k:'planned',    label:'Planned',        hint:'Full block planned, not yet ticked Done' },
+];
+function lessonFilter(){
+  const f = state && state.lessonFilter;
+  return LESSON_FILTERS.some(x=>x.k===f) ? f : 'all';
+}
+function setLessonFilter(k){
+  state.lessonFilter = k;
+  saveState();
+  refreshAfterMove();          // redraws whichever page is open
+}
+// Which bucket a lesson falls in.
+function lessonStatus(d){
+  if(d && d.done) return 'finished';
+  return dayIsPlanned(d) ? 'planned' : 'needs';
+}
+function lessonMatchesFilter(d, f){
+  f = f || lessonFilter();
+  if(f === 'all') return true;
+  const st = lessonStatus(d);
+  if(f === 'unfinished') return st !== 'finished';
+  return st === f;
+}
+// How many lessons in the whole course sit in each bucket.
+function lessonFilterCounts(scope){
+  const c = { all:0, unfinished:0, finished:0, needs:0, planned:0 };
+  (scope || flatLessons().map(x=>x.d)).forEach(d => {
+    const st = lessonStatus(d);
+    c.all++; c[st]++;
+    if(st !== 'finished') c.unfinished++;
+  });
+  return c;
+}
+// The chip row itself. `scope` is the list of days being counted.
+function lessonFilterBarHTML(scope, note){
+  const f = lessonFilter();
+  const c = lessonFilterCounts(scope);
+  return `<div class="lf-bar no-print">
+    <span class="lf-label">Show</span>
+    ${LESSON_FILTERS.map(x=>`<button class="prep-fchip${f===x.k?' on':''}" title="${esc(x.hint)}"
+      onclick="setLessonFilter('${x.k}')">${x.label}<span class="lf-n">${c[x.k]}</span></button>`).join('')}
+    ${f!=='all' ? `<span class="lf-note">${c[f]} of ${c.all} shown${note?` · ${esc(note)}`:''}</span>` : ''}
+  </div>`;
+}
+
 function pacingDateNoteHTML(){
   const events = allCustomEvents().length;
   const evTxt = events ? ` · <b>${events}</b> of your own event${events===1?'':'s'}` : '';
-  const slotTxt = keepDateSlots()
-    ? `Move a day and it takes the date of the slot it lands on. <button class="sp-linkbtn" onclick="toggleKeepDateSlots()">let dates travel with the lesson instead</button>`
-    : `Dates travel with the lesson when you move it. <button class="sp-linkbtn" onclick="toggleKeepDateSlots()">keep dates with the calendar slot instead</button>`;
   if(!schoolMapSems(activeCourse).length){
     return `<div class="sp-note">Dates are whatever you set here or on each lesson${evTxt}.
-      <button class="sp-linkbtn" onclick="openMapImport()">Paste your school's semester map</button> to fill them in and pick up school events.
-      <div class="sp-note-sub">${slotTxt}</div></div>`;
+      <button class="sp-linkbtn" onclick="openMapImport()">Paste your school's semester map</button> to fill them in and pick up school events.</div>`;
   }
   let dated = 0, withNotes = 0;
   orderedUnits().forEach(u => (state.units[u.id]||[]).forEach(w => (w.days||[]).forEach(d => {
@@ -7847,8 +8057,7 @@ function pacingDateNoteHTML(){
   })));
   const m = getSchoolMap(activeCourse, schoolMapSems(activeCourse)[0]);
   return `<div class="sp-note">📅 ${dated} lesson${dated===1?'':'s'} matched to <b>${esc((m&&m.title)||'your school map')}</b>${withNotes?` · ${withNotes} with school events`:''}${evTxt}
-    <button class="sp-linkbtn" onclick="openMapImport()">re-paste</button>
-    <div class="sp-note-sub">${slotTxt}</div></div>`;
+    <button class="sp-linkbtn" onclick="openMapImport()">re-paste</button></div>`;
 }
 
 // ── EDITING A LESSON'S DATE IN PLACE ─────────────────────────────
@@ -7944,12 +8153,20 @@ function renderEventList(){
 }
 
 function simplePacingHTML(){
+  const f = lessonFilter();
+  const allDays = [];
   const blocks = orderedUnits().map(u => {
     const weeks = state.units[u.id] || [];
     const days = [];
-    weeks.forEach((w, wi) => (w.days||[]).forEach((d, di) => days.push({d, wi, di, weekLabel:w.weekLabel})));
+    weeks.forEach((w, wi) => (w.days||[]).forEach((d, di) => {
+      allDays.push(d);
+      // Day and lesson numbers count every class day, so a filtered view
+      // still tells you which day of the year you're looking at.
+      days.push({d, wi, di, weekLabel:w.weekLabel, hidden:!lessonMatchesFilter(d, f)});
+    }));
     return { u, days };
-  }).filter(b => b.days.length);
+  }).filter(b => b.days.length).map(b => ({...b, shown:b.days.filter(x=>!x.hidden).length}))
+    .filter(b => b.shown > 0);
 
   const co = getCourse();
   const inp = (val, uid, wi, di, field, ph) =>
@@ -7962,14 +8179,18 @@ function simplePacingHTML(){
   const body = blocks.map(b => {
     const c = getUC(b.u.id);
     let lessonNo = 0;
-    return b.days.map((row, idx) => {
+    let shownIdx = -1;
+    return b.days.map((row) => {
       globalDay++; lessonNo++;
+      if(row.hidden) return '';
+      shownIdx++;
+      const idx = shownIdx;
       const d = row.d, planned = dayIsPlanned(d);
       const schoolNotes = schoolMapNotes(d);
       const myEvents = customEventsOn(d.dateA);
       const isToday = d.dateA && d.dateA === today;
       const band = idx === 0
-        ? `<td class="sp-band" rowspan="${b.days.length}" style="background:${c.br}"
+        ? `<td class="sp-band" rowspan="${b.shown}" style="background:${c.br}"
              ondragover="unitDragOver(event,${b.u.id})" ondrop="unitDrop(event,${b.u.id})"
              title="Drop a day here to move it into this unit">
              <div class="sp-band-inner">Unit ${unitNo(b.u.id)}<span>${esc(b.u.name)}</span>
@@ -8018,7 +8239,7 @@ function simplePacingHTML(){
     <div class="sp-head">
       <div>
         <h2 class="sp-title">Pacing Guide — ${esc(co.name)}</h2>
-        <div class="sp-sub">The big-picture map across every unit: general themes only. Edit the date, Content or HW here and it saves straight to that lesson. Drag a day by its ⠿ handle to move it to another slot, week or unit — drop it on a unit band to send it to the end of that unit.</div>
+        <div class="sp-sub">The big-picture map across every unit: general themes only. Edit the date, Content or HW here and it saves straight to that lesson; drag a day by its ⠿ handle to move it.</div>
       </div>
       <div class="sp-actions">
         <button class="sp-btn sp-btn-ghost" onclick="openEventModal('')" title="Add a retreat, Mass, field trip or any day of your own to the calendar">＋ School event</button>
@@ -8027,6 +8248,7 @@ function simplePacingHTML(){
       </div>
     </div>
     ${pacingDateNoteHTML()}
+    ${lessonFilterBarHTML(allDays)}
     <div class="sp-scroll">
       <table class="sp-table">
         <thead><tr>
@@ -8038,7 +8260,9 @@ function simplePacingHTML(){
           <th style="width:220px">HW</th>
           <th style="width:104px">Plan</th>
         </tr></thead>
-        <tbody>${body || `<tr><td class="sp-td" colspan="7" style="text-align:center;color:var(--ink-3);font-style:italic">No class days yet.</td></tr>`}</tbody>
+        <tbody>${body || `<tr><td class="sp-td" colspan="7" style="text-align:center;color:var(--ink-3);font-style:italic">${
+          allDays.length ? `Nothing matches the <b>${esc(LESSON_FILTERS.find(x=>x.k===f).label)}</b> filter — <button class="sp-linkbtn" onclick="setLessonFilter('all')">show all ${allDays.length}</button>` : 'No class days yet.'
+        }</td></tr>`}</tbody>
       </table>
     </div>
   </div>`;
@@ -8521,14 +8745,7 @@ function renderUnit() {
   const objs  = (state.objs && state.objs[u.id]) || [];
   const totalDays = weeks.reduce((n,w) => n + w.days.length, 0);
 
-  const planHint = `<div class="plan-hint no-print">
-    <b>Moving things around:</b> drag a block by its ⠿ handle to any slot, week or unit — the blue bar shows where it lands. Drag a whole week by the ⠿ beside its name, or nudge with ▲▼ / ‹ ›.
-    ${keepDateSlots()
-      ? `Dates stay with the calendar slot, so whatever lands in a spot takes that spot's date. <button class="sp-linkbtn" onclick="toggleKeepDateSlots()">let dates travel with the lesson instead</button>`
-      : `Dates travel with the lesson when you move it. <button class="sp-linkbtn" onclick="toggleKeepDateSlots()">keep dates with the calendar slot instead</button>`}
-  </div>`;
-
-  const weeksHTML = planHint + weeks.map((week, wi) => `
+  const weeksHTML = weeks.map((week, wi) => `
     <div class="week-block" data-wi="${wi}"
       ondragover="weekDragOver(event,${u.id},${wi})" ondrop="weekDrop(event,${u.id},${wi})">
       <div class="week-nav-row">
@@ -8583,6 +8800,7 @@ function renderUnit() {
       ${unitOverviewPageHTML(u, weeks, false)}
     </div>
     <div id="utab-content-plan" style="display:${currentUnitTab==='plan'?'block':'none'}">
+      ${lessonFilterBarHTML(weeks.flatMap(w=>w.days||[]), `Unit ${unitNo(u.id)}`)}
       ${weeksHTML}
       <button class="add-week-btn" onclick="addWeek()" style="width:100%;padding:10px;margin-top:6px">+ Add another week</button>
     </div>
@@ -8671,7 +8889,8 @@ function dayCardHTML(d, wi, di, c, weeks) {
     : planned
       ? `<span class="dc-pill" style="background:#E3F5E8;color:#1A5227">✓ Planned</span>`
       : `<span class="dc-pill" style="background:#FDF3D6;color:#7A5200">Needs planning</span>`;
-  return `<div class="day-card ${isOpen?'open':''}${d.done?' is-done':''}"
+  const dimmed = !lessonMatchesFilter(d);
+  return `<div class="day-card ${isOpen?'open':''}${d.done?' is-done':''}${dimmed?' is-filtered':''}"
     data-wi="${wi}" data-di="${di}"
     ondragover="lessonDragOver(event,'x')" ondrop="lessonDrop(event,${currentUnit},${wi},${di},'x')"
     onclick="toggleDay(${wi},${di})" style="position:relative;border-top:3px solid ${c.br}">
