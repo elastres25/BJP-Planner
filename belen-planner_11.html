@@ -805,6 +805,10 @@ body.simple-mode .dp-adv { display: none !important; }
 .dl-classlabel { display:inline-flex; align-items:center; font-size:11px; font-weight:700; color:var(--navy-dark,#14315C); background:var(--gold,#F2C75C); border-radius:999px; padding:3px 11px; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
 .dl-calbtn { background:rgba(255,255,255,.14); color:#fff; border:1px solid rgba(255,255,255,.3); border-radius:6px; padding:3px 10px; font-family:inherit; font-size:11px; font-weight:600; cursor:pointer; }
 .dl-calbtn:hover { background:rgba(255,255,255,.26); }
+.dl-reflectbtn { background:rgba(255,255,255,.14); color:#fff; border:1px solid rgba(255,255,255,.3); border-radius:6px; padding:3px 10px; font-family:inherit; font-size:11px; font-weight:600; cursor:pointer; }
+.dl-reflectbtn:hover { background:rgba(255,255,255,.26); }
+.dl-reflectbtn.done { background:rgba(74,222,128,.22); border-color:rgba(74,222,128,.55); }
+.dl-reflectbtn.done:hover { background:rgba(74,222,128,.34); }
 .dl-topic { width:100%; box-sizing:border-box; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.22); border-radius:6px; color:#fff; font-size:14px; font-weight:600; padding:7px 10px; outline:none; font-family:inherit; }
 .dl-topic::placeholder { color:rgba(255,255,255,.5); }
 .dl-table { width:100%; border-collapse:collapse; }
@@ -2224,6 +2228,25 @@ function out(o) {
       <div id="brainstorm-body"></div>
       <div style="display:flex;justify-content:flex-end;margin-top:12px">
         <button onclick="closeBrainstorm()" style="background:var(--navy);color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">Done</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- POST-CLASS REFLECTION MODAL -->
+<div id="debrief-overlay" style="display:none;position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.5);overflow-y:auto" onclick="if(event.target===this)closeDebrief()">
+  <div style="background:var(--white);max-width:600px;margin:56px auto;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,.3);overflow:hidden">
+    <div style="background:var(--navy);padding:12px 16px;display:flex;align-items:center;justify-content:space-between">
+      <span style="color:#fff;font-weight:600;font-size:14px" id="debrief-title">🪞 Post-class reflection</span>
+      <button onclick="closeDebrief()" style="background:rgba(255,255,255,.15);border:none;border-radius:6px;color:#fff;font-size:20px;width:32px;height:32px;cursor:pointer;line-height:1">&times;</button>
+    </div>
+    <div style="padding:16px">
+      <div style="font-size:12px;color:var(--ink-3);margin-bottom:12px">After teaching, capture what happened while it’s fresh — for next time and next year. This is just for you: never printed or shared with students.</div>
+      <div style="font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:6px">How did it go?</div>
+      <div id="debrief-rating" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px"></div>
+      <div id="debrief-body"></div>
+      <div style="display:flex;justify-content:flex-end;margin-top:12px">
+        <button onclick="closeDebrief()" style="background:var(--navy);color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">Done</button>
       </div>
     </div>
   </div>
@@ -9458,6 +9481,7 @@ function dailyPanelHTML(d, i) {
         <div class="dl-menu-body">
           <button onclick="this.closest('details').removeAttribute('open');openMoveLesson(${i})">⇄ Move to another unit</button>
           <button onclick="this.closest('details').removeAttribute('open');openBrainstorm(${i})">💡 Ideas / brainstorm${strip(d.brainstorm)?' •':''}</button>
+          <button onclick="this.closest('details').removeAttribute('open');openDebrief(${i})">🪞 Post-class reflection${hasDebrief(d)?' •':''}</button>
           <button onclick="this.closest('details').removeAttribute('open');exportDailyAgenda(${i})">📋 Copy student agenda</button>
           <button onclick="this.closest('details').removeAttribute('open');exportBlackbaudAgenda(${i})">🗂️ Copy for Blackbaud</button>
         </div>
@@ -9469,6 +9493,7 @@ function dailyPanelHTML(d, i) {
       ${calImported()
         ? `<button class="dl-calbtn" onclick="fillDatesFromHere(${i})" title="Give this lesson its class date, then flow every later lesson onto the next class days (leaves earlier days alone)">↓ Fill dates from here</button>`
         : `<button class="dl-calbtn" onclick="openCalendarImport()" title="Import your school calendar to auto-fill class dates">📅 Import calendar</button>`}
+      <button class="dl-reflectbtn${hasDebrief(d)?' done':''}" onclick="openDebrief(${i})" title="Reflect on how this class went — for next time and next year">${hasDebrief(d) ? (debriefRatingMeta(d.debriefRating)?debriefRatingMeta(d.debriefRating).emoji:'🪞') + ' Reflection ✓' : '🪞 Reflect on class'}</button>
     </div>
     <input class="dl-topic" value="${esc(strip(d.topic))}" placeholder="Lesson topic / title…" onchange="updateDay(${i},'topic',this.value);updateDayCard(${i})">
     <input class="dl-eq" value="${esc(strip(d.eq))}" placeholder="Essential question (optional)…" onchange="updateDay(${i},'eq',this.value)">
@@ -9843,6 +9868,52 @@ function openBrainstorm(i){
 function closeBrainstorm(){
   document.getElementById('brainstorm-overlay').style.display='none';
   if(_brainstormI!==null){ rerenderDay(_brainstormI); _brainstormI=null; }
+}
+
+// ── Post-class reflection (per lesson; teacher-only, never exported) ──
+const DEBRIEF_RATINGS = [
+  {v:'great', emoji:'🟢', label:'Great'},
+  {v:'good',  emoji:'🙂', label:'Good'},
+  {v:'mixed', emoji:'😐', label:'Mixed'},
+  {v:'rough', emoji:'🔴', label:'Rough'},
+];
+function debriefRatingMeta(v){ return DEBRIEF_RATINGS.find(r=>r.v===v) || null; }
+function hasDebrief(d){
+  const txt = String(d.debrief||'').replace(/<[^>]*>/g,'').replace(/&nbsp;/g,' ').trim();
+  return !!(txt || d.debriefRating);
+}
+let _debriefI = null;
+function renderDebriefRating(i){
+  const d = getDay(i);
+  const wrap = document.getElementById('debrief-rating');
+  if(!wrap) return;
+  wrap.innerHTML = DEBRIEF_RATINGS.map(r=>{
+    const on = d.debriefRating === r.v;
+    return `<button onclick="setDebriefRating(${i},'${r.v}')" style="display:flex;align-items:center;gap:6px;border:1px solid ${on?'var(--navy)':'var(--rule-dark)'};background:${on?'var(--navy)':'#fff'};color:${on?'#fff':'var(--ink)'};border-radius:999px;padding:6px 13px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">${r.emoji} ${r.label}</button>`;
+  }).join('');
+}
+function setDebriefRating(i, v){
+  const d = getDay(i);
+  d.debriefRating = (d.debriefRating === v) ? '' : v;   // click again to clear
+  d.debriefAt = Date.now();
+  saveState();
+  renderDebriefRating(i);
+}
+function openDebrief(i){
+  _debriefI = i;
+  const d = getDay(i);
+  const u = UNIT_META.find(m=>m.id===currentUnit);
+  document.getElementById('debrief-title').innerHTML = `🪞 Post-class reflection — ${esc(d.label)}${u?` · ${esc(u.name)}`:''}`;
+  renderDebriefRating(i);
+  document.getElementById('debrief-body').innerHTML =
+    rteField('rte-debrief', d.debrief||'', `updateDay(${i},'debrief',this.innerHTML)`,
+      'What worked? What ran long or flopped? What would I change? Who needs follow-up? Notes for next year…');
+  document.getElementById('debrief-overlay').style.display='block';
+  setTimeout(()=>{ const ed=document.getElementById('rte-debrief'); if(ed) ed.focus(); }, 40);
+}
+function closeDebrief(){
+  document.getElementById('debrief-overlay').style.display='none';
+  if(_debriefI!==null){ rerenderDay(_debriefI); _debriefI=null; }
 }
 
 // ── Per-lesson prep to-dos (stored in the shared dashboard pool) ──
