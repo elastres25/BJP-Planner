@@ -2327,7 +2327,16 @@ function out(o) {
           <button onclick="copySyncCode()" style="flex:1;min-width:180px;background:#fff;color:var(--navy);border:1px solid var(--navy);border-radius:7px;padding:9px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">📋 Copy sync code for another device</button>
           <button onclick="disconnectSync()" style="background:#fff;color:#b42318;border:1px solid #e6b7b3;border-radius:7px;padding:9px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Disconnect</button>
         </div>
-        <p style="font-size:11.5px;color:var(--ink-3,#8A96A2);margin:2px 0 0;line-height:1.5">On another device, open Cloud Sync there and paste this code to link it to the same bins. Each course syncs the first time you <b>Save</b> it while connected.</p>
+        <div id="synccode-box" style="display:none;margin-bottom:10px">
+          <label style="display:block;font-size:11.5px;font-weight:700;color:var(--ink-2);margin-bottom:4px">Sync code — copy this into Cloud Sync on your phone or iPad</label>
+          <textarea id="synccode-text" readonly rows="3" onclick="this.select()" spellcheck="false"
+            style="width:100%;box-sizing:border-box;border:1px solid var(--rule-dark);border-radius:7px;padding:8px 10px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;line-height:1.45;color:var(--ink);background:#FBFAF7;resize:vertical;outline:none;word-break:break-all"></textarea>
+          <p style="font-size:11px;color:#b45309;margin:5px 0 0;line-height:1.45">⚠️ This code contains your jsonbin key — treat it like a password. Don't post it anywhere public.</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+          <button onclick="refreshFromCloud()" style="flex:1;min-width:180px;background:var(--navy);color:#fff;border:none;border-radius:7px;padding:9px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">⤓ Refresh this course from cloud</button>
+        </div>
+        <p style="font-size:11.5px;color:var(--ink-3,#8A96A2);margin:2px 0 0;line-height:1.5">On another device, open Cloud Sync there and paste the code to link it to the same bins. Each course syncs the first time you <b>Save</b> it while connected.<br><b>Working across devices:</b> press <b>Save</b> before you put a device down, and use <b>Refresh</b> when you pick another one up. If two devices both changed the same course, Save will warn you instead of overwriting.</p>
       </div>
 
       <div style="display:flex;justify-content:flex-end;margin-top:14px">
@@ -3205,13 +3214,38 @@ function demoWeek() {
 // and remembered here.
 const SYNC_KEY_LS  = 'bjp-sync-key';
 const SYNC_BINS_LS = 'bjp-sync-bins';
+// The cloud copy this device last SAW (pulled or pushed), per course. It's the
+// record's own `lastModified` stamp. If the cloud's stamp later differs from
+// this, another device (phone / iPad / computer) saved work we've never seen —
+// that's a conflict, and pushing over it would silently destroy their work.
+const SYNC_BASE_LS = 'bjp-sync-base';
 function getSyncKey(){ try{ return localStorage.getItem(SYNC_KEY_LS) || ''; }catch(e){ return ''; } }
 function setSyncKey(k){ try{ k ? localStorage.setItem(SYNC_KEY_LS,k) : localStorage.removeItem(SYNC_KEY_LS); }catch(e){} }
 function getSyncBins(){ try{ return JSON.parse(localStorage.getItem(SYNC_BINS_LS)||'{}')||{}; }catch(e){ return {}; } }
 function getBinId(cid){ return getSyncBins()[cid] || ''; }
 function setBinId(cid,id){ const m=getSyncBins(); m[cid]=id; try{ localStorage.setItem(SYNC_BINS_LS,JSON.stringify(m)); }catch(e){} }
+function getSyncBases(){ try{ return JSON.parse(localStorage.getItem(SYNC_BASE_LS)||'{}')||{}; }catch(e){ return {}; } }
+function getSyncBase(cid){ return getSyncBases()[cid] || 0; }
+function setSyncBase(cid, stamp){ const m=getSyncBases(); m[cid]=stamp||0; try{ localStorage.setItem(SYNC_BASE_LS,JSON.stringify(m)); }catch(e){} }
 function syncConnected(){ return !!getSyncKey(); }
 function getJsonbinKey(){ return getSyncKey(); }
+
+// Read the cloud copy for a course without adopting it. Returns
+// {record, stamp} on success, or null when there's nothing readable.
+async function peekCloud(cid){
+  const key = getSyncKey(), binId = getBinId(cid);
+  if(!key || !binId) return null;
+  try{
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+      method:'GET', headers:{ 'X-Master-Key':key, 'X-Bin-Meta':'false' },
+    });
+    if(!res.ok) return null;
+    const data = await res.json();
+    const record = await unwrapSyncRecord(data.record || data);
+    if(!record || record._v !== 2) return null;
+    return { record, stamp: record.lastModified || 0 };
+  }catch(e){ return null; }
+}
 
 function setSyncStatus(status) {
   const dot   = document.getElementById('sync-dot');
@@ -3311,6 +3345,27 @@ async function pushToSheets() {
         if (binId) setBinId(co.id, binId);
       }
     } else {
+      // Another device may have saved since this one last looked. Compare the
+      // cloud's stamp with the copy we last saw; if it moved, ask before
+      // overwriting instead of quietly winning because we saved most recently.
+      const peek = await peekCloud(co.id);
+      const base = getSyncBase(co.id);
+      if (peek && base && peek.stamp > base) {
+        const when = new Date(peek.stamp).toLocaleString();
+        const ok = confirm(
+          `Another device saved ${co.name} at ${when} — after this device last synced.\n\n` +
+          `Click Cancel (recommended), then use "Refresh from cloud" in Cloud Sync to pull that ` +
+          `work down before making your changes.\n\n` +
+          `Click OK only if you want THIS device's copy to replace it. Their changes will be lost.`
+        );
+        if (!ok) {
+          setSyncStatus('error');
+          const label = document.getElementById('sync-label');
+          if (label) label.textContent = 'Newer work in the cloud — refresh';
+          toast('Not synced — a newer copy is in the cloud. Use "Refresh from cloud" first.');
+          return false;
+        }
+      }
       res = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
         method: 'PUT',
         headers: {
@@ -3323,6 +3378,9 @@ async function pushToSheets() {
     }
     if (res.ok) {
       _lastPushMsg = '';
+      // This is now the cloud copy we've seen, so a later push from here is
+      // not treated as a conflict with our own work.
+      setSyncBase(co.id, state.lastModified || 0);
       setSyncStatus('synced');
       const last = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
       const label = document.getElementById('sync-label');
@@ -3373,9 +3431,15 @@ async function pullFromSheets() {
         // older cloud save never wipes out more recent local work.
         const cloudTime = record.lastModified || 0;
         const localTime = state?.lastModified || 0;
+        // Either way we've now SEEN this cloud copy — remember its stamp so a
+        // later push knows whether the cloud moved behind our back.
+        setSyncBase(co.id, cloudTime);
         if (cloudTime > localTime) {
           state = record;
           saveState();
+          // saveState() re-stamps lastModified locally; the baseline must stay
+          // the cloud copy's own stamp, so re-assert it.
+          setSyncBase(co.id, cloudTime);
           setSyncStatus('synced');
           return true;
         }
@@ -3419,6 +3483,11 @@ function renderSyncSetup(){
   }
   if(connectedBox) connectedBox.style.display = connected ? 'block' : 'none';
   if(inputBox) inputBox.style.display = connected ? 'none' : 'block';
+  // Never leave the key-bearing sync code sitting on screen across re-renders.
+  const codeBox = document.getElementById('synccode-box');
+  const codeTxt = document.getElementById('synccode-text');
+  if(codeBox) codeBox.style.display = 'none';
+  if(codeTxt) codeTxt.value = '';
 }
 async function connectSync(){
   const inp = document.getElementById('sync-key-input');
@@ -3480,10 +3549,76 @@ function disconnectSync(){
   toast('Disconnected — your work stays saved on this device');
 }
 function copySyncCode(){
+  if(!getSyncKey()){ toast('Connect this device first, then you can share its sync code'); return; }
   const code = btoa(JSON.stringify({ k:getSyncKey(), b:getSyncBins() }));
-  const done = ()=>toast('Sync code copied — paste it into “Connect sync” on your other device');
-  if(navigator.clipboard) navigator.clipboard.writeText(code).then(done, done); else done();
+  // Always show the code on screen as well: clipboard access is blocked in
+  // plenty of situations, and silently claiming "copied" when nothing was
+  // copied is worse than showing it. The box is selectable so it can be
+  // copied by hand (or read across to the iPad) either way.
+  const box = document.getElementById('synccode-box');
+  const ta  = document.getElementById('synccode-text');
+  if(box && ta){ ta.value = code; box.style.display = 'block'; ta.focus(); ta.select(); }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(code).then(
+      ()=>toast('Sync code copied — paste it into Cloud Sync on your other device'),
+      ()=>toast('Couldn’t reach the clipboard — select the code below and copy it manually')
+    );
+  } else {
+    toast('Select the code below and copy it manually');
+  }
 }
+
+// Deliberately take the cloud copy for this course, replacing what's on this
+// device. Needed because a normal pull only adopts a cloud copy with a NEWER
+// stamp — and after you've typed anything here, this device's stamp is newer
+// even when its content is older than another device's saved work.
+async function refreshFromCloud(){
+  const co = getCourse();
+  if(!syncConnected()){ toast('Not connected to cloud sync yet'); return; }
+  if(!getBinId(co.id)){ toast(`${co.name} hasn’t been synced yet — press Save once while connected`); return; }
+  toast('Checking the cloud…');
+  const peek = await peekCloud(co.id);
+  if(!peek){ toast('Couldn’t read the cloud copy — check the sync status up top'); return; }
+  const localTime = (state && state.lastModified) || 0;
+  const when = peek.stamp ? new Date(peek.stamp).toLocaleString() : 'unknown date';
+  if(peek.stamp === localTime){ toast(`${co.name} already matches the cloud ✓`); return; }
+  const newer = peek.stamp > localTime;
+  const msg = `Replace ${co.name} on THIS device with the cloud copy saved ${when}?\n\n` +
+    (newer
+      ? 'The cloud copy is the newer one.'
+      : 'Careful: this device was saved more recently than the cloud copy, so anything you ' +
+        'changed here and never synced will be lost.') +
+    '\n\nUse "Backup my data" first if you\'re unsure. This cannot be undone.';
+  if(!confirm(msg)) return;
+  state = peek.record;
+  saveState();
+  setSyncBase(co.id, peek.stamp);   // the copy we now hold IS the cloud's
+  setSyncStatus('synced');
+  currentUnit = null; currentWeek = 0; openDayIdx = null; openWeekIdx = null;
+  renderSyncSetup();
+  nav('dashboard');
+  toast(`${co.name} refreshed from the cloud ✓`);
+}
+
+// A device left open in a background tab holds a stale copy. When it comes
+// back to the foreground, quietly check the cloud and adopt a newer copy, so
+// picking the iPad up after planning on the computer shows the real thing.
+let _lastAutoPull = 0;
+async function autoPullOnReturn(){
+  if(!syncConnected() || !getBinId(getCourse().id)) return;
+  if(Date.now() - _lastAutoPull < 20000) return;          // don't hammer the free tier
+  const ae = document.activeElement;
+  if(ae && (ae.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName))) return;  // mid-edit
+  _lastAutoPull = Date.now();
+  const adopted = await pullFromSheets();
+  if(adopted){
+    renderCourseToggle();
+    nav('dashboard');
+    toast('Picked up newer work from another device ✓');
+  }
+}
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) autoPullOnReturn(); });
+window.addEventListener('focus', autoPullOnReturn);
 
 // ── NAVIGATION ────────────────────────────────────────────────────
 function nav(target, unitId) {
