@@ -1519,7 +1519,8 @@ body.dragging-lesson, body.dragging-week { cursor: grabbing; }
     <button onclick="closeMoreMenu();exportBackup()">Backup my data</button>
     <button onclick="closeMoreMenu();document.getElementById('restore-file-input').click()">Restore from backup</button>
     <button onclick="closeMoreMenu();exportPDF()">Export PDF</button>
-    <button onclick="closeMoreMenu();nav('week');driveSendWeek()">☁ Send week to Google Drive</button>
+    <button onclick="closeMoreMenu();driveSendCurrentUnit()">☁ Send this unit to Drive</button>
+    <button onclick="closeMoreMenu();previewCurrentUnit()">🖨 Preview unit / Save as PDF</button>
     <button onclick="closeMoreMenu();openDriveSetup()">Google Drive setup…</button>
     <div class="mm-sec">Schedule</div>
     <button onclick="closeMoreMenu();openCalendarImport()">📅 Import school calendar…</button>
@@ -5363,6 +5364,164 @@ function buildWeekDoc(){
   return { title, html };
 }
 
+// ── BUILD ONE UNIT'S GOOGLE DOC (cover page + a landscape page per week) ──
+// Produces the whole unit as a single HTML doc: page 1 = the unit cover
+// (objectives, vocabulary & knowledge, assignments & assessments, pacing),
+// then one landscape page per week, mirroring the Week view. Re-exporting
+// regenerates the doc from current data, so every page is always up to date.
+function buildUnitDoc(uid){
+  const co = getCourse();
+  const u  = UNIT_META.find(m=>m.id===uid) || {name:'Unit', weeks:0};
+  const uov = getUOV(uid);
+  const P = { navy:'#1B3A6B', gold:'#C9991A', goldL:'#F0C84A', goldBg:'#FDF6E3',
+              ink:'#1C1917', ink2:'#57534E', ink3:'#8A857C', rule:'#D9D5CC',
+              tealBg:'#E1F5EE', tealTx:'#085041', tealBr:'#0F6E56' };
+  const S = s => escPDF(String(s==null?'':s).replace(/<[^>]*>/g,' ').replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim());
+  const weeks = state.units[uid] || [];
+
+  // ---- gather cover data ----
+  const objectives = (uov.unitGoalItems||[]).filter(Boolean);
+  const vocabCat = (uov.knowledgeCategories||[]).find(c=>c.name==='Vocabulary');
+  const vocab = ((vocabCat?vocabCat.items:uov.vocab)||[]).filter(v=>typeof v==='string'&&v.trim());
+  const knowledgeCats = (uov.knowledgeCategories||[]).filter(c=>c.name!=='Vocabulary' && (c.items||[]).length);
+  const skills = (uov.skillItems||[]).filter(Boolean);
+  const scripture = (uov.scriptureItems||[]).filter(Boolean);
+  const assignments = getUnitAssignments(uid).filter(a=>String(a.title||'').trim())
+      .slice().sort((x,y)=> (x.due||'~').localeCompare(y.due||'~'));
+
+  // ---- per-week class + pacing data ----
+  const dstr = d => [['A',d.dateA],['B',d.dateB]].filter(x=>x[1])
+      .map(x=>`${x[0]} ${isoParse(x[1]).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}`).join(' · ');
+  const weekData = weeks.map((w,wi)=>{
+    const days = (w.days||[]);
+    const dates = days.flatMap(d=>[d.dateA,d.dateB]).filter(Boolean).sort();
+    const range = dates.length ? `${isoParse(dates[0]).toLocaleDateString('en-US',{month:'short',day:'numeric'})} – ${isoParse(dates[dates.length-1]).toLocaleDateString('en-US',{month:'short',day:'numeric'})}` : '';
+    return { label: w.weekLabel || `Week ${wi+1}`, range, days,
+             focus: days.map(d=>S(d.topic)).filter(Boolean).join(' · '), blocks: days.length };
+  });
+  const allDates = weeks.flatMap(w=>(w.days||[]).flatMap(d=>[d.dateA,d.dateB])).filter(Boolean).sort();
+  const unitRange = allDates.length ? `${isoParse(allDates[0]).toLocaleDateString('en-US',{month:'short',day:'numeric'})} – ${isoParse(allDates[allDates.length-1]).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}` : '';
+  const totalBlocks = weeks.reduce((n,w)=>n+(w.days||[]).length,0);
+
+  const actLines = d => (d.activities||[]).filter(a=> a.brk || (a.name||'').trim() || (a.desc||'').trim()).map(a=>{
+    if(a.brk) return `<div style="text-align:center;font-size:8pt;font-weight:700;color:#7A4B00;border-top:1px dashed ${P.gold};border-bottom:1px dashed ${P.gold};padding:1px 0;margin:3px 0">🍽 ${S(a.name)||'Lunch'}</div>`;
+    const nm = S(a.name)||S(a.desc); const ty = actType(a)?`<span style="color:#7A4B00;font-weight:700">${escPDF(actType(a))}-</span> `:'';
+    const dur = a.dur?` <span style="color:${P.ink3}">[${a.dur} min]</span>`:''; const ipp = actIPPText(a)?` <span style="color:${P.navy};font-weight:800">(${escPDF(actIPPText(a))})</span>`:'';
+    return `<div style="margin:0 0 4px;padding-left:14px;text-indent:-14px"><b>${ty}${nm}</b>${dur}${ipp}</div>`;
+  }).join('');
+  const resLines = d => (d.materials||[]).map(m=>{ const t=S(matTitle(m)||matUrl(m)), url=matUrl(m); return `<div style="padding-left:9px;text-indent:-9px;margin:0 0 2px">• ${url?`<a href="${escPDF(url)}" style="color:${P.navy}">${t}</a>`:t}</div>`; }).join('');
+
+  const chipList = (arr, sep=', ') => arr.map(S).join(sep);
+
+  // ---- cover page ----
+  const objHTML = objectives.length
+    ? `<ul style="margin:0;padding:0;list-style:none">${objectives.map(o=>`<li style="display:flex;gap:7px;margin:0 0 7px;font-size:10.5pt;line-height:1.4"><span style="color:${P.tealTx};font-weight:900">✓</span><span>${S(o)}</span></li>`).join('')}</ul>`
+    : `<div style="color:${P.ink3};font-style:italic;font-size:10pt">Add unit objectives in the Unit Overview.</div>`;
+
+  let vkHTML = '';
+  if(vocab.length) vkHTML += `<div style="margin:0 0 6px;font-size:10pt"><b style="color:${P.navy}">Vocabulary:</b> ${chipList(vocab)}</div>`;
+  knowledgeCats.forEach(c=>{ vkHTML += `<div style="margin:0 0 6px;font-size:10pt"><b style="color:${P.navy}">${S(c.name)}:</b> ${chipList((c.items||[]).filter(Boolean))}</div>`; });
+  if(skills.length) vkHTML += `<div style="margin:0 0 6px;font-size:10pt"><b style="color:${P.navy}">Skills:</b> ${chipList(skills)}</div>`;
+  if(scripture.length) vkHTML += `<div style="margin:0 0 6px;font-size:10pt"><b style="color:${P.navy}">Scripture:</b> ${chipList(scripture)}</div>`;
+  if(!vkHTML) vkHTML = `<div style="color:${P.ink3};font-style:italic;font-size:10pt">Add vocabulary &amp; knowledge in the Unit Overview.</div>`;
+
+  const asgHTML = assignments.length
+    ? assignments.map(a=>{ const t=assignType(a.type); const due=a.due?isoParse(a.due).toLocaleDateString('en-US',{month:'short',day:'numeric'}):'—';
+        return `<div style="display:flex;align-items:center;gap:8px;border:1px solid #E7E5E0;border-radius:6px;padding:6px 9px;margin:0 0 5px">
+          <span style="flex:1;font-size:10pt;font-weight:600">${S(a.title)}</span>
+          <span style="font-size:8pt;font-weight:800;border-radius:4px;padding:2px 7px;background:${t.bg};color:${t.tx};-webkit-print-color-adjust:exact;print-color-adjust:exact">${escPDF(t.label)}</span>
+          <span style="font-size:9pt;font-weight:700;color:${P.ink2};white-space:nowrap">${escPDF(due)}</span></div>`; }).join('')
+    : `<div style="color:${P.ink3};font-style:italic;font-size:10pt">No assignments yet — add them in the Assignments &amp; Assessments box.</div>`;
+
+  const paceHTML = weekData.map(w=>`<tr>
+      <td style="background:${P.goldBg};border:1px solid ${P.rule};padding:5px 9px;font-weight:700;color:${P.navy};font-size:9.5pt;white-space:nowrap">${escPDF(w.label)}</td>
+      <td style="border:1px solid ${P.rule};padding:5px 9px;color:${P.ink2};font-size:9.5pt;white-space:nowrap">${escPDF(w.range)||'—'}</td>
+      <td style="border:1px solid ${P.rule};padding:5px 9px;font-size:9.5pt">${w.focus||'<span style="color:#8A857C">—</span>'}</td>
+      <td style="border:1px solid ${P.rule};padding:5px 9px;text-align:center;color:${P.ink2};font-size:9.5pt">${w.blocks}</td></tr>`).join('');
+
+  const cover = `<div class="pg">
+    <div class="ph"><div><div class="pt">${escPDF(co.name)} (${escPDF(co.code)}) — Unit Overview</div><div class="ps">${escPDF(state.teacher||'')} · 2025–2026</div></div>
+      <div style="text-align:right"><div class="pu">Unit ${unitNo(uid)} · ${S(u.name)}</div><div class="pw">${weeks.length} weeks · ${totalBlocks} blocks${unitRange?` · ${escPDF(unitRange)}`:''}</div></div></div>
+    <div style="background:${P.tealBg};border-left:5px solid ${P.tealBr};border-radius:6px;padding:12px 15px;margin-bottom:14px;-webkit-print-color-adjust:exact;print-color-adjust:exact">
+      <div style="font-size:16pt;font-weight:800;color:${P.tealTx}">${S(u.name)}</div>
+      ${u.desc?`<div style="font-size:10pt;color:#25514a;margin-top:4px;line-height:1.45">${S(u.desc)}</div>`:''}
+      ${(uov.eqItems&&uov.eqItems[0])?`<div style="font-size:10pt;font-weight:700;color:${P.tealBr};margin-top:6px">Big question: ${S(uov.eqItems[0])}</div>`:''}
+    </div>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:14px"><tr>
+      <td style="width:52%;vertical-align:top;padding-right:16px">
+        <div class="sh">Unit Objectives</div>${objHTML}
+        <div class="sh" style="margin-top:13px">Vocabulary &amp; Knowledge Expectations</div>${vkHTML}
+      </td>
+      <td style="width:48%;vertical-align:top">
+        <div class="sh">Assignments &amp; Assessments</div>${asgHTML}
+      </td>
+    </tr></table>
+    <div class="sh">Pacing at a Glance</div>
+    <table style="width:100%;border-collapse:collapse">
+      <thead><tr>
+        <th style="background:${P.navy};color:#fff;border:1px solid ${P.navy};padding:5px 9px;text-align:left;font-size:9.5pt;-webkit-print-color-adjust:exact;print-color-adjust:exact">Week</th>
+        <th style="background:${P.navy};color:#fff;border:1px solid ${P.navy};padding:5px 9px;text-align:left;font-size:9.5pt;-webkit-print-color-adjust:exact;print-color-adjust:exact">Dates</th>
+        <th style="background:${P.navy};color:#fff;border:1px solid ${P.navy};padding:5px 9px;text-align:left;font-size:9.5pt;-webkit-print-color-adjust:exact;print-color-adjust:exact">Focus</th>
+        <th style="background:${P.navy};color:#fff;border:1px solid ${P.navy};padding:5px 9px;text-align:center;font-size:9.5pt;-webkit-print-color-adjust:exact;print-color-adjust:exact">Blocks</th>
+      </tr></thead><tbody>${paceHTML}</tbody></table>
+  </div>`;
+
+  // ---- one page per week ----
+  const rowLbl = (t,sub) => `<td style="background:${P.goldBg};border:1px solid ${P.rule};padding:7px 9px;width:140px;vertical-align:top;-webkit-print-color-adjust:exact;print-color-adjust:exact"><div style="font-size:9.5pt;font-weight:700;color:${P.navy}">${t}</div>${sub?`<div style="font-size:7.5pt;color:${P.ink3};margin-top:2px">${sub}</div>`:''}</td>`;
+  const cell = h => `<td style="border:1px solid ${P.rule};padding:7px 9px;vertical-align:top;font-size:9pt;line-height:1.42">${h||''}</td>`;
+  const weekPages = weekData.filter(w=>w.days.length).map(w=>{
+    const days = w.days;
+    const heads = days.map(d=>`<th style="background:${P.goldL};border:1px solid ${P.rule};border-top:4px solid ${P.tealBr};padding:6px 9px;text-align:left;-webkit-print-color-adjust:exact;print-color-adjust:exact"><div style="font-size:12pt;font-weight:700;color:${P.navy}">${S(d.topic)||S(d.label)}</div><div style="font-size:8.5pt;color:#6b5a2a;font-weight:600;margin-top:2px">${escPDF(d.label)}${dstr(d)?` · ${escPDF(dstr(d))}`:''}</div></th>`).join('');
+    const rowGoals = `<tr>${rowLbl('Goals','What students should learn')}${days.map(d=>cell(goalsHTML(d))).join('')}</tr>`;
+    const rowTgts  = `<tr>${rowLbl('Learning Targets','&ldquo;I can…&rdquo;')}${days.map(d=>cell(targetsHTML(d))).join('')}</tr>`;
+    const rowActs  = `<tr>${rowLbl('Activities / Tasks','with IPP stages')}${days.map(d=>cell(actLines(d))).join('')}</tr>`;
+    const rowHW    = `<tr>${rowLbl('Homework','')}${days.map(d=>cell(S(d.homework))).join('')}</tr>`;
+    const rowRes   = `<tr>${rowLbl('Resources','')}${days.map(d=>cell(resLines(d))).join('')}</tr>`;
+    const banner = t => `<tr><td colspan="${days.length+1}" style="background:${P.goldL};border:1px solid ${P.rule};padding:4px 9px;font-size:9pt;font-weight:700;color:${P.navy};-webkit-print-color-adjust:exact;print-color-adjust:exact">${t}</td></tr>`;
+    return `<p class="pbmark" style="color:#fff;font-size:1pt;margin:0">@@PB@@</p><div class="pg">
+      <div class="ph"><div><div class="pt">Weekly Lesson Plans — ${escPDF(co.name)} (${escPDF(co.code)})</div><div class="ps">${escPDF(state.teacher||'')} · 2025–2026</div></div>
+        <div style="text-align:right"><div class="pu">Unit ${unitNo(uid)} · ${S(u.name)}</div><div class="pw">${escPDF(w.label)}${w.range?` · ${escPDF(w.range)}`:''}</div></div></div>
+      <table style="width:100%;border-collapse:collapse;margin-bottom:9px"><tr>
+        <td style="background:#EEF1F6;border:1px solid ${P.rule};padding:4px 8px;width:110px;font-size:8pt;font-weight:700;color:${P.navy};-webkit-print-color-adjust:exact;print-color-adjust:exact">IPP Key</td>
+        <td style="border:1px solid ${P.rule};padding:4px 8px;font-size:8pt;color:#333">${IPP_STAGES.map(s=>`<b style="color:${P.navy}">${s.letter}</b> ${escPDF(s.label)}`).join(' &nbsp;|&nbsp; ')}</td></tr></table>
+      <table style="width:100%;border-collapse:collapse;table-layout:fixed">
+        <thead><tr><th style="background:${P.goldBg};border:1px solid ${P.rule};width:140px;padding:6px 9px;text-align:left;color:${P.navy};font-size:10pt;-webkit-print-color-adjust:exact;print-color-adjust:exact">Week of<br><span style="font-weight:400;font-size:8.5pt;color:${P.ink3}">${escPDF(w.range)}</span></th>${heads}</tr></thead>
+        <tbody>${rowGoals}${rowTgts}${banner('Learning Activities / Tasks')}${rowActs}${rowHW}${banner('Student Resources / Links / Tech Tools')}${rowRes}</tbody>
+      </table></div>`;
+  }).join('');
+
+  const docName = `${co.name} · Unit ${unitNo(uid)} — ${(u.name||'').replace(/[\\/:*?"<>|]/g,'').trim()}`;
+  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${escPDF(docName)}</title>
+    <style>
+      @page{size:letter landscape;margin:.4in}
+      body{font-family:'Helvetica Neue',Arial,sans-serif;color:${P.ink};margin:0}
+      .pg{page-break-after:always}
+      .pbmark{page-break-before:always}
+      .ph{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid ${P.gold};padding-bottom:7px;margin-bottom:12px}
+      .pt{font-size:14pt;font-weight:700;color:${P.navy}} .ps{font-size:9.5pt;color:${P.ink2};margin-top:2px}
+      .pu{font-size:11.5pt;font-weight:800;color:${P.gold};text-transform:uppercase} .pw{font-size:9.5pt;color:${P.ink2};margin-top:2px}
+      .sh{font-size:9.5pt;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:${P.navy};border-bottom:2px solid ${P.goldL};padding-bottom:3px;margin-bottom:8px}
+      table{page-break-inside:auto} tr{page-break-inside:avoid}
+    </style></head><body>${cover}${weekPages}</body></html>`;
+  return { docName, html, empty: !weeks.length };
+}
+
+// Send the whole unit as one Google Doc (cover + weekly pages), one file per unit.
+async function driveSendUnit(uid){
+  if(!driveConfigured()){ openDriveSetup(); return; }
+  const doc = buildUnitDoc(uid);
+  if(doc.empty){ toast('This unit has no weeks yet.'); return; }
+  await sendToDrive(doc.docName, doc.html);
+}
+// Preview the unit doc in a new tab (also handy for Print → Save as PDF).
+function previewUnitDoc(uid){
+  const doc = buildUnitDoc(uid);
+  const w = window.open('', '_blank'); w.document.open(); w.document.write(doc.html); w.document.close();
+}
+function _currentUnitOrWarn(){ if(!currentUnit){ toast('Open a unit first, then export it.'); return null; } return currentUnit; }
+function driveSendCurrentUnit(){ const u=_currentUnitOrWarn(); if(u) driveSendUnit(u); }
+function previewCurrentUnit(){ const u=_currentUnitOrWarn(); if(u) previewUnitDoc(u); }
+
 function exportWeekPDF(){
   const doc = buildWeekDoc();
   if(doc.empty){ toast('No dated classes in this week — set A/B dates first'); return; }
@@ -5601,23 +5760,63 @@ function pickDriveIntoResForm(){
   });
 }
 
-const DRIVE_APPS_SCRIPT = `function doPost(e) {
+const DRIVE_APPS_SCRIPT = `// Belen Planner — Drive endpoint (v2: one editable Google Doc per unit).
+// Setup: Extensions/Apps Script → paste this → add the "Drive API" AND "Docs API"
+// Advanced Services (Services + → enable both) → Deploy as Web app → Execute as
+// "Me", Access "Anyone" → paste the /exec URL into the planner's Drive setup.
+function doPost(e) {
   try {
     var d = JSON.parse(e.postData.contents);
     var blob = Utilities.newBlob(d.html, 'text/html', d.docName);
-    var meta = { mimeType: 'application/vnd.google-apps.document' };
+    var v3 = !!Drive.Files.create;
+    var id = findDocId_(d.folderId, d.docName, v3);
     var file;
-    if (Drive.Files.create) {          // Drive API v3
-      meta.name = d.docName; meta.parents = [d.folderId];
-      file = Drive.Files.create(meta, blob);
-    } else {                           // Drive API v2
-      meta.title = d.docName; meta.parents = [{ id: d.folderId }];
-      file = Drive.Files.insert(meta, blob);
+    if (id) {                                  // update the unit's doc in place
+      file = Drive.Files.update({}, id, blob);
+      id = (file && file.id) || id;
+    } else if (v3) {                           // Drive API v3 — create
+      file = Drive.Files.create({ name:d.docName, mimeType:'application/vnd.google-apps.document', parents:[d.folderId] }, blob);
+      id = file.id;
+    } else {                                   // Drive API v2 — create
+      file = Drive.Files.insert({ title:d.docName, mimeType:'application/vnd.google-apps.document', parents:[{ id:d.folderId }] }, blob);
+      id = file.id;
     }
-    return out({ ok: true, id: file.id });
+    fixPageBreaks_(id);   // turn @@PB@@ markers into real page breaks
+    setLandscape_(id);    // letter landscape
+    return out({ ok: true, id: id });
   } catch (err) { return out({ ok: false, error: String(err) }); }
 }
-function doGet() { return out({ ok: true, msg: 'Planner Drive endpoint is live' }); }
+function findDocId_(folderId, name, v3) {
+  var safe = String(name).replace(/'/g, "\\\\'");
+  if (v3) {
+    var r = Drive.Files.list({ q: "'"+folderId+"' in parents and name='"+safe+"' and trashed=false", fields:'files(id)', pageSize:1 });
+    return (r.files && r.files.length) ? r.files[0].id : null;
+  }
+  var r2 = Drive.Files.list({ q: "'"+folderId+"' in parents and title='"+safe+"' and trashed=false", maxResults:1 });
+  return (r2.items && r2.items.length) ? r2.items[0].id : null;
+}
+function fixPageBreaks_(docId) {
+  try {
+    var doc = DocumentApp.openById(docId), body = doc.getBody(), guard = 0, f;
+    while ((f = body.findText('@@PB@@')) && guard++ < 100) {
+      var para = f.getElement().getParent();
+      var idx = body.getChildIndex(para);
+      para.asText().setText('');
+      body.insertPageBreak(idx);
+    }
+    doc.saveAndClose();
+  } catch (e2) {}
+}
+function setLandscape_(docId) {
+  try {
+    Docs.Documents.batchUpdate({ requests: [{ updateDocumentStyle: {
+      documentStyle: { pageSize: { width:{magnitude:792,unit:'PT'}, height:{magnitude:612,unit:'PT'} },
+        marginTop:{magnitude:28,unit:'PT'}, marginBottom:{magnitude:28,unit:'PT'},
+        marginLeft:{magnitude:28,unit:'PT'}, marginRight:{magnitude:28,unit:'PT'} },
+      fields: 'pageSize,marginTop,marginBottom,marginLeft,marginRight' } }] }, docId);
+  } catch (e3) {}   // if Docs API isn't enabled the doc still saves (portrait)
+}
+function doGet() { return out({ ok: true, msg: 'Planner Drive endpoint is live (v2 — unit docs)' }); }
 function out(o) {
   return ContentService.createTextOutput(JSON.stringify(o))
     .setMimeType(ContentService.MimeType.JSON);
@@ -7610,24 +7809,49 @@ function savePaceAssess(el) {
 // "announce" date (when to tell students) and a "due" date. Shown as a
 // sortable box on the Unit Overview page.
 const ASSIGN_TYPES = [
-  {key:'HW',         label:'HW',         bg:'#E6EBF4', tx:'#1B3A6B', br:'#C5D0E4'},
-  {key:'Quiz',       label:'Quiz',       bg:'#FBEFD0', tx:'#8A6A12', br:'#E6D5A0'},
-  {key:'Discussion', label:'Discussion', bg:'#E1F5EE', tx:'#085041', br:'#A7DEC8'},
-  {key:'Test',       label:'Test',       bg:'#F6E1D8', tx:'#993C1D', br:'#E3BBA9'},
-  {key:'Project',    label:'Project',    bg:'#EEE6F4', tx:'#5B2C82', br:'#D3C0E4'},
-  {key:'Other',      label:'Other',      bg:'#ECECEC', tx:'#555555', br:'#D5D5D5'},
+  {key:'HW',           label:'HW',           bg:'#E6EBF4', tx:'#1B3A6B', br:'#C5D0E4'},
+  {key:'Formative',    label:'Formative',    bg:'#F1EFE8', tx:'#5F5E5A', br:'#D9D5CC'},
+  {key:'Quiz',         label:'Quiz',         bg:'#FBEFD0', tx:'#8A6A12', br:'#E6D5A0'},
+  {key:'Discussion',   label:'Discussion',   bg:'#E1F5EE', tx:'#085041', br:'#A7DEC8'},
+  {key:'Test',         label:'Test',         bg:'#F6E1D8', tx:'#993C1D', br:'#E3BBA9'},
+  {key:'Project',      label:'Project',      bg:'#EEE6F4', tx:'#5B2C82', br:'#D3C0E4'},
+  {key:'Essay',        label:'Essay',        bg:'#E6F1FB', tx:'#0C447C', br:'#B9D6F0'},
+  {key:'Presentation', label:'Presentation', bg:'#EEEDFE', tx:'#3C3489', br:'#CFC9F0'},
+  {key:'Other',        label:'Other',        bg:'#ECECEC', tx:'#555555', br:'#D5D5D5'},
 ];
+// Assessment lifecycle — lets you track a piece from planning to grading, not
+// just "done". Graded implies the work is complete (its dashboard task ticks off).
+const ASSIGN_STATUS = [
+  {key:'Planned',  label:'Planned',  bg:'#F1EFE8', tx:'#5F5E5A', br:'#D9D5CC'},
+  {key:'Assigned', label:'Assigned', bg:'#E6EBF4', tx:'#1B3A6B', br:'#C5D0E4'},
+  {key:'Graded',   label:'Graded',   bg:'#E1F5EE', tx:'#085041', br:'#A7DEC8'},
+];
+function assignStatus(k){ return ASSIGN_STATUS.find(s=>s.key===k) || ASSIGN_STATUS[0]; }
 function assignType(k){ return ASSIGN_TYPES.find(t=>t.key===k) || ASSIGN_TYPES[ASSIGN_TYPES.length-1]; }
 
 function getUnitAssignments(uid){
   if(!state.unitAssignments) state.unitAssignments = {};
   if(!state.unitAssignments[uid]) state.unitAssignments[uid] = [];
+  // Backfill a status on older items (before the tracker had a lifecycle):
+  // a ticked-off item is "Graded", otherwise "Planned".
+  state.unitAssignments[uid].forEach(a=>{ if(!a.status) a.status = a.done ? 'Graded' : 'Planned'; });
   return state.unitAssignments[uid];
 }
 function addUnitAssignment(uid){
   const list = getUnitAssignments(uid);
-  list.push({id: uid+'-a'+Math.random().toString(36).slice(2,8), type:'HW', title:'', announce:'', due:'', done:false});
+  list.push({id: uid+'-a'+Math.random().toString(36).slice(2,8), type:'HW', title:'', announce:'', due:'', status:'Planned', done:false});
   saveState(); syncAssignmentTodos(); renderUnit();
+}
+// Set the lifecycle status. "Graded" completes the item (and its dashboard task).
+function setAssignStatus(uid, id, status){
+  const a = getUnitAssignments(uid).find(x=>x.id===id);
+  if(!a) return;
+  a.status = status;
+  a.done = (status === 'Graded');
+  const t = findAssignTodo(uid, id);
+  if(t) t.done = a.done;
+  saveState();
+  renderUnit();
 }
 // Save a single field without re-rendering (used while typing a title, so
 // focus isn't lost). saveState only.
@@ -7724,6 +7948,8 @@ function toggleAssignmentDone(uid, id){
   const a = getUnitAssignments(uid).find(x => x.id === id);
   if(!a) return;
   a.done = !a.done;
+  // Keep the lifecycle status in step: done → Graded; un-done → Assigned.
+  a.status = a.done ? 'Graded' : (a.status === 'Graded' ? 'Assigned' : (a.status || 'Planned'));
   const t = findAssignTodo(uid, id);
   if(t) t.done = a.done;
   saveState();
@@ -7749,12 +7975,13 @@ function unitAssignmentsHTML(uid){
     const dueN  = assignDaysUntil(a.due);
     const overdue = dueN !== null && dueN < 0;
     const dueSoon = dueN !== null && dueN >= 0 && dueN <= 3;
+    const st = assignStatus(a.status);
     return `<tr${a.done?' class="assign-done"':''}>
-      <td style="border:1px solid var(--rule);padding:5px;vertical-align:middle;text-align:center;width:30px">
-        <span class="assign-cb${a.done?' on':''}" title="${a.done?'Done — click to reopen':'Mark done (also ticks it off on your dashboard)'}"
-          onclick="toggleAssignmentDone(${uid},'${a.id}')">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke-width="4"><polyline points="20 6 9 17 4 12"/></svg>
-        </span>
+      <td style="border:1px solid var(--rule);padding:5px 6px;vertical-align:middle;white-space:nowrap;text-align:center">
+        <select onchange="setAssignStatus(${uid},'${a.id}',this.value)" title="Track this from planning to grading"
+          style="font-family:inherit;font-size:11px;font-weight:700;border:1px solid ${st.br};background:${st.bg};color:${st.tx};border-radius:999px;padding:3px 8px;cursor:pointer;outline:none;-webkit-print-color-adjust:exact;print-color-adjust:exact">
+          ${ASSIGN_STATUS.map(o=>`<option value="${o.key}" ${o.key===(a.status||'Planned')?'selected':''}>${o.label}</option>`).join('')}
+        </select>
       </td>
       <td style="border:1px solid var(--rule);padding:5px 6px;vertical-align:middle;white-space:nowrap">
         <select onchange="updateAssignReRender(${uid},'${a.id}','type',this.value)"
@@ -7795,7 +8022,7 @@ function unitAssignmentsHTML(uid){
       <table style="width:100%;border-collapse:collapse;font-size:12px;background:var(--white)">
         <thead>
           <tr>
-            <th style="border:1px solid var(--rule);padding:6px;background:#FAFAF8;width:30px"></th>
+            <th style="border:1px solid var(--rule);padding:6px 8px;background:#FAFAF8;font-size:10px;font-weight:700;color:var(--ink-2);text-align:center;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap">Status</th>
             <th style="border:1px solid var(--rule);padding:6px 8px;background:#FAFAF8;font-size:10px;font-weight:700;color:var(--ink-2);text-align:left;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap">Type</th>
             <th style="border:1px solid var(--rule);padding:6px 10px;background:#FAFAF8;font-size:10px;font-weight:700;color:var(--ink-2);text-align:left;text-transform:uppercase;letter-spacing:.04em">Assignment</th>
             <th style="border:1px solid var(--rule);padding:6px 8px;background:#FAFAF8;font-size:10px;font-weight:700;color:var(--ink-2);text-align:left;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap">Announce</th>
