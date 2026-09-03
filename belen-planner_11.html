@@ -5567,21 +5567,21 @@ async function openDrivePicker(onPick){
     const picker = new google.picker.PickerBuilder()
       .setOAuthToken(token)
       .setDeveloperKey(p.apiKey)
-      .setTitle('Choose a file from your Drive')
+      .setTitle('Choose file(s) from your Drive — hold Ctrl/⌘ or Shift to pick several')
       .enableFeature(google.picker.Feature.SUPPORT_DRIVES)
+      .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
       .addView(mine)
       .addView(recent)
       .addView(new google.picker.DocsUploadView())
       .setCallback(data => {
         if(!data || data.action !== google.picker.Action.PICKED) return;
-        const doc = (data.docs || [])[0];
-        if(!doc) return;
-        onPick({
+        const files = (data.docs || []).map(doc => ({
           title: doc.name || doc.title || '',
           url: doc.url || (doc.id ? `https://drive.google.com/open?id=${doc.id}` : ''),
           mimeType: doc.mimeType || '',
           id: doc.id || '',
-        });
+        }));
+        if(files.length) onPick(files);   // onPick always receives an array
       })
       .build();
     picker.setVisible(true);
@@ -5603,25 +5603,50 @@ function drivePickBtnHTML(handler){
     <a class="drive-open" href="https://drive.google.com/drive/my-drive" target="_blank" rel="noopener" title="Open Drive in a new tab and copy the link">open Drive ↗</a>`;
 }
 
-// Fill the lesson-resource popup from a picked Drive file.
+// Fill the lesson-resource popup from a picked Drive file. One file → fill the
+// form (so you can tweak the title). Several files → add them all at once.
 function pickDriveIntoResourceModal(){
-  openDrivePicker(f => {
-    document.getElementById('resource-url').value = f.url;
-    const t = document.getElementById('resource-title');
-    if(!t.value.trim()) t.value = f.title;
-    toast(`${driveKindLabel(f.mimeType)} linked ✓`);
+  openDrivePicker(files => {
+    if(files.length === 1){
+      const f = files[0];
+      document.getElementById('resource-url').value = f.url;
+      const t = document.getElementById('resource-title');
+      if(!t.value.trim()) t.value = f.title;
+      toast(`${driveKindLabel(f.mimeType)} linked ✓`);
+      return;
+    }
+    if(!_resEdit) return;
+    const d = getDay(_resEdit.i);
+    d.materials = d.materials || [];
+    files.forEach(f => d.materials.push({ title: f.title || f.url, url: f.url }));
+    saveState();
+    const i = _resEdit.i; closeResourceModal(); rerenderDay(i);
+    toast(`${files.length} resources added ✓`);
   });
 }
-// Fill the inline unit-resource form from a picked Drive file.
+// Fill the inline unit-resource form from a picked Drive file. One file → fill
+// the form; several → add each as its own unit resource in the open category.
 function pickDriveIntoResForm(){
-  openDrivePicker(f => {
-    const wrap = document.querySelector('.ures-form'); if(!wrap) return;
-    wrap.querySelector('.ures-in-url').value = f.url;
-    const name = wrap.querySelector('.ures-in-name');
-    if(!name.value.trim()) name.value = f.title;
-    const note = wrap.querySelector('.ures-in-note');
-    if(note && !note.value.trim()) note.value = driveKindLabel(f.mimeType);
-    toast(`${driveKindLabel(f.mimeType)} linked ✓`);
+  openDrivePicker(files => {
+    if(files.length === 1){
+      const f = files[0];
+      const wrap = document.querySelector('.ures-form'); if(!wrap) return;
+      wrap.querySelector('.ures-in-url').value = f.url;
+      const name = wrap.querySelector('.ures-in-name');
+      if(!name.value.trim()) name.value = f.title;
+      const note = wrap.querySelector('.ures-in-note');
+      if(note && !note.value.trim()) note.value = driveKindLabel(f.mimeType);
+      toast(`${driveKindLabel(f.mimeType)} linked ✓`);
+      return;
+    }
+    const uid = currentUnit; if(!uid) return;
+    const cat = (typeof resUI!=='undefined' && resUI && resUI.addCat) || '';
+    files.forEach(f => getUnitResources(uid).push({
+      id: uid+'-'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),
+      cat, title: f.title || f.url, url: normalizeUrl(f.url), note: driveKindLabel(f.mimeType)
+    }));
+    saveState(); reRenderResources(uid);
+    toast(`${files.length} resources added ✓`);
   });
 }
 
@@ -5711,7 +5736,7 @@ function testDrivePicker(){
   try{ localStorage.setItem(DRIVE_CFG_KEY, JSON.stringify(c)); }catch(e){}
   _driveTokenClient = null;   // the client ID may have just changed
   if(!drivePickerReady()){ toast('Fill in both the API key and the client ID first'); return; }
-  openDrivePicker(f => toast(`Picker works — you chose "${f.title}" ✓`));
+  openDrivePicker(files => toast(`Picker works — you chose "${files[0].title}"${files.length>1?` +${files.length-1} more`:''} ✓`));
 }
 function closeDriveSetup(){ document.getElementById('drive-setup-overlay').style.display='none'; }
 function copyDriveScript(btn){
