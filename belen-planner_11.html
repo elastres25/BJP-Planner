@@ -1519,6 +1519,7 @@ body.dragging-lesson, body.dragging-week { cursor: grabbing; }
     <button onclick="closeMoreMenu();exportBackup()">Backup my data</button>
     <button onclick="closeMoreMenu();document.getElementById('restore-file-input').click()">Restore from backup</button>
     <button onclick="closeMoreMenu();exportPDF()">Export PDF</button>
+    <button onclick="closeMoreMenu();exportBlackbaudLog()">🗂️ Class log for Blackbaud</button>
     <button onclick="closeMoreMenu();driveSendCurrentUnit()">☁ Send this unit to Drive</button>
     <button onclick="closeMoreMenu();previewCurrentUnit()">🖨 Preview unit / Save as PDF</button>
     <button onclick="closeMoreMenu();openDriveSetup()">Google Drive setup…</button>
@@ -2274,7 +2275,7 @@ function out(o) {
 <div id="bbhtml-overlay" style="display:none;position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.5);overflow-y:auto" onclick="if(event.target===this)closeBBHtml()">
   <div style="background:var(--white);max-width:620px;margin:44px auto;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,.3);overflow:hidden">
     <div style="background:var(--navy);padding:12px 16px;display:flex;align-items:center;justify-content:space-between">
-      <span style="color:#fff;font-weight:600;font-size:14px">Daily Agenda — styled for Blackbaud</span>
+      <span id="bbhtml-title" style="color:#fff;font-weight:600;font-size:14px">Daily Agenda — styled for Blackbaud</span>
       <button onclick="closeBBHtml()" style="background:rgba(255,255,255,.15);border:none;border-radius:6px;color:#fff;font-size:20px;width:32px;height:32px;cursor:pointer;line-height:1">&times;</button>
     </div>
     <div style="padding:16px">
@@ -10069,6 +10070,83 @@ function bbAgendaHTML(d){
 let _bbAgenda = { html:'', plain:'' };
 function exportBlackbaudAgenda(i){
   _bbAgenda = bbAgendaHTML(getDay(i));
+  const t=document.getElementById('bbhtml-title'); if(t) t.textContent='Daily Agenda — styled for Blackbaud';
+  document.getElementById('bbhtml-preview').innerHTML = _bbAgenda.html;
+  document.getElementById('bbhtml-overlay').style.display='block';
+}
+
+// ── RUNNING CLASS LOG for the Blackbaud Bulletin Board ───────────────
+// One block, newest class on top — each entry shows Date · Topic · Objective ·
+// Agenda ("what we did"), so students can scroll back through the whole course.
+// Built from the planner; paste (or re-paste) it whenever you want it current.
+function bbLog(){
+  const co = getCourse();
+  const strip = s => String(s||'').replace(/<[^>]*>/g,' ').replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim();
+  const today = isoToday();
+  const cal = loadCalendar();
+  // One entry per lesson (A/B collapsed), only classes already taught (dated ≤ today).
+  const byLesson = {};
+  collectClasses().forEach(c=>{
+    if(!c.date || c.date > today) return;
+    const k = `${c.uid}-${c.wi}-${c.di}`;
+    if(!byLesson[k]) byLesson[k] = { d:c.d, u:c.u, uid:c.uid, dates:[] };
+    byLesson[k].dates.push({block:c.block, date:c.date});
+  });
+  let items = Object.values(byLesson).filter(L=> strip(L.d.topic) || actsLines(L.d).length || strip(L.d.label));
+  const lastDate = L => L.dates.map(x=>x.date).sort().slice(-1)[0] || '';
+  items.sort((a,b)=> lastDate(b).localeCompare(lastDate(a)));   // newest first
+
+  const C = { navy:'#1B2A4A', blue:'#1D6FBF', accent:'#1B6EC2', ink:'#2A2E33',
+              mut:'#6B7075', bd:'#DDE1E7', chipBg:'#EAF1FB' };
+  const entry = L => {
+    const d = L.d;
+    const dsorted = L.dates.slice().sort((a,b)=>a.date.localeCompare(b.date));
+    const dateStr = dsorted.map(x=>{
+      const nice = isoParse(x.date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+      const ab = (cal && cal.abByDate && cal.abByDate[x.date]) ? ` (${cal.abByDate[x.date]})` : '';
+      return `${nice}${ab}`;
+    }).join(' · ');
+    const topic = strip(d.topic) || strip(d.label) || 'Class';
+    let ican = strip(targetsHTML(d)).replace(/^I can\s*/i,''); if(!ican) ican = strip(goalsHTML(d));
+    const acts = actsLines(d);
+    const agenda = acts.length
+      ? `<ol style="margin:4px 0 0;padding-left:20px;color:${C.ink};font-size:13px;line-height:1.5">${acts.map(t=>`<li style="margin:1px 0">${esc(t)}</li>`).join('')}</ol>`
+      : `<div style="color:${C.mut};font-size:13px">—</div>`;
+    return `<div style="border:1px solid ${C.bd};border-left:4px solid ${C.blue};border-radius:8px;padding:11px 14px;margin:0 0 10px">`
+      +`<div style="font-size:11px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:${C.accent}">📅 ${esc(dateStr)} · Unit ${unitNo(L.uid)}${d.label?` · ${esc(strip(d.label))}`:''}</div>`
+      +`<div style="font-size:17px;font-weight:700;color:${C.navy};margin:2px 0 6px">${esc(topic)}</div>`
+      +(ican?`<div style="font-size:13px;color:${C.ink};margin:0 0 4px"><b style="color:${C.accent}">🎯 I can…</b> ${esc(ican)}</div>`:'')
+      +`<div style="font-size:13px;color:${C.ink}"><b style="color:${C.accent}">📝 What we did</b>${agenda}</div>`
+      +`</div>`;
+  };
+
+  const body = items.length ? items.map(entry).join('')
+    : `<div style="color:${C.mut};font-size:14px;padding:6px 2px">No classes to show yet — entries appear here once a lesson has a class date on or before today.</div>`;
+
+  const html =
+`<div style="font-family:'Helvetica Neue',Arial,sans-serif;max-width:680px">`
++`<div style="background:${C.navy};background:linear-gradient(100deg,${C.navy},${C.blue});padding:13px 16px;border-radius:10px;margin-bottom:12px">`
++`<div style="font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#C2D6F0">📚 ${esc(co.name)} · Class Log</div>`
++`<div style="font-size:19px;font-weight:700;color:#fff;margin-top:2px">What We Did — Day by Day</div>`
++`<div style="font-size:12px;color:#C2D6F0;margin-top:3px">Newest on top. Missed a class? Catch up here.</div>`
++`</div>${body}</div>`;
+
+  // Plain-text fallback
+  const pl = [`${co.name} — Class Log (what we did, newest first)`,''];
+  items.forEach(L=>{
+    const d=L.d; const ds=L.dates.slice().sort((a,b)=>a.date.localeCompare(b.date)).map(x=>isoParse(x.date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})).join(' · ');
+    let ican=strip(targetsHTML(d)).replace(/^I can\s*/i,''); if(!ican) ican=strip(goalsHTML(d));
+    pl.push(`📅 ${ds} · Unit ${unitNo(L.uid)}${d.label?` · ${strip(d.label)}`:''}`);
+    pl.push(`   ${strip(d.topic)||strip(d.label)||'Class'}`);
+    if(ican) pl.push(`   🎯 I can… ${ican}`);
+    const acts=actsLines(d); if(acts.length){ pl.push('   📝 What we did:'); acts.forEach((t,n)=>pl.push(`      ${n+1}. ${t}`)); }
+    pl.push('');
+  });
+  return { html, plain: pl.join('\n'), count: items.length };
+}
+function exportBlackbaudLog(){
+  _bbAgenda = bbLog();
+  const t=document.getElementById('bbhtml-title'); if(t) t.textContent='Class Log — styled for Blackbaud';
   document.getElementById('bbhtml-preview').innerHTML = _bbAgenda.html;
   document.getElementById('bbhtml-overlay').style.display='block';
 }
