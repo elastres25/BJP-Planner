@@ -11,3 +11,19 @@
   from = "/"
   to = "/belen-planner_11.html"
   status = 200
+
+# The root rewrite serves the app WITHOUT the ?v= cache-buster, so force the
+# HTML to always revalidate — otherwise the CDN/browser can serve a stale app
+# and you never see new features or the in-app "Update" prompt.
+[[headers]]
+  for = "/"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+[[headers]]
+  for = "/belen-planner_11.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"

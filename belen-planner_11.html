@@ -1536,6 +1536,7 @@ body.dragging-lesson, body.dragging-week { cursor: grabbing; }
         onblur="state.teacher=this.textContent.trim();saveState()"
         title="Click to edit your name">Eric Lastres, SJ</div>
       <div class="topbar-class" id="topbar-class-label">Theology 6 · THE 8100 · 2025–2026</div>
+      <div id="mm-version" style="font-size:10px;opacity:.55;margin-top:5px" title="The app version you're running"></div>
     </div>
   </div>
 </div>
@@ -2422,6 +2423,11 @@ const ASSESS_COLORS = {
   'Presentation': {bg:'#EEEDFE', tx:'#3C3489'},
   'Exit Ticket':  {bg:'#F1EFE8', tx:'#5F5E5A'},
 };
+
+// The build version baked into the app itself, so the update checker knows what
+// it's running even when the page was loaded WITHOUT a ?v= token (e.g. the
+// Netlify root rewrite). Keep this in lockstep with index.html's ?v= token.
+window.APP_VERSION = '20260823-36';
 
 let activeCourse = 6; // default to Theology 6
 
@@ -12450,7 +12456,10 @@ function exportUnitOverviewPDF() {
      the one running, it offers a one-click reload. No hard-refresh needed. -->
 <script>
 (function(){
-  function runningVer(){ try{ return new URLSearchParams(location.search).get('v') || ''; }catch(e){ return ''; } }
+  // The version we're running: the URL's ?v= if present, else the version baked
+  // into the app (so a page opened without ?v= — e.g. the Netlify root rewrite —
+  // still knows what it is and can detect a newer deploy).
+  function runningVer(){ try{ return new URLSearchParams(location.search).get('v') || window.APP_VERSION || ''; }catch(e){ return window.APP_VERSION || ''; } }
   function showUpdateBanner(latest){
     if(document.getElementById('update-banner')) return;
     var b=document.createElement('div');
@@ -12474,7 +12483,10 @@ function exportUnitOverviewPDF() {
       })
       .catch(function(){});
   }
-  window.addEventListener('load', function(){ setTimeout(checkUpdate, 2500); });
+  window.addEventListener('load', function(){
+    try{ var vEl=document.getElementById('mm-version'); if(vEl) vEl.textContent='Version '+runningVer(); }catch(e){}
+    setTimeout(checkUpdate, 2500);
+  });
   setInterval(checkUpdate, 5*60*1000);
   document.addEventListener('visibilitychange', function(){ if(!document.hidden) checkUpdate(); });
 })();
