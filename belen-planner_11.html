@@ -2081,8 +2081,8 @@ function out(o) {
             <button onclick="copyDriveScript(this)" style="position:absolute;top:7px;right:7px;background:var(--gold);color:var(--navy-dark);border:none;border-radius:5px;padding:3px 9px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">Copy</button>
           </div>
         </li>
-        <li>In the left sidebar, next to <b>Services</b>, click <b>+</b> → choose <b>Drive API</b> → <b>Add</b>.</li>
-        <li>Click <b>Deploy → New deployment</b> → gear ⚙ → <b>Web app</b>. Set <b>Execute as: Me</b> and <b>Who has access: Anyone</b> → <b>Deploy</b> → authorize. Copy the <b>Web app URL</b>.</li>
+        <li>In the left sidebar, next to <b>Services</b>, click <b>+</b> and add <b>two</b>: <b>Drive API</b> and <b>Google Docs API</b> (the Docs API is what makes the unit docs <b>landscape</b>). Click <b>Add</b> for each.</li>
+        <li>Click <b>Deploy → New deployment</b> → gear ⚙ → <b>Web app</b>. Set <b>Execute as: Me</b> and <b>Who has access: Anyone</b> → <b>Deploy</b> → authorize. Copy the <b>Web app URL</b>. <span style="color:var(--ink-3)">(Updating an existing setup? Use <b>Deploy → Manage deployments</b> → ✏️ edit → <b>Version: New version</b> → Deploy — the URL stays the same.)</span></li>
         <li>In Google Drive, open each folder you want plans saved to and copy its link from the address bar.</li>
       </ol>
       <label style="display:block;font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:4px">Web app URL <span style="font-weight:400;color:var(--ink-3)">(shared by both courses)</span></label>
@@ -2427,7 +2427,7 @@ const ASSESS_COLORS = {
 // The build version baked into the app itself, so the update checker knows what
 // it's running even when the page was loaded WITHOUT a ?v= token (e.g. the
 // Netlify root rewrite). Keep this in lockstep with index.html's ?v= token.
-window.APP_VERSION = '20260823-36';
+window.APP_VERSION = '20260823-37';
 
 let activeCourse = 6; // default to Theology 6
 
@@ -5721,6 +5721,8 @@ function out(o) {
 function openDriveSetup(){
   const ov = document.getElementById('drive-setup-overlay');
   const c = driveCfg();
+  // Keep the on-screen script identical to what the Copy button copies.
+  const box = document.getElementById('drive-script-box'); if(box) box.textContent = DRIVE_APPS_SCRIPT;
   document.getElementById('drive-url-in').value = c.url || '';
   document.getElementById('drive-folder6-in').value = c.folders[6] || '';
   document.getElementById('drive-folder7-in').value = c.folders[7] || '';
