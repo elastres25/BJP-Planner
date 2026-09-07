@@ -1519,6 +1519,7 @@ body.dragging-lesson, body.dragging-week { cursor: grabbing; }
     <button onclick="closeMoreMenu();exportBackup()">Backup my data</button>
     <button onclick="closeMoreMenu();document.getElementById('restore-file-input').click()">Restore from backup</button>
     <button onclick="closeMoreMenu();exportPDF()">Export PDF</button>
+    <button onclick="closeMoreMenu();exportBlackbaudLog()">🗂️ Class log for Blackbaud</button>
     <button onclick="closeMoreMenu();driveSendCurrentUnit()">☁ Send this unit to Drive</button>
     <button onclick="closeMoreMenu();previewCurrentUnit()">🖨 Preview unit / Save as PDF</button>
     <button onclick="closeMoreMenu();openDriveSetup()">Google Drive setup…</button>
@@ -1535,6 +1536,7 @@ body.dragging-lesson, body.dragging-week { cursor: grabbing; }
         onblur="state.teacher=this.textContent.trim();saveState()"
         title="Click to edit your name">Eric Lastres, SJ</div>
       <div class="topbar-class" id="topbar-class-label">Theology 6 · THE 8100 · 2025–2026</div>
+      <div id="mm-version" style="font-size:10px;opacity:.55;margin-top:5px" title="The app version you're running"></div>
     </div>
   </div>
 </div>
@@ -2079,8 +2081,8 @@ function out(o) {
             <button onclick="copyDriveScript(this)" style="position:absolute;top:7px;right:7px;background:var(--gold);color:var(--navy-dark);border:none;border-radius:5px;padding:3px 9px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">Copy</button>
           </div>
         </li>
-        <li>In the left sidebar, next to <b>Services</b>, click <b>+</b> → choose <b>Drive API</b> → <b>Add</b>.</li>
-        <li>Click <b>Deploy → New deployment</b> → gear ⚙ → <b>Web app</b>. Set <b>Execute as: Me</b> and <b>Who has access: Anyone</b> → <b>Deploy</b> → authorize. Copy the <b>Web app URL</b>.</li>
+        <li>In the left sidebar, next to <b>Services</b>, click <b>+</b> and add <b>two</b>: <b>Drive API</b> and <b>Google Docs API</b> (the Docs API is what makes the unit docs <b>landscape</b>). Click <b>Add</b> for each.</li>
+        <li>Click <b>Deploy → New deployment</b> → gear ⚙ → <b>Web app</b>. Set <b>Execute as: Me</b> and <b>Who has access: Anyone</b> → <b>Deploy</b> → authorize. Copy the <b>Web app URL</b>. <span style="color:var(--ink-3)">(Updating an existing setup? Use <b>Deploy → Manage deployments</b> → ✏️ edit → <b>Version: New version</b> → Deploy — the URL stays the same.)</span></li>
         <li>In Google Drive, open each folder you want plans saved to and copy its link from the address bar.</li>
       </ol>
       <label style="display:block;font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:4px">Web app URL <span style="font-weight:400;color:var(--ink-3)">(shared by both courses)</span></label>
@@ -2274,7 +2276,7 @@ function out(o) {
 <div id="bbhtml-overlay" style="display:none;position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.5);overflow-y:auto" onclick="if(event.target===this)closeBBHtml()">
   <div style="background:var(--white);max-width:620px;margin:44px auto;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,.3);overflow:hidden">
     <div style="background:var(--navy);padding:12px 16px;display:flex;align-items:center;justify-content:space-between">
-      <span style="color:#fff;font-weight:600;font-size:14px">Daily Agenda — styled for Blackbaud</span>
+      <span id="bbhtml-title" style="color:#fff;font-weight:600;font-size:14px">Daily Agenda — styled for Blackbaud</span>
       <button onclick="closeBBHtml()" style="background:rgba(255,255,255,.15);border:none;border-radius:6px;color:#fff;font-size:20px;width:32px;height:32px;cursor:pointer;line-height:1">&times;</button>
     </div>
     <div style="padding:16px">
@@ -2430,6 +2432,11 @@ const ASSESS_COLORS = {
   'Presentation': {bg:'#EEEDFE', tx:'#3C3489'},
   'Exit Ticket':  {bg:'#F1EFE8', tx:'#5F5E5A'},
 };
+
+// The build version baked into the app itself, so the update checker knows what
+// it's running even when the page was loaded WITHOUT a ?v= token (e.g. the
+// Netlify root rewrite). Keep this in lockstep with index.html's ?v= token.
+window.APP_VERSION = '20260823-40';
 
 let activeCourse = 6; // default to Theology 6
 
@@ -5447,22 +5454,22 @@ function buildUnitDoc(uid){
       ${u.desc?`<div style="font-size:10pt;color:#25514a;margin-top:4px;line-height:1.45">${S(u.desc)}</div>`:''}
       ${(uov.eqItems&&uov.eqItems[0])?`<div style="font-size:10pt;font-weight:700;color:${P.tealBr};margin-top:6px">Big question: ${S(uov.eqItems[0])}</div>`:''}
     </div>
-    <table style="width:100%;border-collapse:collapse;margin-bottom:14px"><tr>
-      <td style="width:52%;vertical-align:top;padding-right:16px">
+    <table width="100%" style="width:100%;border-collapse:collapse;margin-bottom:14px;table-layout:fixed"><tr>
+      <td width="52%" style="width:52%;vertical-align:top;padding-right:16px">
         <div class="sh">Unit Objectives</div>${objHTML}
         <div class="sh" style="margin-top:13px">Vocabulary &amp; Knowledge Expectations</div>${vkHTML}
       </td>
-      <td style="width:48%;vertical-align:top">
+      <td width="48%" style="width:48%;vertical-align:top">
         <div class="sh">Assignments &amp; Assessments</div>${asgHTML}
       </td>
     </tr></table>
     <div class="sh">Pacing at a Glance</div>
-    <table style="width:100%;border-collapse:collapse">
+    <table width="100%" style="width:100%;border-collapse:collapse;table-layout:fixed">
       <thead><tr>
-        <th style="background:${P.navy};color:#fff;border:1px solid ${P.navy};padding:5px 9px;text-align:left;font-size:9.5pt;-webkit-print-color-adjust:exact;print-color-adjust:exact">Week</th>
-        <th style="background:${P.navy};color:#fff;border:1px solid ${P.navy};padding:5px 9px;text-align:left;font-size:9.5pt;-webkit-print-color-adjust:exact;print-color-adjust:exact">Dates</th>
-        <th style="background:${P.navy};color:#fff;border:1px solid ${P.navy};padding:5px 9px;text-align:left;font-size:9.5pt;-webkit-print-color-adjust:exact;print-color-adjust:exact">Focus</th>
-        <th style="background:${P.navy};color:#fff;border:1px solid ${P.navy};padding:5px 9px;text-align:center;font-size:9.5pt;-webkit-print-color-adjust:exact;print-color-adjust:exact">Blocks</th>
+        <th width="12%" style="width:12%;background:${P.navy};color:#fff;border:1px solid ${P.navy};padding:5px 9px;text-align:left;font-size:9.5pt;-webkit-print-color-adjust:exact;print-color-adjust:exact">Week</th>
+        <th width="18%" style="width:18%;background:${P.navy};color:#fff;border:1px solid ${P.navy};padding:5px 9px;text-align:left;font-size:9.5pt;-webkit-print-color-adjust:exact;print-color-adjust:exact">Dates</th>
+        <th width="62%" style="width:62%;background:${P.navy};color:#fff;border:1px solid ${P.navy};padding:5px 9px;text-align:left;font-size:9.5pt;-webkit-print-color-adjust:exact;print-color-adjust:exact">Focus</th>
+        <th width="8%" style="width:8%;background:${P.navy};color:#fff;border:1px solid ${P.navy};padding:5px 9px;text-align:center;font-size:9.5pt;-webkit-print-color-adjust:exact;print-color-adjust:exact">Blocks</th>
       </tr></thead><tbody>${paceHTML}</tbody></table>
   </div>`;
 
@@ -5471,7 +5478,10 @@ function buildUnitDoc(uid){
   const cell = h => `<td style="border:1px solid ${P.rule};padding:7px 9px;vertical-align:top;font-size:9pt;line-height:1.42">${h||''}</td>`;
   const weekPages = weekData.filter(w=>w.days.length).map(w=>{
     const days = w.days;
-    const heads = days.map(d=>`<th style="background:${P.goldL};border:1px solid ${P.rule};border-top:4px solid ${P.tealBr};padding:6px 9px;text-align:left;-webkit-print-color-adjust:exact;print-color-adjust:exact"><div style="font-size:12pt;font-weight:700;color:${P.navy}">${S(d.topic)||S(d.label)}</div><div style="font-size:8.5pt;color:#6b5a2a;font-weight:600;margin-top:2px">${escPDF(d.label)}${dstr(d)?` · ${escPDF(dstr(d))}`:''}</div></th>`).join('');
+    // Explicit % column widths — Google Docs ignores width:100% on tables and
+    // sizes to content, so without this the table crams into the left of the page.
+    const clsW = Math.floor(84 / Math.max(days.length,1));
+    const heads = days.map(d=>`<th width="${clsW}%" style="width:${clsW}%;background:${P.goldL};border:1px solid ${P.rule};border-top:4px solid ${P.tealBr};padding:6px 9px;text-align:left;-webkit-print-color-adjust:exact;print-color-adjust:exact"><div style="font-size:12pt;font-weight:700;color:${P.navy}">${S(d.topic)||S(d.label)}</div><div style="font-size:8.5pt;color:#6b5a2a;font-weight:600;margin-top:2px">${escPDF(d.label)}${dstr(d)?` · ${escPDF(dstr(d))}`:''}</div></th>`).join('');
     const rowGoals = `<tr>${rowLbl('Goals','What students should learn')}${days.map(d=>cell(goalsHTML(d))).join('')}</tr>`;
     const rowTgts  = `<tr>${rowLbl('Learning Targets','&ldquo;I can…&rdquo;')}${days.map(d=>cell(targetsHTML(d))).join('')}</tr>`;
     const rowActs  = `<tr>${rowLbl('Activities / Tasks','with IPP stages')}${days.map(d=>cell(actLines(d))).join('')}</tr>`;
@@ -5484,8 +5494,8 @@ function buildUnitDoc(uid){
       <table style="width:100%;border-collapse:collapse;margin-bottom:9px"><tr>
         <td style="background:#EEF1F6;border:1px solid ${P.rule};padding:4px 8px;width:110px;font-size:8pt;font-weight:700;color:${P.navy};-webkit-print-color-adjust:exact;print-color-adjust:exact">IPP Key</td>
         <td style="border:1px solid ${P.rule};padding:4px 8px;font-size:8pt;color:#333">${IPP_STAGES.map(s=>`<b style="color:${P.navy}">${s.letter}</b> ${escPDF(s.label)}`).join(' &nbsp;|&nbsp; ')}</td></tr></table>
-      <table style="width:100%;border-collapse:collapse;table-layout:fixed">
-        <thead><tr><th style="background:${P.goldBg};border:1px solid ${P.rule};width:140px;padding:6px 9px;text-align:left;color:${P.navy};font-size:10pt;-webkit-print-color-adjust:exact;print-color-adjust:exact">Week of<br><span style="font-weight:400;font-size:8.5pt;color:${P.ink3}">${escPDF(w.range)}</span></th>${heads}</tr></thead>
+      <table width="100%" style="width:100%;border-collapse:collapse;table-layout:fixed">
+        <thead><tr><th width="16%" style="width:16%;background:${P.goldBg};border:1px solid ${P.rule};padding:6px 9px;text-align:left;color:${P.navy};font-size:10pt;-webkit-print-color-adjust:exact;print-color-adjust:exact">Week of<br><span style="font-weight:400;font-size:8.5pt;color:${P.ink3}">${escPDF(w.range)}</span></th>${heads}</tr></thead>
         <tbody>${rowGoals}${rowTgts}${banner('Learning Activities / Tasks')}${rowActs}${rowHW}${banner('Student Resources / Links / Tech Tools')}${rowRes}</tbody>
       </table></div>`;
   }).join('');
@@ -5702,21 +5712,21 @@ async function openDrivePicker(onPick){
     const picker = new google.picker.PickerBuilder()
       .setOAuthToken(token)
       .setDeveloperKey(p.apiKey)
-      .setTitle('Choose a file from your Drive')
+      .setTitle('Choose file(s) from your Drive — hold Ctrl/⌘ or Shift to pick several')
       .enableFeature(google.picker.Feature.SUPPORT_DRIVES)
+      .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
       .addView(mine)
       .addView(recent)
       .addView(new google.picker.DocsUploadView())
       .setCallback(data => {
         if(!data || data.action !== google.picker.Action.PICKED) return;
-        const doc = (data.docs || [])[0];
-        if(!doc) return;
-        onPick({
+        const files = (data.docs || []).map(doc => ({
           title: doc.name || doc.title || '',
           url: doc.url || (doc.id ? `https://drive.google.com/open?id=${doc.id}` : ''),
           mimeType: doc.mimeType || '',
           id: doc.id || '',
-        });
+        }));
+        if(files.length) onPick(files);   // onPick always receives an array
       })
       .build();
     picker.setVisible(true);
@@ -5738,25 +5748,50 @@ function drivePickBtnHTML(handler){
     <a class="drive-open" href="https://drive.google.com/drive/my-drive" target="_blank" rel="noopener" title="Open Drive in a new tab and copy the link">open Drive ↗</a>`;
 }
 
-// Fill the lesson-resource popup from a picked Drive file.
+// Fill the lesson-resource popup from a picked Drive file. One file → fill the
+// form (so you can tweak the title). Several files → add them all at once.
 function pickDriveIntoResourceModal(){
-  openDrivePicker(f => {
-    document.getElementById('resource-url').value = f.url;
-    const t = document.getElementById('resource-title');
-    if(!t.value.trim()) t.value = f.title;
-    toast(`${driveKindLabel(f.mimeType)} linked ✓`);
+  openDrivePicker(files => {
+    if(files.length === 1){
+      const f = files[0];
+      document.getElementById('resource-url').value = f.url;
+      const t = document.getElementById('resource-title');
+      if(!t.value.trim()) t.value = f.title;
+      toast(`${driveKindLabel(f.mimeType)} linked ✓`);
+      return;
+    }
+    if(!_resEdit) return;
+    const d = getDay(_resEdit.i);
+    d.materials = d.materials || [];
+    files.forEach(f => d.materials.push({ title: f.title || f.url, url: f.url }));
+    saveState();
+    const i = _resEdit.i; closeResourceModal(); rerenderDay(i);
+    toast(`${files.length} resources added ✓`);
   });
 }
-// Fill the inline unit-resource form from a picked Drive file.
+// Fill the inline unit-resource form from a picked Drive file. One file → fill
+// the form; several → add each as its own unit resource in the open category.
 function pickDriveIntoResForm(){
-  openDrivePicker(f => {
-    const wrap = document.querySelector('.ures-form'); if(!wrap) return;
-    wrap.querySelector('.ures-in-url').value = f.url;
-    const name = wrap.querySelector('.ures-in-name');
-    if(!name.value.trim()) name.value = f.title;
-    const note = wrap.querySelector('.ures-in-note');
-    if(note && !note.value.trim()) note.value = driveKindLabel(f.mimeType);
-    toast(`${driveKindLabel(f.mimeType)} linked ✓`);
+  openDrivePicker(files => {
+    if(files.length === 1){
+      const f = files[0];
+      const wrap = document.querySelector('.ures-form'); if(!wrap) return;
+      wrap.querySelector('.ures-in-url').value = f.url;
+      const name = wrap.querySelector('.ures-in-name');
+      if(!name.value.trim()) name.value = f.title;
+      const note = wrap.querySelector('.ures-in-note');
+      if(note && !note.value.trim()) note.value = driveKindLabel(f.mimeType);
+      toast(`${driveKindLabel(f.mimeType)} linked ✓`);
+      return;
+    }
+    const uid = currentUnit; if(!uid) return;
+    const cat = (typeof resUI!=='undefined' && resUI && resUI.addCat) || '';
+    files.forEach(f => getUnitResources(uid).push({
+      id: uid+'-'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),
+      cat, title: f.title || f.url, url: normalizeUrl(f.url), note: driveKindLabel(f.mimeType)
+    }));
+    saveState(); reRenderResources(uid);
+    toast(`${files.length} resources added ✓`);
   });
 }
 
@@ -5781,8 +5816,8 @@ function doPost(e) {
       file = Drive.Files.insert({ title:d.docName, mimeType:'application/vnd.google-apps.document', parents:[{ id:d.folderId }] }, blob);
       id = file.id;
     }
-    fixPageBreaks_(id);   // turn @@PB@@ markers into real page breaks
-    setLandscape_(id);    // letter landscape
+    var land = setLandscape_(id);   // letter landscape (needs the Docs API)
+    postProcess_(id, land);         // page breaks + stretch tables to the new width
     return out({ ok: true, id: id });
   } catch (err) { return out({ ok: false, error: String(err) }); }
 }
@@ -5795,18 +5830,6 @@ function findDocId_(folderId, name, v3) {
   var r2 = Drive.Files.list({ q: "'"+folderId+"' in parents and title='"+safe+"' and trashed=false", maxResults:1 });
   return (r2.items && r2.items.length) ? r2.items[0].id : null;
 }
-function fixPageBreaks_(docId) {
-  try {
-    var doc = DocumentApp.openById(docId), body = doc.getBody(), guard = 0, f;
-    while ((f = body.findText('@@PB@@')) && guard++ < 100) {
-      var para = f.getElement().getParent();
-      var idx = body.getChildIndex(para);
-      para.asText().setText('');
-      body.insertPageBreak(idx);
-    }
-    doc.saveAndClose();
-  } catch (e2) {}
-}
 function setLandscape_(docId) {
   try {
     Docs.Documents.batchUpdate({ requests: [{ updateDocumentStyle: {
@@ -5814,7 +5837,37 @@ function setLandscape_(docId) {
         marginTop:{magnitude:28,unit:'PT'}, marginBottom:{magnitude:28,unit:'PT'},
         marginLeft:{magnitude:28,unit:'PT'}, marginRight:{magnitude:28,unit:'PT'} },
       fields: 'pageSize,marginTop,marginBottom,marginLeft,marginRight' } }] }, docId);
-  } catch (e3) {}   // if Docs API isn't enabled the doc still saves (portrait)
+    return true;
+  } catch (e3) { return false; }   // Docs API not enabled → doc still saves (portrait)
+}
+function postProcess_(docId, landscape) {
+  try {
+    var doc = DocumentApp.openById(docId), body = doc.getBody(), guard = 0, f;
+    // 1) turn the @@PB@@ markers into real page breaks
+    while ((f = body.findText('@@PB@@')) && guard++ < 200) {
+      var para = f.getElement().getParent();
+      var idx = body.getChildIndex(para);
+      para.asText().setText('');
+      body.insertPageBreak(idx);
+    }
+    // 2) Google imports tables at the PORTRAIT width, then we switched to
+    //    landscape — so stretch every table back out to fill the wider page,
+    //    keeping each table's own column proportions.
+    if (landscape) {
+      var usable = 736;   // 792pt landscape − 2×28pt margins
+      var tables = body.getTables();
+      for (var i = 0; i < tables.length; i++) {
+        var t = tables[i], ncol = 0;
+        try { ncol = t.getRow(0).getNumCells(); } catch (e4) {}
+        if (!ncol) continue;
+        var ws = [], sum = 0, c;
+        for (c = 0; c < ncol; c++) { var w = 0; try { w = t.getColumnWidth(c); } catch (e5) {} if (!w || w < 1) w = 50; ws.push(w); sum += w; }
+        if (sum <= 0) continue;
+        for (c = 0; c < ncol; c++) { try { t.setColumnWidth(c, Math.round(ws[c] / sum * usable)); } catch (e6) {} }
+      }
+    }
+    doc.saveAndClose();
+  } catch (e2) {}
 }
 function doGet() { return out({ ok: true, msg: 'Planner Drive endpoint is live (v2 — unit docs)' }); }
 function out(o) {
@@ -5824,6 +5877,8 @@ function out(o) {
 function openDriveSetup(){
   const ov = document.getElementById('drive-setup-overlay');
   const c = driveCfg();
+  // Keep the on-screen script identical to what the Copy button copies.
+  const box = document.getElementById('drive-script-box'); if(box) box.textContent = DRIVE_APPS_SCRIPT;
   document.getElementById('drive-url-in').value = c.url || '';
   document.getElementById('drive-folder6-in').value = c.folders[6] || '';
   document.getElementById('drive-folder7-in').value = c.folders[7] || '';
@@ -5846,7 +5901,7 @@ function testDrivePicker(){
   try{ localStorage.setItem(DRIVE_CFG_KEY, JSON.stringify(c)); }catch(e){}
   _driveTokenClient = null;   // the client ID may have just changed
   if(!drivePickerReady()){ toast('Fill in both the API key and the client ID first'); return; }
-  openDrivePicker(f => toast(`Picker works — you chose "${f.title}" ✓`));
+  openDrivePicker(files => toast(`Picker works — you chose "${files[0].title}"${files.length>1?` +${files.length-1} more`:''} ✓`));
 }
 function closeDriveSetup(){ document.getElementById('drive-setup-overlay').style.display='none'; }
 function copyDriveScript(btn){
@@ -10179,6 +10234,83 @@ function bbAgendaHTML(d){
 let _bbAgenda = { html:'', plain:'' };
 function exportBlackbaudAgenda(i){
   _bbAgenda = bbAgendaHTML(getDay(i));
+  const t=document.getElementById('bbhtml-title'); if(t) t.textContent='Daily Agenda — styled for Blackbaud';
+  document.getElementById('bbhtml-preview').innerHTML = _bbAgenda.html;
+  document.getElementById('bbhtml-overlay').style.display='block';
+}
+
+// ── RUNNING CLASS LOG for the Blackbaud Bulletin Board ───────────────
+// One block, newest class on top — each entry shows Date · Topic · Objective ·
+// Agenda ("what we did"), so students can scroll back through the whole course.
+// Built from the planner; paste (or re-paste) it whenever you want it current.
+function bbLog(){
+  const co = getCourse();
+  const strip = s => String(s||'').replace(/<[^>]*>/g,' ').replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim();
+  const today = isoToday();
+  const cal = loadCalendar();
+  // One entry per lesson (A/B collapsed), only classes already taught (dated ≤ today).
+  const byLesson = {};
+  collectClasses().forEach(c=>{
+    if(!c.date || c.date > today) return;
+    const k = `${c.uid}-${c.wi}-${c.di}`;
+    if(!byLesson[k]) byLesson[k] = { d:c.d, u:c.u, uid:c.uid, dates:[] };
+    byLesson[k].dates.push({block:c.block, date:c.date});
+  });
+  let items = Object.values(byLesson).filter(L=> strip(L.d.topic) || actsLines(L.d).length || strip(L.d.label));
+  const lastDate = L => L.dates.map(x=>x.date).sort().slice(-1)[0] || '';
+  items.sort((a,b)=> lastDate(b).localeCompare(lastDate(a)));   // newest first
+
+  const C = { navy:'#1B2A4A', blue:'#1D6FBF', accent:'#1B6EC2', ink:'#2A2E33',
+              mut:'#6B7075', bd:'#DDE1E7', chipBg:'#EAF1FB' };
+  const entry = L => {
+    const d = L.d;
+    const dsorted = L.dates.slice().sort((a,b)=>a.date.localeCompare(b.date));
+    const dateStr = dsorted.map(x=>{
+      const nice = isoParse(x.date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+      const ab = (cal && cal.abByDate && cal.abByDate[x.date]) ? ` (${cal.abByDate[x.date]})` : '';
+      return `${nice}${ab}`;
+    }).join(' · ');
+    const topic = strip(d.topic) || strip(d.label) || 'Class';
+    let ican = strip(targetsHTML(d)).replace(/^I can\s*/i,''); if(!ican) ican = strip(goalsHTML(d));
+    const acts = actsLines(d);
+    const agenda = acts.length
+      ? `<ol style="margin:4px 0 0;padding-left:20px;color:${C.ink};font-size:13px;line-height:1.5">${acts.map(t=>`<li style="margin:1px 0">${esc(t)}</li>`).join('')}</ol>`
+      : `<div style="color:${C.mut};font-size:13px">—</div>`;
+    return `<div style="border:1px solid ${C.bd};border-left:4px solid ${C.blue};border-radius:8px;padding:11px 14px;margin:0 0 10px">`
+      +`<div style="font-size:11px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:${C.accent}">📅 ${esc(dateStr)} · Unit ${unitNo(L.uid)}${d.label?` · ${esc(strip(d.label))}`:''}</div>`
+      +`<div style="font-size:17px;font-weight:700;color:${C.navy};margin:2px 0 6px">${esc(topic)}</div>`
+      +(ican?`<div style="font-size:13px;color:${C.ink};margin:0 0 4px"><b style="color:${C.accent}">🎯 I can…</b> ${esc(ican)}</div>`:'')
+      +`<div style="font-size:13px;color:${C.ink}"><b style="color:${C.accent}">📝 What we did</b>${agenda}</div>`
+      +`</div>`;
+  };
+
+  const body = items.length ? items.map(entry).join('')
+    : `<div style="color:${C.mut};font-size:14px;padding:6px 2px">No classes to show yet — entries appear here once a lesson has a class date on or before today.</div>`;
+
+  const html =
+`<div style="font-family:'Helvetica Neue',Arial,sans-serif;max-width:680px">`
++`<div style="background:${C.navy};background:linear-gradient(100deg,${C.navy},${C.blue});padding:13px 16px;border-radius:10px;margin-bottom:12px">`
++`<div style="font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#C2D6F0">📚 ${esc(co.name)} · Class Log</div>`
++`<div style="font-size:19px;font-weight:700;color:#fff;margin-top:2px">What We Did — Day by Day</div>`
++`<div style="font-size:12px;color:#C2D6F0;margin-top:3px">Newest on top. Missed a class? Catch up here.</div>`
++`</div>${body}</div>`;
+
+  // Plain-text fallback
+  const pl = [`${co.name} — Class Log (what we did, newest first)`,''];
+  items.forEach(L=>{
+    const d=L.d; const ds=L.dates.slice().sort((a,b)=>a.date.localeCompare(b.date)).map(x=>isoParse(x.date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})).join(' · ');
+    let ican=strip(targetsHTML(d)).replace(/^I can\s*/i,''); if(!ican) ican=strip(goalsHTML(d));
+    pl.push(`📅 ${ds} · Unit ${unitNo(L.uid)}${d.label?` · ${strip(d.label)}`:''}`);
+    pl.push(`   ${strip(d.topic)||strip(d.label)||'Class'}`);
+    if(ican) pl.push(`   🎯 I can… ${ican}`);
+    const acts=actsLines(d); if(acts.length){ pl.push('   📝 What we did:'); acts.forEach((t,n)=>pl.push(`      ${n+1}. ${t}`)); }
+    pl.push('');
+  });
+  return { html, plain: pl.join('\n'), count: items.length };
+}
+function exportBlackbaudLog(){
+  _bbAgenda = bbLog();
+  const t=document.getElementById('bbhtml-title'); if(t) t.textContent='Class Log — styled for Blackbaud';
   document.getElementById('bbhtml-preview').innerHTML = _bbAgenda.html;
   document.getElementById('bbhtml-overlay').style.display='block';
 }
@@ -12482,7 +12614,10 @@ function exportUnitOverviewPDF() {
      the one running, it offers a one-click reload. No hard-refresh needed. -->
 <script>
 (function(){
-  function runningVer(){ try{ return new URLSearchParams(location.search).get('v') || ''; }catch(e){ return ''; } }
+  // The version we're running: the URL's ?v= if present, else the version baked
+  // into the app (so a page opened without ?v= — e.g. the Netlify root rewrite —
+  // still knows what it is and can detect a newer deploy).
+  function runningVer(){ try{ return new URLSearchParams(location.search).get('v') || window.APP_VERSION || ''; }catch(e){ return window.APP_VERSION || ''; } }
   function showUpdateBanner(latest){
     if(document.getElementById('update-banner')) return;
     var b=document.createElement('div');
@@ -12506,7 +12641,10 @@ function exportUnitOverviewPDF() {
       })
       .catch(function(){});
   }
-  window.addEventListener('load', function(){ setTimeout(checkUpdate, 2500); });
+  window.addEventListener('load', function(){
+    try{ var vEl=document.getElementById('mm-version'); if(vEl) vEl.textContent='Version '+runningVer(); }catch(e){}
+    setTimeout(checkUpdate, 2500);
+  });
   setInterval(checkUpdate, 5*60*1000);
   document.addEventListener('visibilitychange', function(){ if(!document.hidden) checkUpdate(); });
 })();
