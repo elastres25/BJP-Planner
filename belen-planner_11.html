@@ -2427,7 +2427,7 @@ const ASSESS_COLORS = {
 // The build version baked into the app itself, so the update checker knows what
 // it's running even when the page was loaded WITHOUT a ?v= token (e.g. the
 // Netlify root rewrite). Keep this in lockstep with index.html's ?v= token.
-window.APP_VERSION = '20260823-37';
+window.APP_VERSION = '20260823-38';
 
 let activeCourse = 6; // default to Theology 6
 
@@ -5319,22 +5319,22 @@ function buildUnitDoc(uid){
       ${u.desc?`<div style="font-size:10pt;color:#25514a;margin-top:4px;line-height:1.45">${S(u.desc)}</div>`:''}
       ${(uov.eqItems&&uov.eqItems[0])?`<div style="font-size:10pt;font-weight:700;color:${P.tealBr};margin-top:6px">Big question: ${S(uov.eqItems[0])}</div>`:''}
     </div>
-    <table style="width:100%;border-collapse:collapse;margin-bottom:14px"><tr>
-      <td style="width:52%;vertical-align:top;padding-right:16px">
+    <table width="100%" style="width:100%;border-collapse:collapse;margin-bottom:14px;table-layout:fixed"><tr>
+      <td width="52%" style="width:52%;vertical-align:top;padding-right:16px">
         <div class="sh">Unit Objectives</div>${objHTML}
         <div class="sh" style="margin-top:13px">Vocabulary &amp; Knowledge Expectations</div>${vkHTML}
       </td>
-      <td style="width:48%;vertical-align:top">
+      <td width="48%" style="width:48%;vertical-align:top">
         <div class="sh">Assignments &amp; Assessments</div>${asgHTML}
       </td>
     </tr></table>
     <div class="sh">Pacing at a Glance</div>
-    <table style="width:100%;border-collapse:collapse">
+    <table width="100%" style="width:100%;border-collapse:collapse;table-layout:fixed">
       <thead><tr>
-        <th style="background:${P.navy};color:#fff;border:1px solid ${P.navy};padding:5px 9px;text-align:left;font-size:9.5pt;-webkit-print-color-adjust:exact;print-color-adjust:exact">Week</th>
-        <th style="background:${P.navy};color:#fff;border:1px solid ${P.navy};padding:5px 9px;text-align:left;font-size:9.5pt;-webkit-print-color-adjust:exact;print-color-adjust:exact">Dates</th>
-        <th style="background:${P.navy};color:#fff;border:1px solid ${P.navy};padding:5px 9px;text-align:left;font-size:9.5pt;-webkit-print-color-adjust:exact;print-color-adjust:exact">Focus</th>
-        <th style="background:${P.navy};color:#fff;border:1px solid ${P.navy};padding:5px 9px;text-align:center;font-size:9.5pt;-webkit-print-color-adjust:exact;print-color-adjust:exact">Blocks</th>
+        <th width="12%" style="width:12%;background:${P.navy};color:#fff;border:1px solid ${P.navy};padding:5px 9px;text-align:left;font-size:9.5pt;-webkit-print-color-adjust:exact;print-color-adjust:exact">Week</th>
+        <th width="18%" style="width:18%;background:${P.navy};color:#fff;border:1px solid ${P.navy};padding:5px 9px;text-align:left;font-size:9.5pt;-webkit-print-color-adjust:exact;print-color-adjust:exact">Dates</th>
+        <th width="62%" style="width:62%;background:${P.navy};color:#fff;border:1px solid ${P.navy};padding:5px 9px;text-align:left;font-size:9.5pt;-webkit-print-color-adjust:exact;print-color-adjust:exact">Focus</th>
+        <th width="8%" style="width:8%;background:${P.navy};color:#fff;border:1px solid ${P.navy};padding:5px 9px;text-align:center;font-size:9.5pt;-webkit-print-color-adjust:exact;print-color-adjust:exact">Blocks</th>
       </tr></thead><tbody>${paceHTML}</tbody></table>
   </div>`;
 
@@ -5343,7 +5343,10 @@ function buildUnitDoc(uid){
   const cell = h => `<td style="border:1px solid ${P.rule};padding:7px 9px;vertical-align:top;font-size:9pt;line-height:1.42">${h||''}</td>`;
   const weekPages = weekData.filter(w=>w.days.length).map(w=>{
     const days = w.days;
-    const heads = days.map(d=>`<th style="background:${P.goldL};border:1px solid ${P.rule};border-top:4px solid ${P.tealBr};padding:6px 9px;text-align:left;-webkit-print-color-adjust:exact;print-color-adjust:exact"><div style="font-size:12pt;font-weight:700;color:${P.navy}">${S(d.topic)||S(d.label)}</div><div style="font-size:8.5pt;color:#6b5a2a;font-weight:600;margin-top:2px">${escPDF(d.label)}${dstr(d)?` · ${escPDF(dstr(d))}`:''}</div></th>`).join('');
+    // Explicit % column widths — Google Docs ignores width:100% on tables and
+    // sizes to content, so without this the table crams into the left of the page.
+    const clsW = Math.floor(84 / Math.max(days.length,1));
+    const heads = days.map(d=>`<th width="${clsW}%" style="width:${clsW}%;background:${P.goldL};border:1px solid ${P.rule};border-top:4px solid ${P.tealBr};padding:6px 9px;text-align:left;-webkit-print-color-adjust:exact;print-color-adjust:exact"><div style="font-size:12pt;font-weight:700;color:${P.navy}">${S(d.topic)||S(d.label)}</div><div style="font-size:8.5pt;color:#6b5a2a;font-weight:600;margin-top:2px">${escPDF(d.label)}${dstr(d)?` · ${escPDF(dstr(d))}`:''}</div></th>`).join('');
     const rowGoals = `<tr>${rowLbl('Goals','What students should learn')}${days.map(d=>cell(goalsHTML(d))).join('')}</tr>`;
     const rowTgts  = `<tr>${rowLbl('Learning Targets','&ldquo;I can…&rdquo;')}${days.map(d=>cell(targetsHTML(d))).join('')}</tr>`;
     const rowActs  = `<tr>${rowLbl('Activities / Tasks','with IPP stages')}${days.map(d=>cell(actLines(d))).join('')}</tr>`;
@@ -5356,8 +5359,8 @@ function buildUnitDoc(uid){
       <table style="width:100%;border-collapse:collapse;margin-bottom:9px"><tr>
         <td style="background:#EEF1F6;border:1px solid ${P.rule};padding:4px 8px;width:110px;font-size:8pt;font-weight:700;color:${P.navy};-webkit-print-color-adjust:exact;print-color-adjust:exact">IPP Key</td>
         <td style="border:1px solid ${P.rule};padding:4px 8px;font-size:8pt;color:#333">${IPP_STAGES.map(s=>`<b style="color:${P.navy}">${s.letter}</b> ${escPDF(s.label)}`).join(' &nbsp;|&nbsp; ')}</td></tr></table>
-      <table style="width:100%;border-collapse:collapse;table-layout:fixed">
-        <thead><tr><th style="background:${P.goldBg};border:1px solid ${P.rule};width:140px;padding:6px 9px;text-align:left;color:${P.navy};font-size:10pt;-webkit-print-color-adjust:exact;print-color-adjust:exact">Week of<br><span style="font-weight:400;font-size:8.5pt;color:${P.ink3}">${escPDF(w.range)}</span></th>${heads}</tr></thead>
+      <table width="100%" style="width:100%;border-collapse:collapse;table-layout:fixed">
+        <thead><tr><th width="16%" style="width:16%;background:${P.goldBg};border:1px solid ${P.rule};padding:6px 9px;text-align:left;color:${P.navy};font-size:10pt;-webkit-print-color-adjust:exact;print-color-adjust:exact">Week of<br><span style="font-weight:400;font-size:8.5pt;color:${P.ink3}">${escPDF(w.range)}</span></th>${heads}</tr></thead>
         <tbody>${rowGoals}${rowTgts}${banner('Learning Activities / Tasks')}${rowActs}${rowHW}${banner('Student Resources / Links / Tech Tools')}${rowRes}</tbody>
       </table></div>`;
   }).join('');
