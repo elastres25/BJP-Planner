@@ -2427,7 +2427,7 @@ const ASSESS_COLORS = {
 // The build version baked into the app itself, so the update checker knows what
 // it's running even when the page was loaded WITHOUT a ?v= token (e.g. the
 // Netlify root rewrite). Keep this in lockstep with index.html's ?v= token.
-window.APP_VERSION = '20260823-38';
+window.APP_VERSION = '20260823-39';
 
 let activeCourse = 6; // default to Theology 6
 
@@ -5681,8 +5681,8 @@ function doPost(e) {
       file = Drive.Files.insert({ title:d.docName, mimeType:'application/vnd.google-apps.document', parents:[{ id:d.folderId }] }, blob);
       id = file.id;
     }
-    fixPageBreaks_(id);   // turn @@PB@@ markers into real page breaks
-    setLandscape_(id);    // letter landscape
+    var land = setLandscape_(id);   // letter landscape (needs the Docs API)
+    postProcess_(id, land);         // page breaks + stretch tables to the new width
     return out({ ok: true, id: id });
   } catch (err) { return out({ ok: false, error: String(err) }); }
 }
@@ -5695,18 +5695,6 @@ function findDocId_(folderId, name, v3) {
   var r2 = Drive.Files.list({ q: "'"+folderId+"' in parents and title='"+safe+"' and trashed=false", maxResults:1 });
   return (r2.items && r2.items.length) ? r2.items[0].id : null;
 }
-function fixPageBreaks_(docId) {
-  try {
-    var doc = DocumentApp.openById(docId), body = doc.getBody(), guard = 0, f;
-    while ((f = body.findText('@@PB@@')) && guard++ < 100) {
-      var para = f.getElement().getParent();
-      var idx = body.getChildIndex(para);
-      para.asText().setText('');
-      body.insertPageBreak(idx);
-    }
-    doc.saveAndClose();
-  } catch (e2) {}
-}
 function setLandscape_(docId) {
   try {
     Docs.Documents.batchUpdate({ requests: [{ updateDocumentStyle: {
@@ -5714,7 +5702,37 @@ function setLandscape_(docId) {
         marginTop:{magnitude:28,unit:'PT'}, marginBottom:{magnitude:28,unit:'PT'},
         marginLeft:{magnitude:28,unit:'PT'}, marginRight:{magnitude:28,unit:'PT'} },
       fields: 'pageSize,marginTop,marginBottom,marginLeft,marginRight' } }] }, docId);
-  } catch (e3) {}   // if Docs API isn't enabled the doc still saves (portrait)
+    return true;
+  } catch (e3) { return false; }   // Docs API not enabled → doc still saves (portrait)
+}
+function postProcess_(docId, landscape) {
+  try {
+    var doc = DocumentApp.openById(docId), body = doc.getBody(), guard = 0, f;
+    // 1) turn the @@PB@@ markers into real page breaks
+    while ((f = body.findText('@@PB@@')) && guard++ < 200) {
+      var para = f.getElement().getParent();
+      var idx = body.getChildIndex(para);
+      para.asText().setText('');
+      body.insertPageBreak(idx);
+    }
+    // 2) Google imports tables at the PORTRAIT width, then we switched to
+    //    landscape — so stretch every table back out to fill the wider page,
+    //    keeping each table's own column proportions.
+    if (landscape) {
+      var usable = 736;   // 792pt landscape − 2×28pt margins
+      var tables = body.getTables();
+      for (var i = 0; i < tables.length; i++) {
+        var t = tables[i], ncol = 0;
+        try { ncol = t.getRow(0).getNumCells(); } catch (e4) {}
+        if (!ncol) continue;
+        var ws = [], sum = 0, c;
+        for (c = 0; c < ncol; c++) { var w = 0; try { w = t.getColumnWidth(c); } catch (e5) {} if (!w || w < 1) w = 50; ws.push(w); sum += w; }
+        if (sum <= 0) continue;
+        for (c = 0; c < ncol; c++) { try { t.setColumnWidth(c, Math.round(ws[c] / sum * usable)); } catch (e6) {} }
+      }
+    }
+    doc.saveAndClose();
+  } catch (e2) {}
 }
 function doGet() { return out({ ok: true, msg: 'Planner Drive endpoint is live (v2 — unit docs)' }); }
 function out(o) {
