@@ -321,7 +321,8 @@ button, input, textarea, select { font-family: inherit; }
   font-size: 10px; font-weight: 700; color: var(--navy);
   letter-spacing: .04em; margin-bottom: 2px;
 }
-.pace-date { font-size: 10px; color: var(--ink-3); }
+.pace-date { font-size: 10px; color: var(--ink-3); display:flex; gap:4px; flex-wrap:wrap; align-items:center; }
+.pace-notes { display:flex; flex-wrap:wrap; gap:3px; margin-top:3px; }
 .pace-cell { padding: 8px 12px; }
 .pace-rte {
   min-height: 48px; outline: none; font-size: 12px;
@@ -451,7 +452,6 @@ button, input, textarea, select { font-family: inherit; }
   border:6px solid transparent; border-top:7px solid var(--navy); z-index:2;
 }
 .dc-num { font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 4px; }
-.day-card:hover .day-del-btn { display: block !important; }
 .unit-card:hover .uc-controls { display: flex !important; }
 /* Claude panel */
 #claude-panel { position:fixed;right:0;top:0;bottom:0;width:380px;background:var(--white);border-left:1px solid var(--rule);box-shadow:-4px 0 24px rgba(0,0,0,.1);z-index:200;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s ease; }
@@ -758,6 +758,35 @@ body.simple-mode .dp-adv { display: none !important; }
   font-family:inherit; font-size:12px; font-weight:600; color:var(--navy); cursor:pointer; }
 .sp-add:hover { border-color:var(--navy); background:#fff; }
 .sp-band { color:#fff; vertical-align:top; padding:0; width:120px; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+/* editable dates + your own events on the pacing guide */
+.sp-btn-ghost { background:#fff; color:var(--navy); border:1px solid var(--rule-dark); }
+.sp-btn-ghost:hover { background:var(--parchment); }
+.sp-actions { display:flex; gap:8px; flex-wrap:wrap; }
+.sp-handlecell { width:62px; white-space:nowrap; }
+.sp-gday { font-size:12px; color:var(--ink-2); }
+.sp-wklbl { font-size:9px; font-weight:600; letter-spacing:.03em; text-transform:uppercase; color:var(--ink-3); margin-top:2px; }
+.sp-datebox { display:flex; align-items:center; gap:5px; }
+.sp-dateinp { border:1px solid transparent; background:transparent; border-radius:5px; padding:3px 4px;
+  font-family:inherit; font-size:11.5px; color:var(--ink); outline:none; width:118px; }
+.sp-dateinp:hover { border-color:var(--rule-dark); background:#fff; }
+.sp-dateinp:focus { border-color:var(--navy); background:#fff; }
+.sp-dow { font-size:10px; font-weight:700; text-transform:uppercase; color:var(--ink-3); }
+.sp-daterow { display:flex; gap:4px; margin-top:3px; flex-wrap:wrap; }
+.sp-minibtn { background:none; border:1px dashed var(--rule-dark); border-radius:5px; color:var(--ink-3);
+  cursor:pointer; font-family:inherit; font-size:9.5px; font-weight:700; letter-spacing:.02em; padding:2px 6px; }
+.sp-minibtn:hover { border-color:var(--navy); color:var(--navy); background:#fff; }
+.sp-status.done { color:var(--navy); }
+.smap-note-pill.mine { background:#EDE9FB; color:#3C3489; }
+.ev-x { border:none; background:none; cursor:pointer; color:inherit; opacity:.55; font-size:11px;
+  line-height:1; padding:0 0 0 3px; font-family:inherit; }
+.ev-x:hover { opacity:1; }
+.ev-row { border-bottom:1px solid var(--rule); padding:7px 2px; }
+.ev-row:last-child { border-bottom:none; }
+.ev-date { font-size:12px; font-weight:700; color:var(--ink); display:flex; gap:8px; align-items:baseline; flex-wrap:wrap; }
+.ev-lesson { font-size:10.5px; font-weight:600; color:var(--ink-3); }
+.ev-lesson.ev-noclass { font-style:italic; font-weight:400; }
+.ev-pills { display:flex; flex-wrap:wrap; gap:4px; margin-top:4px; }
+.ev-empty { font-size:12px; color:var(--ink-3); font-style:italic; padding:10px 2px; line-height:1.5; }
 .sp-band-inner { padding:10px 12px; font-weight:800; font-size:13px; }
 .sp-band-inner span { display:block; font-weight:600; font-size:11px; opacity:.9; margin-top:3px; line-height:1.3; }
 .sp-band-inner .sp-band-add { margin-top:9px; display:inline-block; background:rgba(255,255,255,.2); border:1px solid rgba(255,255,255,.35); color:#fff; border-radius:6px; padding:3px 9px; font-size:11px; font-weight:600; cursor:pointer; font-family:inherit; }
@@ -776,6 +805,10 @@ body.simple-mode .dp-adv { display: none !important; }
 .dl-classlabel { display:inline-flex; align-items:center; font-size:11px; font-weight:700; color:var(--navy-dark,#14315C); background:var(--gold,#F2C75C); border-radius:999px; padding:3px 11px; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
 .dl-calbtn { background:rgba(255,255,255,.14); color:#fff; border:1px solid rgba(255,255,255,.3); border-radius:6px; padding:3px 10px; font-family:inherit; font-size:11px; font-weight:600; cursor:pointer; }
 .dl-calbtn:hover { background:rgba(255,255,255,.26); }
+.dl-reflectbtn { background:rgba(255,255,255,.14); color:#fff; border:1px solid rgba(255,255,255,.3); border-radius:6px; padding:3px 10px; font-family:inherit; font-size:11px; font-weight:600; cursor:pointer; }
+.dl-reflectbtn:hover { background:rgba(255,255,255,.26); }
+.dl-reflectbtn.done { background:rgba(74,222,128,.22); border-color:rgba(74,222,128,.55); }
+.dl-reflectbtn.done:hover { background:rgba(74,222,128,.34); }
 .dl-topic { width:100%; box-sizing:border-box; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.22); border-radius:6px; color:#fff; font-size:14px; font-weight:600; padding:7px 10px; outline:none; font-family:inherit; }
 .dl-topic::placeholder { color:rgba(255,255,255,.5); }
 .dl-table { width:100%; border-collapse:collapse; }
@@ -1031,6 +1064,25 @@ body.simple-mode .dp-adv { display: none !important; }
 .wk-dh-topic { font-size:12.5px; font-weight:600; color:var(--ink); line-height:1.3; margin-top:1px; }
 .wk-dh-none { color:#7a6a3a; font-style:italic; font-weight:400; }
 .wk-dh-dates { font-size:10px; color:#6a5a2a; margin-top:2px; }
+.wk-donetag { background:#1B3A6B; color:#fff; border-radius:5px; font-size:9.5px; font-weight:800; letter-spacing:.03em; padding:3px 7px; white-space:nowrap; }
+.wk-dh-tag { background:rgba(255,255,255,.65); border:1px solid rgba(0,0,0,.12); border-radius:5px;
+  padding:3px 8px; font-size:12px; font-weight:700; color:var(--navy); display:inline-block; }
+
+/* ── "DONE": the finished lesson, locked to the weekly card ── */
+.dl-donetoggle { display:inline-flex; align-items:center; gap:5px; cursor:pointer; user-select:none;
+  background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.35); border-radius:6px;
+  padding:4px 10px; font-size:11.5px; font-weight:700; color:#fff; white-space:nowrap; }
+.dl-donetoggle:hover { background:rgba(255,255,255,.28); }
+.dl-donetoggle input { accent-color:var(--gold); cursor:pointer; margin:0; }
+.dl-donetoggle.on { background:#E3F5E8; border-color:#9AD3AE; color:#1A5227; }
+.dl-donetoggle.on:hover { background:#D3EEDC; }
+.dl-donebar { display:flex; align-items:center; gap:10px; flex-wrap:wrap; background:#F4F8F5;
+  border:1px solid #C9E4D2; border-radius:9px; padding:9px 12px; margin-bottom:12px; }
+.dl-donenote { font-size:11.5px; color:#2C5B3C; line-height:1.45; flex:1; min-width:180px; }
+.dl-donebtns { display:flex; gap:6px; margin-left:auto; }
+.dl-donebtn { background:#fff; color:#1A5227; border:1px solid #9AD3AE; border-radius:6px; padding:4px 10px;
+  font-family:inherit; font-size:11px; font-weight:600; cursor:pointer; white-space:nowrap; }
+.dl-donebtn:hover { background:#EAF6EE; }
 .wk-lbl { background:var(--gold-bg); color:var(--navy); font-size:12px; font-weight:700; padding:8px 10px; width:150px; text-align:left; line-height:1.25; }
 .wk-lbl small { display:block; font-size:9.5px; font-weight:400; color:var(--ink-3); margin-top:2px; text-transform:none; letter-spacing:0; }
 .wk-lbl-blank { background:var(--gold-bg); width:150px; }
@@ -1063,6 +1115,20 @@ body.simple-mode .dp-adv { display: none !important; }
 .ures-in:focus { border-color:var(--navy); }
 .ures-in-name { font-weight:600; }
 .ures-form-btns { display:flex; gap:6px; justify-content:flex-end; margin-top:1px; }
+/* ── Google Drive: pick a file instead of pasting its link ── */
+.ures-urlrow { display:flex; flex-direction:column; gap:5px; }
+.drive-row { display:inline-flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.drive-pick { display:inline-flex; align-items:center; gap:5px; background:var(--navy); color:#fff;
+  border:none; border-radius:6px; padding:5px 11px; font-family:inherit; font-size:11.5px;
+  font-weight:700; cursor:pointer; white-space:nowrap; }
+.drive-pick:hover { background:var(--navy-light,#254d8e); }
+.drive-pick.ghost { background:#fff; color:var(--navy); border:1px dashed var(--rule-dark); font-weight:600; }
+.drive-pick.ghost:hover { background:var(--parchment); border-color:var(--navy); }
+.drive-tri { color:#F6C447; font-size:10px; line-height:1; }
+.drive-pick.ghost .drive-tri { color:#1DA462; }
+.drive-open { font-size:11px; font-weight:600; color:var(--ink-3); text-decoration:none; white-space:nowrap; }
+.drive-open:hover { color:var(--navy); text-decoration:underline; }
+.ures-item-title .drive-tri { color:#1DA462; }
 .ures-cancel { background:none; border:1px solid var(--rule-dark); border-radius:6px; padding:6px 12px; font-family:inherit; font-size:12px; font-weight:600; color:var(--ink-2); cursor:pointer; }
 .ures-cancel:hover { border-color:var(--ink-3); }
 .ures-save { background:var(--navy); color:#fff; border:none; border-radius:6px; padding:6px 14px; font-family:inherit; font-size:12px; font-weight:700; cursor:pointer; }
@@ -1338,6 +1404,52 @@ body.simple-mode .dp-adv { display: none !important; }
   margin-bottom: 14px;
 }
 .print-meta { font-size: 11px; color: var(--ink-2); display: flex; flex-direction: column; gap: 2px; }
+
+/* ══════════════════════════════════════════════════════════
+   MOVING LESSONS & WEEKS (drag and drop)
+   A blue bar shows exactly where the thing you're dragging
+   will land; a tinted panel means "drop it in this week".
+══════════════════════════════════════════════════════════ */
+.week-block { border-radius: 12px; padding: 2px 4px 0; margin-bottom: 22px; transition: background .12s, box-shadow .12s; }
+.week-block.is-dragging { opacity: .45; }
+.week-drag { cursor: grab; color: var(--ink-3); font-size: 12px; line-height: 1; user-select: none;
+  padding: 3px 4px; border-radius: 4px; }
+.week-drag:hover { background: var(--parchment); color: var(--navy); }
+.week-drag:active { cursor: grabbing; }
+.wk-daterange { font-size: 11px; color: var(--ink-3); }
+.wk-movegrp { display: inline-flex; gap: 3px; margin-right: 2px; }
+.wk-move { background: none; border: 1px solid var(--rule); border-radius: 5px; color: var(--ink-2);
+  cursor: pointer; font-family: inherit; font-size: 10px; line-height: 1; padding: 4px 6px; }
+.wk-move:hover:not(:disabled) { background: var(--parchment); color: var(--navy); border-color: var(--navy); }
+.wk-move:disabled { opacity: .28; cursor: default; }
+.week-empty-drop { border: 1px dashed var(--rule-dark); border-radius: var(--radius); padding: 16px;
+  text-align: center; font-size: 11.5px; color: var(--ink-3); font-style: italic; }
+body.dragging-lesson .week-empty-drop { border-color: var(--navy); color: var(--navy); background: rgba(27,58,107,.05); }
+
+/* the little ‹ › nudge + delete cluster on a day card */
+.day-nudge { position: absolute; top: 5px; right: 5px; display: none; gap: 3px; z-index: 3; }
+.day-card:hover .day-nudge, .day-card.open .day-nudge { display: flex; }
+.day-del-btn { border: none; background: #fee2e2; color: #c0392b; font-size: 13px; font-weight: 600;
+  cursor: pointer; line-height: 1; padding: 3px 7px; border-radius: 4px; }
+.day-del-btn:hover { background: #fbc0c0; }
+.day-card.is-done { background: #FBFAF8; }
+
+/* drop indicators */
+.day-card.is-dragging, tr.is-dragging { opacity: .4; }
+.day-card.drop-before { box-shadow: -4px 0 0 0 var(--navy); }
+.day-card.drop-after  { box-shadow:  4px 0 0 0 var(--navy); }
+.week-block.drop-before { box-shadow: 0 -4px 0 0 var(--navy); }
+.week-block.drop-after  { box-shadow: 0  4px 0 0 var(--navy); }
+.week-block.drop-into, .week-empty-drop.drop-into { background: rgba(27,58,107,.07); box-shadow: 0 0 0 2px rgba(27,58,107,.35); }
+tr.drop-before > td { box-shadow: inset 0  3px 0 -1px var(--navy); }
+tr.drop-after  > td { box-shadow: inset 0 -3px 0 -1px var(--navy); }
+td.drop-into, .sp-band.drop-into { box-shadow: inset 0 0 0 2px var(--gold); }
+.row-drag { cursor: grab; color: var(--ink-3); font-size: 12px; user-select: none; line-height: 1;
+  padding: 2px 3px; border-radius: 4px; display: inline-block; }
+.row-drag:hover { background: var(--parchment); color: var(--navy); }
+.row-drag:active { cursor: grabbing; }
+body.dragging-lesson, body.dragging-week { cursor: grabbing; }
+@media print { .day-nudge, .week-drag, .wk-movegrp, .row-drag { display: none !important; } }
 </style>
 </head>
 <body>
@@ -1377,7 +1489,7 @@ body.simple-mode .dp-adv { display: none !important; }
         onfocus="if(this.value.trim().length>=2)runGlobalSearch(this.value)">
       <div id="search-results" class="search-results" style="display:none"></div>
     </div>
-    <span id="sync-status" title="Sync status">
+    <span id="sync-status" title="Cloud sync — click to set up or check" onclick="openSyncSetup()" style="cursor:pointer">
       <span id="sync-dot" style="width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.3);flex-shrink:0"></span>
       <span id="sync-label">Not synced</span>
     </span>
@@ -1403,14 +1515,19 @@ body.simple-mode .dp-adv { display: none !important; }
       <button onclick="closeMoreMenu();gotoNextLesson()">▶ Next lesson</button>
     </div>
     <div class="mm-sec">Save &amp; Export</div>
+    <button onclick="closeMoreMenu();openSyncSetup()">☁️ Cloud sync setup…</button>
     <button onclick="closeMoreMenu();exportBackup()">Backup my data</button>
     <button onclick="closeMoreMenu();document.getElementById('restore-file-input').click()">Restore from backup</button>
     <button onclick="closeMoreMenu();exportPDF()">Export PDF</button>
-    <button onclick="closeMoreMenu();nav('week');driveSendWeek()">☁ Send week to Google Drive</button>
+    <button onclick="closeMoreMenu();exportBlackbaudLog()">🗂️ Class log for Blackbaud</button>
+    <button onclick="closeMoreMenu();driveSendCurrentUnit()">☁ Send this unit to Drive</button>
+    <button onclick="closeMoreMenu();previewCurrentUnit()">🖨 Preview unit / Save as PDF</button>
     <button onclick="closeMoreMenu();openDriveSetup()">Google Drive setup…</button>
     <div class="mm-sec">Schedule</div>
     <button onclick="closeMoreMenu();openCalendarImport()">📅 Import school calendar…</button>
     <button onclick="closeMoreMenu();openMapImport()">📥 Paste school semester map…</button>
+    <button onclick="closeMoreMenu();openEventModal('')">📌 School events &amp; days of your own…</button>
+    <button onclick="closeMoreMenu();toggleKeepDateSlots()" id="mm-dateslots">🗓 Dates when moving a lesson…</button>
     <div class="mm-sec">Advanced</div>
     <button onclick="closeMoreMenu();nav('prep')">Prep Board</button>
     <button onclick="closeMoreMenu();resetCourseData()">Reset course data</button>
@@ -1419,6 +1536,7 @@ body.simple-mode .dp-adv { display: none !important; }
         onblur="state.teacher=this.textContent.trim();saveState()"
         title="Click to edit your name">Eric Lastres, SJ</div>
       <div class="topbar-class" id="topbar-class-label">Theology 6 · THE 8100 · 2025–2026</div>
+      <div id="mm-version" style="font-size:10px;opacity:.55;margin-top:5px" title="The app version you're running"></div>
     </div>
   </div>
 </div>
@@ -1608,6 +1726,16 @@ body.simple-mode .dp-adv { display: none !important; }
 .d-t-text:focus{background:rgba(27,58,107,.1);box-shadow:0 0 0 1px var(--navy) inset;}
 .d-t-textlink.link{cursor:pointer;}
 .d-t-textlink.link:hover{color:var(--navy);text-decoration:underline;}
+/* every assignment carries a task: tick box on the row, chip on the task */
+.assign-cb{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;
+  border:1.5px solid var(--rule-dark);border-radius:5px;cursor:pointer;color:transparent;
+  background:#fff;transition:all .12s;vertical-align:middle;}
+.assign-cb:hover{border-color:var(--navy);}
+.assign-cb.on{background:var(--navy);border-color:var(--navy);color:#fff;}
+.assign-cb svg{stroke:currentColor;}
+tr.assign-done{opacity:.55;}
+tr.assign-done input[type=text]{text-decoration:line-through;}
+.d-t-chip.assign{background:#EDE9FB;color:#3C3489;border-color:#D3C0E4;}
 .d-t-sub{display:flex;align-items:center;gap:7px;margin-top:5px;flex-wrap:wrap;}
 .d-t-tag{font-size:9.5px;font-weight:600;padding:1px 7px;border-radius:999px;background:var(--parchment);border:1px solid var(--rule);color:var(--ink-2);}
 .d-t-tag.auto{background:rgba(35,74,135,.08);border-color:rgba(35,74,135,.2);color:var(--navy-light);}
@@ -1697,6 +1825,21 @@ body.simple-mode .dp-adv { display: none !important; }
 .prep-fchip{background:#fff;border:1px solid var(--rule);border-radius:999px;padding:5px 14px;font-size:12px;font-weight:600;color:var(--ink-2);cursor:pointer;font-family:inherit;transition:all .12s;}
 .prep-fchip:hover{border-color:var(--navy);color:var(--navy);}
 .prep-fchip.on{background:var(--navy);border-color:var(--navy);color:#fff;}
+/* filter chips shared by the Pacing Guide and the unit's Weekly Plan */
+.lf-bar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:9px 14px;
+  border-bottom:1px solid var(--rule);background:#FBFAF8;}
+.lf-label{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--ink-3);margin-right:2px;}
+.lf-bar .prep-fchip{padding:4px 11px;font-size:11.5px;display:inline-flex;align-items:center;gap:6px;}
+.lf-n{font-size:10px;font-weight:700;opacity:.6;}
+.prep-fchip.on .lf-n{opacity:.85;}
+.lf-note{font-size:11px;color:var(--ink-3);margin-left:2px;}
+/* in the unit view the bar floats above the weeks rather than inside a card */
+#utab-content-plan .lf-bar{border:1px solid var(--rule);border-radius:9px;margin-bottom:14px;}
+/* a filtered-out day stays in place (so the week keeps its shape and you can
+   still drop onto it) but fades back */
+.day-card.is-filtered{opacity:.32;filter:saturate(.4);}
+.day-card.is-filtered:hover{opacity:.75;filter:none;}
 .prep-filter-note{font-size:11px;color:var(--ink-3);margin-left:2px;}
 .prep-guided-cta{margin-top:9px;font-size:11px;font-weight:700;color:var(--navy);letter-spacing:.02em;opacity:.85;}
 .prep-stage:hover .prep-guided-cta{opacity:1;}
@@ -1938,8 +2081,8 @@ function out(o) {
             <button onclick="copyDriveScript(this)" style="position:absolute;top:7px;right:7px;background:var(--gold);color:var(--navy-dark);border:none;border-radius:5px;padding:3px 9px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">Copy</button>
           </div>
         </li>
-        <li>In the left sidebar, next to <b>Services</b>, click <b>+</b> → choose <b>Drive API</b> → <b>Add</b>.</li>
-        <li>Click <b>Deploy → New deployment</b> → gear ⚙ → <b>Web app</b>. Set <b>Execute as: Me</b> and <b>Who has access: Anyone</b> → <b>Deploy</b> → authorize. Copy the <b>Web app URL</b>.</li>
+        <li>In the left sidebar, next to <b>Services</b>, click <b>+</b> and add <b>two</b>: <b>Drive API</b> and <b>Google Docs API</b> (the Docs API is what makes the unit docs <b>landscape</b>). Click <b>Add</b> for each.</li>
+        <li>Click <b>Deploy → New deployment</b> → gear ⚙ → <b>Web app</b>. Set <b>Execute as: Me</b> and <b>Who has access: Anyone</b> → <b>Deploy</b> → authorize. Copy the <b>Web app URL</b>. <span style="color:var(--ink-3)">(Updating an existing setup? Use <b>Deploy → Manage deployments</b> → ✏️ edit → <b>Version: New version</b> → Deploy — the URL stays the same.)</span></li>
         <li>In Google Drive, open each folder you want plans saved to and copy its link from the address bar.</li>
       </ol>
       <label style="display:block;font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:4px">Web app URL <span style="font-weight:400;color:var(--ink-3)">(shared by both courses)</span></label>
@@ -1952,6 +2095,30 @@ function out(o) {
       <input id="drive-folder7-in" type="text" placeholder="https://drive.google.com/drive/folders/…" style="width:100%;box-sizing:border-box;border:1px solid var(--rule-dark);border-radius:7px;padding:8px 10px;font-family:inherit;font-size:12.5px;color:var(--ink);outline:none;margin-bottom:6px">
       <input id="drive-label7-in" type="text" placeholder="Name to use in the file (optional)" style="width:100%;box-sizing:border-box;border:1px solid var(--rule);border-radius:7px;padding:7px 10px;font-family:inherit;font-size:12px;color:var(--ink-2);outline:none">
       <div style="font-size:11px;color:var(--ink-3);margin-top:8px;line-height:1.5">Files are named: <b>M.D.YYYY - M.D.YYYY | Course | Year</b><br>e.g. <span style="color:var(--ink-2)">1.5.2026 - 1.9.2026 | Ignatian Leadership in Action LD | 2026</span></div>
+
+      <!-- Second, independent piece: browsing Drive to attach resources -->
+      <div style="border-top:1px solid var(--rule);margin:18px 0 0;padding-top:14px">
+        <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:4px"><span class="drive-tri">▲</span> Pick files from Drive (for resources)</div>
+        <div style="font-size:12px;color:var(--ink-2);line-height:1.55;margin-bottom:10px">
+          Optional, and separate from the folders above. With this filled in, every <b>+ Add resource</b> box gets a <b>Pick from Drive</b> button that opens Google's own file browser — no more copying links by hand. It runs in your browser: the planner only ever receives the file's <i>name and link</i>.
+        </div>
+        <ol style="padding-left:20px;margin:0 0 12px;display:flex;flex-direction:column;gap:7px;font-size:12px;color:var(--ink-2)">
+          <li>Open <a href="https://console.cloud.google.com/projectcreate" target="_blank" rel="noopener" style="color:var(--navy);font-weight:600">console.cloud.google.com</a> and create a project (free).</li>
+          <li><b>APIs &amp; Services → Library</b>: enable <b>Google Picker API</b> and <b>Google Drive API</b>.</li>
+          <li><b>Credentials → Create credentials → API key</b>. Copy it below.</li>
+          <li><b>Create credentials → OAuth client ID → Web application</b>. Under <b>Authorized JavaScript origins</b> add <b id="drive-origin-hint">this site's address</b>. Copy the client ID below.</li>
+          <li>On the <b>OAuth consent screen</b>, add yourself as a <b>Test user</b> (or publish it) so Google lets you sign in.</li>
+        </ol>
+        <label style="display:block;font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:4px">API key</label>
+        <input id="drive-apikey-in" type="text" placeholder="AIza…" style="width:100%;box-sizing:border-box;border:1px solid var(--rule-dark);border-radius:7px;padding:8px 10px;font-family:inherit;font-size:12.5px;color:var(--ink);outline:none;margin-bottom:10px">
+        <label style="display:block;font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:4px">OAuth client ID</label>
+        <input id="drive-clientid-in" type="text" placeholder="1234567890-abcdef.apps.googleusercontent.com" style="width:100%;box-sizing:border-box;border:1px solid var(--rule-dark);border-radius:7px;padding:8px 10px;font-family:inherit;font-size:12.5px;color:var(--ink);outline:none">
+        <div style="display:flex;gap:8px;margin-top:9px;align-items:center;flex-wrap:wrap">
+          <button onclick="testDrivePicker()" style="background:none;border:1px solid var(--navy);border-radius:7px;padding:6px 12px;font-size:12px;font-weight:600;color:var(--navy);cursor:pointer;font-family:inherit">Try the picker</button>
+          <button onclick="driveSignOut()" style="background:none;border:1px solid var(--rule-dark);border-radius:7px;padding:6px 12px;font-size:12px;font-weight:600;color:var(--ink-3);cursor:pointer;font-family:inherit">Sign out of Drive</button>
+          <span style="font-size:11px;color:var(--ink-3);line-height:1.4">Keys are stored on this device only — they are never synced.</span>
+        </div>
+      </div>
       <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end;align-items:center;flex-wrap:wrap">
         <button onclick="driveTest()" style="background:none;border:1px solid var(--navy);border-radius:7px;padding:8px 14px;font-size:12.5px;font-weight:600;color:var(--navy);cursor:pointer;font-family:inherit;margin-right:auto">🔌 Test connection</button>
         <button onclick="closeDriveSetup()" style="background:none;border:1px solid var(--rule-dark);border-radius:7px;padding:8px 16px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;font-family:inherit">Cancel</button>
@@ -1984,8 +2151,11 @@ function out(o) {
       <label style="display:block;font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:4px">Title</label>
       <input id="resource-title" type="text" placeholder="e.g. Marks of the Church handout" onkeydown="if(event.key==='Enter'){event.preventDefault();submitResource()}"
         style="width:100%;box-sizing:border-box;border:1px solid var(--rule-dark);border-radius:7px;padding:9px 11px;font-family:inherit;font-size:14px;color:var(--ink);outline:none;margin-bottom:12px">
-      <label style="display:block;font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:4px">Link <span style="font-weight:400;color:var(--ink-3)">(optional)</span></label>
-      <input id="resource-url" type="url" placeholder="Paste a Google Doc / Drive / website link…" onkeydown="if(event.key==='Enter'){event.preventDefault();submitResource()}"
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:4px;flex-wrap:wrap">
+        <label style="font-size:12px;font-weight:600;color:var(--ink-2)">Link <span style="font-weight:400;color:var(--ink-3)">(optional)</span></label>
+        <span class="drive-row" id="resource-drive-row"></span>
+      </div>
+      <input id="resource-url" type="url" placeholder="Pick from Drive, or paste any link…" onkeydown="if(event.key==='Enter'){event.preventDefault();submitResource()}"
         style="width:100%;box-sizing:border-box;border:1px solid var(--rule-dark);border-radius:7px;padding:9px 11px;font-family:inherit;font-size:13.5px;color:var(--ink);outline:none">
       <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end">
         <button onclick="closeResourceModal()" style="background:none;border:1px solid var(--rule-dark);border-radius:7px;padding:8px 16px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;font-family:inherit">Cancel</button>
@@ -1999,7 +2169,7 @@ function out(o) {
 <div id="movelesson-overlay" style="display:none;position:fixed;inset:0;z-index:905;background:rgba(0,0,0,.5);overflow-y:auto" onclick="if(event.target===this)closeMoveLesson()">
   <div style="background:var(--white);max-width:460px;margin:70px auto;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,.3);overflow:hidden">
     <div style="background:var(--navy);padding:12px 16px;display:flex;align-items:center;justify-content:space-between">
-      <span style="color:#fff;font-weight:600;font-size:14px">Move lesson to another unit</span>
+      <span style="color:#fff;font-weight:600;font-size:14px">Move this lesson</span>
       <button onclick="closeMoveLesson()" style="background:rgba(255,255,255,.15);border:none;border-radius:6px;color:#fff;font-size:20px;width:32px;height:32px;cursor:pointer;line-height:1">&times;</button>
     </div>
     <div style="padding:16px">
@@ -2011,6 +2181,39 @@ function out(o) {
       <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end">
         <button onclick="closeMoveLesson()" style="background:none;border:1px solid var(--rule-dark);border-radius:7px;padding:8px 16px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;font-family:inherit">Cancel</button>
         <button onclick="moveLessonConfirm()" style="background:var(--navy);color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">Move lesson</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCHOOL EVENT MODAL — your own calendar entries, alongside the school map -->
+<div id="event-overlay" style="display:none;position:fixed;inset:0;z-index:906;background:rgba(0,0,0,.5);overflow-y:auto" onclick="if(event.target===this)closeEventModal()">
+  <div style="background:var(--white);max-width:520px;margin:60px auto;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,.3);overflow:hidden">
+    <div style="background:var(--navy);padding:12px 16px;display:flex;align-items:center;justify-content:space-between">
+      <span style="color:#fff;font-weight:600;font-size:14px">📌 School events &amp; days of your own</span>
+      <button onclick="closeEventModal()" style="background:rgba(255,255,255,.15);border:none;border-radius:6px;color:#fff;font-size:20px;width:32px;height:32px;cursor:pointer;line-height:1">&times;</button>
+    </div>
+    <div style="padding:16px">
+      <div style="font-size:12.5px;color:var(--ink-2);line-height:1.55;margin-bottom:14px">
+        The imported semester map stays exactly as the school wrote it. Add anything else here — a retreat, a Mass, a field trip, a day you'll be out — and it shows up on the pacing guide next to the school's own notes.
+      </div>
+      <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap">
+        <div style="flex:0 0 150px">
+          <label style="display:block;font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:4px">Date</label>
+          <input id="event-date" type="date" style="width:100%;box-sizing:border-box;border:1px solid var(--rule-dark);border-radius:7px;padding:8px 10px;font-family:inherit;font-size:13px;color:var(--ink);outline:none">
+        </div>
+        <div style="flex:1;min-width:180px">
+          <label style="display:block;font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:4px">Event</label>
+          <input id="event-text" type="text" placeholder="e.g. Class retreat · All-school Mass · Field trip"
+            onkeydown="if(event.key==='Enter'){event.preventDefault();submitEvent()}"
+            style="width:100%;box-sizing:border-box;border:1px solid var(--rule-dark);border-radius:7px;padding:8px 10px;font-family:inherit;font-size:13px;color:var(--ink);outline:none">
+        </div>
+        <button onclick="submitEvent()" style="background:var(--navy);color:#fff;border:none;border-radius:7px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">Add</button>
+      </div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin:18px 0 6px">Your events</div>
+      <div id="event-list" style="max-height:260px;overflow-y:auto"></div>
+      <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end">
+        <button onclick="closeEventModal()" style="background:none;border:1px solid var(--rule-dark);border-radius:7px;padding:8px 16px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;font-family:inherit">Done</button>
       </div>
     </div>
   </div>
@@ -2028,6 +2231,25 @@ function out(o) {
       <div id="brainstorm-body"></div>
       <div style="display:flex;justify-content:flex-end;margin-top:12px">
         <button onclick="closeBrainstorm()" style="background:var(--navy);color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">Done</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- POST-CLASS REFLECTION MODAL -->
+<div id="debrief-overlay" style="display:none;position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.5);overflow-y:auto" onclick="if(event.target===this)closeDebrief()">
+  <div style="background:var(--white);max-width:600px;margin:56px auto;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,.3);overflow:hidden">
+    <div style="background:var(--navy);padding:12px 16px;display:flex;align-items:center;justify-content:space-between">
+      <span style="color:#fff;font-weight:600;font-size:14px" id="debrief-title">🪞 Post-class reflection</span>
+      <button onclick="closeDebrief()" style="background:rgba(255,255,255,.15);border:none;border-radius:6px;color:#fff;font-size:20px;width:32px;height:32px;cursor:pointer;line-height:1">&times;</button>
+    </div>
+    <div style="padding:16px">
+      <div style="font-size:12px;color:var(--ink-3);margin-bottom:12px">After teaching, capture what happened while it’s fresh — for next time and next year. This is just for you: never printed or shared with students.</div>
+      <div style="font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:6px">How did it go?</div>
+      <div id="debrief-rating" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px"></div>
+      <div id="debrief-body"></div>
+      <div style="display:flex;justify-content:flex-end;margin-top:12px">
+        <button onclick="closeDebrief()" style="background:var(--navy);color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">Done</button>
       </div>
     </div>
   </div>
@@ -2054,7 +2276,7 @@ function out(o) {
 <div id="bbhtml-overlay" style="display:none;position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.5);overflow-y:auto" onclick="if(event.target===this)closeBBHtml()">
   <div style="background:var(--white);max-width:620px;margin:44px auto;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,.3);overflow:hidden">
     <div style="background:var(--navy);padding:12px 16px;display:flex;align-items:center;justify-content:space-between">
-      <span style="color:#fff;font-weight:600;font-size:14px">Daily Agenda — styled for Blackbaud</span>
+      <span id="bbhtml-title" style="color:#fff;font-weight:600;font-size:14px">Daily Agenda — styled for Blackbaud</span>
       <button onclick="closeBBHtml()" style="background:rgba(255,255,255,.15);border:none;border-radius:6px;color:#fff;font-size:20px;width:32px;height:32px;cursor:pointer;line-height:1">&times;</button>
     </div>
     <div style="padding:16px">
@@ -2067,6 +2289,51 @@ function out(o) {
         <button onclick="closeBBHtml()" style="background:none;border:1px solid var(--rule-dark);border-radius:7px;padding:8px 16px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;font-family:inherit">Close</button>
         <button onclick="bbCopyHTMLsrc(this)" style="background:#fff;border:1px solid var(--navy);border-radius:7px;padding:8px 16px;font-size:13px;font-weight:700;color:var(--navy);cursor:pointer;font-family:inherit">&lt;/&gt; Copy HTML code</button>
         <button onclick="bbCopyFormatted(this)" style="background:var(--navy);color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">📋 Copy formatted</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONNECT CLOUD SYNC MODAL -->
+<div id="syncsetup-overlay" style="display:none;position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.5);overflow-y:auto" onclick="if(event.target===this)closeSyncSetup()">
+  <div style="background:var(--white);max-width:520px;margin:52px auto;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,.3);overflow:hidden">
+    <div style="background:var(--navy);padding:12px 16px;display:flex;align-items:center;justify-content:space-between">
+      <span style="color:#fff;font-weight:600;font-size:14px">☁️ Cloud Sync</span>
+      <button onclick="closeSyncSetup()" style="background:rgba(255,255,255,.15);border:none;border-radius:6px;color:#fff;font-size:20px;width:32px;height:32px;cursor:pointer;line-height:1">&times;</button>
+    </div>
+    <div style="padding:16px">
+      <div id="syncsetup-status" style="font-size:13px;color:var(--ink);background:var(--rule-light,#f5f5f7);border:1px solid var(--rule-dark);border-radius:8px;padding:10px 12px;margin-bottom:14px"></div>
+
+      <!-- Not-connected: paste a key -->
+      <div id="syncsetup-input-box">
+        <div style="font-size:13px;color:var(--ink-2);line-height:1.55;margin-bottom:10px">
+          Sync keeps this planner backed up in the cloud and matched across your devices. Set it up once per device:
+          <ol style="margin:8px 0 0;padding-left:20px">
+            <li>Make a free account at <b>jsonbin.io</b> (<a href="https://jsonbin.io" target="_blank" rel="noopener">jsonbin.io</a>).</li>
+            <li>Open <b>Account → API Keys</b> and copy your <b>Master Key</b>.</li>
+            <li>Paste it below and click <b>Connect</b>. The app creates a private bin for each course automatically.</li>
+          </ol>
+        </div>
+        <input id="sync-key-input" type="text" placeholder="Paste Master Key (or a sync code from another device)" autocomplete="off" spellcheck="false"
+          style="width:100%;box-sizing:border-box;border:1px solid var(--rule-dark);border-radius:7px;padding:9px 11px;font-family:inherit;font-size:13px;color:var(--ink);outline:none">
+        <div style="display:flex;gap:8px;margin-top:10px;justify-content:flex-end">
+          <button onclick="connectSync()" style="background:var(--navy);color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">Connect</button>
+        </div>
+        <div id="syncsetup-msg" style="display:none;margin-top:12px;background:#FDECEA;border:1px solid #F5C6C0;border-radius:8px;padding:10px 12px;font-size:12.5px;color:#7a271a;line-height:1.5"></div>
+        <p style="font-size:11.5px;color:var(--ink-3,#8A96A2);margin:10px 0 0;line-height:1.5">🔒 Your key is stored only in this browser (localStorage) — never uploaded to the app’s code or shared. That’s why it won’t get revoked like the old one.</p>
+      </div>
+
+      <!-- Connected: manage -->
+      <div id="syncsetup-connected" style="display:none">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+          <button onclick="copySyncCode()" style="flex:1;min-width:180px;background:#fff;color:var(--navy);border:1px solid var(--navy);border-radius:7px;padding:9px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">📋 Copy sync code for another device</button>
+          <button onclick="disconnectSync()" style="background:#fff;color:#b42318;border:1px solid #e6b7b3;border-radius:7px;padding:9px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Disconnect</button>
+        </div>
+        <p style="font-size:11.5px;color:var(--ink-3,#8A96A2);margin:2px 0 0;line-height:1.5">On another device, open Cloud Sync there and paste this code to link it to the same bins. Each course syncs the first time you <b>Save</b> it while connected.</p>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;margin-top:14px">
+        <button onclick="closeSyncSetup()" style="background:none;border:1px solid var(--rule-dark);border-radius:7px;padding:8px 16px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;font-family:inherit">Close</button>
       </div>
     </div>
   </div>
@@ -2110,8 +2377,8 @@ const COURSES = {
     code: 'THE 8100',
     fullName: 'Introduction to Catholicism & Ignatian Spirituality',
     storageKey: 'belen-theo6',
-    jsonbinId:  '6a3dd673da38895dfe006d8e',
-    jsonbinKey: '$2a$10$Ez6k5zzjJBiZDbN8petn6eBp3iN6YClb5DvX1gr21O8F03lilSH2i',
+    // Cloud-sync credentials live in localStorage now (set via "Connect sync"),
+    // never in this public file — see the JSONBIN SYNC section.
     color: '#534AB7',
     unitMeta: [
       {id:1, sem:1, name:'Introduction to Faith Life at Belen',          blocks:'5-6 blocks · 2-3 wks', color:'purple', weeks:2, totalBlocks:6,  blocksPerWeek:[3,3],       desc:'Students are introduced to Belen Jesuit as a Catholic Jesuit school within the larger Catholic community, learning the structure of the Church, the Ignatian Core Values, and how to participate in the liturgical and sacramental life of the school.'},
@@ -2133,8 +2400,7 @@ const COURSES = {
     code: 'THE 7100',
     fullName: 'Foundations of Morality in Scripture',
     storageKey: 'belen-theo7',
-    jsonbinId:  'YOUR_THEO7_BIN_ID',
-    jsonbinKey: '$2a$10$Ez6k5zzjJBiZDbN8petn6eBp3iN6YClb5DvX1gr21O8F03lilSH2i',
+    // Cloud-sync credentials live in localStorage now (set via "Connect sync").
     color: '#0F6E56',
     unitMeta: [
       {id:1, sem:1, name:'Introduction to Morality and Scripture',         blocks:'3 blocks · 1.5 wks',  color:'purple', weeks:1, totalBlocks:3,  blocksPerWeek:[3],             desc:'Students are introduced to the foundational concepts of the course — what morality is, why Scripture and morality are studied together, and the distinction between virtue and vice — establishing the framework for the entire year.'},
@@ -2157,6 +2423,11 @@ const ASSESS_COLORS = {
   'Presentation': {bg:'#EEEDFE', tx:'#3C3489'},
   'Exit Ticket':  {bg:'#F1EFE8', tx:'#5F5E5A'},
 };
+
+// The build version baked into the app itself, so the update checker knows what
+// it's running even when the page was loaded WITHOUT a ?v= token (e.g. the
+// Netlify root rewrite). Keep this in lockstep with index.html's ?v= token.
+window.APP_VERSION = '20260823-40';
 
 let activeCourse = 6; // default to Theology 6
 
@@ -2935,11 +3206,19 @@ function demoWeek() {
 }
 
 // ── JSONBIN SYNC ─────────────────────────────────────────────────
-function getJsonbinUrl() {
-  const co = getCourse();
-  return `https://api.jsonbin.io/v3/b/${co.jsonbinId}`;
-}
-function getJsonbinKey() { return getCourse().jsonbinKey; }
+// Credentials live per-device in localStorage (set via the "Connect sync"
+// dialog), never in this public file — a public key gets scraped and revoked.
+// One master key; each course gets its own private bin, created on first sync
+// and remembered here.
+const SYNC_KEY_LS  = 'bjp-sync-key';
+const SYNC_BINS_LS = 'bjp-sync-bins';
+function getSyncKey(){ try{ return localStorage.getItem(SYNC_KEY_LS) || ''; }catch(e){ return ''; } }
+function setSyncKey(k){ try{ k ? localStorage.setItem(SYNC_KEY_LS,k) : localStorage.removeItem(SYNC_KEY_LS); }catch(e){} }
+function getSyncBins(){ try{ return JSON.parse(localStorage.getItem(SYNC_BINS_LS)||'{}')||{}; }catch(e){ return {}; } }
+function getBinId(cid){ return getSyncBins()[cid] || ''; }
+function setBinId(cid,id){ const m=getSyncBins(); m[cid]=id; try{ localStorage.setItem(SYNC_BINS_LS,JSON.stringify(m)); }catch(e){} }
+function syncConnected(){ return !!getSyncKey(); }
+function getJsonbinKey(){ return getSyncKey(); }
 
 function setSyncStatus(status) {
   const dot   = document.getElementById('sync-dot');
@@ -2949,6 +3228,7 @@ function setSyncStatus(status) {
     synced:  { color:'#4ade80', text:'Synced' },
     syncing: { color:'#fbbf24', text:'Syncing…' },
     error:   { color:'#f87171', text:'Sync failed — saved locally' },
+    ready:   { color:'#38bdf8', text:'Connected — Save to sync' },
     local:   { color:'rgba(255,255,255,.3)', text:'Local only' },
   };
   const s = map[status] || map.local;
@@ -2970,56 +3250,134 @@ function saveState() {
   }
 }
 
+let _lastPushMsg = '';   // jsonbin's own explanation of the most recent failure
+let _binWentPublic = false;  // set when we fell back to a public bin on the free tier
+
+// jsonbin's FREE tier caps a record at 100KB. Lesson-plan JSON compresses ~5–10x,
+// so we gzip it with the browser's native CompressionStream (no dependency) and
+// send a small wrapper {_bjpGz:"<base64>"} that fits under the cap. Pulls detect
+// the wrapper and decompress; uncompressed cloud copies still load (back-compat).
+function _u8ToB64(u8){ let s=''; const CH=0x8000; for(let i=0;i<u8.length;i+=CH){ s+=String.fromCharCode.apply(null,u8.subarray(i,i+CH)); } return btoa(s); }
+function _b64ToU8(b64){ const bin=atob(b64); const u8=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) u8[i]=bin.charCodeAt(i); return u8; }
+async function gzipB64(str){
+  const cs=new CompressionStream('gzip');
+  const buf=await new Response(new Blob([new TextEncoder().encode(str)]).stream().pipeThrough(cs)).arrayBuffer();
+  return _u8ToB64(new Uint8Array(buf));
+}
+async function gunzipB64(b64){
+  const ds=new DecompressionStream('gzip');
+  const buf=await new Response(new Blob([_b64ToU8(b64)]).stream().pipeThrough(ds)).arrayBuffer();
+  return new TextDecoder().decode(buf);
+}
+// The exact body to send to jsonbin — gzip-wrapped when the browser supports it.
+async function buildSyncBody(){
+  const raw = JSON.stringify(state);
+  if (typeof CompressionStream === 'function') {
+    try { return JSON.stringify({ _bjpGz: await gzipB64(raw) }); } catch(e){ /* fall back to raw */ }
+  }
+  return raw;
+}
+// Unwrap a fetched cloud record (decompress if it's a gzip wrapper).
+async function unwrapSyncRecord(record){
+  if (record && typeof record._bjpGz === 'string') {
+    try { return JSON.parse(await gunzipB64(record._bjpGz)); } catch(e){ return null; }
+  }
+  return record;
+}
 async function pushToSheets() {
+  const key = getSyncKey();
+  if (!key) { setSyncStatus('local'); return false; }   // not connected to cloud yet
+  const co = getCourse();
   setSyncStatus('syncing');
   try {
-    const res = await fetch(getJsonbinUrl(), {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Master-Key': getJsonbinKey(),
-        'X-Bin-Versioning': 'false',
-      },
-      body: JSON.stringify(state),
-    });
+    const payload = await buildSyncBody();   // gzip-compressed to fit the free 100KB cap
+    let binId = getBinId(co.id);
+    let res;
+    if (!binId) {
+      // First cloud save for this course — create a bin and remember its id.
+      // Try a PRIVATE bin first; jsonbin's free tier may not allow private bins,
+      // so if it's refused, fall back to a PUBLIC bin (its URL is a random,
+      // effectively unguessable id) so free accounts can still sync.
+      const makeBin = (priv) => fetch('https://api.jsonbin.io/v3/b', {
+        method: 'POST',
+        headers: Object.assign(
+          { 'Content-Type':'application/json', 'X-Master-Key':key, 'X-Bin-Name':`Belen ${co.name} planner` },
+          priv ? { 'X-Bin-Private':'true' } : {}
+        ),
+        body: payload,
+      });
+      res = await makeBin(true);
+      if (!res.ok && (res.status === 401 || res.status === 403)) {
+        const pub = await makeBin(false);
+        if (pub.ok) _binWentPublic = true;
+        res = pub;   // surface the public attempt's result either way
+      }
+      if (res.ok) {
+        const d = await res.json();
+        binId = d && d.metadata && d.metadata.id;
+        if (binId) setBinId(co.id, binId);
+      }
+    } else {
+      res = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Master-Key': key,
+          'X-Bin-Versioning': 'false',
+        },
+        body: payload,
+      });
+    }
     if (res.ok) {
+      _lastPushMsg = '';
       setSyncStatus('synced');
       const last = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-      document.getElementById('sync-label').textContent = `Synced ${last}`;
+      const label = document.getElementById('sync-label');
+      if (label) label.textContent = `Synced ${last}`;
+      return true;
     } else {
-      const txt = await res.text();
-      console.error('JSONBin PUT failed:', res.status, txt);
+      const txt = await res.text().catch(()=> '');
+      console.error('JSONBin push failed:', res.status, txt);
+      // jsonbin returns a JSON body like {"message":"..."} explaining the refusal.
+      try { _lastPushMsg = (JSON.parse(txt) || {}).message || ''; }
+      catch(e){ _lastPushMsg = String(txt||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().slice(0,180); }
       setSyncStatus('error');
+      // Show the HTTP status so the cause is visible without DevTools
+      // (401/403 = bad key, 404 = missing bin, 413/400 = too big, 429 = quota).
+      const label = document.getElementById('sync-label');
+      if (label) label.textContent = `Sync failed (${res.status})`;
+      return false;
     }
   } catch(e) {
     console.error('JSONBin push error:', e);
+    _lastPushMsg = 'The request never reached jsonbin — a browser extension/ad-blocker or your network is likely blocking api.jsonbin.io.';
     setSyncStatus('error');
+    const label = document.getElementById('sync-label');
+    if (label) label.textContent = 'Sync failed (blocked/offline)';
+    return false;
   }
 }
 
 async function pullFromSheets() {
-  setSyncStatus('syncing');
+  const key = getSyncKey();
   const co = getCourse();
-  if (co.jsonbinId === 'YOUR_THEO7_BIN_ID') {
-    setSyncStatus('local');
-    return false;
-  }
+  const binId = getBinId(co.id);
+  // Not connected → "Local only". Connected but no bin for this course yet
+  // (the first Save creates it) → "Connected — Save to sync".
+  if (!key)   { setSyncStatus('local'); return false; }
+  if (!binId) { setSyncStatus('ready'); return false; }
+  setSyncStatus('syncing');
   try {
-    const res = await fetch(getJsonbinUrl() + '/latest', {
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
       method: 'GET',
-      headers: {
-        'X-Master-Key': getJsonbinKey(),
-        'X-Bin-Meta': 'false',
-      },
+      headers: { 'X-Master-Key': key, 'X-Bin-Meta': 'false' },
     });
     if (res.ok) {
       const data = await res.json();
-      const record = data.record || data;
+      const record = await unwrapSyncRecord(data.record || data);
       if (record && record._v === 2 && record.units && Object.keys(record.units).length > 0) {
-        // Don't blindly overwrite — only adopt the cloud copy if it's
-        // actually newer than what's already saved locally. Older cloud
-        // saves (e.g. from before a feature was added) should never wipe
-        // out more recent local work.
+        // Only adopt the cloud copy if it's actually newer than local, so an
+        // older cloud save never wipes out more recent local work.
         const cloudTime = record.lastModified || 0;
         const localTime = state?.lastModified || 0;
         if (cloudTime > localTime) {
@@ -3027,21 +3385,111 @@ async function pullFromSheets() {
           saveState();
           setSyncStatus('synced');
           return true;
-        } else {
-          // Local copy is newer or equal — keep it, but report as synced
-          // since the data already matches or supersedes the cloud copy
-          setSyncStatus('synced');
-          return false;
         }
+        setSyncStatus('synced');
+        return false;
       }
+      setSyncStatus('synced');
+      return false;
     } else {
       console.error('JSONBin GET failed:', res.status);
+      setSyncStatus('error');
+      const label = document.getElementById('sync-label');
+      if (label) label.textContent = `Sync failed (${res.status})`;
+      return false;
     }
   } catch(e) {
+    // A THROWN fetch (not a clean HTTP status) means the request never got a
+    // usable answer: network down, host blocked, jsonbin down, or an error
+    // response with no CORS headers (e.g. a rejected key).
     console.error('JSONBin pull error:', e);
+    setSyncStatus('error');
+    const label = document.getElementById('sync-label');
+    if (label) label.textContent = 'Sync failed (blocked/offline)';
+    return false;
   }
+}
+
+// ── CONNECT-SYNC UI ───────────────────────────────────────────────
+function openSyncSetup(){ renderSyncSetup(); document.getElementById('syncsetup-overlay').style.display='block'; }
+function closeSyncSetup(){ document.getElementById('syncsetup-overlay').style.display='none'; }
+function renderSyncSetup(){
+  const connected = syncConnected();
+  const bins = getSyncBins();
+  const statusEl = document.getElementById('syncsetup-status');
+  const connectedBox = document.getElementById('syncsetup-connected');
+  const inputBox = document.getElementById('syncsetup-input-box');
+  if(statusEl){
+    statusEl.innerHTML = connected
+      ? `<b style="color:#0a7d3c">● Connected</b> on this device. Courses synced: ${Object.keys(bins).length ? Object.keys(bins).map(id=>COURSES[id]?COURSES[id].name:id).join(', ') : '— none yet (open each course and Save once)'}.`
+      : `<b style="color:#b45309">● Not connected</b> — this device saves locally only.`;
+  }
+  if(connectedBox) connectedBox.style.display = connected ? 'block' : 'none';
+  if(inputBox) inputBox.style.display = connected ? 'none' : 'block';
+}
+async function connectSync(){
+  const inp = document.getElementById('sync-key-input');
+  // Strip stray whitespace and wrapping quotes — a common paste mistake that
+  // itself causes a 403.
+  const raw = (inp.value||'').trim().replace(/^["']+|["']+$/g,'').trim();
+  const msg = document.getElementById('syncsetup-msg');
+  if(msg) msg.style.display = 'none';
+  if(!raw){ toast('Paste your jsonbin Master Key first'); return; }
+  // A "sync code" from another device is base64 of {k:key, b:bins}.
+  let applied = false;
+  try {
+    const dec = JSON.parse(atob(raw));
+    if(dec && dec.k){ setSyncKey(dec.k); if(dec.b) localStorage.setItem(SYNC_BINS_LS, JSON.stringify(dec.b)); applied = true; }
+  } catch(e){ /* not a sync code — treat as a raw key */ }
+  if(!applied) setSyncKey(raw);
+  inp.value = '';
+  toast('Testing connection…');
+  const ok = await pushToSheets();   // creates this course's bin if needed
+  if(ok){
+    renderSyncSetup();
+    toast(_binWentPublic
+      ? '✓ Connected — syncing (free-tier bin; its URL is random & unguessable)'
+      : '✓ Connected — this course is now syncing');
+    return;
+  }
+  // Failed — read the status the push recorded and give tailored guidance.
+  const label = (document.getElementById('sync-label')||{}).textContent || '';
+  const codeM = label.match(/\((\d+)\)/);
+  let help;
+  if(/40[13]/.test(label)){
+    help = `<b>jsonbin rejected this key (HTTP ${codeM?codeM[1]:'403'}).</b> The key reached jsonbin but wasn’t accepted. On <a href="https://jsonbin.io" target="_blank" rel="noopener">jsonbin.io</a>, check all three:
+      <ul style="margin:6px 0 0;padding-left:18px;line-height:1.5">
+        <li>Copy the <b>Master Key</b> from <b>Account → API Keys</b> — <u>not</u> an “Access Key”.</li>
+        <li>Use a <b>newly generated</b> key (the leaked one is permanently dead).</li>
+        <li>Make sure your account <b>email is verified</b> — unverified accounts can’t save.</li>
+      </ul>`;
+    setSyncKey('');   // don't leave a known-bad key lingering
+  } else if(/429/.test(label)){
+    help = `<b>Free-plan request limit hit (HTTP 429).</b> Wait a few minutes and try again, or raise your jsonbin plan.`;
+    setSyncKey('');
+  } else if(/blocked|offline/i.test(label)){
+    help = `<b>The request never reached jsonbin.</b> A browser ad-blocker/extension or your school network may be blocking <code>api.jsonbin.io</code>. Try pausing extensions or a different network (e.g. phone hotspot).`;
+    setSyncKey('');
+  } else {
+    help = `<b>Couldn’t connect.</b> Status: “${label||'unknown'}”.`;
+  }
+  // Show jsonbin's own words — the definitive reason.
+  if(_lastPushMsg){
+    help += `<div style="margin-top:8px;padding-top:8px;border-top:1px solid #F5C6C0"><b>jsonbin’s exact message:</b><br>“${(typeof esc==='function'?esc(_lastPushMsg):_lastPushMsg)}”</div>`;
+  }
+  renderSyncSetup();
+  if(msg){ msg.innerHTML = help; msg.style.display = 'block'; }
+}
+function disconnectSync(){
+  setSyncKey('');
   setSyncStatus('local');
-  return false;
+  renderSyncSetup();
+  toast('Disconnected — your work stays saved on this device');
+}
+function copySyncCode(){
+  const code = btoa(JSON.stringify({ k:getSyncKey(), b:getSyncBins() }));
+  const done = ()=>toast('Sync code copied — paste it into “Connect sync” on your other device');
+  if(navigator.clipboard) navigator.clipboard.writeText(code).then(done, done); else done();
 }
 
 // ── NAVIGATION ────────────────────────────────────────────────────
@@ -3143,6 +3591,13 @@ function gotoNextLesson(){
 function gotoPacing(){ nav('pacing'); }
 function gotoAssessments(){ nav('assess'); }
 
+// Label the date-behavior entry with whatever it's currently set to.
+function refreshMoreMenuLabels(){
+  const el = document.getElementById('mm-dateslots');
+  if(el) el.textContent = keepDateSlots()
+    ? '🗓 Moving a lesson: keeps the slot\u2019s date'
+    : '🗓 Moving a lesson: date travels with it';
+}
 function toggleMoreMenu(e){
   if(e) e.stopPropagation();
   const m = document.getElementById('more-menu');
@@ -3150,6 +3605,7 @@ function toggleMoreMenu(e){
   const willOpen = !m.classList.contains('open');
   m.classList.toggle('open', willOpen);
   if(willOpen){
+    refreshMoreMenuLabels();
     setTimeout(()=>document.addEventListener('click', _moreMenuOutside), 0);
   }
 }
@@ -3826,10 +4282,52 @@ function plannerDaysByDate(){
 
 // Calendar notes that apply to a lesson: stored on the day at sync time so
 // they survive even if the map is later replaced.
-function dayCalNotes(d){
+function schoolMapNotes(d){
   const hit = mapHitForDate(d && d.dateA);
   if(hit) return hit.row.notes;
   return (d && Array.isArray(d.calNotes)) ? d.calNotes : [];
+}
+// Everything worth flagging against a lesson: the school's own map notes,
+// plus any event you added yourself on that date.
+function dayCalNotes(d){
+  return schoolMapNotes(d).concat(customEventsOn(d && d.dateA));
+}
+
+// ── YOUR OWN SCHOOL EVENTS ───────────────────────────────────────
+// The imported semester map is the school's document and stays read-only.
+// Anything you want on the calendar that isn't in it — a retreat, a Mass, a
+// field trip, a day you know you'll be out — lives here, keyed by date, and
+// shows up beside the map's notes everywhere a lesson's date is shown.
+function getCustomEvents(){
+  if(!state.customEvents || typeof state.customEvents !== 'object') state.customEvents = {};
+  return state.customEvents;
+}
+function customEventsOn(iso){
+  if(!iso) return [];
+  const v = getCustomEvents()[iso];
+  return Array.isArray(v) ? v.slice() : [];
+}
+function addCustomEvent(iso, text){
+  text = String(text||'').trim();
+  if(!iso || !text) return false;
+  const all = getCustomEvents();
+  all[iso] = (all[iso]||[]).concat([text]);
+  saveState();
+  return true;
+}
+function removeCustomEvent(iso, idx){
+  const all = getCustomEvents();
+  if(!all[iso]) return;
+  all[iso].splice(idx, 1);
+  if(!all[iso].length) delete all[iso];
+  saveState();
+}
+function allCustomEvents(){
+  const all = getCustomEvents();
+  return Object.keys(all).sort().reduce((out, iso) => {
+    all[iso].forEach((text, idx) => out.push({ iso, text, idx }));
+    return out;
+  }, []);
 }
 
 function calNoteBadgeHTML(d, small){
@@ -4094,6 +4592,26 @@ function updateTodoLink(id, val){
   const t = (state.todos||[]).find(x=>x.id===id);
   if(t){ const link=parseTodoLink(val); t.lesson=link.lesson; t.unit=link.unit; saveState(); renderDashboard(); }
 }
+// ── To-do filter (open / done / where it came from) ──────────────
+const TODO_FILTERS = [
+  { k:'all',    label:'All',         hint:'Everything on the list' },
+  { k:'open',   label:'Open',        hint:'Not ticked off yet' },
+  { k:'done',   label:'Done',        hint:'Already ticked off' },
+  { k:'assign', label:'Assignments', hint:'Tasks that come from a unit assignment' },
+  { k:'mine',   label:'My tasks',    hint:'Tasks you typed yourself' },
+];
+function todoFilter(){
+  const f = state && state.todoFilter;
+  return TODO_FILTERS.some(x=>x.k===f) ? f : 'all';
+}
+function setTodoFilter(k){ state.todoFilter = k; saveState(); renderDashboard(); }
+function todoFilterCount(items, k){
+  return items.filter(it =>
+    k === 'open'   ? !it.done :
+    k === 'done'   ? it.done :
+    k === 'assign' ? !!it.assign :
+    k === 'mine'   ? (it.manual && !it.assign) : true).length;
+}
 function toggleDashTodo(id){
   const t = (state.todos||[]).find(x=>x.id===id);
   if(t){ t.done=!t.done; saveState(); renderDashboard(); }
@@ -4224,6 +4742,19 @@ function addTaskFromDay(i){
   state.todos.push({ id: uid(), text: `${t} — ${label}`, due, done:false });
   saveState();
   toast('Added to your dashboard To-Do ✓');
+}
+// Deleting an assignment's task deletes the assignment — there is only one
+// of each, so leaving a stray row behind in the unit would be a lie.
+function deleteAssignmentFromDash(uid, id){
+  const a = getUnitAssignments(uid).find(x=>x.id===id);
+  const name = a ? assignTodoText(a) : 'this assignment';
+  if(!confirm(`Delete "${name}"? It's removed from Unit ${unitNo(uid)} as well.`)) return;
+  const list = getUnitAssignments(uid);
+  const i = list.findIndex(x=>x.id===id);
+  if(i>=0) list.splice(i,1);
+  saveState();
+  syncAssignmentTodos();
+  renderDashboard();
 }
 function deleteDashTodo(id){
   state.todos = (state.todos||[]).filter(x=>x.id!==id);
@@ -4397,10 +4928,11 @@ function renderDashboard(){
     autos.push({ key:'horizon', text:`Extend your plan through ${fmtNice(target)} to stay 2 weeks ahead`, due:plannedThrough||today, tag:'planning horizon' });
   }
 
+  syncAssignmentTodos();   // every assignment carries a task on this list
   const items = [
     ...autos.map(a=>({ id:a.key, auto:true, text:a.text, due:a.due, tag:a.tag, unit:a.unit, open:a.open, done:!!(state.autoDone&&state.autoDone[a.key]) })),
     ...(state.todos||[]).map(t=>{
-      const m={ id:t.id, manual:true, text:t.text, due:t.due||'', done:!!t.done, cat:t.cat||'', subtasks:t.subtasks||[], lesson:t.lesson||null, unit:t.unit||null };
+      const m={ id:t.id, manual:true, text:t.text, due:t.due||'', done:!!t.done, cat:t.cat||'', subtasks:t.subtasks||[], lesson:t.lesson||null, unit:t.unit||null, assign:t.assign||null };
       if(t.lesson) m.open=[t.lesson.uid, t.lesson.wi, t.lesson.di];
       return m;
     }),
@@ -4408,7 +4940,13 @@ function renderDashboard(){
 
   const bucketOf = it => (it.due && it.due<today) ? 'over' : (it.due && it.due<=isoAddDays(today,7)) ? 'week' : 'later';
   const groups = {over:[], week:[], later:[]};
-  items.forEach(it=>groups[bucketOf(it)].push(it));
+  const tf = todoFilter();
+  const shown = items.filter(it =>
+    tf === 'open'    ? !it.done :
+    tf === 'done'    ? it.done :
+    tf === 'assign'  ? !!it.assign :
+    tf === 'mine'    ? (it.manual && !it.assign) : true);
+  shown.forEach(it=>groups[bucketOf(it)].push(it));
   const sortFn = (a,b)=> (a.done-b.done) || (!a.due-!b.due) || (a.due||'').localeCompare(b.due||'');
   Object.values(groups).forEach(g=>g.sort(sortFn));
 
@@ -4420,7 +4958,9 @@ function renderDashboard(){
       else if(it.due<=isoAddDays(today,7)){ pri='p-warn'; dueCls=' warn'; dueTxt=`Due ${fmtNice(it.due)}`; }
       else { dueTxt=`Due ${fmtNice(it.due)}`; }
     }
-    const toggle = it.auto ? `toggleAutoDone('${it.id}')` : `toggleDashTodo('${it.id}')`;
+    const toggle = it.auto ? `toggleAutoDone('${it.id}')`
+      : it.assign ? `toggleAssignmentDone(${it.assign.uid},'${it.assign.id}')`
+      : `toggleDashTodo('${it.id}')`;
     const mainClick = it.open ? ` onclick="openGridDay(${it.open[0]},${it.open[1]},${it.open[2]})"` : '';
     const cat = it.manual ? todoCat(it.cat) : null;
     const cats = getTodoCats();
@@ -4442,7 +4982,14 @@ function renderDashboard(){
       } else {
         linkChip = `<button class="d-t-linkbtn" title="Link this task to a lesson or unit" onclick="event.stopPropagation();openTodoLinkPicker('${it.id}')">🔗 Link lesson</button>`;
       }
-      sub = `<input type="date" class="d-t-dateedit" value="${esc(it.due||'')}" title="Due date" onchange="updateTodoDate('${it.id}',this.value)">
+      if(it.assign){
+        const uu = UNIT_META.find(m=>m.id===it.assign.uid);
+        linkChip = `<span class="d-t-chip assign" title="Open this unit's assignments" onclick="event.stopPropagation();navUnitTab(${it.assign.uid},'overview')">📝 Assignment${uu?` · Unit ${unitNo(uu.id)}`:''}</span>`;
+      }
+      const dateChange = it.assign
+        ? `updateAssignField(${it.assign.uid},'${it.assign.id}','due',this.value);renderDashboard()`
+        : `updateTodoDate('${it.id}',this.value)`;
+      sub = `<input type="date" class="d-t-dateedit" value="${esc(it.due||'')}" title="Due date" onchange="${dateChange}">
         ${catSel}${linkChip}
         <span class="d-t-due${dueCls}">${it.due?dueTxt:'No date'}</span>`;
     } else {
@@ -4455,7 +5002,7 @@ function renderDashboard(){
     const catBar = cat ? `border-left:3px solid ${cat.color}` : '';
     // Subtasks (manual tasks only)
     let subsHTML = '';
-    if(it.manual){
+    if(it.manual && !it.assign){
       const subs = it.subtasks||[];
       const doneN = subs.filter(s=>s.done).length;
       const rows = subs.map(s=>`<div class="d-sub${s.done?' done':''}">
@@ -4472,13 +5019,17 @@ function renderDashboard(){
     return `<div class="d-todo ${pri}${it.done?' done':''}"${catBar?` style="${catBar}"`:''}>
       <div class="d-cb" onclick="${toggle}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg></div>
       <div class="d-t-body">
-        <div class="d-t-main">${cat?`<span class="d-t-catdot" style="background:${cat.color}"></span>`:''}${it.manual
+        <div class="d-t-main">${cat?`<span class="d-t-catdot" style="background:${cat.color}"></span>`:''}${it.assign
+          ? `<span class="d-t-textlink link" title="Edit this assignment in its unit" onclick="navUnitTab(${it.assign.uid},'overview')">${esc(it.text)}</span>`
+          : it.manual
           ? `<span class="d-t-textwrap"><span class="d-t-text" contenteditable="true" title="Click to edit · select text then 🔗 to add a link" onclick="todoTextClick(event)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}" onblur="updateTodoText('${it.id}',this.innerHTML)">${it.text}</span><button class="d-t-linktext" title="Add a link to the selected text" onmousedown="event.preventDefault()" onclick="linkTodoText('${it.id}',this)">🔗</button></span>`
-          : `<span class="d-t-textlink${it.open?' link':''}"${mainClick}>${esc(it.text)}</span>`}${it.manual?(subCount||''):''}</div>
+          : `<span class="d-t-textlink${it.open?' link':''}"${mainClick}>${esc(it.text)}</span>`}${it.manual&&!it.assign?(subCount||''):''}</div>
         <div class="d-t-sub">${sub}</div>
         ${subsHTML}
       </div>
-      ${it.manual?`<button class="d-t-del" title="Delete" onclick="deleteDashTodo('${it.id}')">&times;</button>`:''}
+      ${it.assign
+        ? `<button class="d-t-del" title="Delete this assignment (removes it from its unit too)" onclick="deleteAssignmentFromDash(${it.assign.uid},'${it.assign.id}')">&times;</button>`
+        : it.manual?`<button class="d-t-del" title="Delete" onclick="deleteDashTodo('${it.id}')">&times;</button>`:''}
     </div>`;
   };
 
@@ -4499,6 +5050,11 @@ function renderDashboard(){
   const todoCard = `
     <div class="d-card">
       <div class="d-card-h"><h2>Teacher To-Do</h2><span class="d-meta">${items.filter(i=>!i.done).length} open</span></div>
+      <div class="lf-bar" style="border:none;background:none;padding:0 0 8px">
+        <span class="lf-label">Show</span>
+        ${TODO_FILTERS.map(x=>`<button class="prep-fchip${tf===x.k?' on':''}" title="${esc(x.hint)}"
+          onclick="setTodoFilter('${x.k}')">${x.label}<span class="lf-n">${todoFilterCount(items,x.k)}</span></button>`).join('')}
+      </div>
       <div class="d-add-row">
         <input id="d-todo-text" placeholder="Add your own task…" onkeydown="if(event.key==='Enter')addDashTodo()">
         <input id="d-todo-due" type="date" title="Optional due date">
@@ -4520,8 +5076,9 @@ function renderDashboard(){
              </span>`
           : `<button class="d-cat-new" onclick="toggleTodoCatForm()">+ New category</button>`}
       </div>
-      ${anyTodo ? (groupHTML('Overdue','var(--crit)',groups.over)+groupHTML('This Week','#8a6d1a',groups.week)+groupHTML('Next Two Weeks','var(--navy)',groups.later))
-                : `<div class="d-empty-note">You're all caught up — no tasks due. Auto-tasks appear here as classes and assessments approach.</div>`}
+      ${shown.length ? (groupHTML('Overdue','var(--crit)',groups.over)+groupHTML('This Week','#8a6d1a',groups.week)+groupHTML('Next Two Weeks','var(--navy)',groups.later))
+        : anyTodo ? `<div class="d-empty-note">Nothing under <b>${esc(TODO_FILTERS.find(x=>x.k===tf).label)}</b> — <button class="sp-linkbtn" onclick="setTodoFilter('all')">show all ${items.length}</button></div>`
+        : `<div class="d-empty-note">You're all caught up — no tasks due. Auto-tasks appear here as classes and assessments approach.</div>`}
     </div>`;
 
   // ============ MINI CALENDAR ============
@@ -4801,6 +5358,167 @@ function buildWeekDoc(){
   return { title, html };
 }
 
+// ── BUILD ONE UNIT'S GOOGLE DOC (cover page + a landscape page per week) ──
+// Produces the whole unit as a single HTML doc: page 1 = the unit cover
+// (objectives, vocabulary & knowledge, assignments & assessments, pacing),
+// then one landscape page per week, mirroring the Week view. Re-exporting
+// regenerates the doc from current data, so every page is always up to date.
+function buildUnitDoc(uid){
+  const co = getCourse();
+  const u  = UNIT_META.find(m=>m.id===uid) || {name:'Unit', weeks:0};
+  const uov = getUOV(uid);
+  const P = { navy:'#1B3A6B', gold:'#C9991A', goldL:'#F0C84A', goldBg:'#FDF6E3',
+              ink:'#1C1917', ink2:'#57534E', ink3:'#8A857C', rule:'#D9D5CC',
+              tealBg:'#E1F5EE', tealTx:'#085041', tealBr:'#0F6E56' };
+  const S = s => escPDF(String(s==null?'':s).replace(/<[^>]*>/g,' ').replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim());
+  const weeks = state.units[uid] || [];
+
+  // ---- gather cover data ----
+  const objectives = (uov.unitGoalItems||[]).filter(Boolean);
+  const vocabCat = (uov.knowledgeCategories||[]).find(c=>c.name==='Vocabulary');
+  const vocab = ((vocabCat?vocabCat.items:uov.vocab)||[]).filter(v=>typeof v==='string'&&v.trim());
+  const knowledgeCats = (uov.knowledgeCategories||[]).filter(c=>c.name!=='Vocabulary' && (c.items||[]).length);
+  const skills = (uov.skillItems||[]).filter(Boolean);
+  const scripture = (uov.scriptureItems||[]).filter(Boolean);
+  const assignments = getUnitAssignments(uid).filter(a=>String(a.title||'').trim())
+      .slice().sort((x,y)=> (x.due||'~').localeCompare(y.due||'~'));
+
+  // ---- per-week class + pacing data ----
+  const dstr = d => [['A',d.dateA],['B',d.dateB]].filter(x=>x[1])
+      .map(x=>`${x[0]} ${isoParse(x[1]).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}`).join(' · ');
+  const weekData = weeks.map((w,wi)=>{
+    const days = (w.days||[]);
+    const dates = days.flatMap(d=>[d.dateA,d.dateB]).filter(Boolean).sort();
+    const range = dates.length ? `${isoParse(dates[0]).toLocaleDateString('en-US',{month:'short',day:'numeric'})} – ${isoParse(dates[dates.length-1]).toLocaleDateString('en-US',{month:'short',day:'numeric'})}` : '';
+    return { label: w.weekLabel || `Week ${wi+1}`, range, days,
+             focus: days.map(d=>S(d.topic)).filter(Boolean).join(' · '), blocks: days.length };
+  });
+  const allDates = weeks.flatMap(w=>(w.days||[]).flatMap(d=>[d.dateA,d.dateB])).filter(Boolean).sort();
+  const unitRange = allDates.length ? `${isoParse(allDates[0]).toLocaleDateString('en-US',{month:'short',day:'numeric'})} – ${isoParse(allDates[allDates.length-1]).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}` : '';
+  const totalBlocks = weeks.reduce((n,w)=>n+(w.days||[]).length,0);
+
+  const actLines = d => (d.activities||[]).filter(a=> a.brk || (a.name||'').trim() || (a.desc||'').trim()).map(a=>{
+    if(a.brk) return `<div style="text-align:center;font-size:8pt;font-weight:700;color:#7A4B00;border-top:1px dashed ${P.gold};border-bottom:1px dashed ${P.gold};padding:1px 0;margin:3px 0">🍽 ${S(a.name)||'Lunch'}</div>`;
+    const nm = S(a.name)||S(a.desc); const ty = actType(a)?`<span style="color:#7A4B00;font-weight:700">${escPDF(actType(a))}-</span> `:'';
+    const dur = a.dur?` <span style="color:${P.ink3}">[${a.dur} min]</span>`:''; const ipp = actIPPText(a)?` <span style="color:${P.navy};font-weight:800">(${escPDF(actIPPText(a))})</span>`:'';
+    return `<div style="margin:0 0 4px;padding-left:14px;text-indent:-14px"><b>${ty}${nm}</b>${dur}${ipp}</div>`;
+  }).join('');
+  const resLines = d => (d.materials||[]).map(m=>{ const t=S(matTitle(m)||matUrl(m)), url=matUrl(m); return `<div style="padding-left:9px;text-indent:-9px;margin:0 0 2px">• ${url?`<a href="${escPDF(url)}" style="color:${P.navy}">${t}</a>`:t}</div>`; }).join('');
+
+  const chipList = (arr, sep=', ') => arr.map(S).join(sep);
+
+  // ---- cover page ----
+  const objHTML = objectives.length
+    ? `<ul style="margin:0;padding:0;list-style:none">${objectives.map(o=>`<li style="display:flex;gap:7px;margin:0 0 7px;font-size:10.5pt;line-height:1.4"><span style="color:${P.tealTx};font-weight:900">✓</span><span>${S(o)}</span></li>`).join('')}</ul>`
+    : `<div style="color:${P.ink3};font-style:italic;font-size:10pt">Add unit objectives in the Unit Overview.</div>`;
+
+  let vkHTML = '';
+  if(vocab.length) vkHTML += `<div style="margin:0 0 6px;font-size:10pt"><b style="color:${P.navy}">Vocabulary:</b> ${chipList(vocab)}</div>`;
+  knowledgeCats.forEach(c=>{ vkHTML += `<div style="margin:0 0 6px;font-size:10pt"><b style="color:${P.navy}">${S(c.name)}:</b> ${chipList((c.items||[]).filter(Boolean))}</div>`; });
+  if(skills.length) vkHTML += `<div style="margin:0 0 6px;font-size:10pt"><b style="color:${P.navy}">Skills:</b> ${chipList(skills)}</div>`;
+  if(scripture.length) vkHTML += `<div style="margin:0 0 6px;font-size:10pt"><b style="color:${P.navy}">Scripture:</b> ${chipList(scripture)}</div>`;
+  if(!vkHTML) vkHTML = `<div style="color:${P.ink3};font-style:italic;font-size:10pt">Add vocabulary &amp; knowledge in the Unit Overview.</div>`;
+
+  const asgHTML = assignments.length
+    ? assignments.map(a=>{ const t=assignType(a.type); const due=a.due?isoParse(a.due).toLocaleDateString('en-US',{month:'short',day:'numeric'}):'—';
+        return `<div style="display:flex;align-items:center;gap:8px;border:1px solid #E7E5E0;border-radius:6px;padding:6px 9px;margin:0 0 5px">
+          <span style="flex:1;font-size:10pt;font-weight:600">${S(a.title)}</span>
+          <span style="font-size:8pt;font-weight:800;border-radius:4px;padding:2px 7px;background:${t.bg};color:${t.tx};-webkit-print-color-adjust:exact;print-color-adjust:exact">${escPDF(t.label)}</span>
+          <span style="font-size:9pt;font-weight:700;color:${P.ink2};white-space:nowrap">${escPDF(due)}</span></div>`; }).join('')
+    : `<div style="color:${P.ink3};font-style:italic;font-size:10pt">No assignments yet — add them in the Assignments &amp; Assessments box.</div>`;
+
+  const paceHTML = weekData.map(w=>`<tr>
+      <td style="background:${P.goldBg};border:1px solid ${P.rule};padding:5px 9px;font-weight:700;color:${P.navy};font-size:9.5pt;white-space:nowrap">${escPDF(w.label)}</td>
+      <td style="border:1px solid ${P.rule};padding:5px 9px;color:${P.ink2};font-size:9.5pt;white-space:nowrap">${escPDF(w.range)||'—'}</td>
+      <td style="border:1px solid ${P.rule};padding:5px 9px;font-size:9.5pt">${w.focus||'<span style="color:#8A857C">—</span>'}</td>
+      <td style="border:1px solid ${P.rule};padding:5px 9px;text-align:center;color:${P.ink2};font-size:9.5pt">${w.blocks}</td></tr>`).join('');
+
+  const cover = `<div class="pg">
+    <div class="ph"><div><div class="pt">${escPDF(co.name)} (${escPDF(co.code)}) — Unit Overview</div><div class="ps">${escPDF(state.teacher||'')} · 2025–2026</div></div>
+      <div style="text-align:right"><div class="pu">Unit ${unitNo(uid)} · ${S(u.name)}</div><div class="pw">${weeks.length} weeks · ${totalBlocks} blocks${unitRange?` · ${escPDF(unitRange)}`:''}</div></div></div>
+    <div style="background:${P.tealBg};border-left:5px solid ${P.tealBr};border-radius:6px;padding:12px 15px;margin-bottom:14px;-webkit-print-color-adjust:exact;print-color-adjust:exact">
+      <div style="font-size:16pt;font-weight:800;color:${P.tealTx}">${S(u.name)}</div>
+      ${u.desc?`<div style="font-size:10pt;color:#25514a;margin-top:4px;line-height:1.45">${S(u.desc)}</div>`:''}
+      ${(uov.eqItems&&uov.eqItems[0])?`<div style="font-size:10pt;font-weight:700;color:${P.tealBr};margin-top:6px">Big question: ${S(uov.eqItems[0])}</div>`:''}
+    </div>
+    <table width="100%" style="width:100%;border-collapse:collapse;margin-bottom:14px;table-layout:fixed"><tr>
+      <td width="52%" style="width:52%;vertical-align:top;padding-right:16px">
+        <div class="sh">Unit Objectives</div>${objHTML}
+        <div class="sh" style="margin-top:13px">Vocabulary &amp; Knowledge Expectations</div>${vkHTML}
+      </td>
+      <td width="48%" style="width:48%;vertical-align:top">
+        <div class="sh">Assignments &amp; Assessments</div>${asgHTML}
+      </td>
+    </tr></table>
+    <div class="sh">Pacing at a Glance</div>
+    <table width="100%" style="width:100%;border-collapse:collapse;table-layout:fixed">
+      <thead><tr>
+        <th width="12%" style="width:12%;background:${P.navy};color:#fff;border:1px solid ${P.navy};padding:5px 9px;text-align:left;font-size:9.5pt;-webkit-print-color-adjust:exact;print-color-adjust:exact">Week</th>
+        <th width="18%" style="width:18%;background:${P.navy};color:#fff;border:1px solid ${P.navy};padding:5px 9px;text-align:left;font-size:9.5pt;-webkit-print-color-adjust:exact;print-color-adjust:exact">Dates</th>
+        <th width="62%" style="width:62%;background:${P.navy};color:#fff;border:1px solid ${P.navy};padding:5px 9px;text-align:left;font-size:9.5pt;-webkit-print-color-adjust:exact;print-color-adjust:exact">Focus</th>
+        <th width="8%" style="width:8%;background:${P.navy};color:#fff;border:1px solid ${P.navy};padding:5px 9px;text-align:center;font-size:9.5pt;-webkit-print-color-adjust:exact;print-color-adjust:exact">Blocks</th>
+      </tr></thead><tbody>${paceHTML}</tbody></table>
+  </div>`;
+
+  // ---- one page per week ----
+  const rowLbl = (t,sub) => `<td style="background:${P.goldBg};border:1px solid ${P.rule};padding:7px 9px;width:140px;vertical-align:top;-webkit-print-color-adjust:exact;print-color-adjust:exact"><div style="font-size:9.5pt;font-weight:700;color:${P.navy}">${t}</div>${sub?`<div style="font-size:7.5pt;color:${P.ink3};margin-top:2px">${sub}</div>`:''}</td>`;
+  const cell = h => `<td style="border:1px solid ${P.rule};padding:7px 9px;vertical-align:top;font-size:9pt;line-height:1.42">${h||''}</td>`;
+  const weekPages = weekData.filter(w=>w.days.length).map(w=>{
+    const days = w.days;
+    // Explicit % column widths — Google Docs ignores width:100% on tables and
+    // sizes to content, so without this the table crams into the left of the page.
+    const clsW = Math.floor(84 / Math.max(days.length,1));
+    const heads = days.map(d=>`<th width="${clsW}%" style="width:${clsW}%;background:${P.goldL};border:1px solid ${P.rule};border-top:4px solid ${P.tealBr};padding:6px 9px;text-align:left;-webkit-print-color-adjust:exact;print-color-adjust:exact"><div style="font-size:12pt;font-weight:700;color:${P.navy}">${S(d.topic)||S(d.label)}</div><div style="font-size:8.5pt;color:#6b5a2a;font-weight:600;margin-top:2px">${escPDF(d.label)}${dstr(d)?` · ${escPDF(dstr(d))}`:''}</div></th>`).join('');
+    const rowGoals = `<tr>${rowLbl('Goals','What students should learn')}${days.map(d=>cell(goalsHTML(d))).join('')}</tr>`;
+    const rowTgts  = `<tr>${rowLbl('Learning Targets','&ldquo;I can…&rdquo;')}${days.map(d=>cell(targetsHTML(d))).join('')}</tr>`;
+    const rowActs  = `<tr>${rowLbl('Activities / Tasks','with IPP stages')}${days.map(d=>cell(actLines(d))).join('')}</tr>`;
+    const rowHW    = `<tr>${rowLbl('Homework','')}${days.map(d=>cell(S(d.homework))).join('')}</tr>`;
+    const rowRes   = `<tr>${rowLbl('Resources','')}${days.map(d=>cell(resLines(d))).join('')}</tr>`;
+    const banner = t => `<tr><td colspan="${days.length+1}" style="background:${P.goldL};border:1px solid ${P.rule};padding:4px 9px;font-size:9pt;font-weight:700;color:${P.navy};-webkit-print-color-adjust:exact;print-color-adjust:exact">${t}</td></tr>`;
+    return `<p class="pbmark" style="color:#fff;font-size:1pt;margin:0">@@PB@@</p><div class="pg">
+      <div class="ph"><div><div class="pt">Weekly Lesson Plans — ${escPDF(co.name)} (${escPDF(co.code)})</div><div class="ps">${escPDF(state.teacher||'')} · 2025–2026</div></div>
+        <div style="text-align:right"><div class="pu">Unit ${unitNo(uid)} · ${S(u.name)}</div><div class="pw">${escPDF(w.label)}${w.range?` · ${escPDF(w.range)}`:''}</div></div></div>
+      <table style="width:100%;border-collapse:collapse;margin-bottom:9px"><tr>
+        <td style="background:#EEF1F6;border:1px solid ${P.rule};padding:4px 8px;width:110px;font-size:8pt;font-weight:700;color:${P.navy};-webkit-print-color-adjust:exact;print-color-adjust:exact">IPP Key</td>
+        <td style="border:1px solid ${P.rule};padding:4px 8px;font-size:8pt;color:#333">${IPP_STAGES.map(s=>`<b style="color:${P.navy}">${s.letter}</b> ${escPDF(s.label)}`).join(' &nbsp;|&nbsp; ')}</td></tr></table>
+      <table width="100%" style="width:100%;border-collapse:collapse;table-layout:fixed">
+        <thead><tr><th width="16%" style="width:16%;background:${P.goldBg};border:1px solid ${P.rule};padding:6px 9px;text-align:left;color:${P.navy};font-size:10pt;-webkit-print-color-adjust:exact;print-color-adjust:exact">Week of<br><span style="font-weight:400;font-size:8.5pt;color:${P.ink3}">${escPDF(w.range)}</span></th>${heads}</tr></thead>
+        <tbody>${rowGoals}${rowTgts}${banner('Learning Activities / Tasks')}${rowActs}${rowHW}${banner('Student Resources / Links / Tech Tools')}${rowRes}</tbody>
+      </table></div>`;
+  }).join('');
+
+  const docName = `${co.name} · Unit ${unitNo(uid)} — ${(u.name||'').replace(/[\\/:*?"<>|]/g,'').trim()}`;
+  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${escPDF(docName)}</title>
+    <style>
+      @page{size:letter landscape;margin:.4in}
+      body{font-family:'Helvetica Neue',Arial,sans-serif;color:${P.ink};margin:0}
+      .pg{page-break-after:always}
+      .pbmark{page-break-before:always}
+      .ph{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid ${P.gold};padding-bottom:7px;margin-bottom:12px}
+      .pt{font-size:14pt;font-weight:700;color:${P.navy}} .ps{font-size:9.5pt;color:${P.ink2};margin-top:2px}
+      .pu{font-size:11.5pt;font-weight:800;color:${P.gold};text-transform:uppercase} .pw{font-size:9.5pt;color:${P.ink2};margin-top:2px}
+      .sh{font-size:9.5pt;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:${P.navy};border-bottom:2px solid ${P.goldL};padding-bottom:3px;margin-bottom:8px}
+      table{page-break-inside:auto} tr{page-break-inside:avoid}
+    </style></head><body>${cover}${weekPages}</body></html>`;
+  return { docName, html, empty: !weeks.length };
+}
+
+// Send the whole unit as one Google Doc (cover + weekly pages), one file per unit.
+async function driveSendUnit(uid){
+  if(!driveConfigured()){ openDriveSetup(); return; }
+  const doc = buildUnitDoc(uid);
+  if(doc.empty){ toast('This unit has no weeks yet.'); return; }
+  await sendToDrive(doc.docName, doc.html);
+}
+// Preview the unit doc in a new tab (also handy for Print → Save as PDF).
+function previewUnitDoc(uid){
+  const doc = buildUnitDoc(uid);
+  const w = window.open('', '_blank'); w.document.open(); w.document.write(doc.html); w.document.close();
+}
+function _currentUnitOrWarn(){ if(!currentUnit){ toast('Open a unit first, then export it.'); return null; } return currentUnit; }
+function driveSendCurrentUnit(){ const u=_currentUnitOrWarn(); if(u) driveSendUnit(u); }
+function previewCurrentUnit(){ const u=_currentUnitOrWarn(); if(u) previewUnitDoc(u); }
+
 function exportWeekPDF(){
   const doc = buildWeekDoc();
   if(doc.empty){ toast('No dated classes in this week — set A/B dates first'); return; }
@@ -4886,23 +5604,259 @@ function driveSendWeek(){
   if(doc.empty){ toast('No dated classes in this week — set A/B dates first'); return; }
   sendToDrive(doc.title, doc.html);
 }
-const DRIVE_APPS_SCRIPT = `function doPost(e) {
+// ── PICK A FILE STRAIGHT OUT OF GOOGLE DRIVE ─────────────────────
+// Instead of tabbing to Drive, hunting for the file, copying the link and
+// pasting it back, "Pick from Drive" opens Google's own file browser right
+// on top of the planner and fills in the name and link for you.
+//
+// It runs entirely in your browser through Google's Picker: the planner
+// never receives the file, only the title and the link you chose, and the
+// sign-in token is kept in memory (never saved, never synced). One-time
+// setup — an API key + OAuth client ID from a free Google Cloud project —
+// lives in ☁ Drive setup.
+const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.readonly';
+const DRIVE_KINDS = {
+  'application/vnd.google-apps.document':     'Google Doc',
+  'application/vnd.google-apps.spreadsheet':  'Google Sheet',
+  'application/vnd.google-apps.presentation': 'Google Slides',
+  'application/vnd.google-apps.form':         'Google Form',
+  'application/vnd.google-apps.drawing':      'Google Drawing',
+  'application/vnd.google-apps.folder':       'Drive folder',
+  'application/pdf':                          'PDF',
+};
+function driveKindLabel(mime){
+  if(DRIVE_KINDS[mime]) return DRIVE_KINDS[mime];
+  if(/^image\//.test(mime||'')) return 'Image';
+  if(/^video\//.test(mime||'')) return 'Video';
+  return 'Drive file';
+}
+function isDriveUrl(u){ return /^https?:\/\/(docs|drive|sites)\.google\.com\//i.test(String(u||'')); }
+
+function drivePickerCfg(){ const c = driveCfg(); return c.picker || {}; }
+function drivePickerReady(){ const p = drivePickerCfg(); return !!(p.clientId && p.apiKey); }
+
+const _scriptPromises = {};
+function loadScriptOnce(src){
+  if(_scriptPromises[src]) return _scriptPromises[src];
+  _scriptPromises[src] = new Promise((resolve, reject) => {
+    const el = document.createElement('script');
+    el.src = src; el.async = true; el.defer = true;
+    el.onload = () => resolve();
+    el.onerror = () => { delete _scriptPromises[src]; reject(new Error('Could not load ' + src)); };
+    document.head.appendChild(el);
+  });
+  return _scriptPromises[src];
+}
+
+let _pickerApiLoaded = false, _driveToken = '', _driveTokenExp = 0, _driveTokenClient = null;
+async function ensurePickerLoaded(){
+  await loadScriptOnce('https://apis.google.com/js/api.js');
+  await loadScriptOnce('https://accounts.google.com/gsi/client');
+  if(!_pickerApiLoaded){
+    await new Promise((res, rej) => gapi.load('picker', { callback: res, onerror: rej }));
+    _pickerApiLoaded = true;
+  }
+}
+// A short-lived access token, held in memory only.
+function driveAccessToken(){
+  return new Promise((resolve, reject) => {
+    if(_driveToken && Date.now() < _driveTokenExp) return resolve(_driveToken);
+    const p = drivePickerCfg();
+    if(!_driveTokenClient){
+      _driveTokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: p.clientId, scope: DRIVE_SCOPE, callback: () => {},
+      });
+    }
+    _driveTokenClient.callback = resp => {
+      if(!resp || resp.error) return reject(new Error((resp && (resp.error_description || resp.error)) || 'Sign-in cancelled'));
+      _driveToken = resp.access_token;
+      _driveTokenExp = Date.now() + Math.max(60, (+resp.expires_in || 3600) - 60) * 1000;
+      resolve(_driveToken);
+    };
+    _driveTokenClient.requestAccessToken({ prompt: _driveToken ? '' : '' });
+  });
+}
+function driveSignOut(){
+  if(_driveToken && window.google?.accounts?.oauth2) google.accounts.oauth2.revoke(_driveToken, ()=>{});
+  _driveToken = ''; _driveTokenExp = 0;
+  toast('Signed out of Google Drive');
+}
+
+// Open the picker. onPick receives {title, url, mimeType, id}.
+async function openDrivePicker(onPick){
+  if(!drivePickerReady()){
+    toast('Add your Google API key & client ID first — one-time setup');
+    openDriveSetup();
+    setTimeout(()=>document.getElementById('drive-clientid-in')?.focus(), 120);
+    return;
+  }
+  try{
+    await ensurePickerLoaded();
+    const token = await driveAccessToken();
+    const p = drivePickerCfg();
+    const mine = new google.picker.DocsView(google.picker.ViewId.DOCS).setIncludeFolders(true);
+    const recent = new google.picker.DocsView(google.picker.ViewId.DOCS).setMode(google.picker.DocsViewMode.LIST);
+    const picker = new google.picker.PickerBuilder()
+      .setOAuthToken(token)
+      .setDeveloperKey(p.apiKey)
+      .setTitle('Choose file(s) from your Drive — hold Ctrl/⌘ or Shift to pick several')
+      .enableFeature(google.picker.Feature.SUPPORT_DRIVES)
+      .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
+      .addView(mine)
+      .addView(recent)
+      .addView(new google.picker.DocsUploadView())
+      .setCallback(data => {
+        if(!data || data.action !== google.picker.Action.PICKED) return;
+        const files = (data.docs || []).map(doc => ({
+          title: doc.name || doc.title || '',
+          url: doc.url || (doc.id ? `https://drive.google.com/open?id=${doc.id}` : ''),
+          mimeType: doc.mimeType || '',
+          id: doc.id || '',
+        }));
+        if(files.length) onPick(files);   // onPick always receives an array
+      })
+      .build();
+    picker.setVisible(true);
+  }catch(e){
+    console.error('Drive picker failed', e);
+    const msg = String((e && e.message) || e);
+    toast(/popup|cancel/i.test(msg) ? 'Drive sign-in cancelled' : 'Drive picker: ' + msg.slice(0, 90));
+  }
+}
+
+// The button(s) shown wherever a link can be pasted. Before setup it offers
+// the setup dialog and a plain link to Drive so pasting still works.
+function drivePickBtnHTML(handler){
+  if(drivePickerReady())
+    return `<button type="button" class="drive-pick" onclick="${handler}" title="Browse your Google Drive and drop the link straight in">
+      <span class="drive-tri">▲</span> Pick from Drive</button>`;
+  return `<button type="button" class="drive-pick ghost" onclick="openDriveSetup()" title="Connect Google Drive once, then pick files without leaving the planner">
+      <span class="drive-tri">▲</span> Connect Drive…</button>
+    <a class="drive-open" href="https://drive.google.com/drive/my-drive" target="_blank" rel="noopener" title="Open Drive in a new tab and copy the link">open Drive ↗</a>`;
+}
+
+// Fill the lesson-resource popup from a picked Drive file. One file → fill the
+// form (so you can tweak the title). Several files → add them all at once.
+function pickDriveIntoResourceModal(){
+  openDrivePicker(files => {
+    if(files.length === 1){
+      const f = files[0];
+      document.getElementById('resource-url').value = f.url;
+      const t = document.getElementById('resource-title');
+      if(!t.value.trim()) t.value = f.title;
+      toast(`${driveKindLabel(f.mimeType)} linked ✓`);
+      return;
+    }
+    if(!_resEdit) return;
+    const d = getDay(_resEdit.i);
+    d.materials = d.materials || [];
+    files.forEach(f => d.materials.push({ title: f.title || f.url, url: f.url }));
+    saveState();
+    const i = _resEdit.i; closeResourceModal(); rerenderDay(i);
+    toast(`${files.length} resources added ✓`);
+  });
+}
+// Fill the inline unit-resource form from a picked Drive file. One file → fill
+// the form; several → add each as its own unit resource in the open category.
+function pickDriveIntoResForm(){
+  openDrivePicker(files => {
+    if(files.length === 1){
+      const f = files[0];
+      const wrap = document.querySelector('.ures-form'); if(!wrap) return;
+      wrap.querySelector('.ures-in-url').value = f.url;
+      const name = wrap.querySelector('.ures-in-name');
+      if(!name.value.trim()) name.value = f.title;
+      const note = wrap.querySelector('.ures-in-note');
+      if(note && !note.value.trim()) note.value = driveKindLabel(f.mimeType);
+      toast(`${driveKindLabel(f.mimeType)} linked ✓`);
+      return;
+    }
+    const uid = currentUnit; if(!uid) return;
+    const cat = (typeof resUI!=='undefined' && resUI && resUI.addCat) || '';
+    files.forEach(f => getUnitResources(uid).push({
+      id: uid+'-'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),
+      cat, title: f.title || f.url, url: normalizeUrl(f.url), note: driveKindLabel(f.mimeType)
+    }));
+    saveState(); reRenderResources(uid);
+    toast(`${files.length} resources added ✓`);
+  });
+}
+
+const DRIVE_APPS_SCRIPT = `// Belen Planner — Drive endpoint (v2: one editable Google Doc per unit).
+// Setup: Extensions/Apps Script → paste this → add the "Drive API" AND "Docs API"
+// Advanced Services (Services + → enable both) → Deploy as Web app → Execute as
+// "Me", Access "Anyone" → paste the /exec URL into the planner's Drive setup.
+function doPost(e) {
   try {
     var d = JSON.parse(e.postData.contents);
     var blob = Utilities.newBlob(d.html, 'text/html', d.docName);
-    var meta = { mimeType: 'application/vnd.google-apps.document' };
+    var v3 = !!Drive.Files.create;
+    var id = findDocId_(d.folderId, d.docName, v3);
     var file;
-    if (Drive.Files.create) {          // Drive API v3
-      meta.name = d.docName; meta.parents = [d.folderId];
-      file = Drive.Files.create(meta, blob);
-    } else {                           // Drive API v2
-      meta.title = d.docName; meta.parents = [{ id: d.folderId }];
-      file = Drive.Files.insert(meta, blob);
+    if (id) {                                  // update the unit's doc in place
+      file = Drive.Files.update({}, id, blob);
+      id = (file && file.id) || id;
+    } else if (v3) {                           // Drive API v3 — create
+      file = Drive.Files.create({ name:d.docName, mimeType:'application/vnd.google-apps.document', parents:[d.folderId] }, blob);
+      id = file.id;
+    } else {                                   // Drive API v2 — create
+      file = Drive.Files.insert({ title:d.docName, mimeType:'application/vnd.google-apps.document', parents:[{ id:d.folderId }] }, blob);
+      id = file.id;
     }
-    return out({ ok: true, id: file.id });
+    var land = setLandscape_(id);   // letter landscape (needs the Docs API)
+    postProcess_(id, land);         // page breaks + stretch tables to the new width
+    return out({ ok: true, id: id });
   } catch (err) { return out({ ok: false, error: String(err) }); }
 }
-function doGet() { return out({ ok: true, msg: 'Planner Drive endpoint is live' }); }
+function findDocId_(folderId, name, v3) {
+  var safe = String(name).replace(/'/g, "\\\\'");
+  if (v3) {
+    var r = Drive.Files.list({ q: "'"+folderId+"' in parents and name='"+safe+"' and trashed=false", fields:'files(id)', pageSize:1 });
+    return (r.files && r.files.length) ? r.files[0].id : null;
+  }
+  var r2 = Drive.Files.list({ q: "'"+folderId+"' in parents and title='"+safe+"' and trashed=false", maxResults:1 });
+  return (r2.items && r2.items.length) ? r2.items[0].id : null;
+}
+function setLandscape_(docId) {
+  try {
+    Docs.Documents.batchUpdate({ requests: [{ updateDocumentStyle: {
+      documentStyle: { pageSize: { width:{magnitude:792,unit:'PT'}, height:{magnitude:612,unit:'PT'} },
+        marginTop:{magnitude:28,unit:'PT'}, marginBottom:{magnitude:28,unit:'PT'},
+        marginLeft:{magnitude:28,unit:'PT'}, marginRight:{magnitude:28,unit:'PT'} },
+      fields: 'pageSize,marginTop,marginBottom,marginLeft,marginRight' } }] }, docId);
+    return true;
+  } catch (e3) { return false; }   // Docs API not enabled → doc still saves (portrait)
+}
+function postProcess_(docId, landscape) {
+  try {
+    var doc = DocumentApp.openById(docId), body = doc.getBody(), guard = 0, f;
+    // 1) turn the @@PB@@ markers into real page breaks
+    while ((f = body.findText('@@PB@@')) && guard++ < 200) {
+      var para = f.getElement().getParent();
+      var idx = body.getChildIndex(para);
+      para.asText().setText('');
+      body.insertPageBreak(idx);
+    }
+    // 2) Google imports tables at the PORTRAIT width, then we switched to
+    //    landscape — so stretch every table back out to fill the wider page,
+    //    keeping each table's own column proportions.
+    if (landscape) {
+      var usable = 736;   // 792pt landscape − 2×28pt margins
+      var tables = body.getTables();
+      for (var i = 0; i < tables.length; i++) {
+        var t = tables[i], ncol = 0;
+        try { ncol = t.getRow(0).getNumCells(); } catch (e4) {}
+        if (!ncol) continue;
+        var ws = [], sum = 0, c;
+        for (c = 0; c < ncol; c++) { var w = 0; try { w = t.getColumnWidth(c); } catch (e5) {} if (!w || w < 1) w = 50; ws.push(w); sum += w; }
+        if (sum <= 0) continue;
+        for (c = 0; c < ncol; c++) { try { t.setColumnWidth(c, Math.round(ws[c] / sum * usable)); } catch (e6) {} }
+      }
+    }
+    doc.saveAndClose();
+  } catch (e2) {}
+}
+function doGet() { return out({ ok: true, msg: 'Planner Drive endpoint is live (v2 — unit docs)' }); }
 function out(o) {
   return ContentService.createTextOutput(JSON.stringify(o))
     .setMimeType(ContentService.MimeType.JSON);
@@ -4910,12 +5864,31 @@ function out(o) {
 function openDriveSetup(){
   const ov = document.getElementById('drive-setup-overlay');
   const c = driveCfg();
+  // Keep the on-screen script identical to what the Copy button copies.
+  const box = document.getElementById('drive-script-box'); if(box) box.textContent = DRIVE_APPS_SCRIPT;
   document.getElementById('drive-url-in').value = c.url || '';
   document.getElementById('drive-folder6-in').value = c.folders[6] || '';
   document.getElementById('drive-folder7-in').value = c.folders[7] || '';
   document.getElementById('drive-label6-in').value = (c.labels && c.labels[6]) || '';
   document.getElementById('drive-label7-in').value = (c.labels && c.labels[7]) || '';
+  const pk = c.picker || {};
+  document.getElementById('drive-apikey-in').value = pk.apiKey || '';
+  document.getElementById('drive-clientid-in').value = pk.clientId || '';
+  const hint = document.getElementById('drive-origin-hint');
+  if(hint) hint.textContent = location.origin;
   ov.style.display = 'block';
+}
+// Prove the keys work before saving anything into a lesson.
+function testDrivePicker(){
+  const c = driveCfg();
+  c.picker = {
+    apiKey:  (document.getElementById('drive-apikey-in').value||'').trim(),
+    clientId:(document.getElementById('drive-clientid-in').value||'').trim(),
+  };
+  try{ localStorage.setItem(DRIVE_CFG_KEY, JSON.stringify(c)); }catch(e){}
+  _driveTokenClient = null;   // the client ID may have just changed
+  if(!drivePickerReady()){ toast('Fill in both the API key and the client ID first'); return; }
+  openDrivePicker(files => toast(`Picker works — you chose "${files[0].title}"${files.length>1?` +${files.length-1} more`:''} ✓`));
 }
 function closeDriveSetup(){ document.getElementById('drive-setup-overlay').style.display='none'; }
 function copyDriveScript(btn){
@@ -4926,9 +5899,17 @@ function saveDriveConfig(){
   const url = document.getElementById('drive-url-in').value.trim();
   const f6  = driveFolderIdFromInput(document.getElementById('drive-folder6-in').value);
   const f7  = driveFolderIdFromInput(document.getElementById('drive-folder7-in').value);
-  if(!url || !/^https:\/\/script\.google\.com\//.test(url)){ toast('Paste your Apps Script web-app URL (starts with https://script.google.com/…)'); return; }
-  if(!f6 && !f7){ toast('Add a Drive folder for at least one course'); return; }
+  const apiKey  = (document.getElementById('drive-apikey-in').value||'').trim();
+  const clientId= (document.getElementById('drive-clientid-in').value||'').trim();
+  // The two halves are independent: you may set up only the file picker.
+  const wantsSend = !!(url || f6 || f7);
+  if(wantsSend && (!url || !/^https:\/\/script\.google\.com\//.test(url))){ toast('Paste your Apps Script web-app URL (starts with https://script.google.com/…)'); return; }
+  if(wantsSend && !f6 && !f7){ toast('Add a Drive folder for at least one course'); return; }
+  if(!wantsSend && !(apiKey && clientId)){ toast('Nothing to save yet — add a web-app URL and folder, or the picker keys'); return; }
   const c = driveCfg();
+  c.picker = (apiKey || clientId) ? { apiKey, clientId } : undefined;
+  if(!c.picker) delete c.picker;
+  _driveTokenClient = null;   // the client ID may have just changed
   c.url = url;
   c.folders = c.folders || {};
   c.folders[6] = f6;
@@ -4941,7 +5922,9 @@ function saveDriveConfig(){
   if(state){ delete state.driveScriptUrl; delete state.driveFolderId; saveState(); }
   closeDriveSetup();
   const which = [f6?'Theology 6':'', f7?'Theology 7':''].filter(Boolean).join(' & ');
-  toast(`Google Drive connected for ${which} ✓`);
+  toast(wantsSend
+    ? `Google Drive connected for ${which}${drivePickerReady()?' · file picker on':''} ✓`
+    : 'Drive file picker connected ✓');
   if(document.getElementById('view-week')?.classList.contains('active')) renderWeekPlan();
 }
 
@@ -5344,6 +6327,43 @@ function renderGuide(){
 // ── WEEK VIEW ────────────────────────────────────────────────────
 let weekPlanOffset = 0; // weeks relative to the current Monday
 
+// ── WEEKLY-VIEW CELLS (shared) ───────────────────────────────────
+// The read-only rendering of one lesson. The Week view builds a column out
+// of these, and a lesson marked Done in the daily planner reuses the very
+// same markup — so a finished lesson looks exactly like it will in the grid.
+const WK_EMPTY = '<span class="wk-empty">—</span>';
+function wkStrip(s){ return String(s||'').replace(/<[^>]*>/g,' ').replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim(); }
+function wkBullets(arr, mapfn){
+  return arr.length ? `<ul class="wk-ul">${arr.map(mapfn).join('')}</ul>` : WK_EMPTY;
+}
+function wkGoalsCell(d){ return `<td class="wk-cell wk-rich">${hasHtmlText(goalsHTML(d))?goalsHTML(d):WK_EMPTY}</td>`; }
+function wkQodCell(d){ return `<td class="wk-cell">${wkStrip(d.qod)?`<div class="wk-qod">${d.qod}</div>`:WK_EMPTY}</td>`; }
+function wkTgtCell(d){ return `<td class="wk-cell wk-rich">${hasHtmlText(targetsHTML(d))?targetsHTML(d):WK_EMPTY}</td>`; }
+function wkActCell(d){
+  // Prefer the teacher's typed list; fall back to any structured activities.
+  if(hasActsText(d)) return `<td class="wk-cell wk-rich">${d.activitiesText}</td>`;
+  const acts = (d.activities||[]).filter(a=>a.brk||wkStrip(a.name)||wkStrip(a.desc));
+  if(!acts.length) return `<td class="wk-cell">${WK_EMPTY}</td>`;
+  let n=0;
+  return `<td class="wk-cell">${acts.map(a=>{
+    if(a.brk) return `<div class="wk-break">🍽 ${esc(wkStrip(a.name)||'Lunch')}</div>`;
+    n++;
+    const letters = actIPPText(a);
+    const detail = wkStrip(a.desc);
+    return `<div class="wk-act">
+      <div class="wk-act-h"><b>${n}. ${actType(a)?`<span class="wk-atype">${esc(actType(a))}-</span> `:''}${esc(wkStrip(a.name)||'—')}${a.dur?` [${a.dur} min]`:''}${letters?` <span class="wk-ipp">${esc(letters)}</span>`:''}</b></div>
+      ${detail?`<div class="wk-act-d">${a.desc}</div>`:''}
+    </div>`;
+  }).join('')}</td>`;
+}
+function wkHwCell(d){ return `<td class="wk-cell">${wkStrip(d.homework)?`<span>${esc(wkStrip(d.homework))}</span>`:WK_EMPTY}</td>`; }
+function wkResCell(d){
+  return `<td class="wk-cell">${wkBullets((d.materials||[]).filter(m=>matTitle(m)||matUrl(m)), m=>{
+    const t=matTitle(m)||matUrl(m), url=matUrl(m);
+    return `<li>${url?`<a href="${esc(url)}" target="_blank" rel="noopener" style="color:var(--navy)">${esc(t)}</a>`:esc(t)}</li>`;
+  })}</td>`;
+}
+
 function renderWeekPlan() {
   const el = document.getElementById('week-wrap');
   if (!el) return;
@@ -5372,10 +6392,6 @@ function renderWeekPlan() {
     return (ad||'').localeCompare(bd||'');
   });
 
-  const bullets = (arr, mapfn) => arr.length
-    ? `<ul class="wk-ul">${arr.map(mapfn).join('')}</ul>`
-    : `<span class="wk-empty">—</span>`;
-
   const cell = fn => lessons.map(fn).join('');
 
   const dayHead = L => {
@@ -5389,6 +6405,7 @@ function renderWeekPlan() {
         <input class="wk-blocktag" value="${esc(tag)}" title="Block label (e.g. A/B)"
           onclick="event.stopPropagation()"
           onchange="setLessonField(${L.uid},${L.wi},${L.di},'blockTag',this.value)">
+        ${d.done?'<span class="wk-donetag" title="Marked done">✓ Done</span>':''}
         <button class="wk-openbtn" onclick="openDayModal(${L.uid},${L.wi},${L.di})" title="Open & edit this lesson">Open ✎</button>
       </div>
       <div class="wk-dh-unit" style="color:${L.col.br}">Unit ${unitNo(L.uid)} · ${esc(L.u.name)}</div>
@@ -5397,32 +6414,12 @@ function renderWeekPlan() {
     </th>`;
   };
 
-  const emptyCell = '<span class="wk-empty">—</span>';
-  const goalsCell = L => `<td class="wk-cell wk-rich">${hasHtmlText(goalsHTML(L.d))?goalsHTML(L.d):emptyCell}</td>`;
-  const qodCell = L => `<td class="wk-cell">${strip(L.d.qod)?`<div class="wk-qod">${L.d.qod}</div>`:emptyCell}</td>`;
-  const tgtCell = L => `<td class="wk-cell wk-rich">${hasHtmlText(targetsHTML(L.d))?targetsHTML(L.d):emptyCell}</td>`;
-  const actCell = L => {
-    // Prefer the teacher's typed list; fall back to any structured activities.
-    if(hasActsText(L.d)) return `<td class="wk-cell wk-rich">${L.d.activitiesText}</td>`;
-    const acts = (L.d.activities||[]).filter(a=>a.brk||strip(a.name)||strip(a.desc));
-    if(!acts.length) return `<td class="wk-cell">${emptyCell}</td>`;
-    let n=0;
-    return `<td class="wk-cell">${acts.map(a=>{
-      if(a.brk) return `<div class="wk-break">🍽 ${esc(strip(a.name)||'Lunch')}</div>`;
-      n++;
-      const letters = actIPPText(a);
-      const detail = strip(a.desc);
-      return `<div class="wk-act">
-        <div class="wk-act-h"><b>${n}. ${actType(a)?`<span class="wk-atype">${esc(actType(a))}-</span> `:''}${esc(strip(a.name)||'—')}${a.dur?` [${a.dur} min]`:''}${letters?` <span class="wk-ipp">${esc(letters)}</span>`:''}</b></div>
-        ${detail?`<div class="wk-act-d">${a.desc}</div>`:''}
-      </div>`;
-    }).join('')}</td>`;
-  };
-  const hwCell = L => `<td class="wk-cell">${strip(L.d.homework)?`<span>${esc(strip(L.d.homework))}</span>`:'<span class="wk-empty">—</span>'}</td>`;
-  const resCell = L => `<td class="wk-cell">${bullets((L.d.materials||[]).filter(m=>matTitle(m)||matUrl(m)), m=>{
-    const t=matTitle(m)||matUrl(m), url=matUrl(m);
-    return `<li>${url?`<a href="${esc(url)}" target="_blank" rel="noopener" style="color:var(--navy)">${esc(t)}</a>`:esc(t)}</li>`;
-  })}</td>`;
+  const goalsCell = L => wkGoalsCell(L.d);
+  const qodCell   = L => wkQodCell(L.d);
+  const tgtCell   = L => wkTgtCell(L.d);
+  const actCell   = L => wkActCell(L.d);
+  const hwCell    = L => wkHwCell(L.d);
+  const resCell   = L => wkResCell(L.d);
   const bannerCells = label => lessons.map(()=>`<td class="wk-banner">${label}</td>`).join('');
 
   const legend = keyLegendHTML();
@@ -6854,31 +7851,58 @@ function savePaceAssess(el) {
 // "announce" date (when to tell students) and a "due" date. Shown as a
 // sortable box on the Unit Overview page.
 const ASSIGN_TYPES = [
-  {key:'HW',         label:'HW',         bg:'#E6EBF4', tx:'#1B3A6B', br:'#C5D0E4'},
-  {key:'Quiz',       label:'Quiz',       bg:'#FBEFD0', tx:'#8A6A12', br:'#E6D5A0'},
-  {key:'Discussion', label:'Discussion', bg:'#E1F5EE', tx:'#085041', br:'#A7DEC8'},
-  {key:'Test',       label:'Test',       bg:'#F6E1D8', tx:'#993C1D', br:'#E3BBA9'},
-  {key:'Project',    label:'Project',    bg:'#EEE6F4', tx:'#5B2C82', br:'#D3C0E4'},
-  {key:'Other',      label:'Other',      bg:'#ECECEC', tx:'#555555', br:'#D5D5D5'},
+  {key:'HW',           label:'HW',           bg:'#E6EBF4', tx:'#1B3A6B', br:'#C5D0E4'},
+  {key:'Formative',    label:'Formative',    bg:'#F1EFE8', tx:'#5F5E5A', br:'#D9D5CC'},
+  {key:'Quiz',         label:'Quiz',         bg:'#FBEFD0', tx:'#8A6A12', br:'#E6D5A0'},
+  {key:'Discussion',   label:'Discussion',   bg:'#E1F5EE', tx:'#085041', br:'#A7DEC8'},
+  {key:'Test',         label:'Test',         bg:'#F6E1D8', tx:'#993C1D', br:'#E3BBA9'},
+  {key:'Project',      label:'Project',      bg:'#EEE6F4', tx:'#5B2C82', br:'#D3C0E4'},
+  {key:'Essay',        label:'Essay',        bg:'#E6F1FB', tx:'#0C447C', br:'#B9D6F0'},
+  {key:'Presentation', label:'Presentation', bg:'#EEEDFE', tx:'#3C3489', br:'#CFC9F0'},
+  {key:'Other',        label:'Other',        bg:'#ECECEC', tx:'#555555', br:'#D5D5D5'},
 ];
+// Assessment lifecycle — lets you track a piece from planning to grading, not
+// just "done". Graded implies the work is complete (its dashboard task ticks off).
+const ASSIGN_STATUS = [
+  {key:'Planned',  label:'Planned',  bg:'#F1EFE8', tx:'#5F5E5A', br:'#D9D5CC'},
+  {key:'Assigned', label:'Assigned', bg:'#E6EBF4', tx:'#1B3A6B', br:'#C5D0E4'},
+  {key:'Graded',   label:'Graded',   bg:'#E1F5EE', tx:'#085041', br:'#A7DEC8'},
+];
+function assignStatus(k){ return ASSIGN_STATUS.find(s=>s.key===k) || ASSIGN_STATUS[0]; }
 function assignType(k){ return ASSIGN_TYPES.find(t=>t.key===k) || ASSIGN_TYPES[ASSIGN_TYPES.length-1]; }
 
 function getUnitAssignments(uid){
   if(!state.unitAssignments) state.unitAssignments = {};
   if(!state.unitAssignments[uid]) state.unitAssignments[uid] = [];
+  // Backfill a status on older items (before the tracker had a lifecycle):
+  // a ticked-off item is "Graded", otherwise "Planned".
+  state.unitAssignments[uid].forEach(a=>{ if(!a.status) a.status = a.done ? 'Graded' : 'Planned'; });
   return state.unitAssignments[uid];
 }
 function addUnitAssignment(uid){
   const list = getUnitAssignments(uid);
-  list.push({id: uid+'-a'+Math.random().toString(36).slice(2,8), type:'HW', title:'', announce:'', due:''});
-  saveState(); renderUnit();
+  list.push({id: uid+'-a'+Math.random().toString(36).slice(2,8), type:'HW', title:'', announce:'', due:'', status:'Planned', done:false});
+  saveState(); syncAssignmentTodos(); renderUnit();
+}
+// Set the lifecycle status. "Graded" completes the item (and its dashboard task).
+function setAssignStatus(uid, id, status){
+  const a = getUnitAssignments(uid).find(x=>x.id===id);
+  if(!a) return;
+  a.status = status;
+  a.done = (status === 'Graded');
+  const t = findAssignTodo(uid, id);
+  if(t) t.done = a.done;
+  saveState();
+  renderUnit();
 }
 // Save a single field without re-rendering (used while typing a title, so
 // focus isn't lost). saveState only.
 function updateAssignField(uid, id, field, val){
   const a = getUnitAssignments(uid).find(x=>x.id===id);
   if(!a) return;
-  a[field] = val; saveState();
+  a[field] = val;
+  syncAssignmentTodos(true);      // its task follows the wording and the date
+  saveState();
 }
 // Save a field AND re-render (used for type/date changes so chips recolor
 // and the list re-sorts by due date).
@@ -6889,7 +7913,7 @@ function updateAssignReRender(uid, id, field, val){
 function deleteUnitAssignment(uid, id){
   const list = getUnitAssignments(uid);
   const i = list.findIndex(x=>x.id===id);
-  if(i>=0){ list.splice(i,1); saveState(); renderUnit(); }
+  if(i>=0){ list.splice(i,1); saveState(); syncAssignmentTodos(); renderUnit(); }
 }
 // Whole-day count relative to today; negative = past, 0 = today.
 function assignDaysUntil(iso){
@@ -6913,9 +7937,73 @@ function assignFmtDate(iso){
   return isoParse(iso).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
 }
 
+// ── EVERY ASSIGNMENT IS A TO-DO ──────────────────────────────────
+// An assignment you've written down is work you still have to do, so each
+// one carries a matching task on the dashboard To-Do list. The assignment
+// row is the source of truth for its wording and due date; ticking it off
+// in either place ticks it off in both. Deleting the assignment takes its
+// task with it.
+function assignTodoText(a){
+  const t = assignType(a.type);
+  const title = String(a.title||'').trim() || 'Untitled assignment';
+  return `${t.label}: ${title}`;
+}
+function findAssignTodo(uid, id){
+  return (state.todos||[]).find(t => t.assign && t.assign.uid === uid && t.assign.id === id) || null;
+}
+// Rebuild the assignment-backed tasks so they match the assignments exactly.
+// Safe to call as often as you like; it only writes when something differs.
+function syncAssignmentTodos(quiet){
+  if(!state.todos) state.todos = [];
+  let changed = false;
+  const live = new Set();
+  Object.keys(state.unitAssignments || {}).forEach(uidKey => {
+    const uid = +uidKey;
+    (state.unitAssignments[uidKey] || []).forEach(a => {
+      // A blank row is a row you haven't written yet — no task until it's named.
+      if(!a.id || !String(a.title||'').trim()) return;
+      live.add(uid + '|' + a.id);
+      const text = assignTodoText(a);
+      let t = findAssignTodo(uid, a.id);
+      if(!t){
+        // Derived id, so a re-sync can never produce a duplicate task.
+        t = { id:'at-'+a.id, assign:{uid, id:a.id}, text, due:a.due||'', done:!!a.done,
+              cat:'', subtasks:[], lesson:null, unit:uid };
+        state.todos.push(t);
+        changed = true;
+      }
+      if(t.text !== text){ t.text = text; changed = true; }
+      if((t.due||'') !== (a.due||'')){ t.due = a.due||''; changed = true; }
+      if(!!t.done !== !!a.done){ t.done = !!a.done; changed = true; }
+      if(t.unit !== uid){ t.unit = uid; changed = true; }
+    });
+  });
+  // Drop tasks whose assignment is gone.
+  const before = state.todos.length;
+  state.todos = state.todos.filter(t => !t.assign || live.has(t.assign.uid + '|' + t.assign.id));
+  if(state.todos.length !== before) changed = true;
+  if(changed && !quiet) saveState();
+  return changed;
+}
+// Tick an assignment off (from its row, or from its task on the dashboard).
+function toggleAssignmentDone(uid, id){
+  const a = getUnitAssignments(uid).find(x => x.id === id);
+  if(!a) return;
+  a.done = !a.done;
+  // Keep the lifecycle status in step: done → Graded; un-done → Assigned.
+  a.status = a.done ? 'Graded' : (a.status === 'Graded' ? 'Assigned' : (a.status || 'Planned'));
+  const t = findAssignTodo(uid, id);
+  if(t) t.done = a.done;
+  saveState();
+  if(document.getElementById('view-dashboard')?.classList.contains('active')) renderDashboard();
+  else renderUnit();
+}
+
 function unitAssignmentsHTML(uid){
   const list = getUnitAssignments(uid);
   list.forEach(a=>{ if(!a.id) a.id = uid+'-a'+Math.random().toString(36).slice(2,8); });
+  syncAssignmentTodos();
+  const done = list.filter(a=>a.done).length;
   // Sort a copy by due date (blanks last) so the soonest is on top.
   const sorted = [...list].sort((x,y)=>{
     if(!x.due && !y.due) return 0;
@@ -6929,7 +8017,14 @@ function unitAssignmentsHTML(uid){
     const dueN  = assignDaysUntil(a.due);
     const overdue = dueN !== null && dueN < 0;
     const dueSoon = dueN !== null && dueN >= 0 && dueN <= 3;
-    return `<tr>
+    const st = assignStatus(a.status);
+    return `<tr${a.done?' class="assign-done"':''}>
+      <td style="border:1px solid var(--rule);padding:5px 6px;vertical-align:middle;white-space:nowrap;text-align:center">
+        <select onchange="setAssignStatus(${uid},'${a.id}',this.value)" title="Track this from planning to grading"
+          style="font-family:inherit;font-size:11px;font-weight:700;border:1px solid ${st.br};background:${st.bg};color:${st.tx};border-radius:999px;padding:3px 8px;cursor:pointer;outline:none;-webkit-print-color-adjust:exact;print-color-adjust:exact">
+          ${ASSIGN_STATUS.map(o=>`<option value="${o.key}" ${o.key===(a.status||'Planned')?'selected':''}>${o.label}</option>`).join('')}
+        </select>
+      </td>
       <td style="border:1px solid var(--rule);padding:5px 6px;vertical-align:middle;white-space:nowrap">
         <select onchange="updateAssignReRender(${uid},'${a.id}','type',this.value)"
           style="font-family:inherit;font-size:11px;font-weight:700;border:1px solid ${t.br};background:${t.bg};color:${t.tx};border-radius:999px;padding:3px 8px;cursor:pointer;outline:none;-webkit-print-color-adjust:exact;print-color-adjust:exact">
@@ -6963,12 +8058,13 @@ function unitAssignmentsHTML(uid){
   return `<div style="margin-bottom:20px">
     <div style="background:var(--navy);padding:8px 14px;display:flex;align-items:center;justify-content:space-between;-webkit-print-color-adjust:exact;print-color-adjust:exact">
       <span style="font-size:12px;font-weight:700;color:white;letter-spacing:.04em">Assignments &amp; Assessments</span>
-      <span style="font-size:10px;color:rgba(255,255,255,.7)">${list.length} item${list.length===1?'':'s'} · sorted by due date</span>
+      <span style="font-size:10px;color:rgba(255,255,255,.7)">${list.length} item${list.length===1?'':'s'}${done?` · ${done} done`:''} · on your dashboard to-do list</span>
     </div>
     <div style="overflow-x:auto">
       <table style="width:100%;border-collapse:collapse;font-size:12px;background:var(--white)">
         <thead>
           <tr>
+            <th style="border:1px solid var(--rule);padding:6px 8px;background:#FAFAF8;font-size:10px;font-weight:700;color:var(--ink-2);text-align:center;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap">Status</th>
             <th style="border:1px solid var(--rule);padding:6px 8px;background:#FAFAF8;font-size:10px;font-weight:700;color:var(--ink-2);text-align:left;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap">Type</th>
             <th style="border:1px solid var(--rule);padding:6px 10px;background:#FAFAF8;font-size:10px;font-weight:700;color:var(--ink-2);text-align:left;text-transform:uppercase;letter-spacing:.04em">Assignment</th>
             <th style="border:1px solid var(--rule);padding:6px 8px;background:#FAFAF8;font-size:10px;font-weight:700;color:var(--ink-2);text-align:left;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap">Announce</th>
@@ -6977,7 +8073,7 @@ function unitAssignmentsHTML(uid){
           </tr>
         </thead>
         <tbody>
-          ${rows || `<tr><td colspan="5" style="border:1px solid var(--rule);padding:14px;text-align:center;color:var(--ink-3);font-size:12px;font-style:italic">No assignments yet — add HWs, quizzes, discussions and tests below.</td></tr>`}
+          ${rows || `<tr><td colspan="6" style="border:1px solid var(--rule);padding:14px;text-align:center;color:var(--ink-3);font-size:12px;font-style:italic">No assignments yet — add HWs, quizzes, discussions and tests below.</td></tr>`}
         </tbody>
       </table>
     </div>
@@ -7026,8 +8122,11 @@ function resForm(uid, cat, r){
   return `<div class="ures-form">
     <input class="ures-in ures-in-name" type="text" placeholder="Name (e.g. Chapter 3 reading)"
       value="${esc(r?.title||'')}" onkeydown="if(event.key==='Enter'){event.preventDefault();${isEdit?`resSaveEdit(${uid},'${r.id}')`:`resSaveNew(${uid},'${cat}')`}}">
-    <input class="ures-in ures-in-url" type="url" placeholder="Paste link (Google Doc, Drive, Slides, website…)"
-      value="${esc(r?.url||'')}">
+    <div class="ures-urlrow">
+      <input class="ures-in ures-in-url" type="url" placeholder="Pick from Drive, or paste any link…"
+        value="${esc(r?.url||'')}">
+      <span class="drive-row">${drivePickBtnHTML('pickDriveIntoResForm()')}</span>
+    </div>
     <input class="ures-in ures-in-note" type="text" placeholder="Short note (optional)"
       value="${esc(r?.note||'')}">
     <div class="ures-form-btns">
@@ -7048,7 +8147,7 @@ function unitResourcesHTML(uid){
       const link = r.url ? `<a href="${esc(r.url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="ures-open" title="Open link">↗ open</a>` : '';
       return `<div class="ures-item" onclick="resStartEdit(${uid},'${r.id}')" title="Click to edit">
         <div class="ures-item-main">
-          <div class="ures-item-title">${esc(r.title||'Untitled')}</div>
+          <div class="ures-item-title">${isDriveUrl(r.url)?'<span class="drive-tri" title="Lives in Google Drive">▲</span> ':''}${esc(r.title||'Untitled')}</div>
           ${r.note?`<div class="ures-item-note">${esc(r.note)}</div>`:''}
           ${r.url?`<div class="ures-item-url">${esc(r.url)}</div>`:''}
         </div>
@@ -7356,9 +8455,65 @@ function dateLessonsFromMap(){
 }
 
 // One line telling you where the dates come from, and nothing more.
+// ── FILTERS: SHOW ME ONLY WHAT I STILL HAVE TO DO ────────────────
+// One filter shared by the Pacing Guide and the unit's Weekly Plan, so
+// switching between them doesn't lose your place. Kept in state, so it
+// survives a reload and follows you across devices.
+const LESSON_FILTERS = [
+  { k:'all',        label:'All',            hint:'Every class day' },
+  { k:'unfinished', label:'Unfinished',     hint:'Everything not yet ticked Done' },
+  { k:'finished',   label:'Finished',       hint:'Lessons ticked Done' },
+  { k:'needs',      label:'Needs planning', hint:'Not enough activities to fill the block yet' },
+  { k:'planned',    label:'Planned',        hint:'Full block planned, not yet ticked Done' },
+];
+function lessonFilter(){
+  const f = state && state.lessonFilter;
+  return LESSON_FILTERS.some(x=>x.k===f) ? f : 'all';
+}
+function setLessonFilter(k){
+  state.lessonFilter = k;
+  saveState();
+  refreshAfterMove();          // redraws whichever page is open
+}
+// Which bucket a lesson falls in.
+function lessonStatus(d){
+  if(d && d.done) return 'finished';
+  return dayIsPlanned(d) ? 'planned' : 'needs';
+}
+function lessonMatchesFilter(d, f){
+  f = f || lessonFilter();
+  if(f === 'all') return true;
+  const st = lessonStatus(d);
+  if(f === 'unfinished') return st !== 'finished';
+  return st === f;
+}
+// How many lessons in the whole course sit in each bucket.
+function lessonFilterCounts(scope){
+  const c = { all:0, unfinished:0, finished:0, needs:0, planned:0 };
+  (scope || flatLessons().map(x=>x.d)).forEach(d => {
+    const st = lessonStatus(d);
+    c.all++; c[st]++;
+    if(st !== 'finished') c.unfinished++;
+  });
+  return c;
+}
+// The chip row itself. `scope` is the list of days being counted.
+function lessonFilterBarHTML(scope, note){
+  const f = lessonFilter();
+  const c = lessonFilterCounts(scope);
+  return `<div class="lf-bar no-print">
+    <span class="lf-label">Show</span>
+    ${LESSON_FILTERS.map(x=>`<button class="prep-fchip${f===x.k?' on':''}" title="${esc(x.hint)}"
+      onclick="setLessonFilter('${x.k}')">${x.label}<span class="lf-n">${c[x.k]}</span></button>`).join('')}
+    ${f!=='all' ? `<span class="lf-note">${c[f]} of ${c.all} shown${note?` · ${esc(note)}`:''}</span>` : ''}
+  </div>`;
+}
+
 function pacingDateNoteHTML(){
+  const events = allCustomEvents().length;
+  const evTxt = events ? ` · <b>${events}</b> of your own event${events===1?'':'s'}` : '';
   if(!schoolMapSems(activeCourse).length){
-    return `<div class="sp-note">Dates are whatever you set on each lesson.
+    return `<div class="sp-note">Dates are whatever you set here or on each lesson${evTxt}.
       <button class="sp-linkbtn" onclick="openMapImport()">Paste your school's semester map</button> to fill them in and pick up school events.</div>`;
   }
   let dated = 0, withNotes = 0;
@@ -7367,17 +8522,117 @@ function pacingDateNoteHTML(){
     if(mapHitForDate(d.dateA)){ dated++; if(dayCalNotes(d).length) withNotes++; }
   })));
   const m = getSchoolMap(activeCourse, schoolMapSems(activeCourse)[0]);
-  return `<div class="sp-note">📅 ${dated} lesson${dated===1?'':'s'} matched to <b>${esc((m&&m.title)||'your school map')}</b>${withNotes?` · ${withNotes} with school events`:''} · ${esc(getCourse().name)} meets on <b>${courseMeetsOn()} days</b>
+  return `<div class="sp-note">📅 ${dated} lesson${dated===1?'':'s'} matched to <b>${esc((m&&m.title)||'your school map')}</b>${withNotes?` · ${withNotes} with school events`:''}${evTxt} · ${esc(getCourse().name)} meets on <b>${courseMeetsOn()} days</b>
     <button class="sp-linkbtn" onclick="openMapImport()">re-paste</button></div>`;
 }
 
+// ── EDITING A LESSON'S DATE IN PLACE ─────────────────────────────
+// A plain date box on the pacing guide, so a date can be fixed where you
+// notice it's wrong instead of opening the lesson.
+function lessonDateInputHTML(uid, wi, di, field, val, title){
+  return `<input type="date" class="sp-dateinp" value="${esc(val||'')}" title="${esc(title||'Class date')}"
+    onclick="event.stopPropagation()"
+    onchange="setLessonDate(${uid},${wi},${di},'${field}',this.value)">`;
+}
+// Set one lesson's class date from anywhere. Cal notes are dropped because
+// they belong to the date, not the lesson — they're re-read from the map.
+function setLessonDate(uid, wi, di, field, val){
+  const d = (state.units[uid]||[])[wi]?.days?.[di];
+  if(!d) return;
+  d[field] = val || '';
+  delete d.calNotes;
+  saveState();
+  invalidateMapIndex();
+  refreshAfterMove();
+  if(val) toast(`${d.label} → ${fmtNice(val)} ✓`);
+}
+// Shift this lesson and every later one onto the following class days, so a
+// single corrected date re-flows the rest of the year.
+function cascadeFromLesson(uid, wi, di){
+  const d = (state.units[uid]||[])[wi]?.days?.[di];
+  if(!d || !d.dateA){ toast('Give this lesson a date first'); return; }
+  const cal = loadCalendar();
+  const dates = (cal && cal.courses[activeCourse] && cal.courses[activeCourse].dates) || [];
+  if(!dates.length){ toast('Import your school calendar to re-flow dates'); return; }
+  let ai = dates.findIndex(x => x >= d.dateA);
+  if(ai < 0){ toast('No class days on or after that date'); return; }
+  const flat = flatLessons();
+  const pos = flat.findIndex(x => x.d === d);
+  if(pos < 0) return;
+  let n = 0;
+  for(let k = pos; k < flat.length; k++){
+    const idx = ai + (k - pos);
+    if(idx >= dates.length) break;
+    flat[k].d.dateA = dates[idx]; flat[k].d.dateB = ''; delete flat[k].d.calNotes; n++;
+  }
+  saveState();
+  invalidateMapIndex();
+  refreshAfterMove();
+  toast(`Re-dated ${n} lesson${n===1?'':'s'} from ${fmtNice(dates[ai])} onward ✓`);
+}
+
+// ── SCHOOL EVENT DIALOG ──────────────────────────────────────────
+function openEventModal(iso){
+  document.getElementById('event-date').value = iso || isoToday();
+  document.getElementById('event-text').value = '';
+  renderEventList();
+  document.getElementById('event-overlay').style.display = 'block';
+  setTimeout(()=>document.getElementById('event-text').focus(), 40);
+}
+function closeEventModal(){ document.getElementById('event-overlay').style.display='none'; }
+function submitEvent(){
+  const iso = document.getElementById('event-date').value;
+  const txt = document.getElementById('event-text').value;
+  if(!iso){ toast('Pick a date for the event'); return; }
+  if(!String(txt||'').trim()){ document.getElementById('event-text').focus(); return; }
+  addCustomEvent(iso, txt);
+  document.getElementById('event-text').value = '';
+  renderEventList();
+  refreshAfterMove();
+  toast(`Added to ${fmtNice(iso)} ✓`);
+  setTimeout(()=>document.getElementById('event-text').focus(), 30);
+}
+function deleteEvent(iso, idx){
+  removeCustomEvent(iso, idx);
+  renderEventList();
+  refreshAfterMove();
+}
+function renderEventList(){
+  const box = document.getElementById('event-list');
+  if(!box) return;
+  const all = allCustomEvents();
+  if(!all.length){
+    box.innerHTML = `<div class="ev-empty">No events of your own yet. Anything you add here shows up on the pacing guide next to the school's own notes.</div>`;
+    return;
+  }
+  const byDate = new Map();
+  const days = plannerDaysByDate();
+  all.forEach(e => { if(!byDate.has(e.iso)) byDate.set(e.iso, []); byDate.get(e.iso).push(e); });
+  box.innerHTML = [...byDate.keys()].map(iso => {
+    const hit = days.get(iso);
+    return `<div class="ev-row">
+      <div class="ev-date">${esc(fmtNice(iso))}${hit?`<span class="ev-lesson">${esc(hit.d.label)} · Unit ${unitNo(hit.u.id)}</span>`:'<span class="ev-lesson ev-noclass">no class that day</span>'}</div>
+      <div class="ev-pills">${byDate.get(iso).map(e =>
+        `<span class="smap-note-pill">${esc(e.text)}<button class="ev-x" title="Remove" onclick="deleteEvent('${esc(iso)}',${e.idx})">×</button></span>`).join(' ')}</div>
+    </div>`;
+  }).join('');
+}
+
 function simplePacingHTML(){
+  const f = lessonFilter();
+  const allDays = [];
   const blocks = orderedUnits().map(u => {
     const weeks = state.units[u.id] || [];
     const days = [];
-    weeks.forEach((w, wi) => (w.days||[]).forEach((d, di) => days.push({d, wi, di})));
+    weeks.forEach((w, wi) => (w.days||[]).forEach((d, di) => {
+      allDays.push(d);
+      // Day and lesson numbers count every class day, so a filtered view
+      // still tells you which day of the year you're looking at.
+      days.push({d, wi, di, weekLabel:w.weekLabel, hidden:!lessonMatchesFilter(d, f)});
+    }));
     return { u, days };
-  }).filter(b => b.days.length);
+  }).filter(b => b.days.length).map(b => ({...b, shown:b.days.filter(x=>!x.hidden).length}))
+    .filter(b => b.shown > 0);
 
   const co = getCourse();
   const inp = (val, uid, wi, di, field, ph) =>
@@ -7390,28 +8645,55 @@ function simplePacingHTML(){
   const body = blocks.map(b => {
     const c = getUC(b.u.id);
     let lessonNo = 0;
-    return b.days.map((row, idx) => {
+    let shownIdx = -1;
+    return b.days.map((row) => {
       globalDay++; lessonNo++;
+      if(row.hidden) return '';
+      shownIdx++;
+      const idx = shownIdx;
       const d = row.d, planned = dayIsPlanned(d);
-      const notes = dayCalNotes(d);
+      const schoolNotes = schoolMapNotes(d);
+      const myEvents = customEventsOn(d.dateA);
       const isToday = d.dateA && d.dateA === today;
-      const dateCell = d.dateA
-        ? `<div class="sp-dline">${isoParse(d.dateA).toLocaleDateString('en-US',{weekday:'short'})} <b>${fmtMD(d.dateA)}</b></div>`
-        : '<span class="smap-dash">—</span>';
       const band = idx === 0
-        ? `<td class="sp-band" rowspan="${b.days.length}" style="background:${c.br}">
+        ? `<td class="sp-band" rowspan="${b.shown}" style="background:${c.br}"
+             ondragover="unitDragOver(event,${b.u.id})" ondrop="unitDrop(event,${b.u.id})"
+             title="Drop a day here to move it into this unit">
              <div class="sp-band-inner">Unit ${unitNo(b.u.id)}<span>${esc(b.u.name)}</span>
                <button class="sp-band-add" onclick="paceAddDayU(${b.u.id})">+ day</button></div>
            </td>` : '';
-      return `<tr${isToday?' class="sp-today"':''}>
+      const notePill = (txt, kind, iso, i) => {
+        const warn = /no school|early release|exam|psat|break|holiday|retreat|mass/i.test(txt);
+        return `<span class="smap-note-pill${warn?' warn':''}${kind==='mine'?' mine':''}" title="${kind==='mine'?'Your own event — click × to remove':'From the school semester map'}">${esc(txt)}${
+          kind==='mine' ? `<button class="ev-x" onclick="event.stopPropagation();deleteEvent('${esc(iso)}',${i})" title="Remove this event">×</button>` : ''}</span>`;
+      };
+      return `<tr${isToday?' class="sp-today"':''}${d.done?' data-done="1"':''}
+        ondragover="lessonDragOver(event,'y')" ondrop="lessonDrop(event,${b.u.id},${row.wi},${row.di},'y')">
         ${band}
-        <td class="sp-td sp-mid">${globalDay}</td>
-        <td class="sp-td sp-mid sp-num">${unitNo(b.u.id)}.${lessonNo}</td>
-        <td class="sp-td sp-date2">${dateCell}${isToday?'<div><span class="smap-today-tag">today</span></div>':''}${notes.length?`<div class="sp-notes">${notes.map(n=>`<span class="smap-note-pill${/no school|early release|exam|psat|break/i.test(n)?' warn':''}">${esc(n)}</span>`).join(' ')}</div>`:''}</td>
+        <td class="sp-td sp-mid sp-handlecell">
+          <span class="row-drag" draggable="true" title="Drag this day to another slot, week or unit"
+            ondragstart="lessonDragStart(event,${b.u.id},${row.wi},${row.di})" ondragend="dragEndAll()">⠿</span>
+          <div class="sp-gday">${globalDay}</div>
+        </td>
+        <td class="sp-td sp-mid sp-num">${unitNo(b.u.id)}.${lessonNo}<div class="sp-wklbl">${esc(row.weekLabel||'')}</div></td>
+        <td class="sp-td sp-date2">
+          <div class="sp-datebox">
+            ${lessonDateInputHTML(b.u.id, row.wi, row.di, 'dateA', d.dateA, 'Class date — edit it right here')}
+            ${d.dateA?`<span class="sp-dow">${isoParse(d.dateA).toLocaleDateString('en-US',{weekday:'short'})}</span>`:''}
+          </div>
+          ${isToday?'<div><span class="smap-today-tag">today</span></div>':''}
+          ${(schoolNotes.length||myEvents.length)?`<div class="sp-notes">${
+            schoolNotes.map(n=>notePill(n,'map')).join(' ')}${
+            myEvents.map((n,i)=>notePill(n,'mine',d.dateA,i)).join(' ')}</div>`:''}
+          <div class="sp-daterow">
+            <button class="sp-minibtn" onclick="openEventModal('${esc(d.dateA||'')}')" title="Add your own event on this date">＋ event</button>
+            ${d.dateA && calImported() ? `<button class="sp-minibtn" onclick="cascadeFromLesson(${b.u.id},${row.wi},${row.di})" title="Re-flow this lesson and every later one onto the next class days">↓ re-flow</button>` : ''}
+          </div>
+        </td>
         <td class="sp-td sp-content">${inp(d.topic, b.u.id, row.wi, row.di, 'topic', 'General theme for the day…')}</td>
         <td class="sp-td">${inp(d.homework, b.u.id, row.wi, row.di, 'homework', 'Homework…')}</td>
         <td class="sp-td sp-mid">
-          <span class="sp-status ${planned?'ok':''}" title="${planned?'Fully planned':'Not fully planned yet'}">${planned?'✓':'○'}</span>
+          <span class="sp-status ${d.done?'done':(planned?'ok':'')}" title="${d.done?'Marked done':(planned?'Fully planned':'Not fully planned yet')}">${d.done?'✓✓':(planned?'✓':'○')}</span>
           <button class="sp-open" onclick="openGridDay(${b.u.id},${row.wi},${row.di})">open →</button>
         </td>
       </tr>`;
@@ -7423,31 +8705,36 @@ function simplePacingHTML(){
     <div class="sp-head">
       <div>
         <h2 class="sp-title">Pacing Guide — ${esc(co.name)}</h2>
-        <div class="sp-sub">The big-picture map across every unit: general themes only. Edit Content or HW here and it saves straight to that lesson.</div>
+        <div class="sp-sub">The big-picture map across every unit: general themes only. Edit the date, Content or HW here and it saves straight to that lesson; drag a day by its ⠿ handle to move it.</div>
       </div>
       <div class="sp-actions">
-        ${schoolMapSems(activeCourse).length?`<button class="sp-btn sp-btn-navy" onclick="dateLessonsFromMap()" title="Put your lessons onto the map's ${courseMeetsOn()} days, in order">📅 Date lessons from the map</button>`:''}
-        <button class="sp-btn" onclick="openMapImport()" title="Paste your school's semester map to fill in the Date column">📥 School map…</button>
+        ${schoolMapSems(activeCourse).length?`<button class="sp-btn sp-btn-ghost" onclick="dateLessonsFromMap()" title="Put your lessons onto the map's ${courseMeetsOn()} days, in order">📅 Date lessons from the map</button>`:''}
+        <button class="sp-btn sp-btn-ghost" onclick="openEventModal('')" title="Add a retreat, Mass, field trip or any day of your own to the calendar">＋ School event</button>
+        <button class="sp-btn sp-btn-ghost" onclick="openMapImport()" title="Paste your school's semester map to fill in the Date column">📥 School map…</button>
         <button class="sp-btn" onclick="exportPacingGuidePDF()">Export</button>
       </div>
     </div>
     ${pacingDateNoteHTML()}
+    ${lessonFilterBarHTML(allDays)}
     <div class="sp-scroll">
       <table class="sp-table">
         <thead><tr>
           <th style="width:120px">Unit</th>
-          <th style="width:54px">Day</th>
-          <th style="width:60px">#</th>
-          <th style="width:118px">Date <span class="sp-th-hint">— school map</span></th>
+          <th style="width:62px">Day</th>
+          <th style="width:70px">#</th>
+          <th style="width:168px">Date <span class="sp-th-hint">— editable</span></th>
           <th>Content <span class="sp-th-hint">— general theme</span></th>
-          <th style="width:240px">HW</th>
+          <th style="width:220px">HW</th>
           <th style="width:104px">Plan</th>
         </tr></thead>
-        <tbody>${body || `<tr><td class="sp-td" colspan="7" style="text-align:center;color:var(--ink-3);font-style:italic">No class days yet.</td></tr>`}</tbody>
+        <tbody>${body || `<tr><td class="sp-td" colspan="7" style="text-align:center;color:var(--ink-3);font-style:italic">${
+          allDays.length ? `Nothing matches the <b>${esc(LESSON_FILTERS.find(x=>x.k===f).label)}</b> filter — <button class="sp-linkbtn" onclick="setLessonFilter('all')">show all ${allDays.length}</button>` : 'No class days yet.'
+        }</td></tr>`}</tbody>
       </table>
     </div>
   </div>`;
 }
+
 
 // ── UNIT SUMMATIVE ASSESSMENT (backwards design, stage 2) ─────────
 const SUMMATIVE_TYPES = ['Essay','Project','Presentation','Performance Task','Portfolio','Test','Other'];
@@ -7706,7 +8993,7 @@ function pacingTableBlockHTML(u, weeks) {
         Export PDF
       </button>
     </div>
-    <p style="font-size:12px;color:var(--ink-3);margin-bottom:10px;font-style:italic">Click any row to open that day's lesson plan. Edit the Description of Content and Assessment / HW directly in the table — changes sync to the lesson plan.</p>
+    <p style="font-size:12px;color:var(--ink-3);margin-bottom:10px;font-style:italic">Click any row to open that day's lesson plan. Edit the date, Description of Content and Assessment / HW directly in the table — changes sync to the lesson plan. Drag a row by its ⠿ handle to move that day to another slot or week.</p>
     <table class="pace-table">
       <thead>
         <tr>
@@ -7728,18 +9015,16 @@ function pacingTableBlockHTML(u, weeks) {
                 style="border:none;background:none;cursor:pointer;color:rgba(255,255,255,.5);font-size:13px;line-height:1;padding:0;margin-left:2px">×</button>
             </div>`
           ).join('');
-          return `<tr draggable="true" id="pace-row-${wi}-${di}"
+          return `<tr id="pace-row-${wi}-${di}"
             data-wi="${wi}" data-di="${di}"
             style="border-bottom:1px solid var(--rule);transition:opacity .15s"
-            ondragstart="paceDragStart(event,${wi},${di})"
-            ondragend="paceDragEnd(event)"
-            ondragover="paceDragOver(event)"
-            ondrop="paceDrop(event,${wi},${di})"
-            ondragenter="this.style.background='#EEF2FF'"
-            ondragleave="this.style.background=''">
+            ondragover="lessonDragOver(event,'y')"
+            ondrop="lessonDrop(event,${u.id},${wi},${di},'y')">
             <td onclick="event.stopPropagation()" style="padding:0;vertical-align:top;position:relative">
               <div style="padding:6px 12px 4px;border-bottom:1px solid var(--rule);background:#FDF5F0;display:flex;align-items:center;gap:6px">
-                <span title="Drag to reorder" style="cursor:grab;color:var(--ink-3);font-size:12px;flex-shrink:0;user-select:none;padding-right:2px">⠿</span>
+                <span class="row-drag" title="Drag to move this day anywhere in the unit" draggable="true"
+                  ondragstart="lessonDragStart(event,${u.id},${wi},${di})" ondragend="dragEndAll()"
+                  style="flex-shrink:0;padding-right:2px">⠿</span>
                 <div style="flex:1">
                   <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:3px">
                     <button onclick="event.stopPropagation();openPacingDay(${wi},${di})"
@@ -7748,7 +9033,11 @@ function pacingTableBlockHTML(u, weeks) {
                     </button>
                     ${assessBadge}
                   </div>
-                  <div class="pace-date">${d.dateA||d.dateB ? (d.dateA||'')+(d.dateB&&d.dateA?' / ':' ')+(d.dateB||'') : '—'}</div>
+                  <div class="pace-date">
+                    ${lessonDateInputHTML(u.id, wi, di, 'dateA', d.dateA, 'A-block class date')}
+                    ${d.dateB ? lessonDateInputHTML(u.id, wi, di, 'dateB', d.dateB, 'B-block class date') : ''}
+                  </div>
+                  ${dayCalNotes(d).length ? `<div class="pace-notes">${dayCalNotes(d).map(n=>`<span class="smap-note-pill">${esc(n)}</span>`).join(' ')}</div>` : ''}
                 </div>
               </div>
               <div contenteditable="true"
@@ -7807,36 +9096,8 @@ function pacingTableBlockHTML(u, weeks) {
 }
 
 // ── PACING GUIDE DRAG & DROP ──────────────────────────────────────
-let paceDragSrc = null;
-
-function paceDragStart(e, wi, di) {
-  paceDragSrc = {wi, di};
-  e.currentTarget.style.opacity = '.4';
-  e.dataTransfer.effectAllowed = 'move';
-}
-
-function paceDragEnd(e) {
-  e.currentTarget.style.opacity = '';
-  e.currentTarget.style.background = '';
-  paceDragSrc = null;
-  // Clear all row highlights
-  document.querySelectorAll('[id^="pace-row-"]').forEach(r => r.style.background = '');
-}
-
-function paceDragOver(e) {
-  e.preventDefault();
-  e.dataTransfer.dropEffect = 'move';
-}
-
-function paceDrop(e, destWi, destDi) {
-  e.preventDefault();
-  e.currentTarget.style.background = '';
-  if (!paceDragSrc) return;
-  if (paceDragSrc.wi === destWi && paceDragSrc.di === destDi) return;
-  moveDayTo(paceDragSrc.wi, paceDragSrc.di, destWi, destDi);
-  // moveDayTo() already re-renders the unit; currentUnitTab keeps us on the
-  // Pacing Guide tab so the reordered table stays in view.
-}
+// Rows use the shared lesson-move engine (see MOVING LESSONS AND WEEKS):
+// a row really leaves its week and lands where the blue bar shows.
 
 function openPacingDay(wi, di) {
   currentWeek = wi;
@@ -7952,39 +9213,38 @@ function renderUnit() {
   const totalDays = weeks.reduce((n,w) => n + w.days.length, 0);
 
   const weeksHTML = weeks.map((week, wi) => `
-    <div style="margin-bottom:22px">
+    <div class="week-block" data-wi="${wi}"
+      ondragover="weekDragOver(event,${u.id},${wi})" ondrop="weekDrop(event,${u.id},${wi})">
       <div class="week-nav-row">
-        <div style="display:flex;align-items:baseline;gap:8px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="week-drag" draggable="true" title="Drag this whole week — lessons and all — to another spot in the unit"
+            ondragstart="weekDragStart(event,${u.id},${wi})" ondragend="dragEndAll()">⠿</span>
           <span class="wk-label">${esc(week.weekLabel)}</span>
-          ${(() => {
-            if (!state.semesterStart) return '';
-            // Find this week's index across all units up to currentUnit
-            let globalWeekIdx = 0;
-            for (const u2 of UNIT_META) {
-              if (u2.id === currentUnit) { globalWeekIdx += wi; break; }
-              globalWeekIdx += (state.units[u2.id]||[]).length;
-            }
-            const mon = weekMonday(state.semesterStart, globalWeekIdx);
-            const fri = addDays(mon, 4);
-            return `<span style="font-size:11px;color:var(--ink-3)">${fmtShort(mon)} – ${fmtShort(fri)}</span>`;
-          })()}
+          <span class="wk-daterange">${weekDateRangeHTML(week, wi)}</span>
         </div>
-        <div style="display:flex;gap:6px">
+        <div style="display:flex;gap:6px;align-items:center">
+          ${weeks.length>1 ? `<span class="wk-movegrp">
+            <button class="wk-move" onclick="moveWeekBy(${wi},-1)" ${wi===0?'disabled':''} title="Move this week earlier">▲</button>
+            <button class="wk-move" onclick="moveWeekBy(${wi},1)" ${wi===weeks.length-1?'disabled':''} title="Move this week later">▼</button>
+          </span>` : ''}
           <button class="add-week-btn" onclick="addDay(${wi})" title="Add a block to this week">+ Add block</button>
           ${weeks.length>1 ? `<button class="add-week-btn" style="color:#993C1D;border-color:rgba(153,60,29,.3)" onclick="deleteWeek(${wi})" title="Delete this week">Delete week</button>` : ''}
         </div>
       </div>
       <div style="display:flex;align-items:stretch;gap:8px">
-        <div class="days-strip" id="days-strip-${wi}" style="grid-template-columns:repeat(${week.days.length},1fr);flex:1">
-          ${week.days.map((d,di) => dayCardHTML(d, wi, di, c)).join('')}
-        </div>
+        ${week.days.length ? `<div class="days-strip" id="days-strip-${wi}" style="grid-template-columns:repeat(${week.days.length},1fr);flex:1">
+          ${week.days.map((d,di) => dayCardHTML(d, wi, di, c, weeks)).join('')}
+        </div>` : `<div class="week-empty-drop" style="flex:1"
+            ondragover="weekDragOver(event,${u.id},${wi})" ondrop="weekDrop(event,${u.id},${wi})">
+            Empty week — drag a block here, or press ＋
+          </div>`}
         <button onclick="addDay(${wi})" title="Add a block to this week"
           style="flex-shrink:0;width:44px;background:var(--white);border:1px dashed var(--rule-dark);border-radius:var(--radius);cursor:pointer;color:var(--navy);font-size:22px;font-weight:300;display:flex;align-items:center;justify-content:center;transition:all .12s"
           onmouseenter="this.style.background='var(--purple-bg)';this.style.borderColor='var(--navy)'"
           onmouseleave="this.style.background='var(--white)';this.style.borderColor='var(--rule-dark)'">＋</button>
       </div>
       <div class="daily-panel ${openWeekIdx===wi&&openDayIdx!==null?'open':''}" id="daily-panel-${wi}">
-        ${(openWeekIdx===wi && openDayIdx!==null) ? dailyPanelHTML(week.days[openDayIdx], openDayIdx) : ''}
+        ${(openWeekIdx===wi && openDayIdx!==null && week.days[openDayIdx]) ? dailyPanelHTML(week.days[openDayIdx], openDayIdx) : ''}
       </div>
     </div>
   `).join('');
@@ -8007,6 +9267,7 @@ function renderUnit() {
       ${unitOverviewPageHTML(u, weeks, false)}
     </div>
     <div id="utab-content-plan" style="display:${currentUnitTab==='plan'?'block':'none'}">
+      ${lessonFilterBarHTML(weeks.flatMap(w=>w.days||[]), `Unit ${unitNo(u.id)}`)}
       ${weeksHTML}
       <button class="add-week-btn" onclick="addWeek()" style="width:100%;padding:10px;margin-top:6px">+ Add another week</button>
     </div>
@@ -8057,12 +9318,29 @@ function renderUnit() {
     <!-- BODY: classic tabs OR the numbered stage-page layer -->
     ${bodyHTML}
   `;
-  initDayDrag();
   // Restore focus to the chip input the teacher was typing in
   if (focusId) { const el = document.getElementById(focusId); if (el) el.focus(); }
 }
 
-function dayCardHTML(d, wi, di, c) {
+// The dates a week actually covers: the real class dates of its lessons when
+// they're set, otherwise the Mon–Fri block counted off the semester start.
+function weekDateRangeHTML(week, wi){
+  const ds = (week.days||[]).map(d => d.dateA || d.dateB).filter(Boolean).sort();
+  if(ds.length){
+    const txt = ds[0] === ds[ds.length-1] ? fmtMD(ds[0]) : `${fmtMD(ds[0])} – ${fmtMD(ds[ds.length-1])}`;
+    return `<span title="Class dates in this week">${esc(txt)}</span>`;
+  }
+  if(!state.semesterStart) return '';
+  let globalWeekIdx = 0;
+  for (const u2 of UNIT_META) {
+    if (u2.id === currentUnit) { globalWeekIdx += wi; break; }
+    globalWeekIdx += (state.units[u2.id]||[]).length;
+  }
+  const mon = weekMonday(state.semesterStart, globalWeekIdx);
+  return `${fmtShort(mon)} – ${fmtShort(addDays(mon, 4))}`;
+}
+
+function dayCardHTML(d, wi, di, c, weeks) {
   const used = (d.activities||[]).reduce((s,a)=>s+(a.dur||0),0);
   const blockDur = d.blockDuration || 90;
   const planned = dayIsPlanned(d);
@@ -8070,16 +9348,30 @@ function dayCardHTML(d, wi, di, c) {
     ? `A: ${fmtMD(d.dateA)} · B: ${fmtMD(d.dateB)}`
     : d.dateA ? `A: ${fmtMD(d.dateA)}` : d.dateB ? `B: ${fmtMD(d.dateB)}` : '— dates not set';
   const isOpen = openWeekIdx===wi && openDayIdx===di;
-  const status = planned
-    ? `<span class="dc-pill" style="background:#E3F5E8;color:#1A5227">✓ Planned</span>`
-    : `<span class="dc-pill" style="background:#FDF3D6;color:#7A5200">Needs planning</span>`;
-  return `<div class="day-card ${isOpen?'open':''}" draggable="true"
+  const all = weeks || state.units[currentUnit] || [];
+  const isFirst = wi===0 && di===0;
+  const isLast  = wi===all.length-1 && di===(all[all.length-1]?.days?.length||1)-1;
+  const status = d.done
+    ? `<span class="dc-pill" style="background:#1B3A6B;color:#fff">✓ Done</span>`
+    : planned
+      ? `<span class="dc-pill" style="background:#E3F5E8;color:#1A5227">✓ Planned</span>`
+      : `<span class="dc-pill" style="background:#FDF3D6;color:#7A5200">Needs planning</span>`;
+  const dimmed = !lessonMatchesFilter(d);
+  return `<div class="day-card ${isOpen?'open':''}${d.done?' is-done':''}${dimmed?' is-filtered':''}"
     data-wi="${wi}" data-di="${di}"
+    ondragover="lessonDragOver(event,'x')" ondrop="lessonDrop(event,${currentUnit},${wi},${di},'x')"
     onclick="toggleDay(${wi},${di})" style="position:relative;border-top:3px solid ${c.br}">
-    <div class="day-drag-handle" title="Drag to reorder"
+    <div class="day-drag-handle" title="Drag to move this block anywhere in the unit" draggable="true"
+      onclick="event.stopPropagation()"
+      ondragstart="lessonDragStart(event,${currentUnit},${wi},${di})" ondragend="dragEndAll()"
       style="position:absolute;top:7px;left:5px;color:var(--ink-3);cursor:grab;opacity:.5;font-size:11px;line-height:1">⠿⠿</div>
-    <button class="day-del-btn" onclick="event.stopPropagation();deleteDay(${wi},${di})" title="Delete this block"
-      style="position:absolute;top:6px;right:5px;border:none;background:#fee2e2;color:#c0392b;font-size:13px;font-weight:600;cursor:pointer;line-height:1;padding:2px 6px;border-radius:4px;display:none;box-shadow:0 1px 3px rgba(0,0,0,.12)">×</button>
+    <div class="day-nudge" onclick="event.stopPropagation()">
+      <button class="wk-move" ${isFirst?'disabled':''} title="Move this block one slot earlier"
+        onclick="event.stopPropagation();nudgeLesson(${currentUnit},${wi},${di},-1)">‹</button>
+      <button class="wk-move" ${isLast?'disabled':''} title="Move this block one slot later"
+        onclick="event.stopPropagation();nudgeLesson(${currentUnit},${wi},${di},1)">›</button>
+      <button class="day-del-btn" onclick="event.stopPropagation();deleteDay(${wi},${di})" title="Delete this block">×</button>
+    </div>
     <div class="dc-num" style="padding-left:16px">${esc(d.label)}</div>
     ${d.topic ? `<div style="font-size:11.5px;font-weight:600;color:var(--ink);margin-bottom:2px;padding-left:16px">${esc(d.topic)}</div>` : `<div style="font-size:11px;font-style:italic;color:var(--ink-3);margin-bottom:2px;padding-left:16px">Untitled — click to plan</div>`}
     <div style="font-size:10px;color:var(--ink-3);margin-bottom:4px;padding-left:16px">${dateStr}</div>
@@ -8093,27 +9385,73 @@ function dayCardHTML(d, wi, di, c) {
   </div>`;
 }
 
-// ── DRAG & DROP REORDERING (with day relabeling) ─────────────────
-let dragSrc = null;
+// ══ MOVING LESSONS AND WEEKS ═════════════════════════════════════
+// One engine behind every way a lesson moves: dragging a day card, dragging
+// a pacing-guide row, or the "Move to another unit" dialog. A lesson really
+// leaves its week and joins the week it is dropped on, so weeks grow and
+// shrink the way you'd expect instead of days shuffling between fixed slots.
 
-function initDayDrag() {
-  document.querySelectorAll('.day-card').forEach(card => {
-    card.addEventListener('dragstart', e => {
-      dragSrc = { wi: +card.dataset.wi, di: +card.dataset.di };
-      card.style.opacity = '.4';
-      e.dataTransfer.effectAllowed = 'move';
-    });
-    card.addEventListener('dragend', () => { card.style.opacity = ''; dragSrc = null; });
-    card.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; });
-    card.addEventListener('drop', e => {
-      e.preventDefault();
-      if (!dragSrc) return;
-      const targetWi = +card.dataset.wi;
-      const targetDi = +card.dataset.di;
-      if (dragSrc.wi === targetWi && dragSrc.di === targetDi) return;
-      moveDayTo(dragSrc.wi, dragSrc.di, targetWi, targetDi);
-    });
+// Every lesson in the course, in the order it is taught.
+function flatLessons(){
+  const out = [];
+  orderedUnits().forEach(u => (state.units[u.id]||[]).forEach((w, wi) =>
+    (w.days||[]).forEach((d, di) => out.push({ d, uid:u.id, wi, di }))));
+  return out;
+}
+
+// Where a lesson object sits right now, or null once it is gone.
+function findLessonPos(day){
+  const hit = flatLessons().find(x => x.d === day);
+  return hit ? { uid:hit.uid, wi:hit.wi, di:hit.di } : null;
+}
+
+// ── DATES BELONG TO THE SLOT, NOT THE LESSON ─────────────────────
+// The class calendar is fixed: the 4th lesson of the year is taught on the
+// 4th class day, whichever lesson that turns out to be. So before a move we
+// snapshot the dates in teaching order and hand them back out in that same
+// order afterwards. The lesson you dragged takes the date of the spot it
+// landed on, and every lesson it pushed along takes its new spot's date.
+// Turn it off (More ▸ dates travel with the lesson) to keep the old behavior.
+function keepDateSlots(){ return !(state && state.keepDateSlots === false); }
+function captureDateSlots(){
+  if(!keepDateSlots()) return null;
+  return flatLessons().map(x => ({
+    dateA: x.d.dateA || '',
+    dateB: x.d.dateB || '',
+    calNotes: Array.isArray(x.d.calNotes) ? x.d.calNotes.slice() : null,
+  }));
+}
+function applyDateSlots(slots){
+  if(!slots) return;
+  flatLessons().forEach((x, k) => {
+    const s = slots[k]; if(!s) return;
+    x.d.dateA = s.dateA; x.d.dateB = s.dateB;
+    if(s.calNotes) x.d.calNotes = s.calNotes; else delete x.d.calNotes;
   });
+}
+function toggleKeepDateSlots(){
+  state.keepDateSlots = keepDateSlots() ? false : true;
+  saveState();
+  toast(keepDateSlots()
+    ? 'Dates stay with the calendar slot — a moved lesson takes its new date ✓'
+    : 'Dates now travel with the lesson when you move it');
+  refreshAfterMove();
+}
+
+// Lesson-linked to-dos are stored as {uid, wi, di}, which goes stale the
+// moment anything moves. Snapshot them against the day object itself, then
+// rewrite the pointers once the move is done.
+function captureTodoLinks(){
+  const out = [];
+  (state.todos||[]).forEach(t => {
+    if(!t.lesson) return;
+    const d = (state.units[t.lesson.uid]||[])[t.lesson.wi]?.days?.[t.lesson.di];
+    if(d) out.push({ t, d });
+  });
+  return out;
+}
+function applyTodoLinks(links){
+  (links||[]).forEach(({t, d}) => { t.lesson = findLessonPos(d); });
 }
 
 // Relabel every day in a unit "Day 1, Day 2, …" in order.
@@ -8121,8 +9459,248 @@ function relabelUnitDays(uid){
   let n = 1;
   (state.units[uid]||[]).forEach(w => (w.days||[]).forEach(d => { d.label = `Day ${n}`; n++; }));
 }
+function relabelUnitWeeks(uid){
+  (state.units[uid]||[]).forEach((w, i) => { w.weekLabel = `Week ${i+1}`; });
+}
 
-// ── MOVE A LESSON TO ANOTHER UNIT ─────────────────────────────────
+// Move one lesson. src/dest are {uid, wi, di}; dest.di may be null to drop it
+// at the end of that week. `after` inserts below/right of the destination
+// lesson. Returns the lesson's new position, or null if nothing moved.
+function moveLesson(src, dest, after){
+  const sWeeks = state.units[src.uid];
+  const sWeek  = sWeeks && sWeeks[src.wi];
+  if(!sWeek || !sWeek.days[src.di]) return null;
+  if(!state.units[dest.uid] || !state.units[dest.uid].length)
+    state.units[dest.uid] = [{ weekLabel:'Week 1', days:[] }];
+  const dWeeks = state.units[dest.uid];
+  const dWeek  = dWeeks[Math.max(0, Math.min(dest.wi|0, dWeeks.length-1))];
+
+  let at = (dest.di === null || dest.di === undefined)
+    ? dWeek.days.length
+    : dest.di + (after ? 1 : 0);
+  if(sWeek === dWeek && (at === src.di || at === src.di + 1)) return null;  // dropped where it already is
+
+  const slots = captureDateSlots();
+  const links = captureTodoLinks();
+  const [day] = sWeek.days.splice(src.di, 1);
+  if(sWeek === dWeek && src.di < at) at--;          // the splice shifted the target left
+  dWeek.days.splice(Math.max(0, Math.min(at, dWeek.days.length)), 0, day);
+
+  relabelUnitDays(src.uid); relabelUnitWeeks(src.uid);
+  if(dest.uid !== src.uid){ relabelUnitDays(dest.uid); relabelUnitWeeks(dest.uid); }
+  applyDateSlots(slots);
+  applyTodoLinks(links);
+  saveState();
+  reflowDatesAuto();
+  invalidateMapIndex();
+  return findLessonPos(day);
+}
+
+// Move a whole week — every lesson in it — to another position in its unit.
+function moveWeekTo(uid, from, to){
+  const weeks = state.units[uid];
+  if(!weeks || from < 0 || from >= weeks.length) return false;
+  to = Math.max(0, Math.min(to, weeks.length-1));
+  if(from === to) return false;
+  const slots = captureDateSlots();
+  const links = captureTodoLinks();
+  const [w] = weeks.splice(from, 1);
+  weeks.splice(to, 0, w);
+  relabelUnitWeeks(uid); relabelUnitDays(uid);
+  applyDateSlots(slots);
+  applyTodoLinks(links);
+  saveState();
+  reflowDatesAuto();
+  invalidateMapIndex();
+  return true;
+}
+
+// Keep whichever lesson is expanded expanded, wherever it ends up.
+function withOpenDayKept(fn){
+  const open = (currentUnit != null && openWeekIdx !== null && openDayIdx !== null)
+    ? (state.units[currentUnit]||[])[openWeekIdx]?.days?.[openDayIdx] : null;
+  const result = fn();
+  if(open){
+    const pos = findLessonPos(open);
+    if(pos && pos.uid === currentUnit){ openWeekIdx = pos.wi; openDayIdx = pos.di; currentWeek = pos.wi; }
+    else { openWeekIdx = null; openDayIdx = null; }
+  }
+  return result;
+}
+
+// Redraw whichever page the teacher is looking at after something moved.
+function refreshAfterMove(){
+  if(dayModalOpen()) closeDayModal();
+  const on = id => document.getElementById(id)?.classList.contains('active');
+  if(on('view-pacing')){ document.getElementById('pacing-wrap').innerHTML = simplePacingHTML(); return; }
+  if(on('view-assess')){ document.getElementById('assess-wrap').innerHTML = assessmentCalendarHTML(); return; }
+  if(on('view-week')){ renderWeekPlan(); return; }
+  if(on('view-course')){ renderCourse(); return; }
+  if(on('view-prep')){ renderPrep(); return; }
+  if(on('view-dashboard')){ renderDashboard(); return; }
+  renderUnit();
+}
+
+// One line telling the teacher what just happened to the dates.
+function moveToastText(src, dest, pos){
+  if(!pos) return '';
+  const where = dest.uid === src.uid
+    ? `${(state.units[pos.uid]||[])[pos.wi]?.weekLabel || 'this week'}`
+    : `Unit ${unitNo(dest.uid)}`;
+  const d = (state.units[pos.uid]||[])[pos.wi]?.days?.[pos.di];
+  const dated = keepDateSlots() && d && d.dateA ? ` · now ${fmtMD(d.dateA)}` : '';
+  return `Moved to ${where}${dated} ✓`;
+}
+
+function finishLessonMove(src, dest, after){
+  let pos = null;
+  withOpenDayKept(() => { pos = moveLesson(src, dest, after); });
+  if(!pos) return;
+  const msg = moveToastText(src, dest, pos);
+  refreshAfterMove();
+  if(msg) toast(msg);
+}
+
+function dropWeekAt(uid, from, wi, after){
+  let to = wi + (after ? 1 : 0);
+  if(from < to) to--;
+  if(to === from) return;
+  let ok = false;
+  withOpenDayKept(() => { ok = moveWeekTo(uid, from, to); });
+  if(!ok) return;
+  refreshAfterMove();
+  toast(`Week moved to position ${to+1}${keepDateSlots()?' — dates re-dated to their new slots':''} ✓`);
+}
+
+function moveWeekBy(wi, delta){
+  const weeks = state.units[currentUnit] || [];
+  const to = wi + delta;
+  if(to < 0 || to >= weeks.length) return;
+  let ok = false;
+  withOpenDayKept(() => { ok = moveWeekTo(currentUnit, wi, to); });
+  if(!ok) return;
+  renderUnit();
+  toast(`Week moved ${delta < 0 ? 'up' : 'down'} ✓`);
+}
+
+// Nudge a single lesson one slot earlier/later — the keyboard-friendly
+// equivalent of dragging it, and it hops week boundaries on its own.
+function nudgeLesson(uid, wi, di, delta){
+  const weeks = state.units[uid] || [];
+  const flat = [];
+  weeks.forEach((w, i) => (w.days||[]).forEach((d, j) => flat.push({wi:i, di:j})));
+  const at = flat.findIndex(p => p.wi === wi && p.di === di);
+  const to = at + delta;
+  if(at < 0 || to < 0 || to >= flat.length) return;
+  finishLessonMove({uid, wi, di}, {uid, wi:flat[to].wi, di:flat[to].di}, delta > 0);
+}
+
+// ── DRAG LAYER ───────────────────────────────────────────────────
+// What is being dragged right now: one lesson, or a whole week.
+let dragItem = null;
+
+function clearDropMarks(){
+  document.querySelectorAll('.drop-before,.drop-after,.drop-into')
+    .forEach(el => el.classList.remove('drop-before','drop-after','drop-into'));
+}
+function dragEndAll(){
+  dragItem = null;
+  clearDropMarks();
+  document.querySelectorAll('.is-dragging').forEach(el => el.classList.remove('is-dragging'));
+  document.body.classList.remove('dragging-lesson','dragging-week');
+}
+// True when the pointer is past the middle of the element — i.e. drop after it.
+function pastMidpoint(ev, el, axis){
+  const r = el.getBoundingClientRect();
+  return axis === 'y' ? (ev.clientY - r.top) > r.height/2 : (ev.clientX - r.left) > r.width/2;
+}
+
+function lessonDragStart(ev, uid, wi, di){
+  ev.stopPropagation();
+  dragItem = { kind:'lesson', uid, wi, di };
+  ev.dataTransfer.effectAllowed = 'move';
+  try{ ev.dataTransfer.setData('text/plain', `lesson:${uid}:${wi}:${di}`); }catch(e){}
+  const box = ev.currentTarget.closest('.day-card, tr') || ev.currentTarget;
+  box.classList.add('is-dragging');
+  document.body.classList.add('dragging-lesson');
+}
+function weekDragStart(ev, uid, wi){
+  ev.stopPropagation();
+  dragItem = { kind:'week', uid, wi };
+  ev.dataTransfer.effectAllowed = 'move';
+  try{ ev.dataTransfer.setData('text/plain', `week:${uid}:${wi}`); }catch(e){}
+  const blk = ev.currentTarget.closest('.week-block');
+  if(blk) blk.classList.add('is-dragging');
+  document.body.classList.add('dragging-week');
+}
+
+// A lesson slot (day card or pacing row) accepting another lesson.
+function lessonDragOver(ev, axis){
+  if(!dragItem || dragItem.kind !== 'lesson') return;
+  ev.preventDefault(); ev.stopPropagation();
+  ev.dataTransfer.dropEffect = 'move';
+  clearDropMarks();
+  ev.currentTarget.classList.add(pastMidpoint(ev, ev.currentTarget, axis) ? 'drop-after' : 'drop-before');
+}
+function lessonDrop(ev, uid, wi, di, axis){
+  if(!dragItem || dragItem.kind !== 'lesson') return;
+  ev.preventDefault(); ev.stopPropagation();
+  const after = pastMidpoint(ev, ev.currentTarget, axis);
+  const src = dragItem;
+  dragEndAll();
+  finishLessonMove(src, { uid, wi, di }, after);
+}
+
+// A week block: reorders weeks, and catches lessons dropped on empty space.
+function weekDragOver(ev, uid, wi){
+  if(!dragItem) return;
+  if(dragItem.kind === 'week' && dragItem.uid !== uid) return;
+  ev.preventDefault();
+  ev.dataTransfer.dropEffect = 'move';
+  clearDropMarks();
+  if(dragItem.kind === 'week'){
+    ev.currentTarget.classList.add(pastMidpoint(ev, ev.currentTarget, 'y') ? 'drop-after' : 'drop-before');
+  } else {
+    ev.currentTarget.classList.add('drop-into');
+  }
+}
+function weekDrop(ev, uid, wi){
+  if(!dragItem) return;
+  ev.preventDefault(); ev.stopPropagation();
+  const item = dragItem;
+  const after = pastMidpoint(ev, ev.currentTarget, 'y');
+  dragEndAll();
+  if(item.kind === 'week'){
+    if(item.uid !== uid) return;
+    dropWeekAt(uid, item.wi, wi, after);
+  } else {
+    finishLessonMove(item, { uid, wi, di:null }, false);   // append to this week
+  }
+}
+// The band down the left of the whole-course pacing guide: drop a lesson on
+// a unit and it joins the end of that unit.
+function unitDragOver(ev, uid){
+  if(!dragItem || dragItem.kind !== 'lesson') return;
+  ev.preventDefault(); ev.stopPropagation();
+  ev.dataTransfer.dropEffect = 'move';
+  clearDropMarks();
+  ev.currentTarget.classList.add('drop-into');
+}
+function unitDrop(ev, uid){
+  if(!dragItem || dragItem.kind !== 'lesson') return;
+  ev.preventDefault(); ev.stopPropagation();
+  const item = dragItem;
+  dragEndAll();
+  const weeks = state.units[uid] || [];
+  finishLessonMove(item, { uid, wi:Math.max(0, weeks.length-1), di:null }, false);
+}
+
+// Legacy entry point kept for anything still calling it by (wi, di).
+function moveDayTo(srcWi, srcDi, destWi, destDi){
+  finishLessonMove({uid:currentUnit, wi:srcWi, di:srcDi}, {uid:currentUnit, wi:destWi, di:destDi}, false);
+}
+
+// ── MOVE A LESSON TO ANOTHER UNIT (dialog) ────────────────────────
 let _moveLesson = null;
 function openMoveLesson(i){
   _moveLesson = { uid: currentUnit, wi: currentWeek, di: i };
@@ -8132,9 +9710,8 @@ function openMoveLesson(i){
   document.getElementById('moveles-what').innerHTML =
     `Moving <b>${esc(d.label)}</b>${strip(d.topic)?` — ${esc(strip(d.topic))}`:''} from <b>Unit ${unitNo(currentUnit)}: ${u?esc(u.name):''}</b>`;
   const sel = document.getElementById('moveles-unit');
-  sel.innerHTML = orderedUnits().filter(x=>x.id!==currentUnit)
-    .map(x=>`<option value="${x.id}">Unit ${unitNo(x.id)} — ${esc(x.name)}</option>`).join('');
-  if(!sel.options.length){ toast('No other unit to move to — add another unit first'); _moveLesson=null; return; }
+  sel.innerHTML = orderedUnits()
+    .map(x=>`<option value="${x.id}"${x.id===currentUnit?' selected':''}>Unit ${unitNo(x.id)} — ${esc(x.name)}${x.id===currentUnit?' (this unit)':''}</option>`).join('');
   moveLessonUnitChanged();
   document.getElementById('movelesson-overlay').style.display='block';
 }
@@ -8144,90 +9721,21 @@ function moveLessonUnitChanged(){
   const wsel = document.getElementById('moveles-week');
   wsel.innerHTML = weeks.map((w,wi)=>`<option value="${wi}">${esc(w.weekLabel)} (${(w.days||[]).length} day${(w.days||[]).length===1?'':'s'})</option>`).join('')
     + `<option value="new">➕ New week at the end</option>`;
-  // default to the last existing week
   if(weeks.length) wsel.value = String(weeks.length-1);
 }
 function closeMoveLesson(){ document.getElementById('movelesson-overlay').style.display='none'; _moveLesson=null; }
 function moveLessonConfirm(){
   if(!_moveLesson) return;
-  const { uid:srcUid, wi:srcWi, di:srcDi } = _moveLesson;
+  const src = _moveLesson;
   const destUid = +document.getElementById('moveles-unit').value;
   const weekVal = document.getElementById('moveles-week').value;
-  const src = state.units[srcUid] && state.units[srcUid][srcWi];
-  if(!src || !src.days[srcDi]){ closeMoveLesson(); return; }
-  // detach any lesson-linked to-dos so they don't point at a stale location
-  (state.todos||[]).forEach(t=>{ if(t.lesson && t.lesson.uid===srcUid && t.lesson.wi===srcWi && t.lesson.di===srcDi) t.lesson=null; });
-  const [day] = src.days.splice(srcDi, 1);
   if(!state.units[destUid]) state.units[destUid] = [];
-  let destWeek;
-  if(weekVal==='new'){
-    destWeek = { weekLabel: `Week ${state.units[destUid].length+1}`, days: [] };
-    state.units[destUid].push(destWeek);
-  } else {
-    destWeek = state.units[destUid][+weekVal] || state.units[destUid][state.units[destUid].length-1];
-    if(!destWeek){ destWeek = { weekLabel:'Week 1', days:[] }; state.units[destUid].push(destWeek); }
+  if(weekVal === 'new'){
+    state.units[destUid].push({ weekLabel:`Week ${state.units[destUid].length+1}`, days:[] });
   }
-  destWeek.days.push(day);
-  relabelUnitDays(srcUid);
-  relabelUnitDays(destUid);
-  // clear open state if the moved day was open
-  if(currentUnit===srcUid && openWeekIdx===srcWi && openDayIdx===srcDi){ openWeekIdx=null; openDayIdx=null; }
-  saveState();
-  reflowDatesAuto();
+  const destWi = weekVal === 'new' ? state.units[destUid].length-1 : +weekVal;
   closeMoveLesson();
-  const du = UNIT_META.find(m=>m.id===destUid);
-  if(dayModalOpen()) closeDayModal();
-  if(currentUnit===srcUid) renderUnit();
-  else if(document.getElementById('view-week')?.classList.contains('active')) renderWeekPlan();
-  toast(`Lesson moved to Unit ${unitNo(destUid)}: ${du?du.name:''} ✓`);
-}
-
-// Move a day from (srcWi, srcDi) to the slot at (destWi, destDi), shifting
-// everything in between, and relabel every day's "Day N" label to match
-// its new continuous position within the unit. Each week keeps its
-// original number of slots (block-per-week pacing is preserved) — only
-// which day occupies which slot changes.
-function moveDayTo(srcWi, srcDi, destWi, destDi) {
-  const weeks = state.units[currentUnit];
-
-  // Record how many slots each week had before the move
-  const counts = weeks.map(w => w.days.length);
-
-  // Flatten all days into one ordered array
-  const flat = [];
-  weeks.forEach(w => w.days.forEach(d => flat.push(d)));
-
-  // Compute flat indices for source and destination
-  const flatIndex = (wi, di) => counts.slice(0, wi).reduce((a,b)=>a+b, 0) + di;
-  const srcFlatIdx  = flatIndex(srcWi, srcDi);
-  const destFlatIdx = flatIndex(destWi, destDi);
-
-  // Remove the moved day, then reinsert it at the destination position
-  const [moved] = flat.splice(srcFlatIdx, 1);
-  flat.splice(destFlatIdx, 0, moved);
-
-  // Refill each week's days array using the original slot counts
-  let ptr = 0;
-  weeks.forEach((w, wi) => {
-    w.days = flat.slice(ptr, ptr + counts[wi]);
-    ptr += counts[wi];
-  });
-
-  // Renumber all days continuously as "Day 1", "Day 2", ... in new order
-  let dayNum = 1;
-  weeks.forEach(w => w.days.forEach(d => { d.label = `Day ${dayNum}`; dayNum++; }));
-
-  // Update open day tracking to follow the moved day to its new location
-  let newWi = null, newDi = null;
-  weeks.forEach((w, wi) => w.days.forEach((d, di) => { if (d === moved) { newWi = wi; newDi = di; } }));
-  if (openWeekIdx === srcWi && openDayIdx === srcDi) {
-    openWeekIdx = newWi; openDayIdx = newDi;
-  }
-
-  saveState();
-  reflowDatesAuto();
-  renderUnit();
-  toast('Day reordered');
+  finishLessonMove(src, { uid:destUid, wi:destWi, di:null }, false);
 }
 
 // Which activity row is currently expanded for editing ("i:ai"), or null.
@@ -8238,6 +9746,78 @@ function editAct(i, ai){
   setTimeout(()=>{ const el=document.getElementById(`actinp-${i}-${ai}`); if(el){ el.focus(); el.select&&el.select(); } }, 30);
 }
 function collapseAct(i){ openActEdit = null; rerenderDay(i); }
+
+// ── "DONE": THE FINISHED LESSON, AS IT LOOKS IN THE WEEK VIEW ────
+// Tick Done and the planner stops being a form and becomes the read-only
+// weekly card — the same table, the same cells, nothing editable. Untick it
+// and the full editor comes straight back; nothing about the lesson changes.
+function toggleLessonDone(i){
+  const d = getDay(i);
+  d.done = !d.done;
+  saveState();
+  rerenderDay(i);
+  toast(d.done ? 'Lesson marked done — shown as it will look in the Week View ✓'
+               : 'Done unticked — the lesson is editable again');
+}
+
+function lessonDoneViewHTML(d, i){
+  const u = UNIT_META.find(m=>m.id===currentUnit);
+  const c = getUC(currentUnit);
+  const tag = wkStrip(d.blockTag) || 'A/B';
+  const topic = wkStrip(d.topic);
+  const dates = [d.dateA?`A: ${fmtMD(d.dateA)}`:'', d.dateB?`B: ${fmtMD(d.dateB)}`:''].filter(Boolean).join(' · ');
+  const notes = dayCalNotes(d);
+  return `
+  <div class="belen-print-header">
+    <svg viewBox="0 0 36 44" fill="none" width="40" height="48"><path d="M18 2L3 8v14c0 10 7 18 15 20 8-2 15-10 15-20V8L18 2z" fill="#C9991A"/><path d="M18 5L5 10.5v11.5c0 8.5 5.5 15 13 17 7.5-2 13-8.5 13-17V10.5L18 5z" fill="#1B3A6B"/><text x="18" y="26" text-anchor="middle" font-family="serif" font-size="13" font-weight="bold" fill="#C9991A">BJ</text></svg>
+    <div><div style="font-size:14px;font-weight:600;color:var(--navy)">Belen Jesuit Preparatory School</div>
+    <div class="print-meta"><span>${esc(state.teacher||'Eric Lastres, SJ')} · ${esc(getCourse().name)}</span><span>Unit ${unitNo(currentUnit)}: ${u?esc(u.name):''} · ${esc(d.label)}</span></div></div>
+  </div>
+
+  <div class="dl-donebar no-print">
+    <label class="dl-donetoggle on" title="Untick to edit this lesson again">
+      <input type="checkbox" checked onchange="toggleLessonDone(${i})">
+      <span>Done</span>
+    </label>
+    <span class="dl-donenote">Finished — shown exactly as it appears in the Weekly View. Untick <b>Done</b> to edit it again.</span>
+    <span class="dl-donebtns">
+      <button class="dl-donebtn" onclick="exportDailyAgenda(${i})">📋 Student agenda</button>
+      <button class="dl-donebtn" onclick="exportBlackbaudAgenda(${i})">🗂️ Blackbaud</button>
+    </span>
+  </div>
+
+  ${keyLegendHTML()}
+
+  <div class="wk-scroll">
+  <table class="wk-table">
+    <thead><tr>
+      <th class="wk-corner">${esc(d.label)}<br><span style="font-weight:400;font-size:10px;color:var(--ink-3)">${dates?esc(dates):'no dates set'}</span></th>
+      <th class="wk-dayhead" style="border-top:4px solid ${c.br}">
+        <div class="wk-dh-row"><span class="wk-dh-tag">${esc(tag)}</span></div>
+        <div class="wk-dh-unit" style="color:${c.br}">Unit ${unitNo(currentUnit)} · ${u?esc(u.name):''}</div>
+        ${topic?`<div class="wk-dh-topic">${esc(topic)}</div>`:`<div class="wk-dh-topic wk-dh-none">Untitled lesson</div>`}
+        ${wkStrip(d.eq)?`<div class="wk-dh-dates">${esc(wkStrip(d.eq))}</div>`:''}
+        ${notes.length?`<div class="wk-dh-dates">${notes.map(n=>`<span class="smap-note-pill">${esc(n)}</span>`).join(' ')}</div>`:''}
+      </th>
+    </tr></thead>
+    <tbody>
+      <tr><td class="wk-lbl">Goals<small>What students should learn</small></td>${wkGoalsCell(d)}</tr>
+      <tr><td class="wk-lbl">Q.O.D.<small>Question of the Day</small></td>${wkQodCell(d)}</tr>
+      <tr><td class="wk-lbl">Learning Targets<small>&ldquo;I can…&rdquo; statements</small></td>${wkTgtCell(d)}</tr>
+      <tr><td class="wk-lbl">Learning Activities / Tasks<small>with IPP stages</small></td>${wkActCell(d)}</tr>
+      <tr><td class="wk-lbl">Homework</td>${wkHwCell(d)}</tr>
+      <tr class="wk-bannerrow"><td class="wk-lbl-blank"></td><td class="wk-banner">Student Resources / Links / Tech Tools</td></tr>
+      <tr><td class="wk-lbl">Resources</td>${wkResCell(d)}</tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="dl-todos no-print">
+    <div class="dl-todos-head">✓ Lesson prep to-dos <span class="dl-todos-note">syncs to your dashboard · not printed</span></div>
+    ${lessonTodosHTML(i)}
+  </div>
+  `;
+}
 
 function dailyPanelHTML(d, i) {
   const u = UNIT_META.find(m=>m.id===currentUnit);
@@ -8254,6 +9834,9 @@ function dailyPanelHTML(d, i) {
     const parsed = parseActText(d.activitiesText);
     if(parsed.length){ d.activities = parsed; delete d.activitiesText; saveState(); }
   }
+
+  // Done means finished: show the read-only weekly card instead of the form.
+  if(d.done) return lessonDoneViewHTML(d, i);
 
   // Activities keep the teacher's own order. Numbering skips break dividers;
   // each break records the teaching minutes that came before it.
@@ -8333,11 +9916,16 @@ function dailyPanelHTML(d, i) {
   <div class="dl-head">
     <div class="dl-head-top">
       <div class="dl-title">${esc(d.label)} · Unit ${unitNo(currentUnit)}${u?` — ${esc(u.name)}`:''}</div>
+      <label class="dl-donetoggle no-print" title="Mark this lesson finished — it locks and shows as it will in the Weekly View">
+        <input type="checkbox" onchange="toggleLessonDone(${i})">
+        <span>Done</span>
+      </label>
       <details class="dl-menu">
         <summary title="More options">⋯</summary>
         <div class="dl-menu-body">
           <button onclick="this.closest('details').removeAttribute('open');openMoveLesson(${i})">⇄ Move to another unit</button>
           <button onclick="this.closest('details').removeAttribute('open');openBrainstorm(${i})">💡 Ideas / brainstorm${strip(d.brainstorm)?' •':''}</button>
+          <button onclick="this.closest('details').removeAttribute('open');openDebrief(${i})">🪞 Post-class reflection${hasDebrief(d)?' •':''}</button>
           <button onclick="this.closest('details').removeAttribute('open');exportDailyAgenda(${i})">📋 Copy student agenda</button>
           <button onclick="this.closest('details').removeAttribute('open');exportBlackbaudAgenda(${i})">🗂️ Copy for Blackbaud</button>
         </div>
@@ -8349,6 +9937,7 @@ function dailyPanelHTML(d, i) {
       ${calImported()
         ? `<button class="dl-calbtn" onclick="fillDatesFromHere(${i})" title="Give this lesson its class date, then flow every later lesson onto the next class days (leaves earlier days alone)">↓ Fill dates from here</button>`
         : `<button class="dl-calbtn" onclick="openCalendarImport()" title="Import your school calendar to auto-fill class dates">📅 Import calendar</button>`}
+      <button class="dl-reflectbtn${hasDebrief(d)?' done':''}" onclick="openDebrief(${i})" title="Reflect on how this class went — for next time and next year">${hasDebrief(d) ? (debriefRatingMeta(d.debriefRating)?debriefRatingMeta(d.debriefRating).emoji:'🪞') + ' Reflection ✓' : '🪞 Reflect on class'}</button>
     </div>
     <input class="dl-topic" value="${esc(strip(d.topic))}" placeholder="Lesson topic / title…" onchange="updateDay(${i},'topic',this.value);updateDayCard(${i})">
     <input class="dl-eq" value="${esc(strip(d.eq))}" placeholder="Essential question (optional)…" onchange="updateDay(${i},'eq',this.value)">
@@ -8396,13 +9985,20 @@ function dailyPanelHTML(d, i) {
     <input id="lestodo-${i}" class="dl-todos-add" placeholder="+ Add a prep task for this lesson, press Enter" onkeydown="if(event.key==='Enter'){event.preventDefault();addLessonTodo(${i},this.value)}">
   </div>
 
-  <!-- Bloom's taxonomy quick reference -->
+  <!-- Quick references: Bloom's verbs, and the IPP at a glance -->
   <div class="dl-blooms">
     <button class="dl-blooms-head" onclick="toggleBloomsRef('blooms-body-${i}')">
       <span id="blooms-chev-${i}" style="display:inline-block;transition:transform .15s">▸</span>
       🌸 Bloom's Taxonomy — verbs &amp; teaching strategies (reference)
     </button>
     <div id="blooms-body-${i}" class="dl-blooms-body" style="display:none">${bloomsReferenceHTML()}</div>
+  </div>
+  <div class="dl-blooms">
+    <button class="dl-blooms-head" onclick="toggleRefCard('ipp-body-${i}','ipp-chev-${i}')">
+      <span id="ipp-chev-${i}" style="display:inline-block;transition:transform .15s">▸</span>
+      ✝️ Quick IPP at a glance — activities &amp; the questions behind each stage
+    </button>
+    <div id="ipp-body-${i}" class="dl-blooms-body" style="display:none">${ippReferenceHTML()}</div>
   </div>
   `;
 }
@@ -8665,6 +10261,83 @@ function bbAgendaHTML(d){
 let _bbAgenda = { html:'', plain:'' };
 function exportBlackbaudAgenda(i){
   _bbAgenda = bbAgendaHTML(getDay(i));
+  const t=document.getElementById('bbhtml-title'); if(t) t.textContent='Daily Agenda — styled for Blackbaud';
+  document.getElementById('bbhtml-preview').innerHTML = _bbAgenda.html;
+  document.getElementById('bbhtml-overlay').style.display='block';
+}
+
+// ── RUNNING CLASS LOG for the Blackbaud Bulletin Board ───────────────
+// One block, newest class on top — each entry shows Date · Topic · Objective ·
+// Agenda ("what we did"), so students can scroll back through the whole course.
+// Built from the planner; paste (or re-paste) it whenever you want it current.
+function bbLog(){
+  const co = getCourse();
+  const strip = s => String(s||'').replace(/<[^>]*>/g,' ').replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim();
+  const today = isoToday();
+  const cal = loadCalendar();
+  // One entry per lesson (A/B collapsed), only classes already taught (dated ≤ today).
+  const byLesson = {};
+  collectClasses().forEach(c=>{
+    if(!c.date || c.date > today) return;
+    const k = `${c.uid}-${c.wi}-${c.di}`;
+    if(!byLesson[k]) byLesson[k] = { d:c.d, u:c.u, uid:c.uid, dates:[] };
+    byLesson[k].dates.push({block:c.block, date:c.date});
+  });
+  let items = Object.values(byLesson).filter(L=> strip(L.d.topic) || actsLines(L.d).length || strip(L.d.label));
+  const lastDate = L => L.dates.map(x=>x.date).sort().slice(-1)[0] || '';
+  items.sort((a,b)=> lastDate(b).localeCompare(lastDate(a)));   // newest first
+
+  const C = { navy:'#1B2A4A', blue:'#1D6FBF', accent:'#1B6EC2', ink:'#2A2E33',
+              mut:'#6B7075', bd:'#DDE1E7', chipBg:'#EAF1FB' };
+  const entry = L => {
+    const d = L.d;
+    const dsorted = L.dates.slice().sort((a,b)=>a.date.localeCompare(b.date));
+    const dateStr = dsorted.map(x=>{
+      const nice = isoParse(x.date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+      const ab = (cal && cal.abByDate && cal.abByDate[x.date]) ? ` (${cal.abByDate[x.date]})` : '';
+      return `${nice}${ab}`;
+    }).join(' · ');
+    const topic = strip(d.topic) || strip(d.label) || 'Class';
+    let ican = strip(targetsHTML(d)).replace(/^I can\s*/i,''); if(!ican) ican = strip(goalsHTML(d));
+    const acts = actsLines(d);
+    const agenda = acts.length
+      ? `<ol style="margin:4px 0 0;padding-left:20px;color:${C.ink};font-size:13px;line-height:1.5">${acts.map(t=>`<li style="margin:1px 0">${esc(t)}</li>`).join('')}</ol>`
+      : `<div style="color:${C.mut};font-size:13px">—</div>`;
+    return `<div style="border:1px solid ${C.bd};border-left:4px solid ${C.blue};border-radius:8px;padding:11px 14px;margin:0 0 10px">`
+      +`<div style="font-size:11px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:${C.accent}">📅 ${esc(dateStr)} · Unit ${unitNo(L.uid)}${d.label?` · ${esc(strip(d.label))}`:''}</div>`
+      +`<div style="font-size:17px;font-weight:700;color:${C.navy};margin:2px 0 6px">${esc(topic)}</div>`
+      +(ican?`<div style="font-size:13px;color:${C.ink};margin:0 0 4px"><b style="color:${C.accent}">🎯 I can…</b> ${esc(ican)}</div>`:'')
+      +`<div style="font-size:13px;color:${C.ink}"><b style="color:${C.accent}">📝 What we did</b>${agenda}</div>`
+      +`</div>`;
+  };
+
+  const body = items.length ? items.map(entry).join('')
+    : `<div style="color:${C.mut};font-size:14px;padding:6px 2px">No classes to show yet — entries appear here once a lesson has a class date on or before today.</div>`;
+
+  const html =
+`<div style="font-family:'Helvetica Neue',Arial,sans-serif;max-width:680px">`
++`<div style="background:${C.navy};background:linear-gradient(100deg,${C.navy},${C.blue});padding:13px 16px;border-radius:10px;margin-bottom:12px">`
++`<div style="font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#C2D6F0">📚 ${esc(co.name)} · Class Log</div>`
++`<div style="font-size:19px;font-weight:700;color:#fff;margin-top:2px">What We Did — Day by Day</div>`
++`<div style="font-size:12px;color:#C2D6F0;margin-top:3px">Newest on top. Missed a class? Catch up here.</div>`
++`</div>${body}</div>`;
+
+  // Plain-text fallback
+  const pl = [`${co.name} — Class Log (what we did, newest first)`,''];
+  items.forEach(L=>{
+    const d=L.d; const ds=L.dates.slice().sort((a,b)=>a.date.localeCompare(b.date)).map(x=>isoParse(x.date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})).join(' · ');
+    let ican=strip(targetsHTML(d)).replace(/^I can\s*/i,''); if(!ican) ican=strip(goalsHTML(d));
+    pl.push(`📅 ${ds} · Unit ${unitNo(L.uid)}${d.label?` · ${strip(d.label)}`:''}`);
+    pl.push(`   ${strip(d.topic)||strip(d.label)||'Class'}`);
+    if(ican) pl.push(`   🎯 I can… ${ican}`);
+    const acts=actsLines(d); if(acts.length){ pl.push('   📝 What we did:'); acts.forEach((t,n)=>pl.push(`      ${n+1}. ${t}`)); }
+    pl.push('');
+  });
+  return { html, plain: pl.join('\n'), count: items.length };
+}
+function exportBlackbaudLog(){
+  _bbAgenda = bbLog();
+  const t=document.getElementById('bbhtml-title'); if(t) t.textContent='Class Log — styled for Blackbaud';
   document.getElementById('bbhtml-preview').innerHTML = _bbAgenda.html;
   document.getElementById('bbhtml-overlay').style.display='block';
 }
@@ -8716,6 +10389,52 @@ function openBrainstorm(i){
 function closeBrainstorm(){
   document.getElementById('brainstorm-overlay').style.display='none';
   if(_brainstormI!==null){ rerenderDay(_brainstormI); _brainstormI=null; }
+}
+
+// ── Post-class reflection (per lesson; teacher-only, never exported) ──
+const DEBRIEF_RATINGS = [
+  {v:'great', emoji:'🟢', label:'Great'},
+  {v:'good',  emoji:'🙂', label:'Good'},
+  {v:'mixed', emoji:'😐', label:'Mixed'},
+  {v:'rough', emoji:'🔴', label:'Rough'},
+];
+function debriefRatingMeta(v){ return DEBRIEF_RATINGS.find(r=>r.v===v) || null; }
+function hasDebrief(d){
+  const txt = String(d.debrief||'').replace(/<[^>]*>/g,'').replace(/&nbsp;/g,' ').trim();
+  return !!(txt || d.debriefRating);
+}
+let _debriefI = null;
+function renderDebriefRating(i){
+  const d = getDay(i);
+  const wrap = document.getElementById('debrief-rating');
+  if(!wrap) return;
+  wrap.innerHTML = DEBRIEF_RATINGS.map(r=>{
+    const on = d.debriefRating === r.v;
+    return `<button onclick="setDebriefRating(${i},'${r.v}')" style="display:flex;align-items:center;gap:6px;border:1px solid ${on?'var(--navy)':'var(--rule-dark)'};background:${on?'var(--navy)':'#fff'};color:${on?'#fff':'var(--ink)'};border-radius:999px;padding:6px 13px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">${r.emoji} ${r.label}</button>`;
+  }).join('');
+}
+function setDebriefRating(i, v){
+  const d = getDay(i);
+  d.debriefRating = (d.debriefRating === v) ? '' : v;   // click again to clear
+  d.debriefAt = Date.now();
+  saveState();
+  renderDebriefRating(i);
+}
+function openDebrief(i){
+  _debriefI = i;
+  const d = getDay(i);
+  const u = UNIT_META.find(m=>m.id===currentUnit);
+  document.getElementById('debrief-title').innerHTML = `🪞 Post-class reflection — ${esc(d.label)}${u?` · ${esc(u.name)}`:''}`;
+  renderDebriefRating(i);
+  document.getElementById('debrief-body').innerHTML =
+    rteField('rte-debrief', d.debrief||'', `updateDay(${i},'debrief',this.innerHTML)`,
+      'What worked? What ran long or flopped? What would I change? Who needs follow-up? Notes for next year…');
+  document.getElementById('debrief-overlay').style.display='block';
+  setTimeout(()=>{ const ed=document.getElementById('rte-debrief'); if(ed) ed.focus(); }, 40);
+}
+function closeDebrief(){
+  document.getElementById('debrief-overlay').style.display='none';
+  if(_debriefI!==null){ rerenderDay(_debriefI); _debriefI=null; }
 }
 
 // ── Per-lesson prep to-dos (stored in the shared dashboard pool) ──
@@ -8774,6 +10493,7 @@ function openAddResource(i, ri){
   document.getElementById('resource-save-btn').textContent = editing ? 'Save changes' : 'Add resource';
   document.getElementById('resource-title').value = m ? matTitle(m) : '';
   document.getElementById('resource-url').value = m ? matUrl(m) : '';
+  document.getElementById('resource-drive-row').innerHTML = drivePickBtnHTML('pickDriveIntoResourceModal()');
   document.getElementById('resource-overlay').style.display = 'block';
   setTimeout(()=>document.getElementById('resource-title').focus(), 40);
 }
@@ -9047,14 +10767,96 @@ function bloomsReferenceHTML() {
   </div>`;
 }
 
-function toggleBloomsRef(bodyId) {
+// ── QUICK IPP AT A GLANCE ────────────────────────────────────────
+// The Ignatian Pedagogical Paradigm laid out the same way as the Bloom's
+// card above it: each stage with the two or three questions that define it
+// and the classroom activities that actually live there. Companion to the
+// IPP letters (C · E · R · A · V) tagged on each activity row.
+function ippReferenceHTML() {
+  const stages = [
+    { letter:'C', stage:'Context', color:'#1B3A6B', bg:'#E6EBF4',
+      gist:'Know the students you actually have before deciding what to teach.',
+      questions:[
+        'Who are these students — what world, family and faith do they walk in with today?',
+        'What do they already know, believe or misunderstand about this material?',
+        'What has to be true of this room for them to risk anything real here?',
+      ],
+      activities:'entrance survey · KWL chart · diagnostic pre-assessment · interest inventory · do-now tied to their own lives · anticipation guide · current-event hook · community-building circle · opening prayer &amp; class norms · quick poll · "where are you from" mapping' },
+    { letter:'E', stage:'Experience', color:'#185FA5', bg:'#E6F1FB',
+      gist:'Give them something to grapple with — head and heart, not head alone.',
+      questions:[
+        'What will students actually do, see, read or feel — not just hear about?',
+        'Where does the material touch imagination and affect, not only intellect?',
+        'Is the experience concrete enough that every student has something to reflect on?',
+      ],
+      activities:'primary-source reading · direct instruction with guided notes · Socratic seminar · simulation or role play · imaginative contemplation / lectio divina · guided film viewing · gallery walk · jigsaw · think-pair-share · case study · guest speaker · lab or hands-on task · debate' },
+    { letter:'R', stage:'Reflection', color:'#0F6E56', bg:'#E1F5EE',
+      gist:'The heart of the paradigm: what does this mean, and what does it mean for me?',
+      questions:[
+        'So what? What is the meaning underneath what we just did?',
+        'What moved in me — what consoled, unsettled or surprised me, and why?',
+        'How does this change what I understand about God, others or myself?',
+      ],
+      activities:'journal prompt · the Examen · one-minute paper · exit ticket · silent reflection with music · turn &amp; talk on a single question · quote response · sketch or visual metaphor · letter to yourself · dyad interview · reflective discussion protocol · gratitude round' },
+    { letter:'A', stage:'Action', color:'#854F0B', bg:'#FAEEDA',
+      gist:'Reflection that stops at feeling is not Ignatian — it has to move outward.',
+      questions:[
+        'Now what? What will I do differently because of this — this week, concretely?',
+        'Where does this call me beyond myself, toward others?',
+        'What interior choice (a new attitude, a habit) does this ask of me?',
+      ],
+      activities:'commitment card ("this week I will…") · service project or site visit · advocacy letter · family or parish interview · teach it to a peer · PSA / campaign · class covenant · prayer intentions written for others · apply the skill to a new case · plan of action with a deadline' },
+    { letter:'V', stage:'Evaluation', color:'#993C1D', bg:'#FAECE7',
+      gist:'Assess the whole student: what they know, and who they are becoming.',
+      questions:[
+        'How do we know growth happened — in understanding and in character?',
+        'What evidence do students have of their own progress, in their own hands?',
+        'Are they growing as men and women for and with others, not just as test-takers?',
+      ],
+      activities:'rubric self-assessment · peer feedback protocol · quiz, test or performance task · portfolio review · one-on-one conference · goal check-in · revised second draft · standards checklist · reflective self-grade with evidence · end-of-unit survey' },
+  ];
+  return `
+  <!-- The paradigm is a cycle: each turn re-reads the context it started from -->
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+    <span style="font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)">A cycle, not a checklist</span>
+    <div style="flex:1;min-width:120px;height:3px;border-radius:2px;background:linear-gradient(90deg,#1B3A6B,#185FA5,#0F6E56,#854F0B,#993C1D);-webkit-print-color-adjust:exact;print-color-adjust:exact"></div>
+    <span style="font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)">↻ back into context</span>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+    ${stages.map(s => `
+      <div style="border-radius:6px;overflow:hidden;border:1px solid ${s.color}30;display:flex;flex-direction:column">
+        <div style="background:${s.color};color:white;padding:5px 10px;display:flex;align-items:baseline;gap:6px;-webkit-print-color-adjust:exact;print-color-adjust:exact">
+          <span style="font-size:12px;font-weight:800;letter-spacing:.04em;opacity:.85">${s.letter}</span>
+          <span style="font-size:11px;font-weight:700;letter-spacing:.04em">${s.stage}</span>
+        </div>
+        <div style="padding:6px 10px;background:${s.bg};-webkit-print-color-adjust:exact;print-color-adjust:exact">
+          <div style="font-size:9.5px;font-style:italic;color:${s.color};opacity:.85;line-height:1.45;margin-bottom:4px">${s.gist}</div>
+          <ul style="margin:0;padding-left:13px;list-style:disc">
+            ${s.questions.map(q=>`<li style="font-size:10px;color:${s.color};line-height:1.45;margin-bottom:2px">${q}</li>`).join('')}
+          </ul>
+        </div>
+        <div style="padding:5px 10px;background:${s.bg};border-top:1px dashed ${s.color}40;flex:1;-webkit-print-color-adjust:exact;print-color-adjust:exact">
+          <div style="font-size:8px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${s.color};opacity:.75;margin-bottom:2px">Activities</div>
+          <div style="font-size:10px;color:${s.color};line-height:1.45">${s.activities}</div>
+        </div>
+      </div>`).join('')}
+  </div>
+  <div style="font-size:9px;color:var(--ink-3);margin-top:8px;line-height:1.5;font-style:italic">
+    Ignatian Pedagogy: A Practical Approach (ICAJE, 1993) and the Characteristics of Jesuit Education (1986). Tag each activity above with its stage using the IPP box on the activity row — C · E · R · A · V.
+  </div>`;
+}
+
+// Collapse/expand either reference card (Bloom's or the IPP).
+function toggleRefCard(bodyId, chevId) {
   const body = document.getElementById(bodyId);
-  const idx = bodyId.split('-').pop();
-  const chev = document.getElementById('blooms-chev-'+idx);
   if (!body) return;
   const open = body.style.display === 'none' || body.style.display === '';
   body.style.display = open ? 'block' : 'none';
+  const chev = chevId && document.getElementById(chevId);
   if (chev) chev.style.transform = open ? 'rotate(90deg)' : '';
+}
+function toggleBloomsRef(bodyId) {
+  toggleRefCard(bodyId, 'blooms-chev-' + bodyId.split('-').pop());
 }
 
 // ── TEACHER GOALS ─────────────────────────────────────────────────
@@ -10058,9 +11860,16 @@ function addWeek() {
 // ── SAVE / EXPORT ─────────────────────────────────────────────────
 async function saveAll() {
   saveState();
-  await pushToSheets();
+  const ok = await pushToSheets();
   renderCourse();
-  toast('Saved & synced — ' + getCourse().name + ' ✓');
+  // Tell the truth: only claim "synced" when the cloud push actually succeeded.
+  if (ok) {
+    toast('Saved & synced — ' + getCourse().name + ' ✓');
+  } else if (!syncConnected()) {
+    toast('Saved on this device. Click the sync status up top to connect cloud sync.');
+  } else {
+    toast('⚠️ Saved on this device, but cloud sync failed — see the status up top.');
+  }
 }
 
 // Download everything currently in this course as a JSON file. This is
@@ -10148,6 +11957,8 @@ function exportPacingGuidePDF() {
         ${band}
         <td style="border:1px solid ${RULE};padding:5px 7px;font-size:9pt;text-align:center">${globalDay}</td>
         <td style="border:1px solid ${RULE};padding:5px 7px;font-size:9pt;text-align:center;font-weight:600">${unitNo(b.u.id)}.${lessonNo}</td>
+        <td style="border:1px solid ${RULE};padding:5px 7px;font-size:8.5pt;white-space:nowrap">${d.dateA?escPDF(isoParse(d.dateA).toLocaleDateString('en-US',{weekday:'short',month:'numeric',day:'numeric'})):'—'}${
+          dayCalNotes(d).length?`<div style="font-size:7.5pt;color:#57534E;margin-top:2px;white-space:normal">${escPDF(dayCalNotes(d).join(' · '))}</div>`:''}</td>
         <td style="border:1px solid ${RULE};padding:5px 8px;font-size:9.5pt">${escPDF(String(d.topic||'').replace(/<[^>]*>/g,' ').trim())}</td>
         <td style="border:1px solid ${RULE};padding:5px 8px;font-size:9pt">${escPDF(String(d.homework||'').replace(/<[^>]*>/g,' ').trim())}</td>
       </tr>`;
@@ -10162,8 +11973,8 @@ function exportPacingGuidePDF() {
       <div style="font-size:15pt;font-weight:700;color:${NAVY}">Pacing Guide — ${escPDF(co.name)}</div>
       <div style="font-size:9.5pt;color:#57534E;margin-top:3px">${escPDF(co.code)} · ${escPDF(state.teacher||'')} · ${new Date().toLocaleDateString()}</div>
     </div>
-    <table><thead><tr>${th('Unit','110px')}${th('Day','44px')}${th('#','54px')}${th('Content')}${th('HW','190px')}</tr></thead>
-    <tbody>${rowsHTML || '<tr><td colspan="5" style="border:1px solid '+RULE+';padding:10px;text-align:center;color:#78716C">No class days yet.</td></tr>'}</tbody></table>
+    <table><thead><tr>${th('Unit','110px')}${th('Day','44px')}${th('#','54px')}${th('Date','96px')}${th('Content')}${th('HW','170px')}</tr></thead>
+    <tbody>${rowsHTML || '<tr><td colspan="6" style="border:1px solid '+RULE+';padding:10px;text-align:center;color:#78716C">No class days yet.</td></tr>'}</tbody></table>
   </body></html>`;
 
   const w = window.open('', '_blank');
@@ -10830,7 +12641,10 @@ function exportUnitOverviewPDF() {
      the one running, it offers a one-click reload. No hard-refresh needed. -->
 <script>
 (function(){
-  function runningVer(){ try{ return new URLSearchParams(location.search).get('v') || ''; }catch(e){ return ''; } }
+  // The version we're running: the URL's ?v= if present, else the version baked
+  // into the app (so a page opened without ?v= — e.g. the Netlify root rewrite —
+  // still knows what it is and can detect a newer deploy).
+  function runningVer(){ try{ return new URLSearchParams(location.search).get('v') || window.APP_VERSION || ''; }catch(e){ return window.APP_VERSION || ''; } }
   function showUpdateBanner(latest){
     if(document.getElementById('update-banner')) return;
     var b=document.createElement('div');
@@ -10854,7 +12668,10 @@ function exportUnitOverviewPDF() {
       })
       .catch(function(){});
   }
-  window.addEventListener('load', function(){ setTimeout(checkUpdate, 2500); });
+  window.addEventListener('load', function(){
+    try{ var vEl=document.getElementById('mm-version'); if(vEl) vEl.textContent='Version '+runningVer(); }catch(e){}
+    setTimeout(checkUpdate, 2500);
+  });
   setInterval(checkUpdate, 5*60*1000);
   document.addEventListener('visibilitychange', function(){ if(!document.hidden) checkUpdate(); });
 })();
