@@ -3445,6 +3445,110 @@ function collectClasses(){
 }
 
 const SCHOOL_MAP_SEEDS = {
+  6: {
+    1: {
+      course: 6, sem: 1, year: 2026,
+      title: 'Semester 1 Course Map · Fall 2026',
+      source: 'Theology 6 Semester Map | Fall 2026',
+      docUrl: 'https://docs.google.com/document/d/1L8spA43clKskI4aqCZXMvRjLF3qUlsHRRAosUuV-TEQ/edit',
+      // The school's calendar only — every school day with its A/B block and
+      // the events that land on it. Lesson Focus and Unit of Study are blank
+      // by design: those are yours to fill in on the Doc and re-paste.
+      projected: {},
+      weekBanners: { 8: 'HOMECOMING WEEK' },
+      rows: [
+        '1||M|8.17|||',
+        '1||T|8.18|HS WELCOME DAY||',
+        '1||W|8.19|MS WELCOME DAY||',
+        '1|A|R|8.20|||',
+        '1|B|F|8.21|HS MASS - HOLY SPIRIT (11/12)||',
+        '2|A|M|8.24|MS MASS - HOLY SPIRIT||',
+        '2|B|T|8.25|HS MASS - HOLY SPIRIT (9/10) · MS - BACK TO SCHOOL||',
+        '2|A|W|8.26|||',
+        '2|B|R|8.27|HS - BACK TO SCHOOL||',
+        '2|A|F|8.28|||',
+        '3|B|M|8.31|||',
+        '3|A|T|9.1|||',
+        '3|B|W|9.2|EARLY RELEASE||',
+        '3|A|R|9.3|||',
+        '3|B|F|9.4|||',
+        '4|-|M|9.7|NO SCHOOL - LABOR DAY||',
+        '4|A|T|9.8|MS MASS||',
+        '4|B|W|9.9|||',
+        '4|A|R|9.10|||',
+        '4|B|F|9.11|||',
+        '5|A|M|9.14|||',
+        '5|B|T|9.15|HS ACADEMIC AWARDS||',
+        '5|A|W|9.16|MS ACADEMIC AWARDS||',
+        '5|B|R|9.17|FRESHMAN RETREAT||',
+        '5|A|F|9.18|6TH GRADE LOCK-IN||',
+        '6|B|M|9.21|PICTURE DAY||',
+        '6|A|T|9.22|||',
+        '6|B|W|9.23|JUNIOR ENCOUNTER (1)||',
+        '6|A|R|9.24|||',
+        '6|B|F|9.25|JUNIOR ENCOUNTER (1) · VOLUNTEER FAIR||',
+        '7|A|M|9.28|||',
+        '7|B|T|9.29|||',
+        '7|A|W|9.30|EARLY RELEASE · JUNIOR ENCOUNTER (2)||',
+        '7|B|R|10.1|||',
+        '7|A|F|10.2|||',
+        '8|B|M|10.5|||',
+        '8|A|T|10.6|SENIOR RING MASS||',
+        '8|-|W|10.7|HS PSAT & MIDDLE SCHOOL FIELD DAY||',
+        '8|B|R|10.8|||',
+        '8|A|F|10.9|||',
+        '9|B|M|10.12|INTERIM REPORT RELEASED||',
+        '9|A|T|10.13|||',
+        '9|B|W|10.14|||',
+        '9|A|R|10.15|||',
+        '9|-|F|10.16|NO SCHOOL||',
+        '10|B|M|10.19|||',
+        '10|A|T|10.20|||',
+        '10|B|W|10.21|||',
+        '10|A|R|10.22|SOPHOMORE RETREAT||',
+        '10|B|F|10.23|||',
+        '11|A|M|10.26|||',
+        '11|B|T|10.27|||',
+        '11|A|W|10.28|EARLY RELEASE||',
+        '11|B|R|10.29|TRUNK OR TREAT · FLIP FLEX SCHEDULE||',
+        '11|A|F|10.30|||',
+        '12|B|M|11.2|||',
+        '12|A|T|11.3|||',
+        '12|B|W|11.4|JUNIOR ENCOUNTER (3)||',
+        '12|A|R|11.5|||',
+        '12|B|F|11.6|||',
+        '13|A|M|11.9|||',
+        '13|B|T|11.10|||',
+        '13|-|W|11.11|NO SCHOOL - VETERAN\'S DAY||',
+        '13|A|R|11.12|||',
+        '13|B|F|11.13|||',
+        '14|A|M|11.16|||',
+        '14|B|T|11.17|FOUNDING OF A NATION||',
+        '14|A|W|11.18|||',
+        '14|B|R|11.19|||',
+        '14|A|F|11.20|||',
+        '14|-|M|11.23|THANKSGIVING BREAK||',
+        '14|-|T|11.24|||',
+        '14|-|W|11.25|||',
+        '14|-|R|11.26|||',
+        '14|-|F|11.27|||',
+        '15|B|M|11.30|||',
+        '15|A|T|12.1|||',
+        '15|B|W|12.2|EARLY RELEASE||',
+        '15|A|R|12.3|SOPHOMORE RETREAT||',
+        '15|B|F|12.4|||',
+        '16|A|M|12.7|||',
+        '16|B|T|12.8|||',
+        '16|A|W|12.9|||',
+        '16|B|R|12.10|CHRISTMAS VILLAGE · FLIP FLEX SCHEDULE||',
+        '16|A|F|12.11|||',
+        '17|B|M|12.14|||',
+        '17|-|T|12.15|SEMESTER EXAMS||',
+        '17|-|W|12.16|||',
+        '17|-|R|12.17|||',
+      ],
+    },
+  },
   7: {
     1: {
       course: 7, sem: 1, year: 2026,
@@ -3744,7 +3848,8 @@ function parseSemesterMapText(text, year){
   let lastWeek = null;
   const clean = s => String(s||'')
     .replace(/\\+(?=[#*_&:.()\/-])/g,'') // backslash escapes from a Docs export
-    .replace(/\*\*/g,'')                 // and its bold markers
+    .replace(/\*{4,}/g,' · ')             // two bolded notes butted together
+    .replace(/\*\*/g,'')                 // and the remaining bold markers
     .replace(/\s+/g,' ').trim();
   // Calendar notes come through in ALL CAPS; a lesson focus reads as a sentence.
   const looksLikeNote = s => !/[a-z]/.test(s);
@@ -3787,11 +3892,28 @@ function parseSemesterMapText(text, year){
     if(!focus && unit && !looksLikeNote(unit)){ focus = unit; unit = ''; }
     else if(!focus && unit && looksLikeNote(unit)){ note = [note, unit].filter(Boolean).join(' · '); unit = ''; }
     if(!focus && !unit && note && !looksLikeNote(note) && blk && blk !== '-'){ focus = note; note = ''; }
-    const notes = [note, ...rest.slice(3).filter(Boolean)].filter(Boolean);
+    // "(9/10)" trailing its own note belongs to the one before it.
+    const notes = [];
+    [note, ...rest.slice(3).filter(Boolean)].filter(Boolean)
+      .join(' · ').split('·').map(s=>s.trim()).filter(Boolean)
+      .forEach(nt => {
+        if(/^\(.*\)$/.test(nt) && notes.length) notes[notes.length-1] += ' ' + nt;
+        else notes.push(nt);
+      });
     rows.push(`${week==null?'':week}|${blk}|${dow}|${md}|${notes.join(' · ')}|${unit}|${focus}`);
   });
   if(!rows.length) return null;
-  return { rows, weekBanners, year };
+  // A Doc can carry stray fragment tables (a few rows split off above the real
+  // one), so put every row back in calendar order and carry week numbers
+  // forward into any row that lost one.
+  rows.sort((a,b) => smapISO(a.split('|')[3], year).localeCompare(smapISO(b.split('|')[3], year)));
+  let carry = '';
+  const ordered = rows.map(r => {
+    const p = r.split('|');
+    if(p[0]) carry = p[0]; else p[0] = carry;
+    return p.join('|');
+  });
+  return { rows: ordered, weekBanners, year };
 }
 
 let smapSem = 1;   // semester the paste dialog defaults to
@@ -7194,6 +7316,45 @@ function paceAddDayU(uid){
 // Whole-course pacing map: every unit is a colored band on the left with
 // its class days listed. General themes only — edit Content or HW here and
 // it saves straight to that lesson; "open" jumps to the full plan.
+// Which A/B block a course actually meets on: Theology 6 on A days,
+// Theology 7 on B days. Only those rows are real class days for it.
+function courseMeetsOn(courseId){
+  const c = courseId || activeCourse;
+  const v = state && state.courseBlock && state.courseBlock[c];
+  return (v === 'A' || v === 'B') ? v : (c === 7 ? 'B' : 'A');
+}
+// Every class day the school map gives this course, in order.
+function mapClassDays(courseId){
+  const blk = courseMeetsOn(courseId);
+  const out = [];
+  schoolMapSems(courseId || activeCourse).forEach(sem => {
+    const m = getSchoolMap(courseId || activeCourse, sem); if(!m) return;
+    (m._rows || smapExpand(m)).forEach(r => { if(r.blk === blk && r.date) out.push(r.date); });
+  });
+  return [...new Set(out)].sort();
+}
+// Put this course's lessons, in order, onto its class days from the map.
+// Explicit button, never automatic — and it only writes dates.
+function dateLessonsFromMap(){
+  const blk = courseMeetsOn();
+  const days = mapClassDays();
+  if(!days.length){ toast('No school map for ' + getCourse().name + ' yet'); return; }
+  const lessons = [];
+  orderedUnits().forEach(u => (state.units[u.id]||[]).forEach(w => (w.days||[]).forEach(d => lessons.push(d))));
+  if(!lessons.length){ toast('No lessons to date yet'); return; }
+  const already = lessons.filter(d => d.dateA).length;
+  const n = Math.min(lessons.length, days.length);
+  const msg = `Put your ${lessons.length} ${getCourse().name} lesson${lessons.length===1?'':'s'} onto the map's ${blk} days, in order?\n\n`
+    + `• ${n} lesson${n===1?'':'s'} will be dated, starting ${fmtNice(days[0])}\n`
+    + (lessons.length > days.length ? `• ${lessons.length-days.length} lesson${lessons.length-days.length===1?'':'s'} past ${fmtNice(days[days.length-1])} will be left undated\n` : '')
+    + (already ? `• ${already} lesson${already===1?'':'s'} already have a date and will be overwritten\n` : '')
+    + `\nOnly dates change — nothing you've planned is touched.`;
+  if(!confirm(msg)) return;
+  lessons.forEach((d, i) => { d.dateA = i < days.length ? days[i] : ''; d.dateB = ''; });
+  saveState(); rerenderPacing();
+  toast(`Dated ${n} lesson${n===1?'':'s'} on the map's ${blk} days ✓`);
+}
+
 // One line telling you where the dates come from, and nothing more.
 function pacingDateNoteHTML(){
   if(!schoolMapSems(activeCourse).length){
@@ -7206,7 +7367,7 @@ function pacingDateNoteHTML(){
     if(mapHitForDate(d.dateA)){ dated++; if(dayCalNotes(d).length) withNotes++; }
   })));
   const m = getSchoolMap(activeCourse, schoolMapSems(activeCourse)[0]);
-  return `<div class="sp-note">📅 ${dated} lesson${dated===1?'':'s'} matched to <b>${esc((m&&m.title)||'your school map')}</b>${withNotes?` · ${withNotes} with school events`:''}
+  return `<div class="sp-note">📅 ${dated} lesson${dated===1?'':'s'} matched to <b>${esc((m&&m.title)||'your school map')}</b>${withNotes?` · ${withNotes} with school events`:''} · ${esc(getCourse().name)} meets on <b>${courseMeetsOn()} days</b>
     <button class="sp-linkbtn" onclick="openMapImport()">re-paste</button></div>`;
 }
 
@@ -7265,6 +7426,7 @@ function simplePacingHTML(){
         <div class="sp-sub">The big-picture map across every unit: general themes only. Edit Content or HW here and it saves straight to that lesson.</div>
       </div>
       <div class="sp-actions">
+        ${schoolMapSems(activeCourse).length?`<button class="sp-btn sp-btn-navy" onclick="dateLessonsFromMap()" title="Put your lessons onto the map's ${courseMeetsOn()} days, in order">📅 Date lessons from the map</button>`:''}
         <button class="sp-btn" onclick="openMapImport()" title="Paste your school's semester map to fill in the Date column">📥 School map…</button>
         <button class="sp-btn" onclick="exportPacingGuidePDF()">Export</button>
       </div>
