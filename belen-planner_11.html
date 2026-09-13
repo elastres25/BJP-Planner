@@ -5310,8 +5310,10 @@ function buildWeekDoc(){
 
   const head = cols.map(c=>{
     const dt = isoParse(c.date).toLocaleDateString('en-US',{weekday:'short', month:'short', day:'numeric'});
-    return `<th style="background:${GOLD};border:1px solid ${RULE};padding:6px 8px;font-size:9.5pt;font-weight:700;color:#1C1917;text-align:center">
-      ${escPDF(c.block)} Block · ${escPDF(dt)}<div style="font-weight:400;font-size:8pt">U${unitNo(c.uid)} · ${escPDF(c.d.label)}</div></th>`;
+    const topic = escPDF(String(c.d.topic||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim());
+    return `<th style="background:${GOLD};border:1px solid ${RULE};padding:6px 8px;font-size:9.5pt;color:${NAVY};text-align:left">
+      ${topic?`<div style="font-size:11pt;font-weight:700;color:${NAVY}">${topic}</div>`:''}
+      <div style="font-weight:700;font-size:8.5pt;color:#6b5a2a">U${unitNo(c.uid)} · ${escPDF(c.d.label)} · ${escPDF(c.block)} ${escPDF(dt)}</div></th>`;
   }).join('');
   const rowLabel = (t, sub) => `<td style="background:#FDF6E3;border:1px solid ${RULE};padding:7px 9px;width:150px;vertical-align:top">
       <div style="font-size:9.5pt;font-weight:700;color:#1C1917">${t}</div>
@@ -5326,7 +5328,7 @@ function buildWeekDoc(){
 
   const html = `<!DOCTYPE html><html><head><meta charset="utf-8">
   <title>${escPDF(title)}</title>
-  <style>@page{size:letter landscape;margin:.45in}body{font-family:Georgia,'Times New Roman',serif;color:#1C1917;margin:0}table{width:100%;border-collapse:collapse}tr{page-break-inside:avoid}</style></head><body>
+  <style>@page{size:letter landscape;margin:.45in}body{font-family:'Helvetica Neue',Arial,sans-serif;color:#1C1917;margin:0}table{width:100%;border-collapse:collapse}tr{page-break-inside:avoid}</style></head><body>
     <div style="border-bottom:3px solid #C9991A;padding-bottom:7px;margin-bottom:10px">
       <div style="font-size:14pt;font-weight:700;color:${NAVY}">Weekly Lesson Plans — ${escPDF(co.name)} (${escPDF(co.code)})</div>
       <div style="font-size:9.5pt;color:#57534E;margin-top:2px">${escPDF(state.teacher||'')} · Week of ${range}</div>
@@ -5509,6 +5511,19 @@ async function driveSendUnit(uid){
   const doc = buildUnitDoc(uid);
   if(doc.empty){ toast('This unit has no weeks yet.'); return; }
   await sendToDrive(doc.docName, doc.html);
+}
+// From the Week view, "Send to Drive" now sends the UNIT doc(s) for whatever
+// units have a class in the week being viewed (each unit doc holds all its weeks).
+async function driveSendCurrentWeekUnits(){
+  if(!driveConfigured()){ openDriveSetup(); return; }
+  const mon=new Date(); mon.setHours(0,0,0,0);
+  mon.setDate(mon.getDate()-((mon.getDay()+6)%7)+weekPlanOffset*7);
+  const sun=new Date(mon); sun.setDate(mon.getDate()+6);
+  const lo=isoOf(mon), hi=isoOf(sun);
+  const uids=[...new Set(collectClasses().filter(c=>c.date>=lo && c.date<=hi).map(c=>c.uid))];
+  if(!uids.length){ toast('No dated classes in this week to send.'); return; }
+  for(const uid of uids){ await driveSendUnit(uid); }
+  if(uids.length>1) toast(`Sent ${uids.length} unit docs (all weeks) to Drive ✓`);
 }
 // Preview the unit doc in a new tab (also handy for Print → Save as PDF).
 function previewUnitDoc(uid){
@@ -6459,7 +6474,7 @@ function renderWeekPlan() {
         ${weekPlanOffset!==0?`<button onclick="weekPlanToday()" style="background:none;border:1px solid var(--rule-dark);border-radius:6px;padding:6px 11px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy)">This week</button>`:''}
         <button onclick="weekPlanStep(1)" style="background:none;border:1px solid var(--rule-dark);border-radius:6px;padding:6px 12px;cursor:pointer;font-size:13px;font-weight:600;color:var(--ink)">Next ›</button>
         ${lessons.length?`<button onclick="exportWeekPDF()" style="background:none;border:1px solid var(--rule-dark);border-radius:6px;padding:6px 12px;cursor:pointer;font-size:12px;font-weight:600;color:var(--ink)">⬇ PDF</button>`:''}
-        ${lessons.length?`<button onclick="driveSendWeek()" title="${driveConfigured()?'Save this week to your Google Drive folder':'Set up Google Drive'}" style="background:var(--navy);color:#fff;border:none;border-radius:6px;padding:6px 13px;cursor:pointer;font-size:12px;font-weight:700">☁ ${driveConfigured()?'Send to Drive':'Set up Drive'}</button>`:''}
+        ${lessons.length?`<button onclick="driveSendCurrentWeekUnits()" title="${driveConfigured()?'Update the unit Google Doc (cover + all weeks) in your Drive folder':'Set up Google Drive'}" style="background:var(--navy);color:#fff;border:none;border-radius:6px;padding:6px 13px;cursor:pointer;font-size:12px;font-weight:700">☁ ${driveConfigured()?'Send to Drive':'Set up Drive'}</button>`:''}
       </div>
     </div>
     ${body}
