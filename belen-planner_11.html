@@ -2427,7 +2427,7 @@ const ASSESS_COLORS = {
 // The build version baked into the app itself, so the update checker knows what
 // it's running even when the page was loaded WITHOUT a ?v= token (e.g. the
 // Netlify root rewrite). Keep this in lockstep with index.html's ?v= token.
-window.APP_VERSION = '20260823-40';
+window.APP_VERSION = '20260920-41';
 
 let activeCourse = 6; // default to Theology 6
 
@@ -3248,6 +3248,64 @@ function saveState() {
     try { setSyncStatus('error'); } catch(_) {}
     toast('⚠️ Could not save — device storage may be full. Use Backup to export your data.');
   }
+  // Google-Docs-style: once cloud sync is connected, every change is pushed to
+  // the cloud automatically (debounced) so it flows to your other devices — no
+  // need to press Save.
+  try { scheduleCloudSync(); } catch(_) {}
+}
+
+// ── AUTO-SYNC (Google-Docs-style) ─────────────────────────────────────
+// When cloud sync is connected, we (1) auto-push every change to the cloud a
+// couple of seconds after you stop typing, and (2) auto-pull the latest copy
+// whenever you return to the tab/window, so edits made on one device show up on
+// the others within seconds. All of this is a no-op until sync is connected.
+let _syncTimer   = null;   // debounce handle for the pending push
+let _pushing     = false;  // a push is in flight right now
+let _lastPushedMod = 0;    // state.lastModified of the last copy we pushed/pulled
+let _lastPullAt  = 0;      // throttle auto-pulls so focus-storms don't hammer the API
+
+function scheduleCloudSync(){
+  if (!syncConnected()) return;                 // local-only until connected
+  if ((state.lastModified||0) <= _lastPushedMod) return;  // nothing new to send
+  clearTimeout(_syncTimer);
+  _syncTimer = setTimeout(runCloudSync, 2500);  // wait for a lull in edits
+}
+async function runCloudSync(){
+  if (!syncConnected()) return;
+  if (_pushing) { scheduleCloudSync(); return; }        // retry after the current push
+  const mod = state.lastModified || 0;
+  if (mod <= _lastPushedMod) return;                    // already up to date
+  _pushing = true;
+  try {
+    const ok = await pushToSheets();
+    if (ok) _lastPushedMod = mod;
+  } catch(e){ console.error('auto-push error', e); }
+  finally { _pushing = false; }
+  // If more edits landed while we were pushing, send them too.
+  if ((state.lastModified||0) > _lastPushedMod) scheduleCloudSync();
+}
+// Re-render whatever view is on screen after an auto-pull adopts newer cloud data.
+function rerenderActiveView(){
+  try{
+    const on = id => document.getElementById(id)?.classList.contains('active');
+    if (on('view-week'))     { renderWeekPlan(); return; }
+    if (on('view-course'))   { renderCourse();   return; }
+    if (on('view-prep'))     { renderPrep();     return; }
+    if (on('view-pacing'))   { const w=document.getElementById('pacing-wrap'); if(w) w.innerHTML=simplePacingHTML(); return; }
+    if (on('view-dashboard')){ renderDashboard(); return; }
+    if (on('view-unit'))     { renderCourse();   return; }
+  }catch(e){ console.error('rerenderActiveView', e); }
+}
+async function autoPullOnFocus(){
+  if (document.hidden) return;
+  if (!syncConnected()) return;
+  const now = Date.now();
+  if (now - _lastPullAt < 8000) return;   // at most one pull per 8s
+  _lastPullAt = now;
+  try{
+    const adopted = await pullFromSheets();  // only adopts if cloud is newer than local
+    if (adopted){ rerenderActiveView(); toast('↻ Synced latest changes from your other device'); }
+  }catch(e){ console.error('auto-pull error', e); }
 }
 
 let _lastPushMsg = '';   // jsonbin's own explanation of the most recent failure
@@ -3382,7 +3440,14 @@ async function pullFromSheets() {
         const localTime = state?.lastModified || 0;
         if (cloudTime > localTime) {
           state = record;
-          saveState();
+          // Persist the adopted copy DIRECTLY, preserving the cloud's
+          // lastModified — going through saveState() would stamp a fresh
+          // timestamp and echo the copy back, causing a device-to-device
+          // ping-pong of the same data. Mark it already-pushed so the
+          // auto-sync sees nothing new to send.
+          _lastPushedMod = record.lastModified || 0;
+          try { localStorage.setItem(getCourse().storageKey, JSON.stringify(state)); }
+          catch(e){ console.error('adopt-save failed:', e); }
           setSyncStatus('synced');
           return true;
         }
@@ -3421,8 +3486,8 @@ function renderSyncSetup(){
   const inputBox = document.getElementById('syncsetup-input-box');
   if(statusEl){
     statusEl.innerHTML = connected
-      ? `<b style="color:#0a7d3c">● Connected</b> on this device. Courses synced: ${Object.keys(bins).length ? Object.keys(bins).map(id=>COURSES[id]?COURSES[id].name:id).join(', ') : '— none yet (open each course and Save once)'}.`
-      : `<b style="color:#b45309">● Not connected</b> — this device saves locally only.`;
+      ? `<b style="color:#0a7d3c">● Connected</b> on this device — <b>auto-sync is on</b>: every change now saves to the cloud on its own (like Google Docs), and returning to this tab pulls the latest from your other devices. Courses synced: ${Object.keys(bins).length ? Object.keys(bins).map(id=>COURSES[id]?COURSES[id].name:id).join(', ') : '— none yet (open each course and make one edit)'}.`
+      : `<b style="color:#b45309">● Not connected</b> — this device saves locally only. Connect below to turn on automatic cloud sync across your devices.`;
   }
   if(connectedBox) connectedBox.style.display = connected ? 'block' : 'none';
   if(inputBox) inputBox.style.display = connected ? 'none' : 'block';
@@ -12350,9 +12415,15 @@ async function init() {
     toast('Loaded ' + getCourse().name + ' ✓');
   } else {
     setSyncStatus('local');
+    // Nothing adopted from the cloud. Leave _lastPushedMod at 0 so that if this
+    // device's copy is ahead of the cloud, the next edit pushes it up.
   }
   renderCourse();
   nav('dashboard');
+  // Google-Docs-style auto-pull: whenever you switch back to this tab or window
+  // (e.g. after editing on another device), fetch the latest copy from the cloud.
+  document.addEventListener('visibilitychange', autoPullOnFocus);
+  window.addEventListener('focus', autoPullOnFocus);
 }
 init();
 </script>
