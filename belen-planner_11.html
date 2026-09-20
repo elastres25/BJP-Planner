@@ -2427,7 +2427,7 @@ const ASSESS_COLORS = {
 // The build version baked into the app itself, so the update checker knows what
 // it's running even when the page was loaded WITHOUT a ?v= token (e.g. the
 // Netlify root rewrite). Keep this in lockstep with index.html's ?v= token.
-window.APP_VERSION = '20260920-41';
+window.APP_VERSION = '20260920-42';
 
 let activeCourse = 6; // default to Theology 6
 
@@ -12413,11 +12413,15 @@ async function init() {
   const fromCloud = await pullFromSheets();
   if (fromCloud) {
     toast('Loaded ' + getCourse().name + ' ✓');
-  } else {
-    setSyncStatus('local');
-    // Nothing adopted from the cloud. Leave _lastPushedMod at 0 so that if this
-    // device's copy is ahead of the cloud, the next edit pushes it up.
   }
+  // NOTE: pullFromSheets() already set the correct badge — 'synced' when
+  // connected (even if the cloud wasn't newer, which is the normal case),
+  // 'ready' when connected but this course has no bin yet, 'local' when not
+  // connected, or 'error' on failure. Do NOT override it here: forcing 'local'
+  // made a connected device open showing "Local only" whenever the cloud copy
+  // wasn't strictly newer than local. When nothing was adopted we leave
+  // _lastPushedMod at 0 so a device that's ahead of the cloud still pushes on
+  // its next edit.
   renderCourse();
   nav('dashboard');
   // Google-Docs-style auto-pull: whenever you switch back to this tab or window
