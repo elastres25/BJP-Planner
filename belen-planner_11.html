@@ -2281,10 +2281,12 @@ function out(o) {
     </div>
     <div style="padding:16px">
       <div style="font-size:12px;color:var(--ink-2);margin-bottom:8px;line-height:1.55">
-        Paste an agenda (e.g. from Claude). Each line becomes an activity. It reads the
-        <b>activity name</b>, the <b>time range</b> (for the length), and the
+        Paste an agenda (e.g. from Claude). Most lines become activities — it reads the
+        <b>name</b>, the <b>time range</b> (for the length), and the
         <b>teaching move</b> (<b>I DO</b>→Focus, <b>WE DO</b>→Guided, <b>YOU DO</b>→Independent).
-        Extra columns like a step number are ignored.
+        A line that’s just <b>Break</b> / <b>Lunch</b> becomes a break divider, and labeled lines like
+        <b>Objective:</b>, <b>I can:</b>, <b>Essential Question:</b>, <b>Homework:</b> fill those fields
+        instead. Step numbers and extra columns are ignored. Preview shows where each line lands.
       </div>
       <textarea id="import-text" placeholder="0&#9;Prelude&#9;YOU DO&#9;0:00–0:05&#10;1&#9;Prayer · Objective · Agenda&#9;—&#9;0:05–0:11&#10;2&#9;Recap — tag the Our Father together&#9;WE DO&#9;0:11–0:16&#10;…"
         style="width:100%;height:190px;border:1px solid var(--rule-dark);border-radius:8px;padding:12px;font-family:inherit;font-size:13px;line-height:1.55;color:var(--ink);resize:vertical;outline:none"></textarea>
@@ -2458,7 +2460,7 @@ const ASSESS_COLORS = {
 // The build version baked into the app itself, so the update checker knows what
 // it's running even when the page was loaded WITHOUT a ?v= token (e.g. the
 // Netlify root rewrite). Keep this in lockstep with index.html's ?v= token.
-window.APP_VERSION = '20260920-43';
+window.APP_VERSION = '20260920-44';
 
 let activeCourse = 6; // default to Theology 6
 
@@ -3230,33 +3232,60 @@ function _moveToPhase(text){
   return null;
 }
 
+// Labeled metadata lines ("Objective: …", "Homework — …") route to lesson
+// fields instead of becoming activities. The label must be one of these AND
+// be followed by a ':' / '-' / '—' separator, so ordinary activity names that
+// merely contain a dash (e.g. "Recap — tag the Our Father") are never caught.
+const _IMPORT_META = [
+  { field:'goals',    re:/^(objectives?|goals?|aims?|swbat|learning\s+goals?)\s*[:\-–—]\s*(.+)$/i },
+  { field:'targets',  re:/^(i\s*can|learning\s+targets?|targets?)\s*[:\-–—]\s*(.+)$/i },
+  { field:'eq',       re:/^(essential\s+questions?|big\s+questions?|eq)\s*[:\-–—]\s*(.+)$/i },
+  { field:'qod',      re:/^(questions?\s+of\s+the\s+day|qod|do\s*now\s+question|bell\s*ringer\s+question)\s*[:\-–—]\s*(.+)$/i },
+  { field:'homework', re:/^(homework|hw|due|assignment)\s*[:\-–—]\s*(.+)$/i },
+  { field:'topic',    re:/^(topics?|titles?|lesson)\s*[:\-–—]\s*(.+)$/i },
+];
+// A row that is JUST a break word (optionally "… time") becomes a break divider.
+const _IMPORT_BREAK = /^(break|lunch|recess|passing\s*period|transition|snack)(\s*time)?\.?$/i;
+// Phase defaults for rows with no explicit I/WE/YOU DO move.
+const _IMPORT_OPENING = /^(prayer|opening\s+prayer|prelude|do\s*now|warm[\s\-]?up|bell\s*ringer|entrance|hook|sign\s+of\s+the\s+cross)\b/i;
+const _IMPORT_CLOSER  = /^(exit\s+ticket|closer|closing|wrap[\s\-]?up|cool\s*down|dismissal|closing\s+prayer)\b/i;
+
 function parseAgendaText(text){
   const timeRe = /(\d{1,2}:\d{2})\s*[–—\-~]{1,3}\s*(\d{1,2}:\d{2})/;
-  const rows = [];
+  const items = [];
   for (let raw of String(text||'').split(/\r?\n/)){
     let line = raw.replace(/ /g, ' ');
     if (!line.trim()) continue;
     // 1) time range → duration
-    let dur = null, timeTxt = '';
+    let dur = null;
     const tm = line.match(timeRe);
-    if (tm){ dur = _clockDiff(tm[1], tm[2]); timeTxt = tm[0]; line = line.replace(tm[0], ' '); }
+    if (tm){ dur = _clockDiff(tm[1], tm[2]); line = line.replace(tm[0], ' '); }
     // 2) teaching move → phase
     let grr = '';
     const mv = _moveToPhase(line);
     if (mv){ grr = mv.phase; line = line.replace(mv.re, ' '); }
     // 3) drop a leading step number that was its own column (tab or 2+ spaces after)
     line = line.replace(/^\s*\d{1,3}(?:[.\):\-])?(?:\t+|\s{2,})/, ' ');
-    // 4) whatever's left is the activity name — collapse column gaps
+    // 4) whatever's left is the name — collapse column gaps, trim stray dashes
     let name = line.replace(/\t+/g, ' ').replace(/\s{2,}/g, ' ').trim();
-    // strip a lone dash/pipe left where the "move" column had "—"
     name = name.replace(/^[\s—–\-|·:]+/, '').replace(/[\s—–\-|]+$/, '').trim();
     // skip a header row like "Step  Activity  Mode  Time"
     if (dur == null && !grr && /^(step|#|no\.?|activity|task|item|mode|move|phase|time|min|duration)\b/i.test(name)) continue;
     if (!name && dur == null && !grr) continue;   // junk / separator line
-    rows.push({ name: name || '(untitled)', dur, grr, timeTxt });
+
+    // a) metadata line → route to a lesson field
+    let meta = null;
+    for (const m of _IMPORT_META){ const g = name.match(m.re); if(g){ meta = { field:m.field, value:g[2].trim() }; break; } }
+    if (meta && meta.value){ items.push({ kind:'field', field:meta.field, value:meta.value }); continue; }
+    // b) a bare "Break" / "Lunch" line → break divider
+    if (_IMPORT_BREAK.test(name)){ items.push({ kind:'break', name: name || 'Break' }); continue; }
+    // c) otherwise an activity; default the phase for obvious openers/closers
+    if (!grr){ if(_IMPORT_OPENING.test(name)) grr = 'opening'; else if(_IMPORT_CLOSER.test(name)) grr = 'closer'; }
+    items.push({ kind:'activity', name: name || '(untitled)', dur, grr });
   }
-  return rows;
+  return items;
 }
+const _IMPORT_FIELD_LABEL = { goals:'→ Goals', targets:'→ Learning targets', eq:'→ Essential question', qod:'→ Q.O.D.', homework:'→ Homework', topic:'→ Topic' };
 
 function openImportPlan(di){
   _importDayIdx = di;
@@ -3296,47 +3325,90 @@ function previewImportPlan(){
     return;
   }
   const phLabel = v => (PHASE_BY_V[v] ? PHASE_BY_V[v].label : '—');
-  const totalMin = _importParsed.reduce((s,r)=> s + (r.dur||0), 0);
-  const noTime = _importParsed.filter(r=> r.dur==null).length;
-  const rowsHTML = _importParsed.map((r,idx)=>`
-    <tr style="border-top:1px solid var(--rule)">
+  const acts   = _importParsed.filter(r=> r.kind==='activity');
+  const breaks = _importParsed.filter(r=> r.kind==='break');
+  const fields = _importParsed.filter(r=> r.kind==='field');
+  const totalMin = acts.reduce((s,r)=> s + (r.dur||0), 0);
+  const noTime = acts.filter(r=> r.dur==null).length;
+  const rowsHTML = _importParsed.map((r,idx)=>{
+    let type, name, len, phase;
+    if (r.kind==='field'){
+      type = `<span style="color:#0C447C;font-weight:700">${esc(_IMPORT_FIELD_LABEL[r.field]||'→ Field')}</span>`;
+      name = esc(r.value); len = '—'; phase = '—';
+    } else if (r.kind==='break'){
+      type = `<span style="color:#7A4B00;font-weight:700">🍽 Break</span>`;
+      name = esc(r.name); len = '—'; phase = '—';
+    } else {
+      type = `<span style="color:var(--ink-3)">Activity</span>`;
+      name = esc(r.name);
+      len = r.dur!=null ? r.dur+' min' : '<span style="color:#B45309">5 min*</span>';
+      phase = r.grr ? esc(phLabel(r.grr)) : '<span style="color:var(--ink-3)">—</span>';
+    }
+    return `<tr style="border-top:1px solid var(--rule)">
       <td style="padding:6px 8px;color:var(--ink-3);font-size:11px;text-align:right">${idx+1}</td>
-      <td style="padding:6px 8px;font-size:12.5px">${esc(r.name)}</td>
-      <td style="padding:6px 8px;font-size:11.5px;color:var(--ink-2);white-space:nowrap">${r.dur!=null?r.dur+' min':'<span style="color:#B45309">— set</span>'}</td>
-      <td style="padding:6px 8px;font-size:11.5px;color:var(--ink-2);white-space:nowrap">${r.grr?esc(phLabel(r.grr)):'<span style="color:var(--ink-3)">—</span>'}</td>
-    </tr>`).join('');
+      <td style="padding:6px 8px;font-size:11px;white-space:nowrap">${type}</td>
+      <td style="padding:6px 8px;font-size:12.5px">${name}</td>
+      <td style="padding:6px 8px;font-size:11.5px;color:var(--ink-2);white-space:nowrap">${len}</td>
+      <td style="padding:6px 8px;font-size:11.5px;color:var(--ink-2);white-space:nowrap">${phase}</td>
+    </tr>`;
+  }).join('');
   if (pv) pv.innerHTML = `
     <div style="border:1px solid var(--rule-dark);border-radius:8px;overflow:hidden">
       <table style="width:100%;border-collapse:collapse;background:#fff">
         <thead><tr style="background:#F5F7FA">
           <th style="padding:6px 8px;font-size:10.5px;color:var(--ink-3);text-align:right;font-weight:700">#</th>
-          <th style="padding:6px 8px;font-size:10.5px;color:var(--ink-3);text-align:left;font-weight:700">Activity</th>
+          <th style="padding:6px 8px;font-size:10.5px;color:var(--ink-3);text-align:left;font-weight:700">Type</th>
+          <th style="padding:6px 8px;font-size:10.5px;color:var(--ink-3);text-align:left;font-weight:700">Content</th>
           <th style="padding:6px 8px;font-size:10.5px;color:var(--ink-3);text-align:left;font-weight:700">Length</th>
           <th style="padding:6px 8px;font-size:10.5px;color:var(--ink-3);text-align:left;font-weight:700">Phase</th>
         </tr></thead>
         <tbody>${rowsHTML}</tbody>
       </table>
     </div>`;
-  if (ct) ct.textContent = `${_importParsed.length} activit${_importParsed.length===1?'y':'ies'} · ${totalMin} min total${noTime?` · ${noTime} without a time (will default to 5 min)`:''}`;
+  const parts = [];
+  parts.push(`${acts.length} activit${acts.length===1?'y':'ies'} · ${totalMin} min`);
+  if (breaks.length) parts.push(`${breaks.length} break${breaks.length===1?'':'s'}`);
+  if (fields.length) parts.push(`${fields.length} field${fields.length===1?'':'s'}`);
+  if (noTime) parts.push(`${noTime} without a time (→ 5 min)`);
+  if (ct) ct.textContent = parts.join(' · ');
   _setImportButtons(true);
+}
+// Route a metadata line into the matching lesson field (append, don't clobber).
+function _applyImportField(d, field, value){
+  const v = String(value||'').trim(); if(!v) return;
+  const div = t => `<div>${esc(t)}</div>`;
+  if (field==='eq'){        d.eq = htmlPlain(d.eq) ? (htmlPlain(d.eq)+'; '+v) : v; }
+  else if (field==='topic'){ if(!htmlPlain(d.topic)) d.topic = v; }
+  else if (field==='goals'){ d.goalsText = (hasHtmlText(d.goalsText)?d.goalsText:'') + div(v); }
+  else if (field==='targets'){ const tv = 'I can ' + v.replace(/^i\s*can\s*/i,''); d.targetsText = (hasHtmlText(d.targetsText)?d.targetsText:'') + div(tv); }
+  else if (field==='qod'){   d.qod = (hasHtmlText(d.qod)?d.qod:'') + div(v); }
+  else if (field==='homework'){ d.homework = (hasHtmlText(d.homework)?d.homework:'') + div(v); }
 }
 function applyImportPlan(replace){
   const di = _importDayIdx;
   if (di == null || !_importParsed.length) return;
   const d = getDay(di);
   if (!d.activities) d.activities = [];
+  const seq = _importParsed.filter(r=> r.kind==='activity' || r.kind==='break');
+  const fieldItems = _importParsed.filter(r=> r.kind==='field');
   if (replace && d.activities.length &&
-      !confirm(`Replace this lesson’s ${d.activities.length} activit${d.activities.length===1?'y':'ies'} with the ${_importParsed.length} pasted one${_importParsed.length===1?'':'s'}?`)) return;
-  const built = _importParsed.map(r => ({
-    id: uid(), start: '—', dur: (r.dur!=null ? r.dur : 5),
-    name: r.name === '(untitled)' ? '' : r.name,
-    notes:'', eq:'', grr: r.grr||'', ipp:'', content:'', studentActivity:'', boardNotes:''
-  }));
-  d.activities = replace ? built : d.activities.concat(built);
+      !confirm(`Replace this lesson’s ${d.activities.length} activit${d.activities.length===1?'y':'ies'} with the ${seq.length} pasted item${seq.length===1?'':'s'}?`)) return;
+  // Build the ordered activity/break list.
+  const built = seq.map(r => r.kind==='break'
+    ? { id: uid(), brk:true, name: r.name || 'Break' }
+    : { id: uid(), start:'—', dur:(r.dur!=null ? r.dur : 5),
+        name: r.name === '(untitled)' ? '' : r.name,
+        notes:'', eq:'', grr: r.grr||'', ipp:'', content:'', studentActivity:'', boardNotes:'' });
+  if (built.length) d.activities = replace ? built : d.activities.concat(built);
+  // Route metadata lines into the lesson fields.
+  fieldItems.forEach(r => _applyImportField(d, r.field, r.value));
   saveState();
   closeImportPlan();
   renderUnit();
-  toast(`${replace?'Replaced with':'Added'} ${built.length} activit${built.length===1?'y':'ies'} ✓`);
+  const bits = [];
+  if (built.length) bits.push(`${built.length} item${built.length===1?'':'s'}`);
+  if (fieldItems.length) bits.push(`${fieldItems.length} field${fieldItems.length===1?'':'s'}`);
+  toast(`${replace?'Replaced':'Added'}: ${bits.join(' + ')||'nothing'} ✓`);
 }
 
 function makeDay(label, date, eq) {
