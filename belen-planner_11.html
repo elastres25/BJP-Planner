@@ -2286,7 +2286,8 @@ function out(o) {
         <b>teaching move</b> (<b>I DO</b>→Focus, <b>WE DO</b>→Guided, <b>YOU DO</b>→Independent).
         A line that’s just <b>Break</b> / <b>Lunch</b> becomes a break divider, and labeled lines like
         <b>Objective:</b>, <b>I can:</b>, <b>Essential Question:</b>, <b>Homework:</b> fill those fields
-        instead. Step numbers and extra columns are ignored. Preview shows where each line lands.
+        instead. A bracket tag like <b>[C·E · IW]</b> sets the IPP stage(s) and the Activity Key.
+        Step numbers and extra columns are ignored. Preview shows where each line lands.
       </div>
       <textarea id="import-text" placeholder="0&#9;Prelude&#9;YOU DO&#9;0:00–0:05&#10;1&#9;Prayer · Objective · Agenda&#9;—&#9;0:05–0:11&#10;2&#9;Recap — tag the Our Father together&#9;WE DO&#9;0:11–0:16&#10;…"
         style="width:100%;height:190px;border:1px solid var(--rule-dark);border-radius:8px;padding:12px;font-family:inherit;font-size:13px;line-height:1.55;color:var(--ink);resize:vertical;outline:none"></textarea>
@@ -2460,7 +2461,7 @@ const ASSESS_COLORS = {
 // The build version baked into the app itself, so the update checker knows what
 // it's running even when the page was loaded WITHOUT a ?v= token (e.g. the
 // Netlify root rewrite). Keep this in lockstep with index.html's ?v= token.
-window.APP_VERSION = '20260920-44';
+window.APP_VERSION = '20260921-45';
 
 let activeCourse = 6; // default to Theology 6
 
@@ -3248,7 +3249,27 @@ const _IMPORT_META = [
 const _IMPORT_BREAK = /^(break|lunch|recess|passing\s*period|transition|snack)(\s*time)?\.?$/i;
 // Phase defaults for rows with no explicit I/WE/YOU DO move.
 const _IMPORT_OPENING = /^(prayer|opening\s+prayer|prelude|do\s*now|warm[\s\-]?up|bell\s*ringer|entrance|hook|sign\s+of\s+the\s+cross)\b/i;
-const _IMPORT_CLOSER  = /^(exit\s+ticket|closer|closing|wrap[\s\-]?up|cool\s*down|dismissal|closing\s+prayer)\b/i;
+const _IMPORT_CLOSER  = /^(exit\s+ticket|close(?:r|d)?|closing|wrap[\s\-]?up|cool\s*down|dismissal|closing\s+prayer)\b/i;
+
+// A bracketed tag like "[C · DI]" or "[E·R · NP]" or "[E·V · T/Q]" carries the
+// IPP stage(s) (single letters C/E/R/A/V) and the Activity Key (a known 2-letter
+// code, or T/Q). The Activity Key is a known token; everything else in the
+// bracket that is a lone C/E/R/A/V is an IPP stage. We pull the key out FIRST so
+// keys that share letters with IPP stages (e.g. "RA" vs the stages R+A) don't
+// bleed into the IPP list.
+const _IPP_LETTER_TO_STAGE = { C:'context', E:'experience', R:'reflection', A:'action', V:'evaluation' };
+function _parseBracketTag(content){
+  let s = ' ' + String(content||'') + ' ';
+  let atype = '';
+  const keyRe = /(T\/Q|IW|GW|CD|IP|NP|DI|RA|SS)/g;   // T/Q first (longest)
+  let m, last = null;
+  while ((m = keyRe.exec(s))) last = m;               // take the LAST key found
+  if (last){ atype = last[1]; s = s.slice(0, last.index) + ' ' + s.slice(last.index + last[1].length); }
+  const seen = new Set();
+  (s.match(/[CERAV]/g) || []).forEach(L => { const st = _IPP_LETTER_TO_STAGE[L]; if (st) seen.add(st); });
+  const ipp = IPP_STAGES.filter(st => seen.has(st.v)).map(st => st.v);   // canonical order
+  return { atype, ipp };
+}
 
 function parseAgendaText(text){
   const timeRe = /(\d{1,2}:\d{2})\s*[–—\-~]{1,3}\s*(\d{1,2}:\d{2})/;
@@ -3264,24 +3285,32 @@ function parseAgendaText(text){
     let grr = '';
     const mv = _moveToPhase(line);
     if (mv){ grr = mv.phase; line = line.replace(mv.re, ' '); }
+    // 2.5) bracket tag "[IPP · Activity Key]" → IPP stages + activity type
+    let atype = '', ipp = [], hadBracket = false;
+    const br = line.match(/\[([^\]]*)\]/);
+    if (br){ hadBracket = true; const t = _parseBracketTag(br[1]); atype = t.atype; ipp = t.ipp; line = line.replace(br[0], ' '); }
     // 3) drop a leading step number that was its own column (tab or 2+ spaces after)
     line = line.replace(/^\s*\d{1,3}(?:[.\):\-])?(?:\t+|\s{2,})/, ' ');
     // 4) whatever's left is the name — collapse column gaps, trim stray dashes
     let name = line.replace(/\t+/g, ' ').replace(/\s{2,}/g, ' ').trim();
     name = name.replace(/^[\s—–\-|·:]+/, '').replace(/[\s—–\-|]+$/, '').trim();
     // skip a header row like "Step  Activity  Mode  Time"
-    if (dur == null && !grr && /^(step|#|no\.?|activity|task|item|mode|move|phase|time|min|duration)\b/i.test(name)) continue;
+    if (dur == null && !grr && !hadBracket && /^(step|#|no\.?|activity|task|item|mode|move|phase|time|min|duration)\b/i.test(name)) continue;
     if (!name && dur == null && !grr) continue;   // junk / separator line
 
-    // a) metadata line → route to a lesson field
-    let meta = null;
-    for (const m of _IMPORT_META){ const g = name.match(m.re); if(g){ meta = { field:m.field, value:g[2].trim() }; break; } }
-    if (meta && meta.value){ items.push({ kind:'field', field:meta.field, value:meta.value }); continue; }
+    // a) metadata line → route to a lesson field. Only a pure label line
+    // (no time, no move, no bracket) counts, so a scheduled activity that merely
+    // starts with a label word (e.g. "Vocabulary: …  [C·DI] 0:14 I DO") is kept.
+    if (dur == null && !grr && !hadBracket){
+      let meta = null;
+      for (const m of _IMPORT_META){ const g = name.match(m.re); if(g){ meta = { field:m.field, value:g[2].trim() }; break; } }
+      if (meta && meta.value){ items.push({ kind:'field', field:meta.field, value:meta.value }); continue; }
+    }
     // b) a bare "Break" / "Lunch" line → break divider
     if (_IMPORT_BREAK.test(name)){ items.push({ kind:'break', name: name || 'Break' }); continue; }
     // c) otherwise an activity; default the phase for obvious openers/closers
     if (!grr){ if(_IMPORT_OPENING.test(name)) grr = 'opening'; else if(_IMPORT_CLOSER.test(name)) grr = 'closer'; }
-    items.push({ kind:'activity', name: name || '(untitled)', dur, grr });
+    items.push({ kind:'activity', name: name || '(untitled)', dur, grr, atype, ipp });
   }
   return items;
 }
@@ -3340,7 +3369,9 @@ function previewImportPlan(){
       name = esc(r.name); len = '—'; phase = '—';
     } else {
       type = `<span style="color:var(--ink-3)">Activity</span>`;
-      name = esc(r.name);
+      const ippLetters = (r.ipp||[]).map(v=>IPP_LETTER[v]||'').filter(Boolean).join('·');
+      const tag = [r.atype||'', ippLetters].filter(Boolean).join(' · ');
+      name = esc(r.name) + (tag ? ` <span style="color:#0C447C;font-size:10.5px;font-weight:700;white-space:nowrap">[${esc(tag)}]</span>` : '');
       len = r.dur!=null ? r.dur+' min' : '<span style="color:#B45309">5 min*</span>';
       phase = r.grr ? esc(phLabel(r.grr)) : '<span style="color:var(--ink-3)">—</span>';
     }
@@ -3398,7 +3429,9 @@ function applyImportPlan(replace){
     ? { id: uid(), brk:true, name: r.name || 'Break' }
     : { id: uid(), start:'—', dur:(r.dur!=null ? r.dur : 5),
         name: r.name === '(untitled)' ? '' : r.name,
-        notes:'', eq:'', grr: r.grr||'', ipp:'', content:'', studentActivity:'', boardNotes:'' });
+        notes:'', eq:'', grr: r.grr||'', atype: r.atype||'',
+        ipp: (r.ipp && r.ipp.length) ? r.ipp.slice() : [],
+        content:'', studentActivity:'', boardNotes:'' });
   if (built.length) d.activities = replace ? built : d.activities.concat(built);
   // Route metadata lines into the lesson fields.
   fieldItems.forEach(r => _applyImportField(d, r.field, r.value));
