@@ -1942,7 +1942,7 @@ tr.assign-done input[type=text]{text-decoration:line-through;}
       <div class="course-stats">
         <div class="cstat"><div class="cstat-n">11</div><div class="cstat-l">Units</div></div>
         <div class="cstat"><div class="cstat-n">2</div><div class="cstat-l">Semesters</div></div>
-        <div class="cstat"><div class="cstat-n">90</div><div class="cstat-l">Min / block</div></div>
+        <div class="cstat"><div class="cstat-n">85</div><div class="cstat-l">Min / block</div></div>
         <div class="cstat"><div class="cstat-n">AMDG</div><div class="cstat-l">Ad Majorem Dei Gloriam</div></div>
       </div>
     </div>
@@ -2461,7 +2461,7 @@ const ASSESS_COLORS = {
 // The build version baked into the app itself, so the update checker knows what
 // it's running even when the page was loaded WITHOUT a ?v= token (e.g. the
 // Netlify root rewrite). Keep this in lockstep with index.html's ?v= token.
-window.APP_VERSION = '20260921-45';
+window.APP_VERSION = '20260921-46';
 
 let activeCourse = 6; // default to Theology 6
 
@@ -2860,6 +2860,11 @@ function loadState() {
         // This un-hides any such unit (it only ever recovers data, never
         // removes it).
         pruneHiddenPopulatedUnits(parsed);
+        // One-time fix: the standard block is 85 min, but older lessons were
+        // created with the wrong 90-min default. Flip any day still sitting at
+        // that old default to 85, once — a flag stops it from ever re-touching
+        // a 90 you might set on purpose later.
+        migrateBlockDuration85(parsed);
         // Safe one-time recovery: if Unit 1 Day 1 looks empty (lost to the
         // sync bug), restore it from the saved PDF without touching
         // anything else already in the planner.
@@ -2887,6 +2892,22 @@ function loadState() {
   const fresh = {_v:2, units, teacher:'Eric Lastres, SJ', objs: defaultObjs(), unitOverviews: defaultUnitOverviews()};
   if (activeCourse === 6) restoreUnit1Day1IfEmpty(fresh);
   return fresh;
+}
+
+// One-time migration of the standard period length from the old 90-min
+// default to the correct 85. Only touches days still at exactly 90, and only
+// once per course (guarded by st._blk85), so a period you deliberately set to
+// 90 afterward is never changed back.
+function migrateBlockDuration85(st){
+  if (!st || st._blk85) return;
+  try {
+    Object.values(st.units || {}).forEach(weeks => {
+      (weeks || []).forEach(w => {
+        ((w && w.days) || []).forEach(d => { if (d && d.blockDuration === 90) d.blockDuration = 85; });
+      });
+    });
+  } catch(e){ console.error('migrateBlockDuration85', e); }
+  st._blk85 = true;
 }
 
 // Restores the real Day 1 lesson (Unit 1, Week 1) recovered from a saved
@@ -3445,7 +3466,7 @@ function applyImportPlan(replace){
 }
 
 function makeDay(label, date, eq) {
-  return { label, date:'', dateA:'', dateB:'', block:'A & B Block', blockDuration:90, topic:'', eq, qod:'', topicDesc:'', brainstorm:'', journalPrompt:'', journalDur:3, journalGrr:'closer', targets:[], teacherGoals:[], vocab:[], lessonObjs:[], knowledgeIntroduced:[], skillsCovered:[], lessonScripture:[], lessonCatechism:[], lessonSaints:[], activities:templateActivities(), materials:[], techTools:[], links:[], assessType:'', assessment:'', homework:'', ignatianReflection:'', postNotes:'' };
+  return { label, date:'', dateA:'', dateB:'', block:'A & B Block', blockDuration:85, topic:'', eq, qod:'', topicDesc:'', brainstorm:'', journalPrompt:'', journalDur:3, journalGrr:'closer', targets:[], teacherGoals:[], vocab:[], lessonObjs:[], knowledgeIntroduced:[], skillsCovered:[], lessonScripture:[], lessonCatechism:[], lessonSaints:[], activities:templateActivities(), materials:[], techTools:[], links:[], assessType:'', assessment:'', homework:'', ignatianReflection:'', postNotes:'' };
 }
 
 function demoWeek() {
@@ -4005,7 +4026,7 @@ function dayIsPlanned(d){
   if(!d) return false;
   if(!d.topic || !String(d.topic).replace(/<[^>]*>/g,'').trim()) return false;
   if(!(d.activities||[]).length) return false;
-  const block = d.blockDuration || 90;
+  const block = d.blockDuration || 85;
   return dayMinutesUsed(d) >= block;
 }
 function isoToday(){ const t=new Date(); return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`; }
@@ -5132,7 +5153,7 @@ function renderDashboard(){
   // ── course-wide planned coverage ──
   let total=0, built=0, plannedMin=0;
   UNIT_META.forEach(u=>(state.units[u.id]||[]).forEach(w=>(w.days||[]).forEach(d=>{
-    total++; if(dayIsPlanned(d)){ built++; plannedMin+=(d.blockDuration||90); }
+    total++; if(dayIsPlanned(d)){ built++; plannedMin+=(d.blockDuration||85); }
   })));
   const pct = total ? Math.round(built/total*100) : 0;
   const pctColor = pct>=80 ? '#1D9E75' : pct>=40 ? 'var(--gold)' : 'var(--crit)';
@@ -9697,7 +9718,7 @@ function weekDateRangeHTML(week, wi){
 
 function dayCardHTML(d, wi, di, c, weeks) {
   const used = (d.activities||[]).reduce((s,a)=>s+(a.dur||0),0);
-  const blockDur = d.blockDuration || 90;
+  const blockDur = d.blockDuration || 85;
   const planned = dayIsPlanned(d);
   const dateStr = d.dateA && d.dateB
     ? `A: ${fmtMD(d.dateA)} · B: ${fmtMD(d.dateB)}`
@@ -10176,7 +10197,7 @@ function lessonDoneViewHTML(d, i){
 
 function dailyPanelHTML(d, i) {
   const u = UNIT_META.find(m=>m.id===currentUnit);
-  const blockDur = d.blockDuration || 90;
+  const blockDur = d.blockDuration || 85;
   const _seg = actSegments(d.activities);
   const usedMins = _seg.total;
   const totalTxt = _seg.hasBreak ? `${_seg.segs.join(' + ')} = ${usedMins} / ${blockDur} min` : `Total: ${usedMins} / ${blockDur} min`;
@@ -11638,7 +11659,7 @@ function updateActDur(di, ai, val) {
   const d = getDay(di);
   const seg = actSegments(d.activities);
   const used = seg.total;
-  const blockDur = d.blockDuration || 90;
+  const blockDur = d.blockDuration || 85;
   const chip = document.querySelector('#day-modal-overlay .dl-time, .daily-panel.open .dl-time');
   if (chip) { chip.textContent = `${used} / ${blockDur} min`; chip.classList.toggle('over', used>blockDur); }
   const total = document.getElementById(`acttotal-${di}`);
@@ -11666,7 +11687,7 @@ function refreshAllTimestamps(di) {
 
 function refreshTracker(di) {
   const d = getDay(di);
-  const blockDur = d.blockDuration || 90;
+  const blockDur = d.blockDuration || 85;
   const total = (d.activities||[]).reduce((s,a)=>s+a.dur,0) + (d.journalOff ? 0 : (d.journalDur ?? 3));
   const pct = Math.min(100, Math.round(total/blockDur*100));
   const col = total > blockDur ? '#993C1D' : total > blockDur*0.9 ? '#854F0B' : '#1B3A6B';
@@ -12376,7 +12397,7 @@ function exportPDF() {
     }).join('');
   };
 
-  const blockDur = d.blockDuration || 90;
+  const blockDur = d.blockDuration || 85;
   const used = (d.activities||[]).reduce((s,a)=>s+(a.dur||0),0);
   const targets = (d.targets||[]).map(t=>'I can '+strip(t).replace(/^I can\s*/i,''));
 
