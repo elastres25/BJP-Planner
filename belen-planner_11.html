@@ -2461,7 +2461,7 @@ const ASSESS_COLORS = {
 // The build version baked into the app itself, so the update checker knows what
 // it's running even when the page was loaded WITHOUT a ?v= token (e.g. the
 // Netlify root rewrite). Keep this in lockstep with index.html's ?v= token.
-window.APP_VERSION = '20260921-46';
+window.APP_VERSION = '20261021-47';
 
 let activeCourse = 6; // default to Theology 6
 
@@ -10331,6 +10331,9 @@ function dailyPanelHTML(d, i) {
     <tr><td class="dl-lbl">Learning Targets<small>&ldquo;I can…&rdquo; statements</small></td><td class="dl-cell">
       ${rteBox(`rte-targets-${i}`, targetsHTML(d), `updateDay(${i},'targetsText',this.innerHTML)`, 'I can…')}
     </td></tr>
+    <tr><td class="dl-lbl">Curriculum<small>Unit goals · knowledge · skills this lesson covers</small></td><td class="dl-cell">
+      ${dayCoverageHTML(i, d)}
+    </td></tr>
 
     <tr><td class="dl-banner" colspan="2">Learning Activities / Tasks</td></tr>
     <tr><td class="dl-lbl">Learning Activities / Tasks<small>Name · minutes · IPP. Use ＋ details for notes.</small></td><td class="dl-cell dl-acts">
@@ -12146,6 +12149,75 @@ function removeLessonObj(di, oi) {
 }
 function toggleLessonObj(di, oi, checked) { // keep for compat
   if (checked) addLessonObj(di, oi); else removeLessonObj(di, oi);
+}
+
+// ── DAY CURRICULUM-COVERAGE CONTROL ───────────────────────────────
+// A compact "+ Tag goal / knowledge / skill" dropdown in each lesson. Picking
+// an item writes to the day's existing coverage arrays (lessonObjs /
+// knowledgeIntroduced / skillsCovered), which in turn greens the matching chip
+// in the Unit Overview automatically (isUnitGoalCoveredFull etc.).
+function addCoverage(di, val){
+  if (!val) return;
+  const d = getDay(di);
+  const parts = String(val).split(':');
+  const kind = parts[0];
+  if (kind === 'goal'){
+    const oi = +parts[1];
+    d.lessonObjs = d.lessonObjs || [];
+    if (!d.lessonObjs.includes(oi)) d.lessonObjs.push(oi);
+  } else if (kind === 'skill'){
+    const si = +parts[1];
+    d.skillsCovered = d.skillsCovered || [];
+    if (!d.skillsCovered.includes(si)) d.skillsCovered.push(si);
+  } else if (kind === 'know'){
+    const ci = +parts[1], ii = +parts[2];
+    d.knowledgeIntroduced = d.knowledgeIntroduced || [];
+    if (!d.knowledgeIntroduced.some(k => k.catIdx===ci && k.itemIdx===ii)) d.knowledgeIntroduced.push({catIdx:ci, itemIdx:ii});
+  }
+  saveState(); renderUnit();
+}
+// A single green coverage chip (matches the Unit Overview chip style).
+function _covChip(label, icon, removeCall){
+  return `<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 7px 3px 8px;border-radius:8px;background:#E1F5EE;color:#085041;border:1px solid #A7DEC8;line-height:1.3">
+    <span style="font-size:10px">${icon}</span><span>${esc(label)}</span>
+    <button onclick="${removeCall}" title="Remove from this lesson" style="border:none;background:none;cursor:pointer;color:#085041;opacity:.55;font-size:13px;line-height:1;padding:0;margin-left:1px">&times;</button>
+  </span>`;
+}
+function dayCoverageHTML(i, d){
+  const uid = currentUnit;
+  const uov = getUOV(uid);
+  const goals  = (uov.unitGoalItems || []).filter(x => typeof x === 'string' && x.trim());
+  const skills = (uov.skillItems || []).filter(x => typeof x === 'string' && x.trim());
+  const cats   = (uov.knowledgeCategories || []);
+  const anyAvail = goals.length || skills.length || cats.some(c => (c.items||[]).length);
+
+  // Selected chips (ordered: goals, knowledge, skills)
+  let chips = '';
+  (d.lessonObjs || []).forEach(oi => { const g = goals[oi]; if (g) chips += _covChip(g, '🎯', `removeLessonObj(${i},${oi})`); });
+  (d.knowledgeIntroduced || []).forEach(k => { const c = cats[k.catIdx]; const it = c && (c.items||[])[k.itemIdx]; if (it) chips += _covChip(it, '📘', `removeKnowledgeFromLesson(${i},${k.catIdx},${k.itemIdx})`); });
+  (d.skillsCovered || []).forEach(si => { const s = skills[si]; if (s) chips += _covChip(s, '🧩', `removeSkillFromDay(${i},${si})`); });
+
+  if (!anyAvail){
+    return `<div style="font-size:11.5px;color:var(--ink-3);line-height:1.45">No unit goals/knowledge/skills yet. Add them in this unit’s <b>Overview</b> (the panel above the lessons) and they’ll appear here to tag.</div>`;
+  }
+  // Dropdown options — hide anything already tagged on this day.
+  const goalOpts = goals.map((g, idx) => (d.lessonObjs||[]).includes(idx) ? '' : `<option value="goal:${idx}">${esc(g)}</option>`).join('');
+  const knowGroups = cats.map((cat, ci) => {
+    const opts = (cat.items||[]).map((it, ii) => (d.knowledgeIntroduced||[]).some(k => k.catIdx===ci && k.itemIdx===ii) ? '' : `<option value="know:${ci}:${ii}">${esc(it)}</option>`).join('');
+    return opts ? `<optgroup label="${esc(cat.name||'Knowledge')}">${opts}</optgroup>` : '';
+  }).join('');
+  const skillOpts = skills.map((s, idx) => (d.skillsCovered||[]).includes(idx) ? '' : `<option value="skill:${idx}">${esc(s)}</option>`).join('');
+  const groups =
+    (goalOpts ? `<optgroup label="Unit Goals">${goalOpts}</optgroup>` : '') +
+    knowGroups +
+    (skillOpts ? `<optgroup label="Skills">${skillOpts}</optgroup>` : '');
+  const dd = groups
+    ? `<select onchange="addCoverage(${i}, this.value); this.selectedIndex=0" title="Tag a unit goal, knowledge item, or skill this lesson covers"
+         style="border:1px dashed var(--rule-dark);border-radius:8px;padding:4px 8px;font-size:11px;font-family:inherit;color:var(--navy);background:var(--white);cursor:pointer;outline:none;max-width:320px">
+         <option value="">＋ Tag goal / knowledge / skill…</option>${groups}</select>`
+    : `<span style="font-size:11px;color:#085041;font-weight:600">All curriculum items tagged ✓</span>`;
+
+  return `<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center">${chips}${dd}</div>`;
 }
 
 function updateObj(i, val) {
