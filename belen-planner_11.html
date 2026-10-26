@@ -1518,6 +1518,7 @@ body.dragging-lesson, body.dragging-week { cursor: grabbing; }
     <button onclick="closeMoreMenu();openSyncSetup()">☁️ Cloud sync setup…</button>
     <button onclick="closeMoreMenu();exportBackup()">Backup my data</button>
     <button onclick="closeMoreMenu();document.getElementById('restore-file-input').click()">Restore from backup</button>
+    <button onclick="closeMoreMenu();openSnapshots()">🕑 Restore an earlier version…</button>
     <button onclick="closeMoreMenu();exportPDF()">Export PDF</button>
     <button onclick="closeMoreMenu();exportBlackbaudLog()">🗂️ Class log for Blackbaud</button>
     <button onclick="closeMoreMenu();driveSendCurrentUnit()">☁ Send this unit to Drive</button>
@@ -2272,6 +2273,17 @@ function out(o) {
   </div>
 </div>
 
+<!-- RESTORE AN EARLIER VERSION (automatic snapshots) MODAL -->
+<div id="snap-overlay" style="display:none;position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.5);overflow-y:auto" onclick="if(event.target===this)closeSnapshots()">
+  <div style="background:var(--white);max-width:560px;margin:44px auto;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,.3);overflow:hidden">
+    <div style="background:var(--navy);padding:12px 16px;display:flex;align-items:center;justify-content:space-between">
+      <span style="color:#fff;font-weight:600;font-size:14px">🕑 Restore an earlier version</span>
+      <button onclick="closeSnapshots()" style="background:rgba(255,255,255,.15);border:none;border-radius:6px;color:#fff;font-size:20px;width:32px;height:32px;cursor:pointer;line-height:1">&times;</button>
+    </div>
+    <div style="padding:16px"><div id="snap-body"></div></div>
+  </div>
+</div>
+
 <!-- IMPORT / PASTE-A-PLAN MODAL — paste a text agenda, auto-fill the lesson -->
 <div id="import-overlay" style="display:none;position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.5);overflow-y:auto" onclick="if(event.target===this)closeImportPlan()">
   <div style="background:var(--white);max-width:640px;margin:44px auto;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,.3);overflow:hidden">
@@ -2461,7 +2473,7 @@ const ASSESS_COLORS = {
 // The build version baked into the app itself, so the update checker knows what
 // it's running even when the page was loaded WITHOUT a ?v= token (e.g. the
 // Netlify root rewrite). Keep this in lockstep with index.html's ?v= token.
-window.APP_VERSION = '20261021-47';
+window.APP_VERSION = '20261026-48';
 
 let activeCourse = 6; // default to Theology 6
 
@@ -2480,6 +2492,7 @@ function switchCourse(id) {
   // Sync from cloud for this course
   pullFromSheets().then(ok => {
     if (ok) { toast('Loaded ' + getCourse().name + ' ✓'); renderDashboard(); }
+    try { takeDailySnapshot(); } catch(e){}
   });
 }
 
@@ -3604,6 +3617,108 @@ async function autoPullOnFocus(){
   }catch(e){ console.error('auto-pull error', e); }
 }
 
+// ── AUTOMATIC LOCAL BACKUPS (snapshots) ───────────────────────────────
+// A rolling, on-device history of each course, kept separately from the live
+// data and from cloud sync. Snapshots are gzip-compressed to stay small, taken
+// once per day you use the app and before any risky overwrite (cloud adoption or
+// a restore). If a bad sync or a mistake wipes your work, you can roll back from
+// ⋯ → "Restore an earlier version." This is the safety net that was missing.
+const SNAP_PREFIX = 'bjp-snap-';
+const SNAP_KEEP = 10;
+// Count genuinely-planned days (ignores the empty default template) — used by
+// both the snapshot labels and the anti-data-loss sync guard.
+const _TEMPLATE_NAMES = new Set(['Prayer & Journal','Review & New Content','Guided Practice','Independent Practice','Reflection & Exit Ticket','']);
+function realDayCount(st){
+  let n=0;
+  const units=(st&&st.units)||{};
+  for(const uid in units){
+    const weeks=units[uid]; if(!Array.isArray(weeks)) continue;
+    for(const w of weeks){ for(const d of ((w&&w.days)||[])){
+      if(d.topic||d.homework||d.goalsText||d.targetsText||d.qod||(d.lessonObjs&&d.lessonObjs.length)||(d.skillsCovered&&d.skillsCovered.length)||d.postNotes){ n++; continue; }
+      const acts=(d.activities||[]);
+      if(acts.some(a=>a&&a.name&&!_TEMPLATE_NAMES.has(a.name))){ n++; continue; }
+      if(d.eq){ n++; }
+    }}
+  }
+  return n;
+}
+function getSnaps(cid){ try{ return JSON.parse(localStorage.getItem(SNAP_PREFIX+cid)||'[]')||[]; }catch(e){ return []; } }
+function setSnaps(cid, arr){
+  try{ localStorage.setItem(SNAP_PREFIX+cid, JSON.stringify(arr)); }
+  catch(e){ // storage full — drop oldest and retry a couple of times
+    while(arr.length>2){ arr.shift(); try{ localStorage.setItem(SNAP_PREFIX+cid, JSON.stringify(arr)); return; }catch(_){} }
+  }
+}
+// Snapshot the CURRENT in-memory state for the active course.
+async function takeSnapshot(reason){
+  try{
+    const cid = getCourse().id;
+    const json = JSON.stringify(state);
+    const real = realDayCount(state);
+    const snaps = getSnaps(cid);
+    const last = snaps[snaps.length-1];
+    // Skip if nothing meaningful changed since the last snapshot (same size).
+    if(last && last.len===json.length && last.real===real && (reason||'').startsWith('daily')) return;
+    let payload, gz=false;
+    if(typeof CompressionStream==='function'){ try{ payload=await gzipB64(json); gz=true; }catch(e){ payload=json; } }
+    else payload=json;
+    snaps.push({ t:Date.now(), reason:reason||'', real, len:json.length, gz, data:payload });
+    while(snaps.length>SNAP_KEEP) snaps.shift();
+    setSnaps(cid, snaps);
+  }catch(e){ console.error('takeSnapshot failed', e); }
+}
+// Once per calendar day, capture the state as loaded.
+async function takeDailySnapshot(){
+  const cid = getCourse().id;
+  const dayKey = new Date().toISOString().slice(0,10);
+  const snaps = getSnaps(cid);
+  const haveToday = snaps.some(s => new Date(s.t).toISOString().slice(0,10)===dayKey && (s.reason||'').startsWith('daily'));
+  if(!haveToday && realDayCount(state)>0) await takeSnapshot('daily '+dayKey);
+}
+async function _snapToState(snap){
+  const json = snap.gz ? await gunzipB64(snap.data) : snap.data;
+  return JSON.parse(json);
+}
+function openSnapshots(){ renderSnapshots(); document.getElementById('snap-overlay').style.display='block'; }
+function closeSnapshots(){ const o=document.getElementById('snap-overlay'); if(o) o.style.display='none'; }
+function renderSnapshots(){
+  const cid = getCourse().id;
+  const snaps = getSnaps(cid).slice().reverse();  // newest first
+  const body = document.getElementById('snap-body');
+  if(!body) return;
+  const head = `<div style="font-size:12.5px;color:var(--ink-2);margin-bottom:10px;line-height:1.5">Automatic on-device backups of <b>${esc(getCourse().name)}</b>. Each entry is a saved snapshot; restoring replaces the current course with that version (your current state is snapshotted first, so you can undo).</div>`;
+  if(!snaps.length){ body.innerHTML = head + `<div style="font-size:12.5px;color:var(--ink-3)">No snapshots yet for this course — they start building as you use the planner.</div>`; return; }
+  body.innerHTML = head + snaps.map((s,ri)=>{
+    const idx = getSnaps(cid).length-1-ri;  // original index
+    const when = new Date(s.t).toLocaleString([], {weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+    const why = (s.reason||'').replace(/^daily\s*\S*/, 'daily snapshot').replace('before-cloud-adopt','before a cloud sync').replace('before-skipped-cloud-adopt','blocked a bad sync').replace('before-restore','before a restore').replace('before-snapshot-restore','before a rollback');
+    return `<div style="display:flex;align-items:center;gap:10px;padding:9px 10px;border:1px solid var(--rule);border-radius:9px;margin-bottom:7px">
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:700;color:var(--ink)">${esc(when)}</div>
+        <div style="font-size:11px;color:var(--ink-3)">${s.real} planned day${s.real===1?'':'s'}${why?` · ${esc(why)}`:''}</div>
+      </div>
+      <button onclick="restoreSnapshot(${idx})" style="background:var(--navy);color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit">Restore</button>
+    </div>`;
+  }).join('');
+}
+async function restoreSnapshot(idx){
+  const cid = getCourse().id;
+  const snaps = getSnaps(cid);
+  const snap = snaps[idx];
+  if(!snap) return;
+  const when = new Date(snap.t).toLocaleString();
+  if(!confirm(`Restore ${getCourse().name} to the snapshot from ${when} (${snap.real} planned days)?\n\nYour current version is saved as a new snapshot first, so this can be undone.`)) return;
+  try{
+    await takeSnapshot('before-snapshot-restore');
+    const restored = await _snapToState(snap);
+    state = restored; state._v = 2;
+    saveState();   // stamps a fresh lastModified so it syncs out as the newest copy
+    currentUnit=null; currentWeek=0; openDayIdx=null; openWeekIdx=null;
+    closeSnapshots(); renderCourse(); nav('course');
+    toast('Restored earlier version ✓');
+  }catch(e){ console.error('restoreSnapshot failed', e); toast('Could not restore that snapshot'); }
+}
+
 let _lastPushMsg = '';   // jsonbin's own explanation of the most recent failure
 let _binWentPublic = false;  // set when we fell back to a public bin on the free tier
 
@@ -3735,6 +3850,21 @@ async function pullFromSheets() {
         const cloudTime = record.lastModified || 0;
         const localTime = state?.lastModified || 0;
         if (cloudTime > localTime) {
+          // SAFETY GUARD: never let a near-empty cloud copy silently replace a
+          // substantially fuller local one (this is exactly how a bad sync on a
+          // new device wiped real work). If the cloud looks like data loss, keep
+          // local, snapshot it, and surface a warning instead of adopting.
+          const localReal = realDayCount(state);
+          const cloudReal = realDayCount(record);
+          if (localReal >= 5 && cloudReal < Math.max(3, Math.floor(localReal * 0.5))) {
+            try { await takeSnapshot('before-skipped-cloud-adopt'); } catch(e){}
+            setSyncStatus('error');
+            const label = document.getElementById('sync-label');
+            if (label) label.textContent = 'Cloud looks empty — kept this device';
+            toast('⚠️ The cloud copy looks almost empty, so I kept the fuller copy on this device. Nothing was overwritten. (⋯ → Restore an earlier version if needed.)');
+            return false;
+          }
+          try { await takeSnapshot('before-cloud-adopt'); } catch(e){}
           state = record;
           // Persist the adopted copy DIRECTLY, preserving the cloud's
           // lastModified — going through saveState() would stamp a fresh
@@ -12361,17 +12491,23 @@ function importBackup(event) {
         toast('That file doesn\'t look like a valid backup');
         return;
       }
-      const courseLabel = payload.course || getCourse().name;
+      const targetCid = (payload.courseId!=null && COURSES[payload.courseId]) ? payload.courseId : activeCourse;
+      const targetName = COURSES[targetCid] ? COURSES[targetCid].name : (payload.course || getCourse().name);
       const msg = `Restore backup from ${payload.exportedAt ? new Date(payload.exportedAt).toLocaleString() : 'unknown date'}?\n\n` +
-                  `This will REPLACE all current data in ${getCourse().name} with the contents of "${file.name}". This cannot be undone.`;
+                  `This will REPLACE all current data in ${targetName} with the contents of "${file.name}". A snapshot of the current ${targetName} is saved first, so this can be undone.`;
       if (!confirm(msg)) { event.target.value = ''; return; }
 
+      // Switch to the course the backup belongs to, so the file always lands in
+      // the right course even if a different one is open.
+      if (targetCid !== activeCourse) { activeCourse = targetCid; state = loadState(); }
+      takeSnapshot('before-restore');   // protect whatever is currently in this course
       state = restoredData;
       state._v = 2;
       saveState();
+      renderCourseToggle();
       currentUnit = null; currentWeek = 0; openDayIdx = null; openWeekIdx = null;
       nav('course');
-      toast('Backup restored ✓ — remember to click Save & Sync to push it to the cloud');
+      toast('Backup restored into ' + targetName + ' ✓ — click Save to sync it to the cloud');
     } catch (err) {
       console.error('Backup restore failed:', err);
       toast('Couldn\'t read that file — make sure it\'s a backup JSON exported from this planner');
@@ -12793,6 +12929,8 @@ async function init() {
   // its next edit.
   renderCourse();
   nav('dashboard');
+  // Capture a daily on-device snapshot of whatever loaded (safety net).
+  try { await takeDailySnapshot(); } catch(e){}
   // Google-Docs-style auto-pull: whenever you switch back to this tab or window
   // (e.g. after editing on another device), fetch the latest copy from the cloud.
   document.addEventListener('visibilitychange', autoPullOnFocus);
