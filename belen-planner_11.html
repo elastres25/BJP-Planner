@@ -2273,6 +2273,9 @@ function out(o) {
   </div>
 </div>
 
+<!-- CLASS MODE — full-screen live lesson timer (filled by JS) -->
+<div id="classmode-overlay" style="display:none;position:fixed;inset:0;z-index:2000;background:#0B1020;color:#fff;font-family:'Helvetica Neue',Arial,sans-serif;-webkit-font-smoothing:antialiased"></div>
+
 <!-- RESTORE AN EARLIER VERSION (automatic snapshots) MODAL -->
 <div id="snap-overlay" style="display:none;position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.5);overflow-y:auto" onclick="if(event.target===this)closeSnapshots()">
   <div style="background:var(--white);max-width:560px;margin:44px auto;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,.3);overflow:hidden">
@@ -2473,7 +2476,7 @@ const ASSESS_COLORS = {
 // The build version baked into the app itself, so the update checker knows what
 // it's running even when the page was loaded WITHOUT a ?v= token (e.g. the
 // Netlify root rewrite). Keep this in lockstep with index.html's ?v= token.
-window.APP_VERSION = '20261027-49';
+window.APP_VERSION = '20261027-50';
 
 let activeCourse = 6; // default to Theology 6
 
@@ -10444,6 +10447,7 @@ function dailyPanelHTML(d, i) {
         ? `<button class="dl-calbtn" onclick="fillDatesFromHere(${i})" title="Give this lesson its class date, then flow every later lesson onto the next class days (leaves earlier days alone)">↓ Fill dates from here</button>`
         : `<button class="dl-calbtn" onclick="openCalendarImport()" title="Import your school calendar to auto-fill class dates">📅 Import calendar</button>`}
       <button class="dl-reflectbtn${hasDebrief(d)?' done':''}" onclick="openDebrief(${i})" title="Reflect on how this class went — for next time and next year">${hasDebrief(d) ? (debriefRatingMeta(d.debriefRating)?debriefRatingMeta(d.debriefRating).emoji:'🪞') + ' Reflection ✓' : '🪞 Reflect on class'}</button>
+      <button class="dl-reflectbtn" onclick="openClassMode(${i})" title="Run this lesson live at your desk — big countdown, behind/ahead tracker, break marker">▶ Class Mode</button>
     </div>
     <input class="dl-topic" value="${esc(strip(d.topic))}" placeholder="Lesson topic / title…" onchange="updateDay(${i},'topic',this.value);updateDayCard(${i})">
     <input class="dl-eq" value="${esc(strip(d.eq))}" placeholder="Essential question (optional)…" onchange="updateDay(${i},'eq',this.value)">
@@ -12381,6 +12385,178 @@ function dayCoverageHTML(i, d){
       <button onclick="toggleCovPanel(${i})" style="background:var(--navy);color:#fff;border:none;border-radius:7px;padding:5px 14px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit">Done ▲</button>
     </div>
   </div>`;
+}
+
+// ══ CLASS MODE ════════════════════════════════════════════════════
+// A full-screen live cockpit for teaching an 85-min block: big countdown for
+// the current segment, the next one underneath, a behind/ahead tracker vs the
+// planned times, a "cut this (flex) segment" hint when behind, and a break
+// marker at 50:00. Reads the day's stored activities — nothing to re-enter.
+let _cm = null;
+function _cmFlex(name){ return /\(\s*flex\s*\)/i.test(name||''); }
+function _cmName(name){ return String(name||'').replace(/\(\s*flex\s*\)/ig,' ').replace(/\s+/g,' ').trim() || 'Segment'; }
+function _cmMMSS(sec){ const neg=sec<0; const n=Math.abs(Math.round(sec)); const m=Math.floor(n/60), s=n%60; return (neg?'-':'')+m+':'+String(s).padStart(2,'0'); }
+
+function openClassMode(di){
+  const d = getDay(di);
+  const acts = (d.activities||[]).filter(a => a && (a.brk || (a.name||'').trim()));
+  if (!acts.length){ toast('No agenda for this lesson yet — add activities first (⋯ Paste a plan or + Add activity)'); return; }
+  let t = 0;
+  const segs = acts.map(a => {
+    const durMin = Math.max(0, Math.round(a.dur||0));
+    const seg = { name: a.brk ? '🍽 Break' : _cmName(a.name), brk: !!a.brk, flex: a.brk?false:_cmFlex(a.name),
+                  grr: a.grr||'', atype: a.atype||'', durMin, startSec: t*60, endSec: (t+durMin)*60 };
+    t += durMin; return seg;
+  });
+  _cm = { di, topic: (htmlPlain(d.topic)||d.label||'Class'), segs, totalMin: t, realStart:0, idx:0, actualStarts:[], timer:null, started:false, ended:false };
+  const o = document.getElementById('classmode-overlay');
+  o.style.display='block';
+  document.addEventListener('keydown', _cmKey, true);
+  try { if (o.requestFullscreen) {/* optional */} } catch(e){}
+  cmRenderShell();
+}
+function closeClassMode(){
+  if (_cm && _cm.timer) clearInterval(_cm.timer);
+  document.removeEventListener('keydown', _cmKey, true);
+  const o=document.getElementById('classmode-overlay'); if(o){ o.style.display='none'; o.innerHTML=''; }
+  _cm=null;
+}
+function _cmKey(e){
+  if(!_cm) return;
+  if(e.key==='Escape'){ e.preventDefault(); closeClassMode(); return; }
+  const k=e.key;
+  if(!_cm.started){ if(k===' '||k==='Enter'){ e.preventDefault(); cmStart(); } return; }
+  if(k===' '||k==='ArrowRight'){ e.preventDefault(); cmNext(); }
+  else if(k==='ArrowLeft'){ e.preventDefault(); cmPrev(); }
+}
+function cmStart(){
+  _cm.realStart = Date.now(); _cm.idx = 0; _cm.actualStarts = [_cm.realStart];
+  _cm.started = true; _cm.ended = false;
+  if(_cm.timer) clearInterval(_cm.timer);
+  _cm.timer = setInterval(cmTick, 250);
+  cmRenderShell();
+}
+function cmNext(){
+  if(!_cm.started){ cmStart(); return; }
+  if(_cm.idx < _cm.segs.length-1){ _cm.idx++; _cm.actualStarts[_cm.idx] = Date.now(); cmRenderShell(); }
+  else { _cm.ended = true; cmRenderShell(); }
+}
+function cmPrev(){
+  if(!_cm.started || _cm.idx<=0){ return; }
+  _cm.idx--; _cm.ended=false; _cm.actualStarts[_cm.idx] = Date.now(); cmRenderShell();
+}
+// Seconds behind (positive) or ahead (negative): how late the current segment
+// actually started vs its planned start, plus any overtime being run right now.
+function cmBehindSec(){
+  const c=_cm.idx, seg=_cm.segs[c];
+  const startedAt = (_cm.actualStarts[c] - _cm.realStart)/1000;
+  const inSeg = (Date.now() - _cm.actualStarts[c])/1000;
+  const overtime = Math.max(0, inSeg - seg.durMin*60);
+  return (startedAt - seg.startSec) + overtime;
+}
+function cmNextFlex(){
+  for(let j=_cm.idx+1; j<_cm.segs.length; j++){ if(_cm.segs[j].flex) return _cm.segs[j]; }
+  return null;
+}
+function cmRenderShell(){
+  const o=document.getElementById('classmode-overlay'); if(!o||!_cm) return;
+  const exitBtn = `<button onclick="closeClassMode()" style="background:#1C2740;color:#9FB3D1;border:none;border-radius:8px;padding:8px 14px;font-size:14px;cursor:pointer;font-family:inherit">Exit (Esc)</button>`;
+
+  if(!_cm.started){
+    o.innerHTML = `<div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px;box-sizing:border-box">
+      <div style="position:fixed;top:16px;right:20px">${exitBtn}</div>
+      <div style="font-size:15px;letter-spacing:.22em;color:#7E92B0;text-transform:uppercase">Class Mode</div>
+      <div style="font-size:clamp(28px,5vw,52px);font-weight:800;margin:10px 0 4px">${esc(_cm.topic)}</div>
+      <div style="font-size:18px;color:#9FB3D1;margin-bottom:26px">${_cm.segs.length} segments · ${_cm.totalMin} min planned</div>
+      <button onclick="this.blur();cmStart()" style="font-size:30px;font-weight:800;background:#F0C84A;color:#0B1020;border:none;border-radius:16px;padding:18px 48px;cursor:pointer;font-family:inherit">▶ Start class</button>
+      <div style="font-size:15px;color:#7E92B0;margin-top:20px">Space / Enter to start · Space or → to advance · ← to go back · Esc to exit</div>
+      <div style="max-width:720px;margin-top:24px;width:100%;max-height:34vh;overflow:auto">
+        ${_cm.segs.map((s,j)=>`<div style="display:flex;justify-content:space-between;gap:12px;padding:6px 10px;border-bottom:1px solid #1C2740;font-size:16px;color:#cfe">
+          <span style="text-align:left">${j+1}. ${esc(s.name)}${s.flex?' <span style="color:#F0C84A;font-size:12px;font-weight:700">(flex)</span>':''}</span>
+          <span style="color:#7E92B0;white-space:nowrap">${_cmMMSS(s.startSec)}–${_cmMMSS(s.endSec)} · ${s.durMin}m</span></div>`).join('')}
+        <div style="text-align:center;color:#F0C84A;font-size:13px;margin-top:8px">🍽 Break marker at 50:00</div>
+      </div>
+    </div>`;
+    return;
+  }
+
+  if(_cm.ended){
+    const finalBehind = cmBehindSec();
+    o.innerHTML = `<div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px">
+      <div style="position:fixed;top:16px;right:20px">${exitBtn}</div>
+      <div style="font-size:clamp(40px,8vw,90px);font-weight:800;color:#86EFAC">✓ Class complete</div>
+      <div style="font-size:24px;color:#9FB3D1;margin-top:14px">Total ${_cmMMSS((Date.now()-_cm.realStart)/1000)} · planned ${_cm.totalMin}:00</div>
+      <div style="display:flex;gap:14px;margin-top:30px">
+        <button onclick="this.blur();cmPrev()" style="font-size:20px;background:#1C2740;color:#cfe;border:none;border-radius:12px;padding:12px 24px;cursor:pointer;font-family:inherit">◂ Back to last segment</button>
+        <button onclick="closeClassMode()" style="font-size:20px;font-weight:700;background:#F0C84A;color:#0B1020;border:none;border-radius:12px;padding:12px 28px;cursor:pointer;font-family:inherit">Done</button>
+      </div>
+    </div>`;
+    return;
+  }
+
+  const c=_cm.idx, seg=_cm.segs[c], nxt=_cm.segs[c+1];
+  const totalSec=Math.max(1,_cm.totalMin*60);
+  const brkLeft=Math.min(100, 3000/totalSec*100);
+  const bars=_cm.segs.map((s,j)=>`<div title="${esc(s.name)}" style="flex:${Math.max(1,s.durMin)};height:10px;border-radius:3px;background:${j<c?'#2E7D5B':(j===c?'#F0C84A':'#26324A')}"></div>`).join('');
+  o.innerHTML = `<div style="height:100%;display:flex;flex-direction:column;padding:26px 36px;box-sizing:border-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
+      <div style="font-size:18px;color:#9FB3D1">${esc(_cm.topic)} &nbsp;·&nbsp; Segment ${c+1} of ${_cm.segs.length}</div>
+      <div style="display:flex;gap:20px;align-items:center">
+        <div id="cm-break" style="font-size:17px;font-weight:700;color:#F0C84A"></div>
+        <div id="cm-elapsed" style="font-size:17px;color:#9FB3D1;font-variant-numeric:tabular-nums"></div>
+        ${exitBtn}
+      </div>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">
+      <div id="cm-behind" style="font-size:28px;font-weight:800;padding:7px 22px;border-radius:999px;margin-bottom:16px"></div>
+      <div style="font-size:clamp(26px,4vw,44px);color:#D6E6FF;margin-bottom:2px">${seg.flex?'<span style="background:#3A2E05;color:#F0C84A;font-size:.5em;font-weight:800;padding:3px 9px;border-radius:999px;vertical-align:middle;letter-spacing:.05em">FLEX</span> ':''}${esc(seg.name)}</div>
+      <div id="cm-countdown" style="font-size:clamp(96px,21vw,230px);font-weight:800;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em"></div>
+      <div style="font-size:20px;color:#7E92B0;margin-top:2px">allotted ${seg.durMin} min · planned ${_cmMMSS(seg.startSec)}–${_cmMMSS(seg.endSec)}</div>
+      <div id="cm-cut" style="font-size:22px;color:#FF9E6B;font-weight:600;margin-top:16px;min-height:28px"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-shrink:0;gap:20px">
+      <div style="font-size:24px;color:#D6E6FF;text-align:left">
+        <span style="color:#7E92B0;font-size:14px;text-transform:uppercase;letter-spacing:.1em">Next</span><br>
+        ${nxt?`${esc(nxt.name)}${nxt.flex?' <span style="color:#F0C84A;font-size:14px">(flex)</span>':''} <span style="color:#7E92B0;font-size:18px">· ${nxt.durMin} min</span>`:'<span style="color:#7E92B0">End of class</span>'}
+      </div>
+      <button onclick="this.blur();cmNext()" style="font-size:24px;font-weight:800;background:#F0C84A;color:#0B1020;border:none;border-radius:14px;padding:14px 32px;cursor:pointer;white-space:nowrap;font-family:inherit">${nxt?'Next ▸':'Finish ▸'} <span style="font-size:15px;font-weight:600;opacity:.7">(Space)</span></button>
+    </div>
+    <div style="position:relative;margin-top:16px;flex-shrink:0">
+      <div style="display:flex;gap:3px">${bars}</div>
+      <div title="Break at 50:00" style="position:absolute;top:-5px;bottom:-5px;left:${brkLeft}%;width:2px;background:#F0C84A"></div>
+      <div style="position:absolute;top:-19px;left:${brkLeft}%;transform:translateX(-50%);font-size:11px;color:#F0C84A;white-space:nowrap">🍽 50:00</div>
+    </div>
+  </div>`;
+  cmTick();
+}
+function cmTick(){
+  if(!_cm||!_cm.started||_cm.ended) return;
+  const c=_cm.idx, seg=_cm.segs[c], now=Date.now();
+  const inSeg=(now-_cm.actualStarts[c])/1000;
+  const remaining=seg.durMin*60 - inSeg;
+  const cd=document.getElementById('cm-countdown');
+  if(cd){ cd.textContent=_cmMMSS(remaining); cd.style.color = remaining<=0?'#FF6B6B':(remaining<=60?'#F0C84A':'#FFFFFF'); }
+  const behind=cmBehindSec();
+  const bp=document.getElementById('cm-behind');
+  if(bp){
+    if(Math.abs(behind)<30){ bp.textContent='● On time'; bp.style.background='#123524'; bp.style.color='#86EFAC'; }
+    else if(behind>0){ bp.textContent='▲ '+_cmMMSS(behind)+' behind'; bp.style.background='#4A1D1D'; bp.style.color='#FCA5A5'; }
+    else { bp.textContent='▼ '+_cmMMSS(-behind)+' ahead'; bp.style.background='#123524'; bp.style.color='#86EFAC'; }
+  }
+  const cut=document.getElementById('cm-cut');
+  if(cut){
+    if(behind>=60){ const f=cmNextFlex(); cut.innerHTML = f?`✂ To catch up, cut or shorten <b>${esc(f.name)}</b> <span style="opacity:.8">(~${f.durMin} min)</span>`:'⚠ Behind, and no (flex) segments left to trim'; }
+    else cut.textContent='';
+  }
+  const brk=document.getElementById('cm-break');
+  if(brk){
+    const toBreak=3000-(now-_cm.realStart)/1000;
+    if(toBreak>60) brk.textContent='🍽 Break in '+_cmMMSS(toBreak);
+    else if(toBreak>-90) brk.textContent='🍽 BREAK TIME';
+    else brk.textContent='';
+  }
+  const el=document.getElementById('cm-elapsed');
+  if(el) el.textContent=_cmMMSS((now-_cm.realStart)/1000)+' / '+_cm.totalMin+':00';
 }
 
 function updateObj(i, val) {
