@@ -2476,7 +2476,7 @@ const ASSESS_COLORS = {
 // The build version baked into the app itself, so the update checker knows what
 // it's running even when the page was loaded WITHOUT a ?v= token (e.g. the
 // Netlify root rewrite). Keep this in lockstep with index.html's ?v= token.
-window.APP_VERSION = '20261027-51';
+window.APP_VERSION = '20261027-52';
 
 let activeCourse = 6; // default to Theology 6
 
@@ -12415,7 +12415,11 @@ function openClassMode(di){
                   grr: a.grr||'', atype: a.atype||'', durMin, startSec: t*60, endSec: (t+durMin)*60 };
     t += durMin; return seg;
   });
-  _cm = { di, topic: (htmlPlain(d.topic)||d.label||'Class'), segs, totalMin: t, realStart:0, idx:0, actualStarts:[], timer:null, started:false, ended:false };
+  // The class is the BLOCK length (how much time you actually have), not the
+  // sum of the activity durations — those can overshoot and shouldn't define
+  // the timer. Default 85 if a lesson has no block length set.
+  const blockMin = Math.max(1, Math.round(d.blockDuration||85) || 85);
+  _cm = { di, topic: (htmlPlain(d.topic)||d.label||'Class'), segs, totalMin: t, blockMin, realStart:0, idx:0, actualStarts:[], timer:null, started:false, ended:false };
   const o = document.getElementById('classmode-overlay');
   o.style.display='block';
   document.addEventListener('keydown', _cmKey, true);
@@ -12474,7 +12478,7 @@ function cmRenderShell(){
       <div style="position:fixed;top:16px;right:20px">${exitBtn}</div>
       <div style="font-size:15px;letter-spacing:.22em;color:#7E92B0;text-transform:uppercase">Class Mode</div>
       <div style="font-size:clamp(28px,5vw,52px);font-weight:800;margin:10px 0 4px">${esc(_cm.topic)}</div>
-      <div style="font-size:18px;color:#9FB3D1;margin-bottom:26px">${_cm.segs.length} segments · ${_cm.totalMin} min planned</div>
+      <div style="font-size:18px;color:#9FB3D1;margin-bottom:26px">${_cm.segs.length} segments · <b style="color:#D6E6FF">${_cm.blockMin}-min block</b>${_cm.totalMin>_cm.blockMin?` &nbsp;·&nbsp; <span style="color:#F0C84A">⚠ agenda is ${_cm.totalMin} min (${_cm.totalMin-_cm.blockMin} over) — trim or mark segments (flex)</span>`:(_cm.totalMin>0&&_cm.totalMin<_cm.blockMin?` &nbsp;·&nbsp; agenda ${_cm.totalMin} min`:'')}</div>
       <button onclick="this.blur();cmStart()" style="font-size:30px;font-weight:800;background:#F0C84A;color:#0B1020;border:none;border-radius:16px;padding:18px 48px;cursor:pointer;font-family:inherit">▶ Start class</button>
       <div style="font-size:15px;color:#7E92B0;margin-top:20px">Space / Enter to start · Space or → to advance · ← to go back · Esc to exit</div>
       <div style="max-width:720px;margin-top:24px;width:100%;max-height:34vh;overflow:auto">
@@ -12492,7 +12496,7 @@ function cmRenderShell(){
     o.innerHTML = `<div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px">
       <div style="position:fixed;top:16px;right:20px">${exitBtn}</div>
       <div style="font-size:clamp(40px,8vw,90px);font-weight:800;color:#86EFAC">✓ Class complete</div>
-      <div style="font-size:24px;color:#9FB3D1;margin-top:14px">Total ${_cmMMSS((Date.now()-_cm.realStart)/1000)} · planned ${_cm.totalMin}:00</div>
+      <div style="font-size:24px;color:#9FB3D1;margin-top:14px">Ran ${_cmMMSS((Date.now()-_cm.realStart)/1000)} · ${_cm.blockMin}-min block</div>
       <div style="display:flex;gap:14px;margin-top:30px">
         <button onclick="this.blur();cmPrev()" style="font-size:20px;background:#1C2740;color:#cfe;border:none;border-radius:12px;padding:12px 24px;cursor:pointer;font-family:inherit">◂ Back to last segment</button>
         <button onclick="closeClassMode()" style="font-size:20px;font-weight:700;background:#F0C84A;color:#0B1020;border:none;border-radius:12px;padding:12px 28px;cursor:pointer;font-family:inherit">Done</button>
@@ -12563,7 +12567,11 @@ function cmTick(){
     else brk.textContent='';
   }
   const el=document.getElementById('cm-elapsed');
-  if(el) el.textContent=_cmMMSS((now-_cm.realStart)/1000)+' / '+_cm.totalMin+':00';
+  if(el){
+    const elapsed=(now-_cm.realStart)/1000, left=_cm.blockMin*60-elapsed;
+    el.textContent='⏳ '+_cmMMSS(left)+' left · '+_cmMMSS(elapsed)+'/'+_cm.blockMin+':00';
+    el.style.color = left<0 ? '#FF9E6B' : '#9FB3D1';
+  }
 }
 
 function updateObj(i, val) {
