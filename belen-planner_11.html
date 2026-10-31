@@ -2476,7 +2476,7 @@ const ASSESS_COLORS = {
 // The build version baked into the app itself, so the update checker knows what
 // it's running even when the page was loaded WITHOUT a ?v= token (e.g. the
 // Netlify root rewrite). Keep this in lockstep with index.html's ?v= token.
-window.APP_VERSION = '20261027-52';
+window.APP_VERSION = '20261031-53';
 
 let activeCourse = 6; // default to Theology 6
 
@@ -6968,7 +6968,10 @@ function renderWeekPlan() {
         ${weekPlanOffset!==0?`<button onclick="weekPlanToday()" style="background:none;border:1px solid var(--rule-dark);border-radius:6px;padding:6px 11px;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy)">This week</button>`:''}
         <button onclick="weekPlanStep(1)" style="background:none;border:1px solid var(--rule-dark);border-radius:6px;padding:6px 12px;cursor:pointer;font-size:13px;font-weight:600;color:var(--ink)">Next ›</button>
         ${lessons.length?`<button onclick="exportWeekPDF()" style="background:none;border:1px solid var(--rule-dark);border-radius:6px;padding:6px 12px;cursor:pointer;font-size:12px;font-weight:600;color:var(--ink)">⬇ PDF</button>`:''}
-        ${lessons.length?`<button onclick="driveSendCurrentWeekUnits()" title="${driveConfigured()?'Update the unit Google Doc (cover + all weeks) in your Drive folder':'Set up Google Drive'}" style="background:var(--navy);color:#fff;border:none;border-radius:6px;padding:6px 13px;cursor:pointer;font-size:12px;font-weight:700">☁ ${driveConfigured()?'Send to Drive':'Set up Drive'}</button>`:''}
+        ${lessons.length ? (driveConfigured()
+          ? `<button onclick="driveSendWeek()" title="Save just this week as its own Google Doc (one file per week), updated in place" style="background:var(--navy);color:#fff;border:none;border-radius:6px;padding:6px 13px;cursor:pointer;font-size:12px;font-weight:700">☁ This week</button>
+             <button onclick="driveSendCurrentWeekUnits()" title="Update the whole-unit Google Doc (cover + all weeks) for the unit(s) in this week" style="background:#fff;color:var(--navy);border:1px solid var(--navy);border-radius:6px;padding:6px 13px;cursor:pointer;font-size:12px;font-weight:700">☁ Whole unit</button>`
+          : `<button onclick="openDriveSetup()" title="Set up Google Drive" style="background:var(--navy);color:#fff;border:none;border-radius:6px;padding:6px 13px;cursor:pointer;font-size:12px;font-weight:700">☁ Set up Drive</button>`) : ''}
       </div>
     </div>
     ${body}
