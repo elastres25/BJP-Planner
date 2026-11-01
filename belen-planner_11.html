@@ -2476,7 +2476,7 @@ const ASSESS_COLORS = {
 // The build version baked into the app itself, so the update checker knows what
 // it's running even when the page was loaded WITHOUT a ?v= token (e.g. the
 // Netlify root rewrite). Keep this in lockstep with index.html's ?v= token.
-window.APP_VERSION = '20261031-53';
+window.APP_VERSION = '20261101-54';
 
 let activeCourse = 6; // default to Theology 6
 
@@ -12682,26 +12682,35 @@ async function saveAll() {
 // independent of localStorage and JSONBin — a copy you fully control,
 // safe from sync bugs, code updates, or browser data loss.
 function exportBackup() {
-  saveState(); // make sure lastModified is current before snapshotting
-  const co = getCourse();
+  saveState(); // persist the active course first
+  // One file holds BOTH courses — the active one from memory, the other read
+  // straight from its own localStorage — so a single backup covers everything.
+  const courses = {};
+  Object.keys(COURSES).forEach(cidStr => {
+    const cid = isNaN(+cidStr) ? cidStr : +cidStr;
+    let data;
+    if (cid === activeCourse) data = state;
+    else { try { data = JSON.parse(localStorage.getItem(COURSES[cid].storageKey) || 'null'); } catch(e){ data = null; } }
+    if (data && data.units) courses[cidStr] = data;
+  });
   const payload = {
-    _backupVersion: 1,
-    course: co.name,
-    courseId: co.id,
+    _backupVersion: 2,
     exportedAt: new Date().toISOString(),
-    data: state,
+    courses,   // { "6": <Theology 6 state>, "7": <Theology 7 state> }
+    courseNames: Object.fromEntries(Object.keys(courses).map(cid => [cid, COURSES[cid].name])),
   };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
   const dateStr = new Date().toISOString().slice(0,10);
   a.href = url;
-  a.download = `${co.name.replace(/\s+/g,'-').toLowerCase()}-backup-${dateStr}.json`;
+  a.download = `belen-planner-backup-${dateStr}.json`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   setTimeout(() => URL.revokeObjectURL(url), 5000);
-  toast('Backup downloaded ✓');
+  const n = Object.keys(courses).length;
+  toast(`Backup downloaded — ${n} course${n===1?'':'s'} in one file ✓`);
 }
 
 // Restore from a previously downloaded backup file. Always asks for
@@ -12713,6 +12722,32 @@ function importBackup(event) {
   reader.onload = (e) => {
     try {
       const payload = JSON.parse(e.target.result);
+
+      // Combined backup (both courses in one file, _backupVersion 2).
+      if (payload.courses && typeof payload.courses === 'object' && !payload.data) {
+        const cids = Object.keys(payload.courses).filter(cid => COURSES[cid] && payload.courses[cid] && payload.courses[cid].units);
+        if (!cids.length) { toast('That file doesn\'t look like a valid backup'); event.target.value=''; return; }
+        const names = cids.map(c => COURSES[c].name).join(' + ');
+        const when = payload.exportedAt ? new Date(payload.exportedAt).toLocaleString() : 'unknown date';
+        if (!confirm(`Restore backup from ${when}?\n\nThis REPLACES ${names} with the contents of "${file.name}". A snapshot of your current data is saved first, so this can be undone.`)) { event.target.value=''; return; }
+        try { takeSnapshot('before-restore'); } catch(_) {}
+        const now = Date.now();
+        cids.forEach(cid => {
+          const data = payload.courses[cid];
+          data._v = 2; data.lastModified = now;   // newest, so it syncs out
+          try { localStorage.setItem(COURSES[cid].storageKey, JSON.stringify(data)); } catch(err){ console.error('restore write failed', cid, err); }
+        });
+        _lastPushedMod = 0;               // force the next sync to push the restored data
+        state = loadState();              // reload the active course from its restored storage
+        renderCourseToggle();
+        currentUnit = null; currentWeek = 0; openDayIdx = null; openWeekIdx = null;
+        nav('course');
+        try { scheduleCloudSync(); } catch(_) {}
+        toast(`Restored ${names} ✓ — click Save to sync it to the cloud`);
+        event.target.value = '';
+        return;
+      }
+
       const restoredData = payload.data || payload; // tolerate raw state exports too
       if (!restoredData || !restoredData.units) {
         toast('That file doesn\'t look like a valid backup');
