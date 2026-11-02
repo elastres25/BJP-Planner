@@ -2476,7 +2476,7 @@ const ASSESS_COLORS = {
 // The build version baked into the app itself, so the update checker knows what
 // it's running even when the page was loaded WITHOUT a ?v= token (e.g. the
 // Netlify root rewrite). Keep this in lockstep with index.html's ?v= token.
-window.APP_VERSION = '20261102-55';
+window.APP_VERSION = '20261102-56';
 
 let activeCourse = 6; // default to Theology 6
 
@@ -7541,9 +7541,15 @@ function coverageTrackerHTML(uid){
   const sUncov = sIdx.filter(i=>!isSkillCoveredFull(uid,i)).map(i=>skills[i]);
   let kTot=0, kCov=0; const kUncov=[];
   cats.forEach((c,ci)=>(c.items||[]).forEach((it,ii)=>{ kTot++; if(isKnowledgeItemCoveredFull(uid,ci,ii)) kCov++; else kUncov.push(it); }));
-  const total = gIdx.length + sIdx.length + kTot;
+  // Reference categories: Scripture / Catechism / Saints / Readings / Reflection.
+  let rTot=0, rCov=0; const rUncov=[];
+  REF_CATS.forEach(rc => (uov[rc.uovField]||[]).forEach((it,ii)=>{
+    if(!ok(it)) return; rTot++;
+    if(isRefCovered(uid, rc.uovField, ii)) rCov++; else rUncov.push(rc.icon+' '+it);
+  }));
+  const total = gIdx.length + sIdx.length + kTot + rTot;
   if (!total) return '';
-  const cov = gCov.length + sCov.length + kCov;
+  const cov = gCov.length + sCov.length + kCov + rCov;
   const pct = Math.round(cov/total*100);
   const bar = (c,t) => { const p=t?Math.round(c/t*100):0; const col=p>=100?'#0a7d3c':(p>=50?'#C9991A':'#B6BCC8'); return `<div style="flex:1;height:7px;background:#E6EBF4;border-radius:4px;overflow:hidden"><div style="width:${p}%;height:100%;background:${col}"></div></div>`; };
   const rowb = (label,c,t) => `<div style="display:flex;align-items:center;gap:8px;margin:4px 0"><span style="font-size:11px;font-weight:700;color:var(--navy);width:84px;flex-shrink:0">${label}</span>${bar(c,t)}<span style="font-size:11px;color:var(--ink-2);width:46px;text-align:right;flex-shrink:0">${c}/${t}</span></div>`;
@@ -7557,7 +7563,8 @@ function coverageTrackerHTML(uid){
     ${rowb('Unit Goals', gCov.length, gIdx.length)}
     ${rowb('Knowledge', kCov, kTot)}
     ${rowb('Skills', sCov.length, sIdx.length)}
-    ${left ? `<details style="margin-top:8px"><summary style="cursor:pointer;font-size:11px;font-weight:700;color:var(--navy);outline:none">▸ What's still needed (${left})</summary>${uncovList('Unit Goals',gUncov)}${uncovList('Knowledge',kUncov)}${uncovList('Skills',sUncov)}</details>`
+    ${rTot ? rowb('Scripture &c.', rCov, rTot) : ''}
+    ${left ? `<details style="margin-top:8px"><summary style="cursor:pointer;font-size:11px;font-weight:700;color:var(--navy);outline:none">▸ What's still needed (${left})</summary>${uncovList('Unit Goals',gUncov)}${uncovList('Knowledge',kUncov)}${uncovList('Skills',sUncov)}${uncovList('Scripture / Readings / Reflection',rUncov)}</details>`
           : `<div style="font-size:11px;color:#0a7d3c;font-weight:700;margin-top:6px">✓ Every goal, knowledge item, and skill is covered by at least one lesson</div>`}
   </div>`;
 }
@@ -7894,10 +7901,14 @@ function removeKnowledgeFromLesson(di, catIdx, itemIdx) {
 }
 // Scripture / Catechism / Saints exposed as categories inside the Knowledge dropdown
 const REF_CATS = [
-  {name:'Scripture',      uovField:'scriptureItems', lessonField:'lessonScripture'},
-  {name:'Catechism',      uovField:'catechismItems', lessonField:'lessonCatechism'},
-  {name:'Notable Saints', uovField:'saintsItems',    lessonField:'lessonSaints'},
+  {name:'Scripture',           icon:'📖', uovField:'scriptureItems',  lessonField:'lessonScripture'},
+  {name:'Catechism',           icon:'📜', uovField:'catechismItems',  lessonField:'lessonCatechism'},
+  {name:'Notable Saints',      icon:'😇', uovField:'saintsItems',     lessonField:'lessonSaints'},
+  {name:'Other Readings',      icon:'📚', uovField:'readingsItems',   lessonField:'lessonReadings'},
+  {name:'Personal Reflection', icon:'🪞', uovField:'reflectionItems', lessonField:'lessonReflection'},
 ];
+// uovField → lessonField, derived so the coverage helpers stay in sync with REF_CATS.
+const REF_LESSON_OF = Object.fromEntries(REF_CATS.map(r => [r.uovField, r.lessonField]));
 
 function updateKnowledgeItemList(di, catIdxStr) {
   const sel = document.getElementById(`know-item-sel-${di}`);
@@ -8072,12 +8083,12 @@ function applyBulkPaste() {
 function isRefCovered(uid, field, idx) {
   const uov = getUOV(uid);
   const item = (uov[field]||[])[idx];
-  const lessonField = {scriptureItems:'lessonScripture',catechismItems:'lessonCatechism',saintsItems:'lessonSaints',readingsItems:'lessonReadings'}[field];
+  const lessonField = REF_LESSON_OF[field];
   if (!lessonField) return false;
   return (state.units[uid]||[]).some(w => (w.days||[]).some(d => (d[lessonField]||[]).includes(idx)));
 }
 function countRefDays(uid, field, idx) {
-  const lessonField = {scriptureItems:'lessonScripture',catechismItems:'lessonCatechism',saintsItems:'lessonSaints',readingsItems:'lessonReadings'}[field];
+  const lessonField = REF_LESSON_OF[field];
   if (!lessonField) return 0;
   let n = 0;
   (state.units[uid]||[]).forEach(w => (w.days||[]).forEach(d => { if ((d[lessonField]||[]).includes(idx)) n++; }));
@@ -8293,11 +8304,14 @@ function unitOverviewPageHTML(u, weeks, showPacingGuide = true) {
           <td style="font-size:12px;font-weight:700;color:var(--ink);padding:8px 14px;border:1px solid var(--rule);width:150px;vertical-align:top;background:#FAFAF8;white-space:nowrap">Personal Reflection</td>
           <td colspan="3" style="border:1px solid var(--rule);padding:8px 12px;vertical-align:top">
             <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:8px">
-              ${(uov.reflectionItems||[]).map((q, qi) => `
-                <div style="display:flex;align-items:flex-start;gap:6px;padding:6px 10px;background:var(--parchment);border-radius:6px;border-left:3px solid var(--navy)">
-                  <span style="font-size:12px;color:var(--ink);line-height:1.4;flex:1">${esc(q)}</span>
+              ${(uov.reflectionItems||[]).map((q, qi) => {
+                const covered = isRefCovered(u.id, 'reflectionItems', qi);
+                return `
+                <div style="display:flex;align-items:flex-start;gap:6px;padding:6px 10px;background:${covered?'#E1F5EE':'var(--parchment)'};border-radius:6px;border-left:3px solid ${covered?'#0a7d3c':'var(--navy)'}">
+                  ${covered?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#085041" stroke-width="3" style="flex-shrink:0;margin-top:2px"><polyline points="20 6 9 17 4 12"/></svg>':''}
+                  <span style="font-size:12px;color:${covered?'#085041':'var(--ink)'};line-height:1.4;flex:1">${esc(q)}</span>
                   <button onclick="removeReflectionItem(${u.id},${qi})" style="border:none;background:none;cursor:pointer;color:var(--ink-3);font-size:14px;flex-shrink:0">&times;</button>
-                </div>`).join('')}
+                </div>`;}).join('')}
             </div>
             <div style="display:flex;gap:8px;align-items:center">
               <input placeholder="Add a reflection question (press Enter)" id="chipin-reflectionItems-${u.id}"
@@ -12362,6 +12376,11 @@ function toggleCov(i, kind, a, b){
     d.knowledgeIntroduced = d.knowledgeIntroduced || [];
     const at = d.knowledgeIntroduced.findIndex(x => x.catIdx===+a && x.itemIdx===+b);
     if (at >= 0) d.knowledgeIntroduced.splice(at,1); else d.knowledgeIntroduced.push({catIdx:+a, itemIdx:+b});
+  } else if (kind === 'ref'){
+    // a = lesson field name (e.g. 'lessonScripture'), b = item index
+    d[a] = d[a] || [];
+    const at = d[a].indexOf(+b);
+    if (at >= 0) d[a].splice(at,1); else d[a].push(+b);
   }
   saveState();
   renderCovCell(i);
@@ -12397,14 +12416,22 @@ function dayCoverageHTML(i, d){
   const ok = v => typeof v === 'string' && v.trim();
   const goalIdx  = goals.map((g,idx)=>idx).filter(idx => ok(goals[idx]));
   const skillIdx = skills.map((s,idx)=>idx).filter(idx => ok(skills[idx]));
-  const anyAvail = goalIdx.length || skillIdx.length || cats.some(c => (c.items||[]).length);
+  // Reference categories (Scripture / Catechism / Saints / Readings / Reflection):
+  // each has its own overview list + per-lesson selection array.
+  const refCats = REF_CATS.map(rc => {
+    const items = uov[rc.uovField] || [];
+    const idxs  = items.map((it,ii)=>ii).filter(ii => ok(items[ii]));
+    return { ...rc, items, idxs, sel: d[rc.lessonField] || [] };
+  }).filter(rc => rc.idxs.length);
+  const anyAvail = goalIdx.length || skillIdx.length || cats.some(c => (c.items||[]).length) || refCats.length;
   if (!anyAvail){
-    return `<div style="font-size:11.5px;color:var(--ink-3);line-height:1.45">No unit goals/knowledge/skills yet. Add them in this unit’s <b>Overview</b> (the panel above the lessons) and they’ll appear here to tag.</div>`;
+    return `<div style="font-size:11.5px;color:var(--ink-3);line-height:1.45">Nothing to tag yet. Add unit goals, knowledge, skills, Scripture, or reflection questions in this unit’s <b>Overview</b> (the panel above the lessons) and they’ll appear here.</div>`;
   }
   const selGoals = d.lessonObjs || [], selSkills = d.skillsCovered || [], selKnow = d.knowledgeIntroduced || [];
   const nSel = selGoals.filter(oi=>ok(goals[oi])).length
              + selSkills.filter(si=>ok(skills[si])).length
-             + selKnow.filter(k=>cats[k.catIdx] && (cats[k.catIdx].items||[])[k.itemIdx]).length;
+             + selKnow.filter(k=>cats[k.catIdx] && (cats[k.catIdx].items||[])[k.itemIdx]).length
+             + refCats.reduce((n,rc)=>n + rc.sel.filter(ii=>ok(rc.items[ii])).length, 0);
 
   // COLLAPSED: show only the selected items as green chips + an open button.
   if (!_covOpen.has(i)){
@@ -12413,6 +12440,7 @@ function dayCoverageHTML(i, d){
     selGoals.forEach(oi => { const g=goals[oi]; if(ok(g)) chips += sel('🎯 '+esc(g)); });
     selKnow.forEach(k => { const c=cats[k.catIdx]; const it=c&&(c.items||[])[k.itemIdx]; if(it) chips += sel('📘 '+esc(it)); });
     selSkills.forEach(si => { const s=skills[si]; if(ok(s)) chips += sel('🧩 '+esc(s)); });
+    refCats.forEach(rc => rc.sel.forEach(ii => { const it=rc.items[ii]; if(ok(it)) chips += sel(rc.icon+' '+esc(it)); }));
     const btn = `<button onclick="toggleCovPanel(${i})" style="background:#fff;border:1px dashed var(--navy);color:var(--navy);border-radius:8px;padding:5px 12px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit">${nSel?'✎ Edit coverage':'＋ Tag curriculum coverage'}</button>`;
     return `<div style="display:flex;flex-wrap:wrap;gap:0;align-items:center">${chips}${btn}</div>`;
   }
@@ -12431,9 +12459,12 @@ function dayCoverageHTML(i, d){
   const skillSec = skillIdx.length ? _covSection('🧩 Skills',
       selSkills.filter(si=>ok(skills[si])).length, skillIdx.length,
       skillIdx.map(idx=>_covGridChip(selSkills.includes(idx), `toggleCov(${i},'skill',${idx})`, skills[idx])).join('')) : '';
+  const refSec = refCats.map(rc => _covSection(rc.icon+' '+rc.name,
+      rc.sel.filter(ii=>ok(rc.items[ii])).length, rc.idxs.length,
+      rc.idxs.map(ii=>_covGridChip(rc.sel.includes(ii), `toggleCov(${i},'ref','${rc.lessonField}',${ii})`, rc.items[ii])).join(''))).join('');
 
   return `<div style="border:1px dashed var(--navy);border-radius:10px;padding:11px 13px;background:#FAFCFF">
-    ${goalSec}${knowSec}${skillSec}
+    ${goalSec}${knowSec}${skillSec}${refSec}
     <div style="text-align:right;margin-top:2px">
       <button onclick="toggleCovPanel(${i})" style="background:var(--navy);color:#fff;border:none;border-radius:7px;padding:5px 14px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit">Done ▲</button>
     </div>
