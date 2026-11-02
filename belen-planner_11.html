@@ -2494,7 +2494,7 @@ const ASSESS_COLORS = {
 // The build version baked into the app itself, so the update checker knows what
 // it's running even when the page was loaded WITHOUT a ?v= token (e.g. the
 // Netlify root rewrite). Keep this in lockstep with index.html's ?v= token.
-window.APP_VERSION = '20261102-57';
+window.APP_VERSION = '20261102-58';
 
 let activeCourse = 6; // default to Theology 6
 
@@ -3548,6 +3548,12 @@ function getSyncBins(){ try{ return JSON.parse(localStorage.getItem(SYNC_BINS_LS
 function getBinId(cid){ return getSyncBins()[cid] || ''; }
 function setBinId(cid,id){ const m=getSyncBins(); m[cid]=id; try{ localStorage.setItem(SYNC_BINS_LS,JSON.stringify(m)); }catch(e){} }
 function syncConnected(){ return !!getSyncKey(); }
+// PUBLIC share mirrors: the main sync bin is private, so a share link reads a
+// separate PUBLIC bin that the same sync keeps updated. One per course.
+const SHARE_BINS_LS = 'bjp-share-bins';
+function getShareBins(){ try{ return JSON.parse(localStorage.getItem(SHARE_BINS_LS)||'{}')||{}; }catch(e){ return {}; } }
+function getShareBinId(cid){ return getShareBins()[cid] || ''; }
+function setShareBinId(cid,id){ const m=getShareBins(); m[cid]=id; try{ localStorage.setItem(SHARE_BINS_LS,JSON.stringify(m)); }catch(e){} }
 function getJsonbinKey(){ return getSyncKey(); }
 
 function setSyncStatus(status) {
@@ -3825,6 +3831,10 @@ async function pushToSheets() {
     }
     if (res.ok) {
       _lastPushMsg = '';
+      // Keep the PUBLIC share mirror (if this course has one) in step with the
+      // private copy, so a shared view-only link always shows the latest — best
+      // effort, never blocks or fails the real sync.
+      try { await mirrorToShareBin(co.id, key, payload); } catch(e){ console.error('share mirror', e); }
       setSyncStatus('synced');
       const last = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
       const label = document.getElementById('sync-label');
@@ -3946,9 +3956,37 @@ function viewParamsFromURL(){
   }catch(e){ return null; }
 }
 function shareLinkForCourse(cid){
-  const bin = getBinId(cid);
+  const bin = getShareBinId(cid);   // the PUBLIC mirror, not the private sync bin
   if (!bin) return '';
   return `${location.origin}${location.pathname}?view=${encodeURIComponent(bin)}&c=${cid}`;
+}
+// Create a PUBLIC bin for this course (viewers read it with no key) and seed it
+// with the current data. Returns the bin id, or '' if jsonbin refused.
+async function ensureShareBin(cid, key, payload){
+  const existing = getShareBinId(cid);
+  if (existing) return existing;
+  const co = COURSES[cid] || getCourse();
+  const res = await fetch('https://api.jsonbin.io/v3/b', {
+    method:'POST',
+    headers:{ 'Content-Type':'application/json', 'X-Master-Key':key,
+              'X-Bin-Private':'false', 'X-Bin-Name':`Belen ${co.name} (shared view)` },
+    body: payload,
+  });
+  if (!res.ok) return '';
+  const d = await res.json().catch(()=>null);
+  const id = d && d.metadata && d.metadata.id;
+  if (id) setShareBinId(cid, id);
+  return id || '';
+}
+// Overwrite the public share mirror with the latest payload (if one exists).
+async function mirrorToShareBin(cid, key, payload){
+  const bin = getShareBinId(cid);
+  if (!bin) return;
+  await fetch(`https://api.jsonbin.io/v3/b/${bin}`, {
+    method:'PUT',
+    headers:{ 'Content-Type':'application/json', 'X-Master-Key':key, 'X-Bin-Versioning':'false' },
+    body: payload,
+  });
 }
 // Fetch the shared bin (keyless public read) and adopt it into `state`.
 async function fetchSharedInto(bin, quiet){
@@ -3997,7 +4035,7 @@ async function initSharedView(vp){
 }
 
 // Owner side: build + show the shareable link for the current course.
-function openShareLink(){
+async function openShareLink(){
   const co = getCourse();
   if (!syncConnected()){
     toast('Connect cloud sync first (⋯ → Cloud sync setup), then share — the link reads your synced copy.');
@@ -4008,6 +4046,19 @@ function openShareLink(){
   if (!bin){
     toast('This course hasn’t synced yet. Press Save once to create its cloud copy, then share.');
     return;
+  }
+  let shareBin = getShareBinId(co.id);
+  if (!shareBin){
+    // First time sharing this course — create the PUBLIC mirror now.
+    toast('Setting up your share link…');
+    try {
+      const payload = await buildSyncBody();
+      shareBin = await ensureShareBin(co.id, getSyncKey(), payload);
+    } catch(e){ console.error('ensureShareBin', e); }
+    if (!shareBin){
+      toast('Couldn’t create the shareable copy (jsonbin may have blocked it). Tell me and I’ll help.');
+      return;
+    }
   }
   const link = shareLinkForCourse(co.id);
   let ov = document.getElementById('share-overlay');
@@ -4044,14 +4095,14 @@ function openShareLink(){
   // Best-effort public-readability check (so the owner knows before sending it).
   (async () => {
     try{
-      const r = await fetch(`https://api.jsonbin.io/v3/b/${bin}/latest`, { headers:{ 'X-Bin-Meta':'false' } });
+      const r = await fetch(`https://api.jsonbin.io/v3/b/${shareBin}/latest`, { headers:{ 'X-Bin-Meta':'false' } });
       const note = document.getElementById('share-note');
       if (!note) return;
       if (r.ok){
         note.innerHTML = '✅ Ready to share — this link opens for anyone. It shows this course only; switch courses and share again for the other.';
         note.style.color = '#0a7d3c';
       } else {
-        note.innerHTML = '⚠️ Your sync copy may be private, so others might see “couldn’t be loaded.” If so, tell me and I’ll switch it to a shareable copy.';
+        note.innerHTML = '⚠️ The shareable copy didn’t respond just now. Give it a moment and re-open this dialog; if it keeps failing, tell me.';
         note.style.color = '#9a6a00';
       }
     }catch(e){ /* offline / blocked here — leave the neutral tip */ }
