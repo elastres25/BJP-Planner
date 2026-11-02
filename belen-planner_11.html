@@ -64,6 +64,23 @@ button, input, textarea, select { font-family: inherit; }
 /* Header hides when scrolling down, returns when scrolling up */
 .topbar { transition: transform .25s ease; }
 .topbar.topbar-hidden { transform: translateY(-100%); }
+/* ── READ-ONLY SHARED VIEW (opened via a ?view= share link) ── */
+#view-banner { display: none; }
+body.view-only #view-banner {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  background: #1B3A6B; color: #F0C84A; font-size: 12.5px; font-weight: 600;
+  padding: 7px 14px; text-align: center; line-height: 1.35;
+}
+body.view-only #sync-status,
+body.view-only .tb-btn.gold,
+body.view-only .tb-more-btn,
+body.view-only #more-menu,
+body.view-only #claude-fab,
+body.view-only #claude-panel { display: none !important; }
+/* Lock every editable field so a viewer can read but not change anything
+   (Chrome/Safari honor -webkit-user-modify). Saving is also a no-op in view
+   mode, so even an edit that slips through never persists or syncs. */
+body.view-only [contenteditable] { -webkit-user-modify: read-only !important; user-modify: read-only; }
 /* Course toggle pills */
 .ct-btn { padding: 5px 14px; border-radius: 999px; font-size: 12px; }
 .ct-short { display: none; }
@@ -1516,6 +1533,7 @@ body.dragging-lesson, body.dragging-week { cursor: grabbing; }
     </div>
     <div class="mm-sec">Save &amp; Export</div>
     <button onclick="closeMoreMenu();openSyncSetup()">☁️ Cloud sync setup…</button>
+    <button onclick="closeMoreMenu();openShareLink()">🔗 Share a view-only link…</button>
     <button onclick="closeMoreMenu();exportBackup()">Backup my data</button>
     <button onclick="closeMoreMenu();document.getElementById('restore-file-input').click()">Restore from backup</button>
     <button onclick="closeMoreMenu();openSnapshots()">🕑 Restore an earlier version…</button>
@@ -2476,7 +2494,7 @@ const ASSESS_COLORS = {
 // The build version baked into the app itself, so the update checker knows what
 // it's running even when the page was loaded WITHOUT a ?v= token (e.g. the
 // Netlify root rewrite). Keep this in lockstep with index.html's ?v= token.
-window.APP_VERSION = '20261102-56';
+window.APP_VERSION = '20261102-57';
 
 let activeCourse = 6; // default to Theology 6
 
@@ -3549,6 +3567,9 @@ function setSyncStatus(status) {
 }
 
 function saveState() {
+  // In a shared read-only view, never persist or sync — a viewer's browser must
+  // not overwrite its own local planner, nor push anything to the owner's cloud.
+  if (window.VIEW_ONLY) return;
   state._v = 2;
   state.lastModified = Date.now();
   try {
@@ -3577,6 +3598,7 @@ let _lastPushedMod = 0;    // state.lastModified of the last copy we pushed/pull
 let _lastPullAt  = 0;      // throttle auto-pulls so focus-storms don't hammer the API
 
 function scheduleCloudSync(){
+  if (window.VIEW_ONLY) return;                 // read-only shared view never pushes
   if (!syncConnected()) return;                 // local-only until connected
   if ((state.lastModified||0) <= _lastPushedMod) return;  // nothing new to send
   clearTimeout(_syncTimer);
@@ -3609,6 +3631,7 @@ function rerenderActiveView(){
   }catch(e){ console.error('rerenderActiveView', e); }
 }
 async function autoPullOnFocus(){
+  if (window.VIEW_ONLY) return;   // shared view refreshes from its own bin, not the owner's key
   if (document.hidden) return;
   if (!syncConnected()) return;
   const now = Date.now();
@@ -3902,6 +3925,147 @@ async function pullFromSheets() {
     if (label) label.textContent = 'Sync failed (blocked/offline)';
     return false;
   }
+}
+
+// ── SHARE: live, read-only public link ────────────────────────────
+// A viewer opens  <app>?view=<binId>&c=<courseId>.  We fetch that jsonbin
+// record directly — free-tier bins are PUBLIC, so no key is needed — show it
+// read-only, and re-fetch periodically so the view reflects the owner's latest
+// auto-sync. Nothing a viewer does is ever saved (saveState is a no-op in view
+// mode), so the owner's data and the viewer's own planner are both protected.
+window.VIEW_ONLY = false;
+let _viewPoll = null, _viewBin = null, _viewLastMod = null;
+
+function viewParamsFromURL(){
+  try{
+    const p = new URLSearchParams(location.search);
+    const bin = (p.get('view')||'').trim();
+    if (!bin) return null;
+    const cid = +(p.get('c')||6) || 6;
+    return { bin, cid };
+  }catch(e){ return null; }
+}
+function shareLinkForCourse(cid){
+  const bin = getBinId(cid);
+  if (!bin) return '';
+  return `${location.origin}${location.pathname}?view=${encodeURIComponent(bin)}&c=${cid}`;
+}
+// Fetch the shared bin (keyless public read) and adopt it into `state`.
+async function fetchSharedInto(bin, quiet){
+  try{
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${bin}/latest`, { headers:{ 'X-Bin-Meta':'false' } });
+    if (!res.ok) return false;
+    const data = await res.json();
+    const record = await unwrapSyncRecord(data.record || data);
+    if (record && record.units && Object.keys(record.units).length){
+      const changed = (record.lastModified||0) !== (_viewLastMod||0);
+      state = record;
+      _viewLastMod = record.lastModified || 0;
+      if (!quiet || changed) rerenderActiveView();
+      return true;
+    }
+  }catch(e){ console.error('shared-view fetch error', e); }
+  return false;
+}
+async function initSharedView(vp){
+  window.VIEW_ONLY = true;
+  _viewBin = vp.bin;
+  document.body.classList.add('view-only');
+  activeCourse = vp.cid;
+  // Banner across the top so it's unmistakably a shared, read-only copy.
+  try{
+    const b = document.createElement('div');
+    b.id = 'view-banner';
+    b.innerHTML = `👁 Viewing <b style="margin:0 4px">${esc(getCourse().name)}</b> — read-only shared copy · updates automatically`;
+    document.body.insertBefore(b, document.body.firstChild);
+  }catch(e){}
+  try { renderCourseToggle(); } catch(e){}
+  const ok = await fetchSharedInto(vp.bin, false);
+  if (!ok){
+    try{
+      document.getElementById('view-banner').innerHTML =
+        '⚠️ This shared planner couldn’t be loaded. The link may be wrong, or the owner’s sync copy isn’t public. Ask them to re-share.';
+    }catch(e){}
+    return;
+  }
+  try { renderCourse(); } catch(e){}
+  try { nav('dashboard'); } catch(e){}
+  // Live refresh: pick up the owner's latest sync without a manual step.
+  _viewPoll = setInterval(()=>fetchSharedInto(vp.bin, true), 45000);
+  window.addEventListener('focus', ()=>fetchSharedInto(vp.bin, true));
+  document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) fetchSharedInto(vp.bin, true); });
+}
+
+// Owner side: build + show the shareable link for the current course.
+function openShareLink(){
+  const co = getCourse();
+  if (!syncConnected()){
+    toast('Connect cloud sync first (⋯ → Cloud sync setup), then share — the link reads your synced copy.');
+    try { openSyncSetup(); } catch(e){}
+    return;
+  }
+  const bin = getBinId(co.id);
+  if (!bin){
+    toast('This course hasn’t synced yet. Press Save once to create its cloud copy, then share.');
+    return;
+  }
+  const link = shareLinkForCourse(co.id);
+  let ov = document.getElementById('share-overlay');
+  if (!ov){
+    ov = document.createElement('div');
+    ov.id = 'share-overlay';
+    ov.style.cssText = 'display:none;position:fixed;inset:0;z-index:420;background:rgba(20,18,15,.5);align-items:center;justify-content:center;padding:20px';
+    ov.onclick = e => { if (e.target === ov) ov.style.display='none'; };
+    document.body.appendChild(ov);
+  }
+  ov.innerHTML = `
+    <div style="background:#fff;max-width:520px;width:100%;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.35);overflow:hidden">
+      <div style="padding:14px 18px;background:var(--navy);display:flex;align-items:center;justify-content:space-between">
+        <span style="color:#fff;font-weight:600;font-size:15px">🔗 Share ${esc(co.name)} (view-only)</span>
+        <button onclick="document.getElementById('share-overlay').style.display='none'" style="border:none;background:none;color:rgba(255,255,255,.7);font-size:22px;cursor:pointer;line-height:1">&times;</button>
+      </div>
+      <div style="padding:18px">
+        <p style="font-size:13px;color:var(--ink);line-height:1.55;margin:0 0 12px">
+          Anyone with this link can <b>view</b> your ${esc(co.name)} plans. They <b>cannot edit</b> anything,
+          and it <b>updates automatically</b> every time your planner syncs — no extra step.
+        </p>
+        <div style="display:flex;gap:8px;align-items:stretch">
+          <input id="share-link-input" readonly value="${esc(link)}" onclick="this.select()"
+            style="flex:1;border:1px solid var(--rule);border-radius:8px;padding:9px 11px;font-size:12px;font-family:monospace;color:var(--ink);background:#FAFAF8;outline:none;box-sizing:border-box">
+          <button onclick="copyShareLink()" id="share-copy-btn"
+            style="background:var(--navy);color:#fff;border:none;border-radius:8px;padding:0 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">Copy</button>
+        </div>
+        <p id="share-note" style="font-size:11.5px;color:var(--ink-3);line-height:1.5;margin:11px 0 0">
+          Tip: the link shows this course only. Switch courses and share again for the other one.
+        </p>
+      </div>
+    </div>`;
+  ov.style.display = 'flex';
+  // Best-effort public-readability check (so the owner knows before sending it).
+  (async () => {
+    try{
+      const r = await fetch(`https://api.jsonbin.io/v3/b/${bin}/latest`, { headers:{ 'X-Bin-Meta':'false' } });
+      const note = document.getElementById('share-note');
+      if (!note) return;
+      if (r.ok){
+        note.innerHTML = '✅ Ready to share — this link opens for anyone. It shows this course only; switch courses and share again for the other.';
+        note.style.color = '#0a7d3c';
+      } else {
+        note.innerHTML = '⚠️ Your sync copy may be private, so others might see “couldn’t be loaded.” If so, tell me and I’ll switch it to a shareable copy.';
+        note.style.color = '#9a6a00';
+      }
+    }catch(e){ /* offline / blocked here — leave the neutral tip */ }
+  })();
+}
+function copyShareLink(){
+  const inp = document.getElementById('share-link-input');
+  if (!inp) return;
+  inp.select();
+  const done = () => { const b=document.getElementById('share-copy-btn'); if(b){ b.textContent='Copied ✓'; setTimeout(()=>{ if(b) b.textContent='Copy'; }, 1800); } };
+  try{
+    if (navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(inp.value).then(done, ()=>{ try{document.execCommand('copy');}catch(_){} done(); }); }
+    else { document.execCommand('copy'); done(); }
+  }catch(e){ try{ document.execCommand('copy'); }catch(_){} done(); }
 }
 
 // ── CONNECT-SYNC UI ───────────────────────────────────────────────
@@ -13250,6 +13414,10 @@ function toast(msg) {
 
 // ── INIT ──────────────────────────────────────────────────────────
 async function init() {
+  // Shared read-only view? (opened via a ?view=<bin> link) — load that copy
+  // instead of the local planner and skip all sync/edit wiring.
+  const vp = viewParamsFromURL();
+  if (vp){ await initSharedView(vp); return; }
   renderCourseToggle();
   const fromCloud = await pullFromSheets();
   if (fromCloud) {
