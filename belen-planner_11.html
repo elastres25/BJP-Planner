@@ -2476,7 +2476,7 @@ const ASSESS_COLORS = {
 // The build version baked into the app itself, so the update checker knows what
 // it's running even when the page was loaded WITHOUT a ?v= token (e.g. the
 // Netlify root rewrite). Keep this in lockstep with index.html's ?v= token.
-window.APP_VERSION = '20261101-54';
+window.APP_VERSION = '20261102-55';
 
 let activeCourse = 6; // default to Theology 6
 
@@ -7428,6 +7428,7 @@ function unitOverviewPanelHTML(uid) {
     </div>
     <div class="uov-body ${isOpen?'open':''}" id="uov-body-${uid}">
       <div style="padding:16px 20px 20px">
+        ${coverageTrackerHTML(uid)}
         ${unitOverviewPageHTML(u, weeks, false)}
       </div>
     </div>
@@ -7508,15 +7509,57 @@ function migrateReflectionItems(uov) {
   }
 }
 
+// Re-render just the Unit Overview panel in place (cheaper than renderUnit)
+// so its coverage chips reflect the latest lesson tags. Returns false if the
+// panel isn't on screen.
+function refreshOverviewPanel(uid) {
+  const panel = document.getElementById(`uov-panel-${uid}`);
+  if (!panel) return false;
+  panel.outerHTML = unitOverviewPanelHTML(uid);
+  return true;
+}
 function toggleUOVPanel(uid) {
-  const body = document.getElementById(`uov-body-${uid}`);
-  const chev = document.getElementById(`uov-chev-${uid}`);
-  const hint = document.getElementById(`uov-hint-${uid}`);
-  if (!body) return;
-  const open = body.classList.toggle('open');
-  uovPanelOpen[uid] = open; // persist across re-renders
-  chev.classList.toggle('open', open);
-  if (hint) hint.textContent = open ? 'Click to collapse' : 'Click to expand';
+  // Flip the open state and RE-RENDER the panel so, on open, the chips show
+  // current coverage (tags made while it was closed now green correctly).
+  uovPanelOpen[uid] = !uovPanelOpen[uid];
+  if (!refreshOverviewPanel(uid)) renderUnit();
+}
+
+// A "what's covered vs. what's still needed" summary for the top of the
+// overview — tracks the three things lessons tag: Unit Goals, Knowledge,
+// Skills. Shows per-section progress bars, an overall %, and a collapsible
+// list of everything not yet covered by any lesson.
+function coverageTrackerHTML(uid){
+  const uov = getUOV(uid);
+  const ok = v => typeof v === 'string' && v.trim();
+  const goals = uov.unitGoalItems || [], skills = uov.skillItems || [], cats = uov.knowledgeCategories || [];
+  const gIdx = goals.map((g,i)=>i).filter(i=>ok(goals[i]));
+  const gCov = gIdx.filter(i=>isUnitGoalCoveredFull(uid,i));
+  const gUncov = gIdx.filter(i=>!isUnitGoalCoveredFull(uid,i)).map(i=>goals[i]);
+  const sIdx = skills.map((s,i)=>i).filter(i=>ok(skills[i]));
+  const sCov = sIdx.filter(i=>isSkillCoveredFull(uid,i));
+  const sUncov = sIdx.filter(i=>!isSkillCoveredFull(uid,i)).map(i=>skills[i]);
+  let kTot=0, kCov=0; const kUncov=[];
+  cats.forEach((c,ci)=>(c.items||[]).forEach((it,ii)=>{ kTot++; if(isKnowledgeItemCoveredFull(uid,ci,ii)) kCov++; else kUncov.push(it); }));
+  const total = gIdx.length + sIdx.length + kTot;
+  if (!total) return '';
+  const cov = gCov.length + sCov.length + kCov;
+  const pct = Math.round(cov/total*100);
+  const bar = (c,t) => { const p=t?Math.round(c/t*100):0; const col=p>=100?'#0a7d3c':(p>=50?'#C9991A':'#B6BCC8'); return `<div style="flex:1;height:7px;background:#E6EBF4;border-radius:4px;overflow:hidden"><div style="width:${p}%;height:100%;background:${col}"></div></div>`; };
+  const rowb = (label,c,t) => `<div style="display:flex;align-items:center;gap:8px;margin:4px 0"><span style="font-size:11px;font-weight:700;color:var(--navy);width:84px;flex-shrink:0">${label}</span>${bar(c,t)}<span style="font-size:11px;color:var(--ink-2);width:46px;text-align:right;flex-shrink:0">${c}/${t}</span></div>`;
+  const uncovList = (title,arr) => arr.length ? `<div style="margin-top:7px"><div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-3);margin-bottom:3px">${title} — still to teach (${arr.length})</div><div style="display:flex;flex-wrap:wrap;gap:4px">${arr.map(x=>`<span style="font-size:10.5px;padding:2px 9px;border-radius:999px;background:#FBF2E0;color:#7A4B00;border:1px solid #E9D6A8">${esc(x)}</span>`).join('')}</div></div>` : '';
+  const left = total - cov;
+  return `<div style="border:1px solid var(--rule);border-radius:10px;padding:12px 14px;margin-bottom:16px;background:#FAFCFF">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+      <span style="font-size:12px;font-weight:800;color:var(--navy)">📊 Curriculum coverage</span>
+      <span style="font-size:13px;font-weight:800;color:${pct>=100?'#0a7d3c':'var(--navy)'}">${cov} of ${total} · ${pct}%</span>
+    </div>
+    ${rowb('Unit Goals', gCov.length, gIdx.length)}
+    ${rowb('Knowledge', kCov, kTot)}
+    ${rowb('Skills', sCov.length, sIdx.length)}
+    ${left ? `<details style="margin-top:8px"><summary style="cursor:pointer;font-size:11px;font-weight:700;color:var(--navy);outline:none">▸ What's still needed (${left})</summary>${uncovList('Unit Goals',gUncov)}${uncovList('Knowledge',kUncov)}${uncovList('Skills',sUncov)}</details>`
+          : `<div style="font-size:11px;color:#0a7d3c;font-weight:700;margin-top:6px">✓ Every goal, knowledge item, and skill is covered by at least one lesson</div>`}
+  </div>`;
 }
 
 function toggleUOVSection(bodyId, chevId) {
@@ -12322,10 +12365,10 @@ function toggleCov(i, kind, a, b){
   }
   saveState();
   renderCovCell(i);
-  // If the unit overview is on screen, re-render the whole unit so its chips
-  // green/un-green live. Otherwise skip it (overview is derived from state and
-  // will be correct whenever it next renders) so tagging stays snappy.
-  try { if (document.querySelector('.uov-body.open')) renderUnit(); } catch(e){}
+  // If the unit overview is open, re-render just its panel so chips green/
+  // un-green live. (Opening a closed overview also re-renders it, so coverage
+  // is always correct whenever the overview is shown.)
+  try { if (uovPanelOpen[currentUnit]) refreshOverviewPanel(currentUnit); } catch(e){}
 }
 
 // One toggle chip in the expanded grid: green+check when selected, grey when not.
