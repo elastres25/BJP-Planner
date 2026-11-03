@@ -2494,7 +2494,7 @@ const ASSESS_COLORS = {
 // The build version baked into the app itself, so the update checker knows what
 // it's running even when the page was loaded WITHOUT a ?v= token (e.g. the
 // Netlify root rewrite). Keep this in lockstep with index.html's ?v= token.
-window.APP_VERSION = '20261102-58';
+window.APP_VERSION = '20261103-59';
 
 let activeCourse = 6; // default to Theology 6
 
@@ -7498,6 +7498,264 @@ function unitCardHTML(u, semIdx, semCount) {
   </div>`;
 }
 
+// ── SWBAT LEARNING OBJECTIVES (teacher's objective guides) ────────
+// SWBAT learning objectives transcribed from the teacher's own objective guides
+// (Theology 6 and 7). Keyed by course id, then unit id. Backfilled into each
+// unit overview as "objectiveItems" when empty; the teacher's edits win.
+const SWBAT_OBJECTIVES = {
+  6: {
+    1: [
+      "Master the vocabulary of the Catholic faith and the life of a Jesuit school.",
+      "Identify and apply the Core Values of Belen Jesuit and the Ignatian way of proceeding.",
+      "Explain the mystery of the Holy Trinity — that God is one Being in three Persons — and articulate why the Catholic Church is monotheistic. (CCC 232–260)",
+      "Differentiate between a Catholic Christian and a non-Catholic Christian, and explain why non-Catholics do not receive the Eucharist at Mass. (CCC 1322–1419)",
+      "Identify and describe the roles and levels of community within the Catholic Church — Pope, Cardinal, Bishop, Priest, Deacon, and layperson; diocese and parish — and explain what it means to call the Pope the servant of the servants of God. (CCC 874–896)",
+      "Compare and contrast a chapel and a church, and describe the procedures and reverences proper to Our Lady of Belen Chapel, including genuflection and the norms for Eucharistic Adoration.",
+      "Define a religious congregation, locate the Society of Jesus among the orders of the Church, and explain why a student at a Jesuit school is not himself a Jesuit. (CCC 799–801)",
+      "Recount, in order, the steps of the Sacrament of Reconciliation and pray the Act of Contrition from memory.",
+      "Demonstrate the norms and practices for participating in the Mass and for receiving Holy Communion, and explain the reasoning behind each practice rather than merely performing it.",
+      "Participate in the Examen and explain how a daily review of one's own day is a form of prayer rather than a self-evaluation.",
+      "Sing the Salve Regina and explain its place in the prayer life of the school.",
+      "Identify and explain the Theme for the Year and articulate what it asks of him specifically as a member of this community.",
+      "Begin to consider his own hopes and fears as he enters Belen, and how the Core Values might shape his response to them.",
+      "Appraise how the Core Values are lived out in the life of this community, producing a short video and an original written prayer for his parents that applies one Core Value to a concrete situation in his first year.",
+    ],
+    2: [
+      "Master the vocabulary of prayer and the Scriptures.",
+      "Identify and distinguish the three expressions of prayer.",
+      "Explain what prayer is — “nothing else than an intimate sharing between friends” (St. Teresa of Avila) — and articulate why prayer is a relationship rather than a transaction. (CCC 2558–2565)",
+      "Identify and distinguish the four types of prayer using the ACTS acronym, and supply an example of each drawn from his own experience.",
+      "Distinguish among the vocal, meditative, and contemplative expressions of prayer, and explain why the Church needs both communal and individual prayer. (CCC 2700–2724)",
+      "Trace the etymology of the word Bible from biblia, and describe the basic structure and organization of the Old and New Testaments.",
+      "Locate a given verse in the Bible by book, chapter, and verse, unassisted.",
+      "Explain the ways Catholics correctly interpret Scripture in order to find truths about God, and why interpretation is necessary rather than optional. (CCC 109–119)",
+      "Participate in Lectio Divina and Visio Divina, and articulate the difference between reading a text and praying with it.",
+      "Recite the Our Father, Hail Mary, Glory Be, and Act of Contrition from memory.",
+      "Recount the basic history of the Rosary, including the tradition of St. Dominic de Guzman, and list the Mysteries.",
+      "Construct a Rosary and pray it, explaining how each prayer and each mystery functions within the whole rather than treating it as repetition.",
+      "Begin to consider which types and expressions of prayer he actually practices, which he avoids, and why.",
+      "Appraise how God remains present in prayer even when feelings and consolation are absent, producing a personal rule of prayer he will keep for the remainder of the semester.",
+    ],
+    3: [
+      "Master the vocabulary of creation, the human person, and sin.",
+      "Identify what each account of the opening chapters of Genesis contributes.",
+      "Explain that God is Father and Creator of heaven and earth, and that His love for us is unconditional and does not depend on our performance. (CCC 279–324)",
+      "Compare and contrast the two creation narratives of Genesis, identifying the distinct emphasis of each.",
+      "Interpret the theological meaning of the differences between the two narratives — that the first culminates in human beings who are free, and the second insists that man and woman need one another.",
+      "Define spiritual truth, and explain how the creation accounts can be true without functioning as a scientific report.",
+      "Explain what it means to be created in the image and likeness of God, and name its three consequences: inherent dignity, the capacity to think and love and respond, and the call to stewardship. (CCC 355–361)",
+      "Distinguish original sin from personal sin, and explain how creation retains its goodness even after the Fall. (CCC 385–412)",
+      "Analyze how his own personal sins affect the larger community and his relationship with God, rather than treating sin as a private matter.",
+      "Explain that God does not abandon His creation, using Psalm 139:13–14 and Isaiah 49:15–16 as evidence.",
+      "Begin to consider how God is like his earthly father and how God is different, and what qualities he looks for in the men he admires.",
+      "Appraise his own stewardship — of his own dignity, of the dignity of others, and of the goods of creation — producing a written commitment to one concrete change in each.",
+    ],
+    4: [
+      "Master the vocabulary of the Gospels, the Liturgical Year, and the Sacrament of Reconciliation.",
+      "Identify the seasons of the Liturgical Year and what each one forms in the faithful.",
+      "Define the Gospels as accounts of the life, teachings, death, and resurrection of Jesus Christ, and name their four authors.",
+      "Explain how the Synoptic Gospels share a common perspective and how the Gospel of John presents a distinct account.",
+      "Explain that Jesus is fully God and fully man, and why both are necessary rather than a compromise between the two. (CCC 464–469)",
+      "Describe the birth and early life of Jesus as presented in Luke 1–2 and Matthew 1–2, distinguishing what each narrative contributes.",
+      "Explain what comprises the Liturgical Year and how its cycle rehearses the life of Christ over twelve months.",
+      "Explain why the Church celebrates Advent, and distinguish preparing for Christ's birth from preparing for His second coming.",
+      "Recount, in order, the steps of the Sacrament of Reconciliation, from the examination of conscience through absolution. (CCC 1422–1470)",
+      "Define the Sacrament of Reconciliation and argue why it is fitting preparation for Advent.",
+      "Explain what the parable of the Prodigal Son (Luke 15:11–32) reveals about the mercy of the Father.",
+      "Begin to consider what concrete steps he can take to come to know Jesus Christ better, and how the Liturgical Year can help him.",
+      "Appraise how Reconciliation and forgiveness operate in his own relationships, producing an examination of conscience written in his own words that he can actually use before Confession.",
+    ],
+    5: [
+      "Master the vocabulary of the Holy Spirit.",
+      "Identify the action of the Holy Spirit across salvation history.",
+      "Explain that the Holy Spirit is a Divine Person — the third Person of the Trinity, equal to the Father and the Son — and not a force, a feeling, or an influence. (CCC 683–701)",
+      "Recognize the Holy Spirit's action in both Testaments by identifying specific passages: Genesis 1:2; Exodus 31:3; Luke 4:1; Luke 10:21; Acts 2:1–4.",
+      "Explain that the Holy Spirit inspired Scripture and worked through its human authors, and state what inspiration does and does not mean.",
+      "Explain the joint mission of the Son and the Spirit using John 14:26 and John 16:7, and describe how they worked together in Jesus' ministry and in the lives of believers.",
+      "Identify and explain the Gifts of the Holy Spirit, and identify and explain the Fruits named in Galatians 5:22–23. (CCC 1830–1832)",
+      "Distinguish a Gift of the Spirit from a Fruit of the Spirit, using the analogy of rowing a boat and sailing one.",
+      "Explain how the Holy Spirit is at work in the liturgy and the sacraments of the Church. (CCC 1091–1109)",
+      "Compose an original prayer to the Holy Spirit, and explain why it is appropriate to pray to the Spirit directly.",
+      "Begin to consider where he has already experienced the Holy Spirit in his own life without having named it.",
+      "Appraise which Gifts and Fruits of the Holy Spirit he recognizes in the people around him, producing a written account that names a specific person and the specific fruit he sees in him or her.",
+    ],
+    6: [
+      "Master the vocabulary of the life of St. Ignatius of Loyola and Ignatian spirituality.",
+      "Identify the five decisive events in the life of St. Ignatius of Loyola.",
+      "Retell the biography of St. Ignatius of Loyola in sequence — Loyola, Pamplona, Montserrat, Manresa, Jerusalem, Paris, Rome — including his birthplace, his role as a soldier, and his death.",
+      "Explain what a cannonball moment is, and how the injury at Pamplona began Ignatius's conversion rather than ending his ambition.",
+      "Describe Ignatius's experience at Manresa and the origin of the Spiritual Exercises.",
+      "Explain “finding God in all things,” and demonstrate it by locating God in one ordinary part of his own day.",
+      "Explain how spiritual discernment works — attending to interior movements — and distinguish it from simply choosing what he already wants.",
+      "Identify the first companions, including St. Peter Faber and St. Francis Xavier, and explain why friendship was instrumental to the founding of the Society of Jesus.",
+      "Describe the vision at La Storta and the papal approval of the Society in 1540, and name the vows Jesuits take.",
+      "Describe the work of the Society of Jesus in the world today — schools, universities, non-school ministries, publications — and explain the stages of becoming a Jesuit.",
+      "Identify Ignatius's feast day and patronage, and explain his continued devotion to the Blessed Mother from Montserrat to the end of his life.",
+      "Begin to consider his own cannonball moments — the interruptions and disappointments that have redirected him — and where God was in them.",
+      "Appraise where he is being called to serve God and his own faith community, producing a written response modeled on the Prayer for Generosity.",
+    ],
+    7: [
+      "Master the vocabulary of the Gospel according to St. Mark.",
+      "Identify the three stages of the Kingdom of God in the Gospel of Mark.",
+      "Identify the key characteristics of the Gospel according to Mark — how Jesus is presented, the audience addressed, and the pace and urgency of the narrative.",
+      "Articulate who St. Mark is, the tradition that he transmits St. Peter's memories of Jesus, and why the lion is his symbol.",
+      "Explain how the text itself shows that Mark wrote for Gentile converts, given how consistently he stops to explain Jewish customs.",
+      "Define parable, and explain why Jesus taught in parables rather than in plain statements.",
+      "Identify and explain key parables and teachings in Mark, demonstrating their moral and theological significance.",
+      "Recognize and describe Jesus' miracles as signs of His divinity and of the presence of the Kingdom, and address why Jesus does not heal every sick person.",
+      "Explain the messianic secret — why Jesus so often tells those He has healed or delivered to say nothing.",
+      "Define the Paschal Mystery and describe its role in salvation history. (CCC 607–655)",
+      "Identify the ongoing effects of the Paschal Mystery, especially through the Sacraments.",
+      "Analyze why the first human being in Mark to recognize Jesus as the Son of God is a Roman centurion, and why the disciples misunderstand Him so often.",
+      "Use scenes from Mark to enter into Ignatian contemplation, placing himself within the scene rather than observing it from outside.",
+      "Begin to consider when he has acted like Peter during the arrest and trial of Jesus, and whether he has ever acted like Judas.",
+      "Appraise how his image of Jesus has changed through reading Mark, identifying his favorite scene in the Gospel and producing a written or recorded reflection on what it revealed to him.",
+    ],
+    8: [
+      "Master the vocabulary of the seven sacraments.",
+      "Identify the three categories of the sacraments and what each accomplishes.",
+      "Define a sacrament as an efficacious sign of grace, instituted by Christ and entrusted to the Church. (CCC 1113–1134)",
+      "Explain what efficacious means, and argue why the sacraments are more than symbols but are not magic. (CCC 1127–1129)",
+      "Name the seven sacraments and sort them correctly into the three categories: Initiation, Healing, and Service.",
+      "Identify where each sacrament is grounded in Scripture: Matthew 28:19; John 20:23; Matthew 26:26–28; Acts 19:6; Mark 10:9; Luke 22:19; James 5:14.",
+      "Explain how each sacrament reflects a key moment in the life and ministry of Christ.",
+      "Explain how Baptism connects him to the life, death, and resurrection of Jesus.",
+      "Distinguish Jesus' presence in the Eucharist from the other ways He is present — in the depths of the heart, in the community of the Church, in the Scriptures, and through God's omnipresence.",
+      "Explain why absolution received from a priest is necessary in addition to repenting in personal prayer. (CCC 1441–1445)",
+      "Explain why regular participation in the sacraments strengthens faith, and describe practical ways to engage them in his own week.",
+      "Begin to consider what he actually knows about his own Baptism — who baptized him, whether he has ever thanked or prayed for that person.",
+      "Appraise why it matters that the sacraments bring him to encounter Christ through physical reality — water, oil, bread, and wine — producing a written explanation of what one specific sacrament says to his own life.",
+    ],
+    9: [
+      "Master the vocabulary of the Church and the Communion of Saints.",
+      "Identify the three states of the Church as the one Communion of Saints.",
+      "Identify and explain the biblical images of the Church — Mother, Body of Christ, People of God, Family of God, Temple of the Holy Spirit, and Pilgrim Church — and cite the Scripture behind each.",
+      "Explain how each image reveals something about the Church's mission and identity that the others do not.",
+      "Define and explain the three states of the Church: Church Militant, Church Suffering, and Church Triumphant. (CCC 946–962)",
+      "Explain how the Church can exist beyond this earthly life, and why it is right to pray for those in Purgatory.",
+      "Define saint and canonization, and describe how a person is recognized as a saint.",
+      "Explain why he can ask the saints in heaven to pray for him, and distinguish asking for intercession from offering worship.",
+      "Describe the origin and meaning of the Apostles' Creed and the Nicene Creed, and identify when Catholics pray each of them.",
+      "Identify the essential truths stated in the Creeds: that the Trinity is three Persons in one God; that Jesus is fully God and fully human; that Jesus will return in glory to judge the world; and that the Holy Spirit is a Person who dwells within us and sustains the Church.",
+      "Begin to consider how he is actually trying to live in order to become a saint, and what in his life currently makes that harder.",
+      "Appraise one saint — St. Catherine of Siena, St. Pier Giorgio Frassati, or St. Francis Xavier — producing a short account of how that saint's life makes holiness look possible for a student his age.",
+    ],
+  },
+  7: {
+    1: [
+      "Explain that morality is ordered toward the end for which he was created — union with God forever — using the language of the Principle and Foundation.",
+      "Define virtue and vice, and classify concrete actions drawn from Scripture and from contemporary media as one or the other.",
+      "Distinguish mortal sin from venial sin by identifying the three conditions required for grave sin (CCC 1857).",
+      "Justify why Scripture and morality are studied together, explaining how the biblical history of covenant makes a claim on how he lives.",
+      "Interpret Genesis 1:26–31, Matthew 5:1–12, and Romans 7:14–25 as accounts, respectively, of human dignity, blessedness, and the interior struggle between what he wants and what he does.",
+      "Relate the Theology of the Body’s account of authentic freedom and self-gift to his own dignity as one made in the image and likeness of God, explaining why freedom is not the absence of limits.",
+      "Appraise his own moral choices in light of the parable of the Prodigal Son (Luke 15:11–32), naming one virtue he intends to grow in this semester.",
+      "Demonstrate mastery of the unit vocabulary and distinctions on the Unit 1 Quiz: Morality and Scripture, including at least one short-answer item that connects a specific scriptural passage to a real moral decision.",
+    ],
+    2: [
+      "Master the vocabulary of the primeval history.",
+      "Identify the key figures of Genesis 1–11 and state what each contributes to the narrative.",
+      "Summarize the two creation accounts of Genesis 1–2, emphasizing the goodness of creation and the gift of free will.",
+      "Explain what it means to be made imago Dei, and derive from it the human vocation to stewardship of creation.",
+      "Distinguish metaphorical and figurative language from literal reportage in Genesis 1–11, and defend why the Church reads these chapters for religious truth rather than as scientific description.",
+      "Analyze Genesis 3 to identify the first sin as a failure of trust in God, and define protoevangelium from Genesis 3:15.",
+      "Compare the offerings of Cain and Abel (Genesis 4) to explain how envy escalates into violence against the sanctity of human life.",
+      "Interpret the genealogies of Genesis 5 and the boast of Lamech as evidence of the ongoing decline of mankind.",
+      "Summarize the Deluge (Genesis 6–9) and explain how God’s covenant with Noah prefigures the covenant of Jesus Christ.",
+      "Interpret the Tower of Babel (Genesis 11) as an account of pride and its consequences for human community.",
+      "Evaluate the claim that moral choices generate “spiritual momentum” — that good leads to more good and sin leads to more sin — using at least two narratives from this unit as evidence.",
+      "Apply the morality goals of Genesis 1–11 to concrete situations in his own life: the group chat, the team, the family, the classroom.",
+      "Reflect on what it means to answer \"Am I my brother’s keeper?\" and identify the “tower” he is tempted to build for himself.",
+      "Demonstrate mastery of the narratives, vocabulary, and moral lessons of the primeval history on the Unit 2 Test: Genesis 1–11, including at least one extended-response item requiring application rather than recall.",
+    ],
+    3: [
+      "Master the vocabulary of the patriarchal narratives.",
+      "Identify the members of the patriarchal family and the places central to their story.",
+      "Summarize the story of Abraham and Sarah (Genesis 12–26), explaining what it cost Abraham to follow God’s will rather than the cultural norms of his day.",
+      "Explain God’s covenant with Abraham and how it prefigures the covenant of Jesus Christ.",
+      "Summarize the stories of Isaac and Rebekah, Jacob and Esau, and Jacob, Leah, and Rachel (Genesis 27–33).",
+      "Analyze the consequences of Jacob’s deception of Isaac and Esau as a case study in justice — that deceit returns upon the deceiver.",
+      "Summarize the story of Joseph and his brothers (Genesis 37–50) and identify in it fortitude, charity, forgiveness, and trust in divine providence.",
+      "Construct an annotated family tree of the patriarchs that traces how the covenantal promise is handed down through a flawed and complicated family.",
+      "Evaluate what it reveals about God that He chooses unexpected, undistinguished, and sinful people to carry out His purposes.",
+      "Contrast God’s standards for leadership with those of contemporary society, using at least two figures from Genesis 12–50 as evidence.",
+      "Apply the morality goals of the patriarchal narratives to concrete examples in his own life, particularly envy toward a brother or teammate and favoritism within a family.",
+      "Reflect on how God has been at work in the struggles of his own family and how God transforms bad situations into good ones.",
+      "Demonstrate mastery of the patriarchal narratives, vocabulary, and moral lessons on the Unit 3 Test: Genesis: The Patriarchs, including at least one item requiring him to defend a claim about divine providence from the text.",
+    ],
+    4: [
+      "Master the vocabulary of the Exodus.",
+      "Identify the key figures and places of the Exodus.",
+      "Summarize the life of Moses from his early life in Egypt (Exodus 1–2) through the reception of the Law at Sinai.",
+      "Explain the call of Moses at the burning bush (Exodus 3) and the significance of God revealing His name.",
+      "Explain why the plagues occurred (Exodus 4–11) in a way consistent with the goodness of God, and analyze Pharaoh’s pride as the engine of the narrative.",
+      "Interpret the relationship between the Passover (Exodus 11–12) and the sacraments of Baptism and the Eucharist.",
+      "Relate Old Testament patterns of worship — sacrifice, sanctuary, priesthood — to Catholic liturgical practice.",
+      "Defend the claim that freedom is for the worship of God, and explain why a person is only fully free when worshipping Him.",
+      "Analyze the golden calf episode (Exodus 32) to explain idolatry and Aaron’s sloth, and to argue that true worship requires destroying the idol previously worshipped.",
+      "Evaluate Moses’ killing of the Egyptian guard (Exodus 2) as a failure of prudence, and trace his growth in maturity across the book.",
+      "Identify a form of slavery from which people today need to be liberated by God, and describe what liberation would concretely require.",
+      "Assess what true worship would look like for a person or a society whose previous idol was money.",
+      "Reflect on how prayer and worship liberate him, and name the idols he has been tempted to worship.",
+      "Demonstrate mastery of the Exodus narrative, vocabulary, and moral lessons on the Unit 4 Test: Exodus, and apply a concept from the unit to a scene from the film The Prince of Egypt.",
+    ],
+    5: [
+      "Master the vocabulary of moral decision-making under the covenant.",
+      "Explain the ultimate purpose and context of law, and defend the claim that there is no freedom without law.",
+      "Argue that the moral law is a demand of human dignity — the requirement of belonging to a royal, priestly nation — rather than an arbitrary restriction.",
+      "Match each of the Ten Commandments with a concrete contemporary application and state the positive good each one protects.",
+      "Distinguish the moral laws of the Old Testament from its ceremonial laws, and explain why the Church retains the former and not the latter.",
+      "Apply the categories of object, intention, and circumstance to specific cases in order to judge the morality of an act.",
+      "Apply the STOP method to a real moral dilemma drawn from student life and defend the resulting judgment in writing.",
+      "Recognize the recurring motif of God creating sanctuaries and human beings defiling them, using the ordination of Aaron and the disobedience of his sons (Leviticus 8, 10) as the primary case.",
+      "Explain the social context of the Torah laws on slavery, and distinguish laws that are time-conditioned from laws that are enduring.",
+      "Evaluate how rules in a sport or a game produce, rather than restrict, the goods of that game, and transfer the analogy to the moral law.",
+      "Complete a moral-reasoning case file: given two dilemmas drawn from real student life, apply object, intention, and circumstance and the STOP method to each, and defend the judgment in writing with reference to a specific commandment and a cited paragraph of the Catechism.",
+    ],
+    6: [
+      "Master the vocabulary of the wilderness, the conquest, and the judges.",
+      "Identify the key figures and places of this unit.",
+      "Summarize the rebellion of Israel in the wilderness (Numbers 11, 13, 14) and identify gluttony and ingratitude as its moral core.",
+      "Summarize the death of Moses (Deuteronomy 34) and explain what it means that the leader does not enter the land.",
+      "Summarize Joshua and the siege of Jericho (Joshua 1, 2, 6) and identify the avarice of the Israelite theft at Ai as the cause of the defeat that follows.",
+      "Summarize the story of Samson and Delilah (Judges 13–16) and analyze lust and wrath as the undoing of a man given extraordinary gifts.",
+      "Evaluate what the Samson narrative does and does not teach about heartbreak, rejecting any generalization about women and articulating what a healthy relationship actually requires.",
+      "Explain the role of a judge in the Israelite community and why God provides judges to help the people continue living the covenant.",
+      "Identify how Ruth’s fidelity to Naomi prepares the way for faith in God, and explain why a foreigner stands in the ancestry of David and of Christ.",
+      "Assess how God continues to work through people of widely differing virtue, naming a flawed figure in history or in the world today through whom God still works.",
+      "Articulate connections between these narratives and his own experience — how God is present in good times and bad, and in what sense the spiritual life is a battle.",
+      "Compose a short profile of a deeply flawed historical or contemporary figure through whom God has nevertheless worked, defending the choice with specific evidence from one narrative in this unit and identifying the virtue and the vice at work in each.",
+    ],
+    7: [
+      "Master the vocabulary of the rise of the monarchy.",
+      "Identify the key figures of 1 and 2 Samuel.",
+      "Summarize the events of the lives of Samuel (1 Samuel 1–3), Saul (1 Samuel 8, 13–15), and David (1 Samuel 16 – 2 Samuel).",
+      "Analyze Saul’s envy and insecurity as the mechanism of his downfall, and identify the rash vow as a failure of prudence.",
+      "Evaluate the friendship of David and Jonathan as a model of loyalty, and specify what makes it different from ordinary teenage friendship.",
+      "Explain the Lord’s covenant with David and how Jesus Christ fulfills it.",
+      "Contrast David’s mercy toward Saul with his sin against Uriah and Bathsheba, and account for how the same man is capable of both.",
+      "Assess the prudence of Abigail and the humility of David’s response to her as a case of correction received well.",
+      "Defend the claim that power corrupts, using Saul and David as evidence, and identify the safeguards that protect against it.",
+      "Identify the heroes who emerge from these narratives and justify why each is heroic on grounds other than success.",
+      "Apply the morality goals of this unit to his own life: where insecurity has driven his decisions, and how his friendships compare to that of Jonathan and David.",
+      "Argue in writing which figure in 1 and 2 Samuel best exemplifies a single named virtue, citing at least three passages in support and answering the strongest objection to the choice.",
+    ],
+    8: [
+      "Master the vocabulary of the Christian moral life.",
+      "List and explain the Cardinal Virtues, the Theological Virtues, and the Seven Deadly Sins, and give a concrete example of each drawn from student life.",
+      "Summarize the Sermon on the Mount (Matthew 5–7), the Sermon of the Parables (Matthew 13), the Sermon on the Church (Matthew 18), the Last Judgment (Matthew 25), and the Resurrection and Great Commission (Matthew 28).",
+      "Match each Beatitude with a concrete example and explain in what sense the person described is genuinely blessed.",
+      "Explain why Jesus teaches in parables and analyze how a specific parable would have shocked its original cultural audience.",
+      "Analyze how Jesus takes the moral laws of the Old Testament and raises them to a more demanding level, using at least two antitheses from Matthew 5.",
+      "Defend the claim that humility is the most foundational and transformational of the virtues.",
+      "Analyze the importance of the women of the Old Testament as preparation for the Blessed Virgin Mary, and examine his own attitudes toward women in light of the Gospel.",
+      "Apply Jesus’ teaching on forgiveness and love of enemies to a situation in his own life where it is genuinely costly.",
+      "Apply the Great Commission to his own plans, specifying how he intends to spend the coming summer if he takes it seriously.",
+      "Appraise how a teaching of Jesus from this unit is upheld or violated in a film, series, or news story of his choosing, creating a brief video that applies one Beatitude or parable to a specific scene and defends the interpretation.",
+    ],
+  },
+};
+
 // ── UNIT OVERVIEW PANEL ───────────────────────────────────────────
 function getUOV(uid) {
   if (!state.unitOverviews) state.unitOverviews = defaultUnitOverviews();
@@ -7522,6 +7780,14 @@ function getUOV(uid) {
 
   // Skill Expectations: migrate from uov.skills (old collapsible panel data)
   if (!uov.skillItems || !uov.skillItems.length)         uov.skillItems      = migrateToChips(uov.skills);
+
+  // SWBAT Learning Objectives (the teacher's own objective guide — distinct
+  // from the curriculum Unit Goals). Seed once from the baked-in defaults when
+  // this unit has none yet; after that the teacher's edits always win.
+  if (typeof uov.objectiveItems === 'undefined') {
+    const _seed = (typeof SWBAT_OBJECTIVES !== 'undefined' && SWBAT_OBJECTIVES[activeCourse]) ? SWBAT_OBJECTIVES[activeCourse][uid] : null;
+    uov.objectiveItems = Array.isArray(_seed) ? _seed.slice() : [];
+  }
 
   // Knowledge categories: auto-create from existing vocab, scripture, saints
   // if categories haven't been manually set yet
@@ -7636,7 +7902,7 @@ function unitOverviewPanelHTML(uid) {
         <span class="uov-chevron ${isOpen?'open':''}" id="uov-chev-${uid}">›</span>
         <div>
           <div class="uov-toggle-title">Unit Overview</div>
-          <div class="uov-toggle-sub">Goals · Essential Questions · Knowledge · Skills · Scripture · Reflection</div>
+          <div class="uov-toggle-sub">Goals · Objectives (SWBAT) · Essential Questions · Knowledge · Skills · Scripture · Reflection</div>
         </div>
       </div>
       <span style="font-size:11px;color:var(--ink-3)" id="uov-hint-${uid}">${isOpen?'Click to collapse':'Click to expand'}</span>
@@ -7747,10 +8013,13 @@ function toggleUOVPanel(uid) {
 function coverageTrackerHTML(uid){
   const uov = getUOV(uid);
   const ok = v => typeof v === 'string' && v.trim();
-  const goals = uov.unitGoalItems || [], skills = uov.skillItems || [], cats = uov.knowledgeCategories || [];
+  const goals = uov.unitGoalItems || [], objs = uov.objectiveItems || [], skills = uov.skillItems || [], cats = uov.knowledgeCategories || [];
   const gIdx = goals.map((g,i)=>i).filter(i=>ok(goals[i]));
   const gCov = gIdx.filter(i=>isUnitGoalCoveredFull(uid,i));
   const gUncov = gIdx.filter(i=>!isUnitGoalCoveredFull(uid,i)).map(i=>goals[i]);
+  const oIdx = objs.map((o,i)=>i).filter(i=>ok(objs[i]));
+  const oCov = oIdx.filter(i=>isObjectiveCoveredFull(uid,i));
+  const oUncov = oIdx.filter(i=>!isObjectiveCoveredFull(uid,i)).map(i=>objs[i]);
   const sIdx = skills.map((s,i)=>i).filter(i=>ok(skills[i]));
   const sCov = sIdx.filter(i=>isSkillCoveredFull(uid,i));
   const sUncov = sIdx.filter(i=>!isSkillCoveredFull(uid,i)).map(i=>skills[i]);
@@ -7762,9 +8031,9 @@ function coverageTrackerHTML(uid){
     if(!ok(it)) return; rTot++;
     if(isRefCovered(uid, rc.uovField, ii)) rCov++; else rUncov.push(rc.icon+' '+it);
   }));
-  const total = gIdx.length + sIdx.length + kTot + rTot;
+  const total = gIdx.length + oIdx.length + sIdx.length + kTot + rTot;
   if (!total) return '';
-  const cov = gCov.length + sCov.length + kCov + rCov;
+  const cov = gCov.length + oCov.length + sCov.length + kCov + rCov;
   const pct = Math.round(cov/total*100);
   const bar = (c,t) => { const p=t?Math.round(c/t*100):0; const col=p>=100?'#0a7d3c':(p>=50?'#C9991A':'#B6BCC8'); return `<div style="flex:1;height:7px;background:#E6EBF4;border-radius:4px;overflow:hidden"><div style="width:${p}%;height:100%;background:${col}"></div></div>`; };
   const rowb = (label,c,t) => `<div style="display:flex;align-items:center;gap:8px;margin:4px 0"><span style="font-size:11px;font-weight:700;color:var(--navy);width:84px;flex-shrink:0">${label}</span>${bar(c,t)}<span style="font-size:11px;color:var(--ink-2);width:46px;text-align:right;flex-shrink:0">${c}/${t}</span></div>`;
@@ -7776,10 +8045,11 @@ function coverageTrackerHTML(uid){
       <span style="font-size:13px;font-weight:800;color:${pct>=100?'#0a7d3c':'var(--navy)'}">${cov} of ${total} · ${pct}%</span>
     </div>
     ${rowb('Unit Goals', gCov.length, gIdx.length)}
+    ${oIdx.length ? rowb('Objectives', oCov.length, oIdx.length) : ''}
     ${rowb('Knowledge', kCov, kTot)}
     ${rowb('Skills', sCov.length, sIdx.length)}
     ${rTot ? rowb('Scripture &c.', rCov, rTot) : ''}
-    ${left ? `<details style="margin-top:8px"><summary style="cursor:pointer;font-size:11px;font-weight:700;color:var(--navy);outline:none">▸ What's still needed (${left})</summary>${uncovList('Unit Goals',gUncov)}${uncovList('Knowledge',kUncov)}${uncovList('Skills',sUncov)}${uncovList('Scripture / Readings / Reflection',rUncov)}</details>`
+    ${left ? `<details style="margin-top:8px"><summary style="cursor:pointer;font-size:11px;font-weight:700;color:var(--navy);outline:none">▸ What's still needed (${left})</summary>${uncovList('Unit Goals',gUncov)}${uncovList('Learning Objectives',oUncov)}${uncovList('Knowledge',kUncov)}${uncovList('Skills',sUncov)}${uncovList('Scripture / Readings / Reflection',rUncov)}</details>`
           : `<div style="font-size:11px;color:#0a7d3c;font-weight:700;margin-top:6px">✓ Every goal, knowledge item, and skill is covered by at least one lesson</div>`}
   </div>`;
 }
@@ -8047,6 +8317,37 @@ function isUnitGoalCoveredFull(uid, idx) {
   return isUnitGoalCovered(uid, idx) || !!(getUOV(uid).manualGoalCovered?.[idx]);
 }
 
+// ── SWBAT OBJECTIVE CHIPS (the teacher's learning objectives) ─────
+// A tracked category parallel to Unit Goals/Skills. Lessons tag which
+// objectives they address in d.objsCovered (raw indices into objectiveItems).
+function addObjectiveChip(e, uid){
+  if (e.key !== 'Enter') return; e.preventDefault();
+  const val = e.target.value.trim(); if (!val) return;
+  const uov = getUOV(uid); if (!uov.objectiveItems) uov.objectiveItems = [];
+  uov.objectiveItems.push(val); saveState();
+  e.target.value = ''; renderUnit();
+}
+function removeObjectiveChip(uid, idx){
+  const uov = getUOV(uid); (uov.objectiveItems||[]).splice(idx,1);
+  (state.units[uid]||[]).forEach(w => (w.days||[]).forEach(d => {
+    d.objsCovered = (d.objsCovered||[]).filter(i => i !== idx).map(i => i > idx ? i-1 : i);
+  }));
+  saveState(); renderUnit();
+}
+function isObjectiveCovered(uid, idx){
+  return (state.units[uid]||[]).some(w => (w.days||[]).some(d => (d.objsCovered||[]).includes(idx)));
+}
+function isObjectiveCoveredFull(uid, idx){
+  return isObjectiveCovered(uid, idx) || !!(getUOV(uid).manualObjCovered?.[idx]);
+}
+function toggleObjectiveCovered(uid, idx){
+  const uov = getUOV(uid); if (!uov.manualObjCovered) uov.manualObjCovered = {};
+  uov.manualObjCovered[idx] = !uov.manualObjCovered[idx]; saveState(); renderUnit();
+}
+function countObjectiveDays(uid, idx){
+  let n = 0; (state.units[uid]||[]).forEach(w => (w.days||[]).forEach(d => { if ((d.objsCovered||[]).includes(idx)) n++; })); return n;
+}
+
 // ── DELETE / MOVE UNIT ────────────────────────────────────────────
 function deleteUnit(uid) {
   const u = UNIT_META.find(m => m.id === uid);
@@ -8189,6 +8490,7 @@ let bulkPasteUid = null, bulkPasteTarget = null;
 
 const BULK_PASTE_LABELS = {
   courseGoalItems: 'Course Goals',   unitGoalItems: 'Unit Goals',
+  objectiveItems: 'Learning Objectives (SWBAT)',
   eqItems: 'Essential Questions',    skillItems: 'Skill Expectations',
   scriptureItems: 'Scripture',       catechismItems: 'Catechism (CCC)',
   readingsItems: 'Other Readings',   saintsItems: 'Notable Saints',
@@ -8460,6 +8762,18 @@ function unitOverviewPageHTML(u, weeks, showPacingGuide = true) {
           <td style="font-size:12px;font-weight:700;color:var(--ink);padding:8px 14px;border:1px solid var(--rule);width:150px;vertical-align:top;background:#FAFAF8;white-space:nowrap">Unit Goals</td>
           <td colspan="3" style="border:1px solid var(--rule);padding:0;vertical-align:top">
             ${trackedChipsHTML(u.id, 'unitGoalItems', uov.unitGoalItems||[], isUnitGoalCoveredFull, countGoalDays, 'addUnitGoalChip', 'removeUnitGoalChip', 'toggleUnitGoalCovered')}
+          </td>
+        </tr>
+
+        <!-- LEARNING OBJECTIVES (SWBAT) — the teacher's own objective guide,
+             distinct from the curriculum Unit Goals above -->
+        <tr>
+          <td style="font-size:12px;font-weight:700;color:var(--ink);padding:8px 14px;border:1px solid var(--rule);width:150px;vertical-align:top;background:#F3F0FB;white-space:normal;border-left:3px solid #6B5BD6">
+            📝 Learning Objectives
+            <div style="font-size:9.5px;font-weight:600;color:#6B5BD6;letter-spacing:.03em;margin-top:2px">SWBAT · your guide</div>
+          </td>
+          <td colspan="3" style="border:1px solid var(--rule);padding:0;vertical-align:top">
+            ${trackedChipsHTML(u.id, 'objectiveItems', uov.objectiveItems||[], isObjectiveCoveredFull, countObjectiveDays, 'addObjectiveChip', 'removeObjectiveChip', 'toggleObjectiveCovered')}
           </td>
         </tr>
 
@@ -12583,6 +12897,10 @@ function toggleCov(i, kind, a, b){
     d.lessonObjs = d.lessonObjs || [];
     const at = d.lessonObjs.indexOf(+a);
     if (at >= 0) d.lessonObjs.splice(at,1); else d.lessonObjs.push(+a);
+  } else if (kind === 'obj'){
+    d.objsCovered = d.objsCovered || [];
+    const at = d.objsCovered.indexOf(+a);
+    if (at >= 0) d.objsCovered.splice(at,1); else d.objsCovered.push(+a);
   } else if (kind === 'skill'){
     d.skillsCovered = d.skillsCovered || [];
     const at = d.skillsCovered.indexOf(+a);
@@ -12626,10 +12944,12 @@ function dayCoverageHTML(i, d){
   // lesson tags (d.lessonObjs / d.skillsCovered) must store those same raw
   // indices. (Filtering first would renumber them and break the sync.)
   const goals  = uov.unitGoalItems || [];
+  const objs   = uov.objectiveItems || [];
   const skills = uov.skillItems || [];
   const cats   = uov.knowledgeCategories || [];
   const ok = v => typeof v === 'string' && v.trim();
   const goalIdx  = goals.map((g,idx)=>idx).filter(idx => ok(goals[idx]));
+  const objIdx   = objs.map((o,idx)=>idx).filter(idx => ok(objs[idx]));
   const skillIdx = skills.map((s,idx)=>idx).filter(idx => ok(skills[idx]));
   // Reference categories (Scripture / Catechism / Saints / Readings / Reflection):
   // each has its own overview list + per-lesson selection array.
@@ -12638,12 +12958,13 @@ function dayCoverageHTML(i, d){
     const idxs  = items.map((it,ii)=>ii).filter(ii => ok(items[ii]));
     return { ...rc, items, idxs, sel: d[rc.lessonField] || [] };
   }).filter(rc => rc.idxs.length);
-  const anyAvail = goalIdx.length || skillIdx.length || cats.some(c => (c.items||[]).length) || refCats.length;
+  const anyAvail = goalIdx.length || objIdx.length || skillIdx.length || cats.some(c => (c.items||[]).length) || refCats.length;
   if (!anyAvail){
-    return `<div style="font-size:11.5px;color:var(--ink-3);line-height:1.45">Nothing to tag yet. Add unit goals, knowledge, skills, Scripture, or reflection questions in this unit’s <b>Overview</b> (the panel above the lessons) and they’ll appear here.</div>`;
+    return `<div style="font-size:11.5px;color:var(--ink-3);line-height:1.45">Nothing to tag yet. Add unit goals, learning objectives, knowledge, skills, Scripture, or reflection questions in this unit’s <b>Overview</b> (the panel above the lessons) and they’ll appear here.</div>`;
   }
-  const selGoals = d.lessonObjs || [], selSkills = d.skillsCovered || [], selKnow = d.knowledgeIntroduced || [];
+  const selGoals = d.lessonObjs || [], selObjs = d.objsCovered || [], selSkills = d.skillsCovered || [], selKnow = d.knowledgeIntroduced || [];
   const nSel = selGoals.filter(oi=>ok(goals[oi])).length
+             + selObjs.filter(oi=>ok(objs[oi])).length
              + selSkills.filter(si=>ok(skills[si])).length
              + selKnow.filter(k=>cats[k.catIdx] && (cats[k.catIdx].items||[])[k.itemIdx]).length
              + refCats.reduce((n,rc)=>n + rc.sel.filter(ii=>ok(rc.items[ii])).length, 0);
@@ -12653,6 +12974,7 @@ function dayCoverageHTML(i, d){
     const sel = v => `<span onclick="toggleCovPanel(${i})" style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 9px;border-radius:999px;background:#E1F5EE;color:#085041;border:1px solid #A7DEC8;line-height:1.3;cursor:pointer;margin:0 5px 5px 0">${v}</span>`;
     let chips = '';
     selGoals.forEach(oi => { const g=goals[oi]; if(ok(g)) chips += sel('🎯 '+esc(g)); });
+    selObjs.forEach(oi => { const o=objs[oi]; if(ok(o)) chips += sel('📝 '+esc(o)); });
     selKnow.forEach(k => { const c=cats[k.catIdx]; const it=c&&(c.items||[])[k.itemIdx]; if(it) chips += sel('📘 '+esc(it)); });
     selSkills.forEach(si => { const s=skills[si]; if(ok(s)) chips += sel('🧩 '+esc(s)); });
     refCats.forEach(rc => rc.sel.forEach(ii => { const it=rc.items[ii]; if(ok(it)) chips += sel(rc.icon+' '+esc(it)); }));
@@ -12664,6 +12986,9 @@ function dayCoverageHTML(i, d){
   const goalSec = goalIdx.length ? _covSection('🎯 Unit Goals',
       selGoals.filter(oi=>ok(goals[oi])).length, goalIdx.length,
       goalIdx.map(idx=>_covGridChip(selGoals.includes(idx), `toggleCov(${i},'goal',${idx})`, goals[idx])).join('')) : '';
+  const objSec = objIdx.length ? _covSection('📝 Learning Objectives (SWBAT)',
+      selObjs.filter(oi=>ok(objs[oi])).length, objIdx.length,
+      objIdx.map(idx=>_covGridChip(selObjs.includes(idx), `toggleCov(${i},'obj',${idx})`, objs[idx])).join('')) : '';
   const knowSec = cats.map((cat,ci)=>{
       const items = cat.items || [];
       if (!items.length) return '';
@@ -12679,7 +13004,7 @@ function dayCoverageHTML(i, d){
       rc.idxs.map(ii=>_covGridChip(rc.sel.includes(ii), `toggleCov(${i},'ref','${rc.lessonField}',${ii})`, rc.items[ii])).join(''))).join('');
 
   return `<div style="border:1px dashed var(--navy);border-radius:10px;padding:11px 13px;background:#FAFCFF">
-    ${goalSec}${knowSec}${skillSec}${refSec}
+    ${goalSec}${objSec}${knowSec}${skillSec}${refSec}
     <div style="text-align:right;margin-top:2px">
       <button onclick="toggleCovPanel(${i})" style="background:var(--navy);color:#fff;border:none;border-radius:7px;padding:5px 14px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit">Done ▲</button>
     </div>
@@ -13416,6 +13741,7 @@ function exportGoogleDoc(scope) {
       </td></tr>
     </table>
     ${list(uov.unitGoalItems, 'UNIT GOALS')}
+    ${list(uov.objectiveItems, 'LEARNING OBJECTIVES (SWBAT)')}
     ${list(uov.eqItems, 'ESSENTIAL QUESTIONS')}
     ${list(uov.scriptureItems, 'SCRIPTURE')}
     ${list(uov.catechismItems, 'CATECHISM (CCC)')}
@@ -13718,6 +14044,7 @@ function exportUnitOverviewPDF() {
   }
 
   const unitGoalChips = (uov.unitGoalItems||[]).map((g,i) => chip(g, isUnitGoalCoveredFull(u.id, i))).join('');
+  const objectiveChips = (uov.objectiveItems||[]).map((o,i) => chip(o, isObjectiveCoveredFull(u.id, i))).join('');
   const skillChips    = (uov.skillItems||[]).map((s,i) => chip(s, isSkillCoveredFull(u.id, i))).join('');
   const vocabChips    = (uov.vocab||[]).map(v => chip(v, isVocabIntroduced(u.id, v))).join('');
 
@@ -13750,6 +14077,7 @@ function exportUnitOverviewPDF() {
     <table style="width:100%;border-collapse:collapse;margin-bottom:16px">
       ${row('Course Goals', (uov.courseGoalItems||[]).map(g=>`<div>• ${g}</div>`).join('') || rtePDF(uov.courseGoals))}
       ${row('Unit Goals', unitGoalChips || (uov.unitGoalItems||[]).map(g=>`<div>• ${g}</div>`).join(''))}
+      ${(uov.objectiveItems||[]).length ? row('Learning Objectives (SWBAT)', objectiveChips) : ''}
       ${row('Essential Questions', (uov.eqItems||[]).map(q=>`<div>• ${q}</div>`).join('') || rtePDF(uov.essentialQuestions))}
       <tr>
         <td style="background:${NAVY};padding:7px 12px;border:1px solid ${NAVY};font-size:11px;font-weight:700;color:white;-webkit-print-color-adjust:exact;print-color-adjust:exact">Knowledge Expectations</td>
