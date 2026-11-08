@@ -2503,7 +2503,7 @@ const ASSESS_COLORS = {
 // The build version baked into the app itself, so the update checker knows what
 // it's running even when the page was loaded WITHOUT a ?v= token (e.g. the
 // Netlify root rewrite). Keep this in lockstep with index.html's ?v= token.
-window.APP_VERSION = '20261108-63';
+window.APP_VERSION = '20261108-64';
 
 let activeCourse = 6; // default to Theology 6
 
@@ -5237,7 +5237,64 @@ function calNoteBadgeHTML(d, small){
 // ══ IMPORT: paste the map straight out of the Google Doc ══════════
 // Tolerant of how Google Docs tables come across: markdown pipe tables,
 // tab-separated paste, and the merged Week cells that shift columns.
+// A clean line-cell: strips Docs export artifacts.
+function _smapClean(s){ return String(s||'')
+  .replace(/\\+(?=[#*_&:.()\/-])/g,'')
+  .replace(/\*{4,}/g,' · ').replace(/\*\*/g,'')
+  .replace(/\s+/g,' ').trim(); }
+
+// Dispatcher: a table copied out of Google Docs often pastes ONE CELL PER LINE
+// (vertical) rather than one row per line. Try the row-per-line parser first;
+// if it finds nothing usable, parse the vertical layout.
 function parseSemesterMapText(text, year){
+  const h = parseHorizontalMap(text, year);
+  if (h && h.rows && h.rows.length >= 3) return h;
+  const v = parseVerticalMap(text, year);
+  if (v && v.rows && v.rows.length) return v;
+  return h || v;
+}
+
+// Google-Docs vertical paste: every cell on its own line. We anchor on a
+// day-of-week letter (M/T/W/R/F) immediately followed by an M.D date, read the
+// BLK (A/B/-) and Week sitting just before it, and take the Calendar Note(s)
+// from the lines after the date up to the next row's Week/BLK.
+function parseVerticalMap(text, year){
+  const toks = String(text||'').replace(/\r/g,'').split('\n').map(_smapClean).filter(s=>s!=='');
+  const isDay  = s=>/^[MTWRF]$/i.test(s);
+  const isDate = s=>/^\d{1,2}[.\/-]\d{1,2}$/.test(s);
+  const isBlk  = s=>/^[AB]$/i.test(s) || /^-+$/.test(s);
+  const isWeek = s=>/^\d{1,2}$/.test(s);
+  const headers = new Set(['week','blk','day','date','calendar note','unit of study','lesson focus']);
+  const anchors = [];
+  for(let i=0;i<toks.length-1;i++){ if(isDay(toks[i]) && isDate(toks[i+1])) anchors.push(i); }
+  if(anchors.length < 3) return null;
+  // Week/BLK tokens sitting immediately before a day index (0–2 of them).
+  const preInfo = ai => {
+    let blk='', week=null, count=0;
+    const t1=toks[ai-1], t2=toks[ai-2];
+    if(ai>=1 && isBlk(t1)){ blk=/^-+$/.test(t1)?'-':t1.toUpperCase(); count=1; if(ai>=2 && isWeek(t2)){ week=+t2; count=2; } }
+    else if(ai>=1 && isWeek(t1)){ week=+t1; count=1; }
+    return { blk, week, count };
+  };
+  const rows=[]; const weekBanners={}; let lastWeek=null;
+  anchors.forEach((ai,k)=>{
+    const dow=toks[ai].toUpperCase(), md=toks[ai+1];
+    const info=preInfo(ai);
+    let week=info.week, blk=info.blk;
+    if(week!=null) lastWeek=week; else week=lastWeek;
+    const start=ai+2;
+    const end = (k<anchors.length-1) ? anchors[k+1]-preInfo(anchors[k+1]).count : toks.length;
+    const noteToks = toks.slice(start,end).filter(s=>!headers.has(s.toLowerCase()) && !/^(no\.|projected)/i.test(s));
+    const notes=[];
+    noteToks.forEach(nt=>{ if(/^\(.*\)$/.test(nt) && notes.length) notes[notes.length-1]+=' '+nt; else notes.push(nt); });
+    rows.push(`${week==null?'':week}|${blk}|${dow}|${md}|${notes.join(' · ')}||`);
+  });
+  rows.sort((a,b)=> smapISO(a.split('|')[3], year).localeCompare(smapISO(b.split('|')[3], year)));
+  let carry=''; const ordered = rows.map(r=>{ const p=r.split('|'); if(p[0]) carry=p[0]; else p[0]=carry; return p.join('|'); });
+  return { rows: ordered, weekBanners, year };
+}
+
+function parseHorizontalMap(text, year){
   const lines = String(text||'').replace(/\r/g,'').split('\n');
   const rows = []; const weekBanners = {};
   let lastWeek = null;
