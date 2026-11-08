@@ -2499,7 +2499,7 @@ const ASSESS_COLORS = {
 // The build version baked into the app itself, so the update checker knows what
 // it's running even when the page was loaded WITHOUT a ?v= token (e.g. the
 // Netlify root rewrite). Keep this in lockstep with index.html's ?v= token.
-window.APP_VERSION = '20261108-61';
+window.APP_VERSION = '20261108-62';
 
 let activeCourse = 6; // default to Theology 6
 
@@ -4249,7 +4249,13 @@ function _lsJSON(k){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v
 // carries Drive + calendar config (clipboard code, no size worry).
 function buildSyncCode(lean){
   const payload = { k:getSyncKey(), b:getSyncBins(), s:getShareBins() };
-  if(!lean){ payload.d = _lsJSON(DRIVE_CFG_KEY); payload.cal = _lsJSON(CAL_KEY); }
+  if(lean){
+    // keep the QR/link tiny: carry only the calendar FEED url (not the events),
+    // so a scanned device still auto-subscribes to the live school calendar.
+    const f = (_lsJSON(CAL_KEY)||{}).feedUrl; if(f) payload.f = f;
+  } else {
+    payload.d = _lsJSON(DRIVE_CFG_KEY); payload.cal = _lsJSON(CAL_KEY);
+  }
   return btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
 }
 function decodeSyncCode(raw){
@@ -4264,6 +4270,8 @@ function applyDecodedCode(dec){
   if(dec.s){ try{ localStorage.setItem(SHARE_BINS_LS, JSON.stringify(dec.s)); }catch(e){} }
   if(dec.d){ try{ localStorage.setItem(DRIVE_CFG_KEY, JSON.stringify(dec.d)); }catch(e){} }
   if(dec.cal){ try{ localStorage.setItem(CAL_KEY, JSON.stringify(dec.cal)); }catch(e){} }
+  // Lean link/QR carries just the feed URL — set it so init() re-pulls the feed.
+  if(dec.f){ try{ const c=_lsJSON(CAL_KEY)||{}; if(c.feedUrl!==dec.f){ c.feedUrl=dec.f; c.feedSyncedAt=0; localStorage.setItem(CAL_KEY, JSON.stringify(c)); } }catch(e){} }
   return true;
 }
 // A personal, bookmarkable link that auto-connects a device — no pasting. The
@@ -4709,6 +4717,56 @@ function reflowDatesAuto(){
   saveState();
   return true;
 }
+// ── LIVE CALENDAR FEED (webcal / ICS subscription) ────────────────
+// Subscribe to a feed URL once; the app fetches it through a first-party
+// Netlify function (a browser can't fetch the school feed directly — it sends
+// no CORS headers) and re-reads it on its own so class dates stay current.
+function calFeedProxyURL(url){ return '/.netlify/functions/ical?u=' + encodeURIComponent(url); }
+function calFeedUrl(){ const c=loadCalendar(); return (c && c.feedUrl) || ''; }
+function calFeedUpdatedLabel(){
+  const c=loadCalendar(); if(!c || !c.feedSyncedAt) return '';
+  try{ return new Date(c.feedSyncedAt).toLocaleString([], {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}); }catch(e){ return ''; }
+}
+async function subscribeCalendarFeed(url, silent){
+  url = String(url||'').trim();
+  if(!url){ if(!silent) toast('Paste your calendar feed link first'); return false; }
+  const norm = url.replace(/^webcal:\/\//i, 'https://');   // webcal → https for the fetch
+  try{
+    const res = await fetch(calFeedProxyURL(norm), { cache:'no-store' });
+    if(!res.ok){
+      const body = await res.text().catch(()=> '');
+      if(!silent) toast('Feed error: ' + (body || ('HTTP '+res.status)));
+      return false;
+    }
+    const text = await res.text();
+    const cal = parseICS(text);
+    if(!cal.courses[6].dates.length && !cal.courses[7].dates.length){ if(!silent) toast('No Theology 6/7 classes found in that feed'); return false; }
+    cal.feedUrl = norm; cal.feedSyncedAt = Date.now();
+    saveCalendar(cal);
+    if(!silent){ renderCalImport(); toast('Subscribed — live calendar feed loaded ✓'); }
+    return true;
+  }catch(e){
+    console.error('calendar feed fetch failed', e);
+    if(!silent) toast('Couldn’t reach the feed. (This works on your live planner site, not when opened as a local file.)');
+    return false;
+  }
+}
+function subscribeCalendarFeedFromInput(){
+  const inp = document.getElementById('cal-feed-input');
+  subscribeCalendarFeed(inp ? inp.value : '');
+}
+// Quietly re-pull the subscribed feed when the app opens (throttled to ~4×/day),
+// so dates track the school calendar with no manual step.
+let _calFeedRefreshing = false;
+async function refreshCalendarFeed(force){
+  if(window.VIEW_ONLY || _calFeedRefreshing) return;
+  const cal = loadCalendar(); const url = cal && cal.feedUrl; if(!url) return;
+  if(!force && cal.feedSyncedAt && (Date.now()-cal.feedSyncedAt) < 6*3600*1000) return;
+  _calFeedRefreshing = true;
+  try{ await subscribeCalendarFeed(url, true); }
+  finally{ _calFeedRefreshing = false; }
+}
+
 function openCalendarImport(){ document.getElementById('cal-overlay').style.display='block'; renderCalImport(); }
 function closeCalendarImport(){ document.getElementById('cal-overlay').style.display='none'; }
 function onICSFile(ev){
@@ -4723,16 +4781,29 @@ function onICSFile(ev){
   };
   r.readAsText(f); ev.target.value='';
 }
+function calFeedBlockHTML(){
+  const furl = calFeedUrl();
+  const updated = calFeedUpdatedLabel();
+  return `
+    <div style="background:#EAF3FF;border:1px solid #B9D6F2;border-radius:9px;padding:11px 13px;margin-bottom:14px">
+      <div style="font-weight:700;color:var(--navy);margin-bottom:5px">🔗 Subscribe to a live calendar feed</div>
+      ${furl
+        ? `<div style="font-size:12px;color:#0F6E56;margin-bottom:8px">✓ Subscribed${updated?` · last updated ${updated}`:''}<div style="font-size:11px;color:var(--ink-3);word-break:break-all;margin-top:2px">${esc(furl)}</div></div>`
+        : `<div style="font-size:12.5px;color:var(--ink-2);line-height:1.5;margin-bottom:8px">Paste your school calendar’s <b>webcal</b> / subscribe link. The planner reads it live and keeps your class dates current automatically — no more downloading a file each time.</div>`}
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <input id="cal-feed-input" type="text" placeholder="webcal://…  or  https://…/iCal.aspx?z=…" value="${furl?esc(furl):''}" autocomplete="off" spellcheck="false" style="flex:1;min-width:200px;border:1px solid var(--rule-dark);border-radius:7px;padding:8px 10px;font-size:12px;font-family:monospace;color:var(--ink);outline:none;box-sizing:border-box">
+        <button onclick="subscribeCalendarFeedFromInput()" style="background:var(--navy);color:#fff;border:none;border-radius:7px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">${furl?'Update now':'Subscribe'}</button>
+      </div>
+      <p style="font-size:11px;color:var(--ink-3);margin:7px 0 0;line-height:1.5">In your school portal, open the calendar and look for <b>Subscribe</b>, <b>Feed</b>, or an iCal/webcal link, and copy that.</p>
+    </div>`;
+}
 function renderCalImport(){
   const cal=loadCalendar(); const el=document.getElementById('cal-body'); if(!el) return;
-  const pick=`<button onclick="document.getElementById('ics-file-input').click()" style="background:var(--navy);color:#fff;border:none;border-radius:7px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">${cal?'Choose a different .ics file':'Choose your .ics file'}</button>`;
+  const pick=`<button onclick="document.getElementById('ics-file-input').click()" style="background:#fff;color:var(--navy);border:1px solid var(--navy);border-radius:7px;padding:8px 14px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit">${cal?'Load a different .ics file':'Load a one-time .ics file'}</button>`;
   if(!cal || !calImported()){
     el.innerHTML=`
-      <div style="margin-bottom:12px">Export your schedule from the school portal as an <b>.ics</b> file, then load it here. The planner reads which days are <b>A days</b> (Theology 6) and <b>B days</b> (Theology 7) and can auto-fill every lesson's class date — skipping breaks automatically.</div>
-      <ol style="padding-left:20px;margin:0 0 14px;display:flex;flex-direction:column;gap:6px;font-size:12.5px">
-        <li>Open your school calendar feed and <b>download / export</b> the .ics file.</li>
-        <li>Click below and choose that file.</li>
-      </ol>
+      ${calFeedBlockHTML()}
+      <div style="font-size:12.5px;color:var(--ink-2);line-height:1.5;margin-bottom:8px"><b>Prefer a one-time file?</b> Export your schedule from the school portal as an <b>.ics</b> file and load it here instead. Either way, the planner reads which days are <b>A days</b> (Theology 6) and <b>B days</b> (Theology 7) and can auto-fill every lesson's class date — skipping breaks automatically.</div>
       ${pick}`;
     return;
   }
@@ -4740,6 +4811,7 @@ function renderCalImport(){
   const line=(cid,co,ab)=>co.dates.length?`<div style="margin:2px 0"><b>${COURSES[cid].name}</b> — ${co.dates.length} class days (${ab} days) · ${co.sections.map(s=>`Sec ${s.sec} ${fmtICSTime(s.times[0])}${s.double?' (double)':''}`).join(', ')}<div style="font-size:11px;color:var(--ink-3)">first: ${fmtNice? fmtNice(co.dates[0]) : co.dates[0]} · last: ${fmtNice? fmtNice(co.dates[co.dates.length-1]) : co.dates[co.dates.length-1]}</div></div>`:'';
   const firstDate = (cal.courses[activeCourse]&&cal.courses[activeCourse].dates[0])||'';
   el.innerHTML=`
+    ${calFeedBlockHTML()}
     <div style="background:#F0F7F2;border:1px solid #BFE3CE;border-radius:8px;padding:10px 12px;margin-bottom:14px">
       <div style="font-weight:700;color:#0F6E56;margin-bottom:4px">✓ Calendar loaded</div>
       ${line(6,c6,'A')}${line(7,c7,'B')}
@@ -13993,6 +14065,9 @@ async function init() {
   nav('dashboard');
   // Capture a daily on-device snapshot of whatever loaded (safety net).
   try { await takeDailySnapshot(); } catch(e){}
+  // If subscribed to a live calendar feed, quietly re-pull it (throttled) so
+  // class dates track the school calendar without any manual re-import.
+  try { refreshCalendarFeed(); } catch(e){}
   // Google-Docs-style auto-pull: whenever you switch back to this tab or window
   // (e.g. after editing on another device), fetch the latest copy from the cloud.
   document.addEventListener('visibilitychange', autoPullOnFocus);
