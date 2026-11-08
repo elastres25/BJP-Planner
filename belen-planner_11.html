@@ -2373,15 +2373,19 @@ function out(o) {
 
       <!-- Not-connected: paste a key -->
       <div id="syncsetup-input-box">
-        <div style="font-size:13px;color:var(--ink-2);line-height:1.55;margin-bottom:10px">
-          Sync keeps this planner backed up in the cloud and matched across your devices. Set it up once per device:
-          <ol style="margin:8px 0 0;padding-left:20px">
+        <div style="background:#EAF3FF;border:1px solid #B9D6F2;border-radius:8px;padding:11px 13px;margin-bottom:12px;font-size:13px;color:var(--ink);line-height:1.55">
+          <b>📱 Already using this planner on another device?</b><br>
+          On that device open <b>⋯ → Cloud sync → “Copy sync code for another device,”</b> then paste that code below and click Connect. This device will pull <b>all your plans and settings</b> down — no re-setup, no re-entering anything. Do this once on each device (phone, laptop, classroom computer) and they all stay matched automatically.
+        </div>
+        <div style="font-size:12.5px;color:var(--ink-3);line-height:1.5;margin-bottom:10px">
+          <b>Setting up sync for the very first time?</b> You need a free cloud key:
+          <ol style="margin:6px 0 0;padding-left:20px">
             <li>Make a free account at <b>jsonbin.io</b> (<a href="https://jsonbin.io" target="_blank" rel="noopener">jsonbin.io</a>).</li>
             <li>Open <b>Account → API Keys</b> and copy your <b>Master Key</b>.</li>
-            <li>Paste it below and click <b>Connect</b>. The app creates a private bin for each course automatically.</li>
+            <li>Paste it below and click <b>Connect</b>. The app creates a private cloud copy of each course automatically. (After this, use the <b>sync code</b> above for every other device.)</li>
           </ol>
         </div>
-        <input id="sync-key-input" type="text" placeholder="Paste Master Key (or a sync code from another device)" autocomplete="off" spellcheck="false"
+        <input id="sync-key-input" type="text" placeholder="Paste a sync code (from another device) — or your Master Key" autocomplete="off" spellcheck="false"
           style="width:100%;box-sizing:border-box;border:1px solid var(--rule-dark);border-radius:7px;padding:9px 11px;font-family:inherit;font-size:13px;color:var(--ink);outline:none">
         <div style="display:flex;gap:8px;margin-top:10px;justify-content:flex-end">
           <button onclick="connectSync()" style="background:var(--navy);color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">Connect</button>
@@ -2393,10 +2397,10 @@ function out(o) {
       <!-- Connected: manage -->
       <div id="syncsetup-connected" style="display:none">
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
-          <button onclick="copySyncCode()" style="flex:1;min-width:180px;background:#fff;color:var(--navy);border:1px solid var(--navy);border-radius:7px;padding:9px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">📋 Copy sync code for another device</button>
+          <button onclick="copySyncCode()" style="flex:1;min-width:180px;background:var(--navy);color:#fff;border:1px solid var(--navy);border-radius:7px;padding:9px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">📋 Copy sync code for another device</button>
           <button onclick="disconnectSync()" style="background:#fff;color:#b42318;border:1px solid #e6b7b3;border-radius:7px;padding:9px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Disconnect</button>
         </div>
-        <p style="font-size:11.5px;color:var(--ink-3,#8A96A2);margin:2px 0 0;line-height:1.5">On another device, open Cloud Sync there and paste this code to link it to the same bins. Each course syncs the first time you <b>Save</b> it while connected.</p>
+        <p style="font-size:11.5px;color:var(--ink-3,#8A96A2);margin:2px 0 0;line-height:1.5">To use the planner on another device, open Cloud Sync <b>there</b> and paste this code. That device pulls <b>all your plans and settings</b> down immediately, then stays matched automatically — no need to Save first. 🔒 The code includes your cloud key, so treat it like a password.</p>
       </div>
 
       <div style="display:flex;justify-content:flex-end;margin-top:14px">
@@ -2494,7 +2498,7 @@ const ASSESS_COLORS = {
 // The build version baked into the app itself, so the update checker knows what
 // it's running even when the page was loaded WITHOUT a ?v= token (e.g. the
 // Netlify root rewrite). Keep this in lockstep with index.html's ?v= token.
-window.APP_VERSION = '20261103-59';
+window.APP_VERSION = '20261108-60';
 
 let activeCourse = 6; // default to Theology 6
 
@@ -2988,7 +2992,17 @@ function restoreUnit1Day1IfEmpty(st) {
         studentActivity: '', boardNotes: '', notes: '',
       },
     ];
-    saveState();
+    // Persist the recovered day DIRECTLY to this course's own storage key —
+    // never via saveState(), which writes the GLOBAL `state`. loadState() can
+    // run this while `state` still holds another course's data (e.g. a
+    // multi-course connect-pull, or switchCourse), so saving the global here
+    // would write the wrong course's data into this course's slot.
+    if (!window.VIEW_ONLY) {
+      try {
+        st._v = 2; st.lastModified = Date.now();
+        localStorage.setItem(getCourse().storageKey, JSON.stringify(st));
+      } catch(e){ console.error('Day 1 recovery save failed:', e); }
+    }
     toast('Recovered your Day 1 lesson ✓');
   } catch(e) { console.error('Day 1 recovery failed:', e); }
 }
@@ -3863,7 +3877,11 @@ async function pushToSheets() {
   }
 }
 
-async function pullFromSheets() {
+async function pullFromSheets(force) {
+  // force=true: an explicit "connect this device" pull. The user is
+  // deliberately loading their cloud data here, so adopt it regardless of
+  // timestamps or the near-empty guard (local is just this device's defaults).
+  // A snapshot is still taken before adopting, so nothing is lost irreversibly.
   const key = getSyncKey();
   const co = getCourse();
   const binId = getBinId(co.id);
@@ -3885,14 +3903,15 @@ async function pullFromSheets() {
         // older cloud save never wipes out more recent local work.
         const cloudTime = record.lastModified || 0;
         const localTime = state?.lastModified || 0;
-        if (cloudTime > localTime) {
+        if (force || cloudTime > localTime) {
           // SAFETY GUARD: never let a near-empty cloud copy silently replace a
           // substantially fuller local one (this is exactly how a bad sync on a
           // new device wiped real work). If the cloud looks like data loss, keep
           // local, snapshot it, and surface a warning instead of adopting.
+          // (Skipped on a forced connect-pull — see pullFromSheets(force).)
           const localReal = realDayCount(state);
           const cloudReal = realDayCount(record);
-          if (localReal >= 5 && cloudReal < Math.max(3, Math.floor(localReal * 0.5))) {
+          if (!force && localReal >= 5 && cloudReal < Math.max(3, Math.floor(localReal * 0.5))) {
             try { await takeSnapshot('before-skipped-cloud-adopt'); } catch(e){}
             setSyncStatus('error');
             const label = document.getElementById('sync-label');
@@ -4144,14 +4163,38 @@ async function connectSync(){
   const msg = document.getElementById('syncsetup-msg');
   if(msg) msg.style.display = 'none';
   if(!raw){ toast('Paste your jsonbin Master Key first'); return; }
-  // A "sync code" from another device is base64 of {k:key, b:bins}.
-  let applied = false;
-  try {
-    const dec = JSON.parse(atob(raw));
-    if(dec && dec.k){ setSyncKey(dec.k); if(dec.b) localStorage.setItem(SYNC_BINS_LS, JSON.stringify(dec.b)); applied = true; }
-  } catch(e){ /* not a sync code — treat as a raw key */ }
-  if(!applied) setSyncKey(raw);
+  // A "sync code" from another device carries the key + both courses' bins
+  // (+ share mirrors + Drive/calendar config). A bare Master Key is just `k`.
+  let isCode = false, hasBins = false;
+  const dec = decodeSyncCode(raw);
+  if(dec && dec.k){
+    setSyncKey(dec.k);
+    if(dec.b){ localStorage.setItem(SYNC_BINS_LS, JSON.stringify(dec.b)); hasBins = Object.keys(dec.b||{}).length > 0; }
+    if(dec.s){ try{ localStorage.setItem(SHARE_BINS_LS, JSON.stringify(dec.s)); }catch(e){} }
+    if(dec.d){ try{ localStorage.setItem(DRIVE_CFG_KEY, JSON.stringify(dec.d)); }catch(e){} }
+    if(dec.cal){ try{ localStorage.setItem(CAL_KEY, JSON.stringify(dec.cal)); }catch(e){} }
+    isCode = true;
+  } else {
+    setSyncKey(raw);
+  }
   inp.value = '';
+  // NEW DEVICE via a sync code with bins → PULL everything down. This is the
+  // safe, correct direction: it brings all your plans onto this device without
+  // risking an overwrite of the cloud with a fresh device's empty defaults.
+  if(isCode && hasBins){
+    toast('Connecting this device & pulling your plans…');
+    let pulled = 0;
+    try { pulled = await pullAllCourses(); } catch(e){ console.error('connect pull', e); }
+    renderSyncSetup();
+    try { renderCourseToggle(); } catch(e){}
+    try { rerenderActiveView(); } catch(e){}
+    toast(pulled
+      ? `✓ This device is connected — pulled ${pulled} course${pulled>1?'s':''} of plans from the cloud`
+      : '✓ Connected — your edits will now sync across devices');
+    return;
+  }
+  // Bare key (or a code with no bins yet = a brand-new account): create/push
+  // this course's bin so syncing can begin.
   toast('Testing connection…');
   const ok = await pushToSheets();   // creates this course's bin if needed
   if(ok){
@@ -4195,10 +4238,40 @@ function disconnectSync(){
   renderSyncSetup();
   toast('Disconnected — your work stays saved on this device');
 }
+// A "sync code" is everything a new device needs to come fully online: the
+// cloud key, both courses' bin ids, the public share-mirror ids, and the
+// Drive/calendar config — so a device set up with it has EVERYTHING, not just
+// one course. UTF-8 safe (calendar text can be non-ASCII).
+function _lsJSON(k){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):null; }catch(e){ return null; } }
+function buildSyncCode(){
+  const payload = { k:getSyncKey(), b:getSyncBins(), s:getShareBins(), d:_lsJSON(DRIVE_CFG_KEY), cal:_lsJSON(CAL_KEY) };
+  return btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+}
+function decodeSyncCode(raw){
+  try{ return JSON.parse(decodeURIComponent(escape(atob(raw)))); }
+  catch(e){ try{ return JSON.parse(atob(raw)); }catch(e2){ return null; } }
+}
 function copySyncCode(){
-  const code = btoa(JSON.stringify({ k:getSyncKey(), b:getSyncBins() }));
+  const code = buildSyncCode();
   const done = ()=>toast('Sync code copied — paste it into “Connect sync” on your other device');
   if(navigator.clipboard) navigator.clipboard.writeText(code).then(done, done); else done();
+}
+// Pull EVERY course that has a cloud bin into this device, so connecting a new
+// device brings down all your plans at once. Never pushes (that could overwrite
+// the cloud with this fresh device's empty defaults).
+async function pullAllCourses(){
+  const prev = activeCourse;
+  const bins = getSyncBins();
+  let pulled = 0;
+  for (const cid of Object.keys(bins)){
+    const idn = +cid; if(!COURSES[idn]) continue;
+    activeCourse = idn;
+    state = loadState();
+    try { if (await pullFromSheets(true)) pulled++; } catch(e){ console.error('pull course '+cid, e); }
+  }
+  activeCourse = prev;
+  state = loadState();
+  return pulled;
 }
 
 // ── NAVIGATION ────────────────────────────────────────────────────
