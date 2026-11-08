@@ -2018,11 +2018,15 @@ tr.assign-done input[type=text]{text-decoration:line-through;}
       <textarea id="mi-text" class="mi-in" rows="10" style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;resize:vertical"
         placeholder="Week&#9;BLK&#9;Day&#9;Date&#9;Calendar Note&#9;Unit of Study&#9;Lesson Focus&#10;1&#9;A&#9;R&#9;8.20&#9;&#9;&#9;Procedures / Introduction #1"></textarea>
       <div id="mi-preview" style="margin-top:12px"></div>
+      <label style="display:flex;align-items:flex-start;gap:8px;font-size:12.5px;color:var(--ink);margin-top:14px;background:#F0F4FA;border:1px solid var(--rule);border-radius:7px;padding:10px 12px;cursor:pointer">
+        <input type="checkbox" id="mi-assign" checked style="margin-top:2px">
+        <span><b>Also fill in all my class dates from this map</b><br><span style="color:var(--ink-3)">Reads the <b>BLK</b> column — every <b>A</b> day is a Theology 6 class, every <b>B</b> day a Theology 7 class — builds your class calendar, and dates every lesson in order (both courses), skipping no-school days. No manual sorting. You can fine-tune any single date afterward.</span></span>
+      </label>
     </div>
     <div style="display:flex;gap:8px;justify-content:flex-end;padding:12px 20px;border-top:1px solid var(--rule);background:var(--parchment)">
       <button class="smap-btn" onclick="closeMapImport()">Cancel</button>
       <button class="smap-btn" onclick="previewMapImport()">Check it</button>
-      <button class="smap-btn primary" onclick="saveMapImport()">Save this map</button>
+      <button class="smap-btn primary" onclick="saveMapImport()">Save &amp; fill dates</button>
     </div>
   </div>
 </div>
@@ -2499,7 +2503,7 @@ const ASSESS_COLORS = {
 // The build version baked into the app itself, so the update checker knows what
 // it's running even when the page was loaded WITHOUT a ?v= token (e.g. the
 // Netlify root rewrite). Keep this in lockstep with index.html's ?v= token.
-window.APP_VERSION = '20261108-62';
+window.APP_VERSION = '20261108-63';
 
 let activeCourse = 6; // default to Theology 6
 
@@ -4249,13 +4253,7 @@ function _lsJSON(k){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v
 // carries Drive + calendar config (clipboard code, no size worry).
 function buildSyncCode(lean){
   const payload = { k:getSyncKey(), b:getSyncBins(), s:getShareBins() };
-  if(lean){
-    // keep the QR/link tiny: carry only the calendar FEED url (not the events),
-    // so a scanned device still auto-subscribes to the live school calendar.
-    const f = (_lsJSON(CAL_KEY)||{}).feedUrl; if(f) payload.f = f;
-  } else {
-    payload.d = _lsJSON(DRIVE_CFG_KEY); payload.cal = _lsJSON(CAL_KEY);
-  }
+  if(!lean){ payload.d = _lsJSON(DRIVE_CFG_KEY); payload.cal = _lsJSON(CAL_KEY); }
   return btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
 }
 function decodeSyncCode(raw){
@@ -4270,8 +4268,6 @@ function applyDecodedCode(dec){
   if(dec.s){ try{ localStorage.setItem(SHARE_BINS_LS, JSON.stringify(dec.s)); }catch(e){} }
   if(dec.d){ try{ localStorage.setItem(DRIVE_CFG_KEY, JSON.stringify(dec.d)); }catch(e){} }
   if(dec.cal){ try{ localStorage.setItem(CAL_KEY, JSON.stringify(dec.cal)); }catch(e){} }
-  // Lean link/QR carries just the feed URL — set it so init() re-pulls the feed.
-  if(dec.f){ try{ const c=_lsJSON(CAL_KEY)||{}; if(c.feedUrl!==dec.f){ c.feedUrl=dec.f; c.feedSyncedAt=0; localStorage.setItem(CAL_KEY, JSON.stringify(c)); } }catch(e){} }
   return true;
 }
 // A personal, bookmarkable link that auto-connects a device — no pasting. The
@@ -4668,7 +4664,7 @@ function calClassLabel(courseId, iso){
   const co=cal.courses[courseId]; const ab=cal.abByDate[iso]||'';
   if(!co.dates.includes(iso)) return ab?`${ab} day · not a ${getCourse().name} class day`:'';
   const secs=co.sections.map(s=>`Sec ${s.sec} (${fmtICSTime(s.times[0])}${s.double?' double':''})`).join(' + ');
-  return `${ab?`${ab} · `:''}${secs}`;
+  return secs ? `${ab?`${ab} · `:''}${secs}` : (ab?`${ab} day`:'');
 }
 function calImported(){ const c=loadCalendar(); return !!(c && c.courses && ((c.courses[6]&&c.courses[6].dates.length)||(c.courses[7]&&c.courses[7].dates.length))); }
 // Assign each lesson (in unit → week → day order) the next class date for the
@@ -4717,56 +4713,6 @@ function reflowDatesAuto(){
   saveState();
   return true;
 }
-// ── LIVE CALENDAR FEED (webcal / ICS subscription) ────────────────
-// Subscribe to a feed URL once; the app fetches it through a first-party
-// Netlify function (a browser can't fetch the school feed directly — it sends
-// no CORS headers) and re-reads it on its own so class dates stay current.
-function calFeedProxyURL(url){ return '/.netlify/functions/ical?u=' + encodeURIComponent(url); }
-function calFeedUrl(){ const c=loadCalendar(); return (c && c.feedUrl) || ''; }
-function calFeedUpdatedLabel(){
-  const c=loadCalendar(); if(!c || !c.feedSyncedAt) return '';
-  try{ return new Date(c.feedSyncedAt).toLocaleString([], {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}); }catch(e){ return ''; }
-}
-async function subscribeCalendarFeed(url, silent){
-  url = String(url||'').trim();
-  if(!url){ if(!silent) toast('Paste your calendar feed link first'); return false; }
-  const norm = url.replace(/^webcal:\/\//i, 'https://');   // webcal → https for the fetch
-  try{
-    const res = await fetch(calFeedProxyURL(norm), { cache:'no-store' });
-    if(!res.ok){
-      const body = await res.text().catch(()=> '');
-      if(!silent) toast('Feed error: ' + (body || ('HTTP '+res.status)));
-      return false;
-    }
-    const text = await res.text();
-    const cal = parseICS(text);
-    if(!cal.courses[6].dates.length && !cal.courses[7].dates.length){ if(!silent) toast('No Theology 6/7 classes found in that feed'); return false; }
-    cal.feedUrl = norm; cal.feedSyncedAt = Date.now();
-    saveCalendar(cal);
-    if(!silent){ renderCalImport(); toast('Subscribed — live calendar feed loaded ✓'); }
-    return true;
-  }catch(e){
-    console.error('calendar feed fetch failed', e);
-    if(!silent) toast('Couldn’t reach the feed. (This works on your live planner site, not when opened as a local file.)');
-    return false;
-  }
-}
-function subscribeCalendarFeedFromInput(){
-  const inp = document.getElementById('cal-feed-input');
-  subscribeCalendarFeed(inp ? inp.value : '');
-}
-// Quietly re-pull the subscribed feed when the app opens (throttled to ~4×/day),
-// so dates track the school calendar with no manual step.
-let _calFeedRefreshing = false;
-async function refreshCalendarFeed(force){
-  if(window.VIEW_ONLY || _calFeedRefreshing) return;
-  const cal = loadCalendar(); const url = cal && cal.feedUrl; if(!url) return;
-  if(!force && cal.feedSyncedAt && (Date.now()-cal.feedSyncedAt) < 6*3600*1000) return;
-  _calFeedRefreshing = true;
-  try{ await subscribeCalendarFeed(url, true); }
-  finally{ _calFeedRefreshing = false; }
-}
-
 function openCalendarImport(){ document.getElementById('cal-overlay').style.display='block'; renderCalImport(); }
 function closeCalendarImport(){ document.getElementById('cal-overlay').style.display='none'; }
 function onICSFile(ev){
@@ -4782,19 +4728,11 @@ function onICSFile(ev){
   r.readAsText(f); ev.target.value='';
 }
 function calFeedBlockHTML(){
-  const furl = calFeedUrl();
-  const updated = calFeedUpdatedLabel();
   return `
     <div style="background:#EAF3FF;border:1px solid #B9D6F2;border-radius:9px;padding:11px 13px;margin-bottom:14px">
-      <div style="font-weight:700;color:var(--navy);margin-bottom:5px">🔗 Subscribe to a live calendar feed</div>
-      ${furl
-        ? `<div style="font-size:12px;color:#0F6E56;margin-bottom:8px">✓ Subscribed${updated?` · last updated ${updated}`:''}<div style="font-size:11px;color:var(--ink-3);word-break:break-all;margin-top:2px">${esc(furl)}</div></div>`
-        : `<div style="font-size:12.5px;color:var(--ink-2);line-height:1.5;margin-bottom:8px">Paste your school calendar’s <b>webcal</b> / subscribe link. The planner reads it live and keeps your class dates current automatically — no more downloading a file each time.</div>`}
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <input id="cal-feed-input" type="text" placeholder="webcal://…  or  https://…/iCal.aspx?z=…" value="${furl?esc(furl):''}" autocomplete="off" spellcheck="false" style="flex:1;min-width:200px;border:1px solid var(--rule-dark);border-radius:7px;padding:8px 10px;font-size:12px;font-family:monospace;color:var(--ink);outline:none;box-sizing:border-box">
-        <button onclick="subscribeCalendarFeedFromInput()" style="background:var(--navy);color:#fff;border:none;border-radius:7px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">${furl?'Update now':'Subscribe'}</button>
-      </div>
-      <p style="font-size:11px;color:var(--ink-3);margin:7px 0 0;line-height:1.5">In your school portal, open the calendar and look for <b>Subscribe</b>, <b>Feed</b>, or an iCal/webcal link, and copy that.</p>
+      <div style="font-weight:700;color:var(--navy);margin-bottom:5px">⚡ Easiest: paste your semester map</div>
+      <div style="font-size:12.5px;color:var(--ink-2);line-height:1.55;margin-bottom:9px">Your school’s semester-map doc already lists every A/B day. <b>Paste it once</b> and the planner builds this calendar <i>and</i> dates every lesson automatically — no .ics file, no sorting.</div>
+      <button onclick="closeCalendarImport();openMapImport()" style="background:var(--navy);color:#fff;border:none;border-radius:7px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">📥 Paste school semester map…</button>
     </div>`;
 }
 function renderCalImport(){
@@ -5416,9 +5354,62 @@ function saveMapImport(){
   saveState();
   invalidateMapIndex();
   smapSem = sem;
+  // Build the A/B class calendar straight from the map's BLK column, then
+  // (opt-in, on by default) date every lesson so there's no manual sorting.
+  let extra = '';
+  try {
+    const built = syncCalendarFromMaps();
+    if (built) {
+      extra = ` · ${built.d6} A / ${built.d7} B class days`;
+      if ((document.getElementById('mi-assign')||{}).checked) {
+        const a = assignDatesBothCourses();
+        const total = (a[6]||0) + (a[7]||0);
+        if (total) extra += ` · dated ${total} lesson${total===1?'':'s'}`;
+      }
+    }
+  } catch(e){ console.error('map→calendar', e); }
   closeMapImport();
   rerenderPacing();
-  toast(`Semester ${sem} map imported ✓`);
+  try { rerenderActiveView(); } catch(e){}
+  toast(`Semester ${sem} map imported ✓${extra}`);
+}
+
+// Turn the imported semester map(s) into the class calendar the date tools use:
+// BLK "A" → a Theology 6 class day, "B" → a Theology 7 class day, "-" → none.
+// Both courses' maps (and both semesters) share one school A/B pattern, so any
+// imported map fills the whole calendar. Returns {d6,d7} counts, or null.
+function syncCalendarFromMaps(){
+  const abByDate = {}; const d6 = new Set(), d7 = new Set(); const seen = new Set();
+  [6,7].forEach(cid => schoolMapSems(cid).forEach(sem => {
+    const m = getSchoolMap(cid, sem); if(!m) return;
+    smapExpand(m).forEach(r => {
+      if(!r.date || seen.has(r.date)) return; seen.add(r.date);
+      if(r.blk === 'A'){ abByDate[r.date] = 'A'; d6.add(r.date); }
+      else if(r.blk === 'B'){ abByDate[r.date] = 'B'; d7.add(r.date); }
+    });
+  }));
+  const dates6 = [...d6].sort(), dates7 = [...d7].sort();
+  if(!dates6.length && !dates7.length) return null;
+  const cal = loadCalendar() || {};
+  const keepSecs = cid => (cal.courses && cal.courses[cid] && cal.courses[cid].sections) || [];
+  cal.importedAt = Date.now();
+  cal.source = 'map';
+  cal.abByDate = abByDate;
+  cal.courses = { 6:{ dates:dates6, sections:keepSecs(6) }, 7:{ dates:dates7, sections:keepSecs(7) } };
+  saveCalendar(cal);
+  return { d6: dates6.length, d7: dates7.length };
+}
+// Assign class dates to every lesson of BOTH courses from the current calendar.
+function assignDatesBothCourses(){
+  const cal = loadCalendar(); if(!cal || !cal.courses) return {6:0,7:0};
+  const prev = activeCourse; const out = {6:0,7:0};
+  [6,7].forEach(cid => {
+    if(!cal.courses[cid] || !cal.courses[cid].dates.length) return;
+    activeCourse = cid; state = loadState();
+    out[cid] = assignActiveCourseDates('');
+  });
+  activeCourse = prev; state = loadState();
+  return out;
 }
 
 function resetSchoolMap(sem){
@@ -14065,9 +14056,6 @@ async function init() {
   nav('dashboard');
   // Capture a daily on-device snapshot of whatever loaded (safety net).
   try { await takeDailySnapshot(); } catch(e){}
-  // If subscribed to a live calendar feed, quietly re-pull it (throttled) so
-  // class dates track the school calendar without any manual re-import.
-  try { refreshCalendarFeed(); } catch(e){}
   // Google-Docs-style auto-pull: whenever you switch back to this tab or window
   // (e.g. after editing on another device), fetch the latest copy from the cloud.
   document.addEventListener('visibilitychange', autoPullOnFocus);

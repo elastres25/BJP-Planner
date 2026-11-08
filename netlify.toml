@@ -5,16 +5,6 @@
   publish = "."
   command = ""
 
-# Serverless functions (e.g. the calendar-feed fetcher at
-# /.netlify/functions/ical) live here. Node 18+ is required for the function
-# runtime used by netlify/functions/ical.js.
-[functions]
-  directory = "netlify/functions"
-  node_bundler = "esbuild"
-
-[build.environment]
-  NODE_VERSION = "18"
-
 # Netlify serves index.html at "/" by default; our app file is named
 # belen-planner_11.html, so this rewrite makes "/" serve it directly.
 [[redirects]]
