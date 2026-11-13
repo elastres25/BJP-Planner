@@ -891,6 +891,7 @@ body.simple-mode .dp-adv { display: none !important; }
 .dl-break-in { border:1px solid transparent; border-radius:5px; padding:3px 7px; font-family:inherit; font-size:12.5px; font-weight:700; color:#7A4B00; background:#FBF3E0; text-align:center; width:120px; outline:none; }
 .dl-break-in:hover { border-color:#E4C97A; } .dl-break-in:focus { border-color:#C9991A; background:#fff; }
 .dl-break-sub { flex:0 0 auto; font-size:10.5px; font-weight:700; color:#7A4B00; white-space:nowrap; }
+.dl-break-in { width:110px; } .dl-break-dur { width:42px; border-color:#E4C97A; color:#7A4B00; font-weight:700; }
 @media print { .ga-move, .ga-del, .ga-detailbtn, .dl-acttools { display:none !important; } .dl-break-in { border:none; background:none; } }
 /* Compact (collapsed) activity line — click to edit */
 .dl-actline { display:flex; align-items:center; gap:9px; padding:5px 6px; border:1px solid transparent; border-radius:6px; cursor:text; }
@@ -2503,7 +2504,7 @@ const ASSESS_COLORS = {
 // The build version baked into the app itself, so the update checker knows what
 // it's running even when the page was loaded WITHOUT a ?v= token (e.g. the
 // Netlify root rewrite). Keep this in lockstep with index.html's ?v= token.
-window.APP_VERSION = '20261108-64';
+window.APP_VERSION = '20261113-65';
 
 let activeCourse = 6; // default to Theology 6
 
@@ -11220,7 +11221,7 @@ function dailyPanelHTML(d, i) {
   const blockDur = d.blockDuration || 85;
   const _seg = actSegments(d.activities);
   const usedMins = _seg.total;
-  const totalTxt = _seg.hasBreak ? `${_seg.segs.join(' + ')} = ${usedMins} / ${blockDur} min` : `Total: ${usedMins} / ${blockDur} min`;
+  const totalTxt = segTotalText(_seg, blockDur);
   const strip = s => String(s||'').replace(/<[^>]*>/g,' ').replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim();
 
   // One-time migration: if this lesson only has a free-text activities list
@@ -11251,8 +11252,9 @@ function dailyPanelHTML(d, i) {
       return `<div class="dl-actwrap dl-break" data-actitem ondragover="actDragOver(event,${i},${ai})" ondragleave="actDragLeave(event)" ondrop="actDrop(event,${i},${ai})">
         <span class="ga-drag" draggable="true" ondragstart="actDragStart(event,${i},${ai})" ondragend="actDragEnd(event)" title="Drag to reorder">⠿</span>
         <span class="dl-break-rule"></span>
-        <span class="dl-break-mid">🍽 <input class="dl-break-in" value="${esc(a.name||'Lunch')}" placeholder="Lunch" onchange="updateActField(${i},${ai},'name',this.value)"></span>
-        <span class="dl-break-sub" id="brksub-${i}-${ai}">${o.before} min before</span>
+        <span class="dl-break-mid">🍽 <input class="dl-break-in" value="${esc(a.name||'Break')}" placeholder="Break" onchange="updateActField(${i},${ai},'name',this.value)">
+          <input class="ga-dur dl-break-dur" type="number" min="0" max="180" value="${a.dur||0}" onchange="updateActDur(${i},${ai},+this.value)" title="Minutes — counts toward the period total">
+          <span class="ga-unit">min</span></span>
         <span class="dl-break-rule"></span>
         <button class="ga-del" onclick="removeAct(${i},${ai})" title="Remove break">&times;</button>
       </div>`;
@@ -11932,16 +11934,32 @@ function addAct(i){
 function addBreak(i){
   const d=getDay(i);
   const acts=d.activities=d.activities||[];
-  acts.push({id:uid(), brk:true, name:'Lunch'});
+  acts.push({id:uid(), brk:true, name:'Break', dur:5});   // minutes count toward the period total
   delete d.activitiesText;
   saveState(); rerenderDay(i);
 }
-// Teaching-minute segments split by any breaks: {segs:[50,35], total:85, hasBreak}
+// The lesson's time in order as teaching chunks and break chunks. EVERYTHING
+// counts toward the total — a break's minutes are real clock time, so the
+// "X / block min" figure reflects the actual period.
+// e.g. parts [{teach:50},{brk:10},{teach:35}] · total 95 · segs [50,35]
 function actSegments(acts){
-  const segs=[]; let cur=0, hasBreak=false;
-  (acts||[]).forEach(a=>{ if(a.brk){ segs.push(cur); cur=0; hasBreak=true; } else cur+=(a.dur||0); });
-  segs.push(cur);
-  return { segs, total: segs.reduce((s,x)=>s+x,0), hasBreak };
+  const parts=[]; let cur=0, hasBreak=false, total=0;
+  (acts||[]).forEach(a=>{
+    const dur = Math.max(0, +a.dur||0);
+    if(a.brk){ parts.push({teach:cur}); cur=0; parts.push({brk:dur}); total+=dur; hasBreak=true; }
+    else { cur+=dur; total+=dur; }
+  });
+  parts.push({teach:cur});
+  const segs = parts.filter(p=>'teach' in p).map(p=>p.teach);
+  return { segs, parts, total, hasBreak };
+}
+// The "50 + 🍽10 + 35 = 95 / 85 min" (or "Total: 70 / 85 min") readout.
+function segTotalText(seg, blockDur){
+  if(!seg.hasBreak) return `Total: ${seg.total} / ${blockDur} min`;
+  const pieces = seg.parts
+    .filter(p => ('brk' in p) || p.teach > 0)
+    .map(p => ('brk' in p) ? `🍽${p.brk}` : `${p.teach}`);
+  return `${pieces.join(' + ')} = ${seg.total} / ${blockDur} min`;
 }
 // Back-compat: old callers that added into a bucket.
 function addActToBucket(i,bucketName){const ph=bucketName==='ic'?'guided':'focus';const p=PHASE_BY_V[ph];getDay(i).activities.push({id:uid(),name:'',dur:p?p.def:10,grr:ph,ipp:'',desc:''});saveState();rerenderDay(i);}
@@ -12687,10 +12705,7 @@ function updateActDur(di, ai, val) {
   const chip = document.querySelector('#day-modal-overlay .dl-time, .daily-panel.open .dl-time');
   if (chip) { chip.textContent = `${used} / ${blockDur} min`; chip.classList.toggle('over', used>blockDur); }
   const total = document.getElementById(`acttotal-${di}`);
-  if (total) { total.textContent = seg.hasBreak ? `${seg.segs.join(' + ')} = ${used} / ${blockDur} min` : `Total: ${used} / ${blockDur} min`; total.classList.toggle('over', used>blockDur); }
-  // refresh each break divider's "N min before"
-  let s=0;
-  (d.activities||[]).forEach((a,ai)=>{ if(a.brk){ const el=document.getElementById(`brksub-${di}-${ai}`); if(el) el.textContent=`${s} min before`; s=0; } else s+=(a.dur||0); });
+  if (total) { total.textContent = segTotalText(seg, blockDur); total.classList.toggle('over', used>blockDur); }
 }
 
 // Recompute and redraw the start-time + duration-bar-fill for every
@@ -12712,7 +12727,7 @@ function refreshAllTimestamps(di) {
 function refreshTracker(di) {
   const d = getDay(di);
   const blockDur = d.blockDuration || 85;
-  const total = (d.activities||[]).reduce((s,a)=>s+a.dur,0) + (d.journalOff ? 0 : (d.journalDur ?? 3));
+  const total = (d.activities||[]).reduce((s,a)=>s+(+a.dur||0),0) + (d.journalOff ? 0 : (d.journalDur ?? 3));
   const pct = Math.min(100, Math.round(total/blockDur*100));
   const col = total > blockDur ? '#993C1D' : total > blockDur*0.9 ? '#854F0B' : '#1B3A6B';
   const bar  = document.getElementById('tbar-'+di);
