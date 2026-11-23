@@ -2504,7 +2504,7 @@ const ASSESS_COLORS = {
 // The build version baked into the app itself, so the update checker knows what
 // it's running even when the page was loaded WITHOUT a ?v= token (e.g. the
 // Netlify root rewrite). Keep this in lockstep with index.html's ?v= token.
-window.APP_VERSION = '20261113-65';
+window.APP_VERSION = '20261113-66';
 
 let activeCourse = 6; // default to Theology 6
 
@@ -8188,32 +8188,6 @@ function pasteListBtn(uid, target, small) {
   </button>`;
 }
 
-function unitOverviewPanelHTML(uid) {
-  const u = UNIT_META.find(m => m.id === uid);
-  if (!u) return '';
-  const weeks = state.units[uid] || [];
-  // Sync vocab before rendering
-  syncVocabToKnowledgeCategory(uid);
-  const isOpen = !!uovPanelOpen[uid];
-  return `<div class="uov-panel" id="uov-panel-${uid}">
-    <div class="uov-toggle" onclick="toggleUOVPanel(${uid})">
-      <div class="uov-toggle-left">
-        <span class="uov-chevron ${isOpen?'open':''}" id="uov-chev-${uid}">›</span>
-        <div>
-          <div class="uov-toggle-title">Unit Overview</div>
-          <div class="uov-toggle-sub">Goals · Objectives (SWBAT) · Essential Questions · Knowledge · Skills · Scripture · Reflection</div>
-        </div>
-      </div>
-      <span style="font-size:11px;color:var(--ink-3)" id="uov-hint-${uid}">${isOpen?'Click to collapse':'Click to expand'}</span>
-    </div>
-    <div class="uov-body ${isOpen?'open':''}" id="uov-body-${uid}">
-      <div style="padding:16px 20px 20px">
-        ${coverageTrackerHTML(uid)}
-        ${unitOverviewPageHTML(u, weeks, false)}
-      </div>
-    </div>
-  </div>`;
-}
 
 
 // ── VOCAB ↔ KNOWLEDGE CATEGORY SYNC ─────────────────────────────
@@ -8292,17 +8266,18 @@ function migrateReflectionItems(uov) {
 // Re-render just the Unit Overview panel in place (cheaper than renderUnit)
 // so its coverage chips reflect the latest lesson tags. Returns false if the
 // panel isn't on screen.
+// Re-render just the Unit Overview container (coverage tracker + table) in
+// place, so lesson-plan coverage tags green/un-green the chips live without a
+// full unit re-render. The container lives in the Overview tab; refreshing its
+// contents keeps it current even while another tab is showing.
 function refreshOverviewPanel(uid) {
   const panel = document.getElementById(`uov-panel-${uid}`);
   if (!panel) return false;
-  panel.outerHTML = unitOverviewPanelHTML(uid);
+  const u = UNIT_META.find(m => m.id === uid);
+  if (!u) return false;
+  const weeks = state.units[uid] || [];
+  panel.innerHTML = coverageTrackerHTML(uid) + unitOverviewPageHTML(u, weeks, false);
   return true;
-}
-function toggleUOVPanel(uid) {
-  // Flip the open state and RE-RENDER the panel so, on open, the chips show
-  // current coverage (tags made while it was closed now green correctly).
-  uovPanelOpen[uid] = !uovPanelOpen[uid];
-  if (!refreshOverviewPanel(uid)) renderUnit();
 }
 
 // A "what's covered vs. what's still needed" summary for the top of the
@@ -8965,6 +8940,7 @@ function saveUOVField(el) {
   saveState();
 }
 function unitOverviewPageHTML(u, weeks, showPacingGuide = true) {
+  syncVocabToKnowledgeCategory(u.id);   // keep the Vocabulary knowledge category in step before rendering
   const uov = getUOV(u.id);
   const obj = uov.objTable || {knowledge:[],understanding:[],skills:[],attitudes:[]};
   const co  = getCourse();
@@ -10647,8 +10623,9 @@ function renderUnit() {
   `).join('');
 
   // Body is either the classic tabs, or the numbered stage-page layer.
+  // The Unit Overview lives ONLY in its tab below (it used to also render in a
+  // collapsible panel here, which showed the whole table twice on the page).
   const tabsBodyHTML = `
-    ${unitOverviewPanelHTML(u.id)}
     <div style="display:flex;gap:0;border-bottom:2px solid var(--rule);margin-bottom:14px;align-items:center">
       ${[['overview','Unit Overview'],['plan','Weekly Plan'],['pacing','Pacing Guide'],['resources','Resources']].map(([t,label]) => {
         const active = currentUnitTab === t;
@@ -10661,7 +10638,10 @@ function renderUnit() {
         style="margin-left:auto;margin-bottom:6px;background:none;border:1px solid var(--rule);border-radius:6px;padding:5px 11px;font-size:12px;font-weight:600;color:var(--navy);cursor:pointer;font-family:inherit">◆ Stage view</button>
     </div>
     <div id="utab-content-overview" style="display:${currentUnitTab==='overview'?'block':'none'}">
-      ${unitOverviewPageHTML(u, weeks, false)}
+      <div id="uov-panel-${u.id}">
+        ${coverageTrackerHTML(u.id)}
+        ${unitOverviewPageHTML(u, weeks, false)}
+      </div>
     </div>
     <div id="utab-content-plan" style="display:${currentUnitTab==='plan'?'block':'none'}">
       ${lessonFilterBarHTML(weeks.flatMap(w=>w.days||[]), `Unit ${unitNo(u.id)}`)}
@@ -13230,10 +13210,10 @@ function toggleCov(i, kind, a, b){
   }
   saveState();
   renderCovCell(i);
-  // If the unit overview is open, re-render just its panel so chips green/
-  // un-green live. (Opening a closed overview also re-renders it, so coverage
-  // is always correct whenever the overview is shown.)
-  try { if (uovPanelOpen[currentUnit]) refreshOverviewPanel(currentUnit); } catch(e){}
+  // Re-render the Unit Overview container so its chips green/un-green live.
+  // It lives in the Overview tab; refreshing its contents keeps it current
+  // even while another tab is showing (no-op if it isn't on the page).
+  try { refreshOverviewPanel(currentUnit); } catch(e){}
 }
 
 // One toggle chip in the expanded grid: green+check when selected, grey when not.
